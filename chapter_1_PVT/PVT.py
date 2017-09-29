@@ -17,7 +17,7 @@ class ComponentGeneral:
     """
     def __init__(self):
         self.gamma = 1          # specific gravity of component, dimensionless
-        self.rho_kgm3 = 1       # density with dimension
+        self.rho_kgm3 = 800       # density with dimension
         self.mu_cp = 1          # dynamic viscosity
         """ термобарические условия """
         self._p_bar = 1
@@ -77,7 +77,26 @@ class OilGeneral(ComponentGeneral):
         else:
             return self.rsb_m3m3
 
+
+    def _calc_rho_kgm3(self, p_bar, t_c):
+        """ тут должна быть реализация расчета газосодержания
+        """
+        if p_bar < self.pb_calibr_bar:
+            return - p_bar + 800
+        else:
+            return 700
+
+
+
+
+
+
+
     def calc(self, p_atm, t_c):
         """ реализация расчета свойств нефти """
         self._rs_m3m3 = self._calc_rs_m3m3(p_atm, t_c)
+        self.rho_kgm3 = self._calc_rho_kgm3(p_atm, t_c)
 
+if __name__ == "__main__":
+    print("Вы запустили модуль напрямую, а не импортировали его.")
+    input ("\n\nНажмите Enter, чтобы выйти.")
