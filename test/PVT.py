@@ -10,6 +10,7 @@ UniflocPy
 
 """
 
+
 class ComponentGeneral:
     """
     Абстрактный класс для описания компонентоы углеводородных флюидов
@@ -17,14 +18,15 @@ class ComponentGeneral:
     def __init__(self):
         self.gamma = 1          # specific gravity of component, dimensionless
         self.rho_kgm3 = 1       # density with dimension
-        self.mu_cP = 1          # dynamic viscosity
+        self.mu_cp = 1          # dynamic viscosity
         """ термобарические условия """
         self._p_bar = 1
         self._t_c = 15
 
-    def calc(self, P_atm, T_C):
+    def calc(self, p_atm, t_c):
         """ recalculate all parameters according to some pressure and termperature"""
         return 1
+
 
 class GasGeneral(ComponentGeneral):
     """
@@ -56,18 +58,26 @@ class OilGeneral(ComponentGeneral):
         """ расчетные свойства """
         self._rs_m3m3 = 1
         self._bo_m3m3 = 1
-        self._mu_m3m3 = 1
-
+        self._mu_cp = 1
 
     @property
     def gas(self):
         return self._gas
 
+    @property
     def rs_m3m3(self):
         """ газосодержание """
         return self._rs_m3m3
 
-    def calc(self, P_atm, T_C):
+    def _calc_rs_m3m3(self, p_bar, t_c):
+        """ тут должна быть реализация расчета газосодержания
+        """
+        if p_bar < self.pb_calibr_bar:
+            return self.rsb_m3m3 / self.pb_calibr_bar * p_bar
+        else:
+            return self.rsb_m3m3
+
+    def calc(self, p_atm, t_c):
         """ реализация расчета свойств нефти """
-        self._rs_m3m3 = self.rsb_m3m3
+        self._rs_m3m3 = self._calc_rs_m3m3(p_atm, t_c)
 
