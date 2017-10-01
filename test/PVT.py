@@ -47,10 +47,9 @@ class GasGeneral(ComponentGeneral):
         self._pseudo_temperature_k = 1
         self.gamma = 0.8
 
-
     @property
     def z(self):
-        return  self._z
+        return self._z
 
     def _calc_z(self):
         pass
@@ -76,7 +75,7 @@ class GasGeneral(ComponentGeneral):
         return self._pseudo_pressure_mpa
 
 
- class OilGeneral(ComponentGeneral):
+class OilGeneral(ComponentGeneral):
     """
     Класс для описания свойств нефти по модели нелетучей нефти
     """
@@ -85,10 +84,12 @@ class GasGeneral(ComponentGeneral):
         self._gas = GasGeneral()        # create gas component
         self.rsb_m3m3 = 100
 
+        self._co_1atm = 1e-5
         self.pb_calibr_bar = 100        # калибровочное значение давления насыщения
         self.tb_calibr_c = 50           # температуры для калибровки по давлению насыщения
         self.bob_calibr_m3m3 = 1.2      # калибровочное значение объемного коэффициента
         self.muob_calibr_cp = 1         # калибровочное значение вязкости при давлении насыщения
+        self.rhob_calibr_kgm3 = 700  # калибровочное значение плотности при давлении насыщения
 
         """ расчетные свойства """
         self._rs_m3m3 = 1
@@ -104,6 +105,37 @@ class GasGeneral(ComponentGeneral):
         """ газосодержание """
         return self._rs_m3m3
 
+    def _calc_rho_kgm3(self, p_bar, t_c):
+        """ тут должна быть реализация расчета плотности нефти
+        """
+        if p_bar < self.pb_calibr_bar:
+            return -self.rhob_calibr_kgm3 / self.pb_calibr_bar * p_bar + 1.8 * self.rhob_calibr_kgm3
+        else:
+            return self.rhob_calibr_kgm3
+
+    def _calc_bo_m3m3(self, p_bar, t_c):
+        """ тут должна быть реализация расчета объемного коэффициента нефти
+        """
+        if p_bar < self.pb_calibr_bar:
+            return self.bob_calibr_m3m3 / self.pb_calibr_bar * p_bar
+        else:
+            return self.bob_calibr_m3m3
+
+    def _calc_mu_cp(self, p_bar, t_c):
+        """ тут должна быть реализация расчета вязкости нефти
+        """
+        if p_bar < self.pb_calibr_bar:
+            return -self.muob_calibr_cp / self.pb_calibr_bar * p_bar + 2 * self.muob_calibr_cp
+        else:
+            return self.muob_calibr_cp
+
+    def _calc_co_1atm(self, p_bar, t_c):
+        """ тут должна быть реализация расчета сжимаемости нефти
+        """
+        return (28.1 * self.rsb_m3m3 + 30.6 * (t_c + 273) - 1180
+                * self._gas.gamma + 1784 / self.gamma - 10910) \
+                / (100000 * p_bar)
+
     def _calc_rs_m3m3(self, p_bar, t_c):
         """ тут должна быть реализация расчета газосодержания
         """
@@ -112,18 +144,13 @@ class GasGeneral(ComponentGeneral):
         else:
             return self.rsb_m3m3
 
-    def _calc_bo_m3m3(self, p_bar, t_c):
-        """
-        Расчет объемного коэффициента нефти по корреляции
-        :param p_bar:
-        :param t_c:
-        :return:
-        """
-        pass
-
     def calc(self, p_atm, t_c):
         """ реализация расчета свойств нефти """
         self._rs_m3m3 = self._calc_rs_m3m3(p_atm, t_c)
+        self.rho_kgm3 = self._calc_rho_kgm3(p_atm, t_c)
+        self._bo_m3m3 = self._calc_bo_m3m3(p_atm, t_c)
+        self._mu_cp = self._calc_mu_cp(p_atm, t_c)
+        self._co_1atm = self._calc_co_1atm(p_atm, t_c)
 
 
 class WaterGeneral(ComponentGeneral):
@@ -151,3 +178,8 @@ class Fluid:
 
     def calc_pvt(self, p_bar, t_c):
         pass
+
+
+if __name__ == "__main__":
+    print("Вы запустили модуль напрямую, а не импортировали его.")
+    input("\n\nНажмите Enter, чтобы выйти.")
