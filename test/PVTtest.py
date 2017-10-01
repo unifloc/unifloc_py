@@ -5,6 +5,11 @@ import numpy as np
 mpl.rcParams['font.family'] = 'fantasy'
 mpl.rcParams['font.fantasy'] = 'Times New Roman'
 
+def test4():
+    # TODO тут надо сделать тест для расчета z фактора газа, чтобы в итоге выводился график Стендинга
+
+    pass
+
 def test3():
     """
     test from ruslan
@@ -15,6 +20,7 @@ def test3():
 
 
     def pvt_plot(oil, p_0=1, p_n=300, dp=20, t_c=20):
+        # TODO надо поправить горизонтальный и вертикальный интервал в выводе графиков, чтобы не было наползаний
         """Газосодержание"""
         plt.subplot(321)
         rs = []
@@ -91,7 +97,7 @@ def test3():
         plt.plot(pp, co, 'm', linewidth=3)
         plt.show()
 
-        input("\nНажмите Enter, чтобы продолжить")
+        #input("\nНажмите Enter, чтобы продолжить")
 
     a = PVT.OilGeneral()
     pvt_plot(a)

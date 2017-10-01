@@ -3,3 +3,4 @@ __pycache__/
 *.py[cod]
 *.vpp.bak*
 .ipynb_checkpoints/
+.cache
