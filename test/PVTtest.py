@@ -8,7 +8,20 @@ mpl.rcParams['font.fantasy'] = 'Times New Roman'
 def test4():
     # TODO тут надо сделать тест для расчета z фактора газа, чтобы в итоге выводился график Стендинга
 
-    pass
+    gas = PVT.GasGeneral()
+    ys= []
+    xs = np.arange(1, 300, 20)
+    for p in xs:
+        gas._calc_z_dranchuk(p, 20)
+        ys.append(gas.z)
+    plt.ylim(0, np.max(ys))
+    plt.xlim(0, np.max(xs))
+    plt.grid(True)
+    plt.title('Сверхсжимаемость', color='black', family='fantasy')
+    plt.xlabel('Давление, атм', color='black', family='fantasy')
+    plt.ylabel('z-фактор', color='black', family='fantasy')
+    plt.plot(xs, ys, 'b', linewidth=3)
+    plt.show()
 
 def test3():
     """
@@ -81,4 +94,5 @@ def test1():
     plt.show()
 
 
-test3()
+# test3()
+test4()
