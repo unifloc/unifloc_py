@@ -89,16 +89,20 @@ class GasGeneral(ComponentGeneral):
     def z(self):
         return self._z
 
+    def _calc_pt_d(self, p_atm, t_c):
+        self._p_pr_d = p_atm / (self._pseudo_pressure_mpa * 10)
+        self._t_pr_d = (t_c + 273.15) / self._pseudo_temperature_k
+
     def _calc_z(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._z = un.z_default  # default z constant set here
+        self._z = un.z_default * (p_bar / p_bar * t_c / t_c)  # default z constant set here  /  используем PT
         return self._z
 
     def _calc_bg_m3m3(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._fvf_m3m3 = un.psc_bar / p_bar
+        self._fvf_m3m3 = un.psc_bar / p_bar * (t_c / t_c)  # t_c - "использование"
         return self._fvf_m3m3
 
     def _calc_mug_cp(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._mu_cp = 1
+        self._mu_cp = 1 * p_bar / p_bar * t_c / t_c
         return self._mu_cp
 
     @ComponentGeneral.gamma.setter
@@ -115,11 +119,29 @@ class GasGeneral(ComponentGeneral):
     def pseudo_pressure_mpa(self):
         return self._pseudo_pressure_mpa
 
-    def _calc_pt_d(self, p_atm, t_c):
-        self._p_pr_d = p_atm / (self._pseudo_pressure_mpa * 10)
-        self._t_pr_d = (t_c + 273.15) / self._pseudo_temperature_k
+        # ============================================================================
+        #    По Беггс Бриллу
+        #     def z_Brill_Beggs_Standing(self):
+        #         'Brill and Beggs, Standing'
+        #         a = 1.39 * (self.T_pr_d - 0.92) ** 0.5 - 0.36 * self.T_pr_d - 0.101
+        #         b = self.P_pr_d * (0.62 - 0.23 * self.T_pr_d)\
+        #         + self.P_pr_d ** 2 * (0.006 / (self.T_pr_d - 0.86) - 0.037)\
+        #         + 0.32 * self.P_pr_d ** 6 / math.exp(20.723 * (self.T_pr_d - 1))
+        #         c = 0.132 - 0.32 * math.log(self.T_pr_d) / math.log(10)
+        #         d = math.exp(0.715 - 1.128 * self.T_pr_d + 0.42 * self.T_pr_d ** 2)
+        #         self.z_d = a + (1 - a) * math.exp(-b) + c * self.P_pr_d ** d
+        # ============================================================================
 
-    def _calc_z_dranchuk(self, p_bar=un.psc_bar, t_c=un.tsc_c):
+
+class GasHC(GasGeneral):
+    """
+    Класс реализующий расчет свойств газа на основе Z-фактора по Дранчуку
+    """
+    # TODO надо реализовать расчет свойств газа по аналогии с унифлокVBA
+    def __init__(self):
+        super().__init__()
+
+    def calc_z(self, p_bar=un.psc_bar, t_c=un.tsc_c):
         self._calc_pt_d(p_bar, t_c)
         self._z = self.z_dranchuk()
         return self._z
@@ -138,7 +160,6 @@ class GasGeneral(ComponentGeneral):
             else:
                 z_low = z_mid
             i += 1
-
         z_d = z_mid
         return z_d
 
@@ -155,33 +176,12 @@ class GasGeneral(ComponentGeneral):
         a_10 = 0.6134
         a_11 = 0.721
         rho_r = 0.27 * self._p_pr_d / (z_d * self._t_pr_d)
-        X = -z_d + (a_1 + a_2 / self._t_pr_d + a_3 / self._t_pr_d ** 3
+        x = -z_d + (a_1 + a_2 / self._t_pr_d + a_3 / self._t_pr_d ** 3
                     + a_4 / self._t_pr_d ** 4 + a_5 / self._t_pr_d ** 5) * rho_r \
             + (a_6 + a_7 / self._t_pr_d + a_8 / self._t_pr_d ** 2) * rho_r ** 2 \
             - a_9 * (a_7 / self._t_pr_d + a_8 / self._t_pr_d ** 2) * rho_r ** 5 \
-            + a_10 * (1 + a_11 * rho_r ** 2) * rho_r ** 2 / self._t_pr_d ** 3 \
-            * math.exp(-a_11 * rho_r ** 2) + 1
-        return X
-
-
-# ============================================================================
-#    По Беггс Бриллу
-#     def z_Brill_Beggs_Standing(self):
-#         'Brill and Beggs, Standing'
-#         a = 1.39 * (self.T_pr_d - 0.92) ** 0.5 - 0.36 * self.T_pr_d - 0.101
-#         b = self.P_pr_d * (0.62 - 0.23 * self.T_pr_d)\
-#         + self.P_pr_d ** 2 * (0.006 / (self.T_pr_d - 0.86) - 0.037)\
-#         + 0.32 * self.P_pr_d ** 6 / math.exp(20.723 * (self.T_pr_d - 1))
-#         c = 0.132 - 0.32 * math.log(self.T_pr_d) / math.log(10)
-#         d = math.exp(0.715 - 1.128 * self.T_pr_d + 0.42 * self.T_pr_d ** 2)
-#         self.z_d = a + (1 - a) * math.exp(-b) + c * self.P_pr_d ** d
-# ============================================================================
-
-    def calc(self, p_atm, t_c):
-        """ реализация расчета свойств газа """
-
-
-
+            + a_10 * (1 + a_11 * rho_r ** 2) * rho_r ** 2 / self._t_pr_d ** 3 * math.exp(-a_11 * rho_r ** 2) + 1
+        return x
 
 
 class OilGeneral(ComponentGeneral):
@@ -216,12 +216,27 @@ class OilGeneral(ComponentGeneral):
         """ газосодержание """
         return self._rs_m3m3
 
+    @property
+    def bo_m3m3(self):
+        """ Объемный коэффициент нефти """
+        return self._bo_m3m3
+
+    @property
+    def mu_cp(self):
+        """ Вязкость нефти """
+        return self._mu_cp
+
+    @property
+    def co_1atm(self):
+        """ Вязкость нефти """
+        return self._co_1atm
+
     def _calc_rho_kgm3(self, p_bar, t_c):
         """ тут должна быть реализация расчета плотности нефти
             в упрощенном виде не зависит от температуры
         """
         if p_bar < self.pb_calibr_bar:
-            return -self.rhob_calibr_kgm3 / self.pb_calibr_bar * p_bar + 1.8 * self.rhob_calibr_kgm3
+            return -self.rhob_calibr_kgm3 / self.pb_calibr_bar * p_bar + 1.8 * self.rhob_calibr_kgm3 * (t_c / t_c)
         else:
             return self.rhob_calibr_kgm3
 
@@ -229,7 +244,7 @@ class OilGeneral(ComponentGeneral):
         """ тут должна быть реализация расчета объемного коэффициента нефти
         """
         if p_bar < self.pb_calibr_bar:
-            return self.bob_calibr_m3m3 / self.pb_calibr_bar * p_bar
+            return self.bob_calibr_m3m3 / self.pb_calibr_bar * p_bar * (t_c / t_c)
         else:
             return self.bob_calibr_m3m3
 
@@ -237,7 +252,7 @@ class OilGeneral(ComponentGeneral):
         """ тут должна быть реализация расчета вязкости нефти
         """
         if p_bar < self.pb_calibr_bar:
-            return -self.muob_calibr_cp / self.pb_calibr_bar * p_bar + 2 * self.muob_calibr_cp
+            return -self.muob_calibr_cp / self.pb_calibr_bar * p_bar + 2 * self.muob_calibr_cp * (t_c / t_c)
         else:
             return self.muob_calibr_cp
 
@@ -245,14 +260,13 @@ class OilGeneral(ComponentGeneral):
         """ тут должна быть реализация расчета сжимаемости нефти
         """
         return (28.1 * self.rsb_m3m3 + 30.6 * (t_c + 273) - 1180
-                * self._gas.gamma + 1784 / self.gamma - 10910) \
-               / (100000 * p_bar)
+                * self._gas.gamma + 1784 / self.gamma - 10910) / (100000 * p_bar)
 
     def _calc_rs_m3m3(self, p_bar, t_c):
         """ тут должна быть реализация расчета газосодержания
         """
         if p_bar < self.pb_calibr_bar:
-            return self.rsb_m3m3 / self.pb_calibr_bar * p_bar
+            return self.rsb_m3m3 / self.pb_calibr_bar * p_bar * (t_c / t_c)
         else:
             return self.rsb_m3m3
 
@@ -263,14 +277,6 @@ class OilGeneral(ComponentGeneral):
         self._bo_m3m3 = self._calc_bo_m3m3(p_atm, t_c)
         self._mu_cp = self._calc_mu_cp(p_atm, t_c)
         self._co_1atm = self._calc_co_1atm(p_atm, t_c)
-
-
-class GasHC(GasGeneral):
-    """
-    класс реализующий расчет свойств газа на основе z фактора по Дранчуку
-    """
-    # TODO надо реализовать расчет свойств газа по аналогии с унифлокVBA
-    pass
 
 
 class OilStanding(OilGeneral):

@@ -2,26 +2,24 @@ import PVT
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+
 mpl.rcParams['font.family'] = 'fantasy'
 mpl.rcParams['font.fantasy'] = 'Times New Roman'
 
-def test4():
-    # TODO тут надо сделать тест для расчета z фактора газа, чтобы в итоге выводился график Стендинга
 
-    gas = PVT.GasGeneral()
-    ys= []
+def test4():
+    # Tест для расчета z-фактора газа
+
+    gas = PVT.GasHC()
+    ys = []
     xs = np.arange(1, 300, 20)
     for p in xs:
-        gas._calc_z_dranchuk(p, 20)
+        gas.calc_z(p, 20)
         ys.append(gas.z)
-    plt.ylim(0, np.max(ys))
-    plt.xlim(0, np.max(xs))
-    plt.grid(True)
-    plt.title('Сверхсжимаемость', color='black', family='fantasy')
-    plt.xlabel('Давление, атм', color='black', family='fantasy')
-    plt.ylabel('z-фактор', color='black', family='fantasy')
-    plt.plot(xs, ys, 'b', linewidth=3)
+    xy = xs, ys
+    subplot_pvt(xy, 0, 0, 0, 'Сверхсжимаемость', 'Z-фактор', 'Давление, атм', 'b', 1, 1, 1, 1)
     plt.show()
+
 
 def test3():
     """
@@ -30,49 +28,57 @@ def test3():
     :return:
     """
     """Временно сюда построитель графиков"""
-    def pvt_plot(oil, p_0=1, p_n=300, dp=20, t_c=20):
 
-        xy = create_plots(oil, p_0, p_n, dp, t_c, 'Газосодержание')
+    def pvt_plot(oil_object, p_0=1, p_n=300, dp=20, t_c=20):
+
+        xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Газосодержание')
         subplot_pvt(xy, 0, 0, 10, 'Газосодержание', 'Rs, м3/м3', 'Давление, атм', 'b')
 
-        xy = create_plots(oil, p_0, p_n, dp, t_c, 'Плотность')
+        xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Плотность')
         subplot_pvt(xy, 0, 1, 10, 'Плотность', 'r, кг/м3', 'Давление, атм', 'g')
 
-        xy = create_plots(oil, p_0, p_n, dp, t_c, 'Объемный коэффициент нефти')
+        xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Объемный коэффициент нефти')
         subplot_pvt(xy, 6, 0, 0.3, 'Объемный коэффициент нефти', 'Bo, м3/м3', 'Давление, атм', 'r')
 
-        xy = create_plots(oil, p_0, p_n, dp, t_c, 'Вязкость нефти')
+        xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Вязкость нефти')
         subplot_pvt(xy, 6, 1, 0.3, 'Вязкость нефти', 'm, сПз', 'Давление, атм', 'b')
 
-        xy = create_plots(oil, p_0, p_n, dp, t_c, 'Сжимаемость нефти')
+        xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Сжимаемость нефти')
         subplot_pvt(xy, 12, 0, 0, 'Сжимаемость нефти', 'Со, 1/атм', 'Давление, атм', 'm')
 
         plt.show()
 
-    def create_plots(oil, p_0, p_n, dp, t_c, title):
+    def create_plots(oil_object, p_0, p_n, dp, t_c, title):
         ys = []
         xs = np.arange(p_0, p_n, dp)
         for p in xs:
-            oil.calc(p, t_c)
-            if title == 'Газосодержание': ys.append(oil.rs_m3m3)
-            if title == 'Плотность': ys.append(oil.rho_kgm3)
-            if title == 'Объемный коэффициент нефти': ys.append(oil._bo_m3m3)
-            if title == 'Вязкость нефти': ys.append(oil._mu_cp)
-            if title == 'Сжимаемость нефти': ys.append(oil._co_1atm)
+            oil_object.calc(p, t_c)
+            if title == 'Газосодержание':
+                ys.append(oil_object.rs_m3m3)
+            if title == 'Плотность':
+                ys.append(oil_object.rho_kgm3)
+            if title == 'Объемный коэффициент нефти':
+                ys.append(oil_object.bo_m3m3)
+            if title == 'Вязкость нефти':
+                ys.append(oil_object.mu_cp)
+            if title == 'Сжимаемость нефти':
+                ys.append(oil_object.co_1atm)
         return xs, ys
 
-    def subplot_pvt(xy, a, b, dy, title, ylabel, xlabel, col):
-        ax = plt.subplot2grid((16, 2), (a, b), rowspan=4, colspan=1)
-        x, y = xy
-        plt.ylim(0, np.max(y) + dy)
-        plt.xlim(0, np.max(x))
-        plt.grid(True)
-        plt.title(title, color='black', family='fantasy')
-        plt.xlabel(xlabel, color='black', family='fantasy')
-        plt.ylabel(ylabel, color='black', family='fantasy')
-        plt.plot(x, y, col, linewidth=3)
     oil = PVT.OilGeneral()
     pvt_plot(oil)
+
+
+def subplot_pvt(xy, a, b, dy, title, ylabel, xlabel, col, line=16, column=2, rowspan=4, colspan=1):
+    plt.subplot2grid((line, column), (a, b), rowspan, colspan)
+    x, y = xy
+    plt.ylim(0, np.max(y) + dy)
+    plt.xlim(0, np.max(x))
+    plt.grid(True)
+    plt.title(title, color='black', family='fantasy')
+    plt.xlabel(xlabel, color='black', family='fantasy')
+    plt.ylabel(ylabel, color='black', family='fantasy')
+    plt.plot(x, y, col, linewidth=3)
 
 
 def test2():
@@ -92,7 +98,6 @@ def test1():
         rs.append(a.rs_m3m3)
     plt.plot(pp, rs)
     plt.show()
-
 
 # test3()
 test4()
