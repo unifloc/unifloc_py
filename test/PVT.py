@@ -287,6 +287,11 @@ class OilStanding(OilGeneral):
     pass
 
 
+
+
+
+
+
 class WaterGeneral(ComponentGeneral):
     """
     класс описывающий свойства воды

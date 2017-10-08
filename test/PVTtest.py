@@ -17,7 +17,7 @@ def test4():
         gas.calc_z(p, 20)
         ys.append(gas.z)
     xy = xs, ys
-    subplot_pvt(xy, 0, 0, 0, 'Сверхсжимаемость', 'Z-фактор', 'Давление, атм', 'b', 1, 1, 1, 1)
+    subplot_pvt(xy, 0, 0, 0, 'Сверхсжимаемость', 'Z-фактор', 'Давление, атм', 'b', 1, 1, 1)
     plt.show()
 
 
@@ -32,19 +32,19 @@ def test3():
     def pvt_plot(oil_object, p_0=1, p_n=300, dp=20, t_c=20):
 
         xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Газосодержание')
-        subplot_pvt(xy, 0, 0, 10, 'Газосодержание', 'Rs, м3/м3', 'Давление, атм', 'b')
+        subplot_pvt(xy, 0, 0, 10, 'Газосодержание', 'Rs, м3/м3', 'Давление, атм', 'b', 16, 2, 4)
 
         xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Плотность')
-        subplot_pvt(xy, 0, 1, 10, 'Плотность', 'r, кг/м3', 'Давление, атм', 'g')
+        subplot_pvt(xy, 0, 1, 10, 'Плотность', 'r, кг/м3', 'Давление, атм', 'g', 16, 2, 4)
 
         xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Объемный коэффициент нефти')
-        subplot_pvt(xy, 6, 0, 0.3, 'Объемный коэффициент нефти', 'Bo, м3/м3', 'Давление, атм', 'r')
+        subplot_pvt(xy, 6, 0, 0.3, 'Объемный коэффициент нефти', 'Bo, м3/м3', 'Давление, атм', 'r', 16, 2, 4)
 
         xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Вязкость нефти')
-        subplot_pvt(xy, 6, 1, 0.3, 'Вязкость нефти', 'm, сПз', 'Давление, атм', 'b')
+        subplot_pvt(xy, 6, 1, 0.3, 'Вязкость нефти', 'm, сПз', 'Давление, атм', 'b', 16, 2, 4)
 
         xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Сжимаемость нефти')
-        subplot_pvt(xy, 12, 0, 0, 'Сжимаемость нефти', 'Со, 1/атм', 'Давление, атм', 'm')
+        subplot_pvt(xy, 12, 0, 0, 'Сжимаемость нефти', 'Со, 1/атм', 'Давление, атм', 'm', 16, 2, 4)
 
         plt.show()
 
@@ -69,7 +69,7 @@ def test3():
     pvt_plot(oil)
 
 
-def subplot_pvt(xy, a, b, dy, title, ylabel, xlabel, col, line=16, column=2, rowspan=4, colspan=1):
+def subplot_pvt(xy, a, b, dy, title, ylabel, xlabel, col, line=1, column=1, rowspan=1, colspan=1):
     plt.subplot2grid((line, column), (a, b), rowspan, colspan)
     x, y = xy
     plt.ylim(0, np.max(y) + dy)
@@ -99,5 +99,5 @@ def test1():
     plt.plot(pp, rs)
     plt.show()
 
-# test3()
-test4()
+test3()
+# test4()
