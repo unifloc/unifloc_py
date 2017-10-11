@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-mpl.rcParams['font.family'] = 'fantasy'
-mpl.rcParams['font.fantasy'] = 'Times New Roman'
 
 
 def test4():
@@ -17,6 +15,8 @@ def test4():
         gas.calc_z(p, 20)
         ys.append(gas.z)
     xy = xs, ys
+    plt.figure(figsize=(80, 40), dpi=100)
+    plt.suptitle("PVT свойства", size=16)
     subplot_pvt(xy, 0, 0, 0, 'Сверхсжимаемость', 'Z-фактор', 'Давление, атм', 'b', 1, 1, 1)
     plt.show()
 
@@ -30,6 +30,7 @@ def test3():
     """Временно сюда построитель графиков"""
 
     def pvt_plot(oil_object, p_0=1, p_n=300, dp=20, t_c=20):
+
 
         xy = create_plots(oil_object, p_0, p_n, dp, t_c, 'Газосодержание')
         subplot_pvt(xy, 0, 0, 10, 'Газосодержание', 'Rs, м3/м3', 'Давление, атм', 'b', 16, 2, 4)
@@ -70,8 +71,13 @@ def test3():
 
 
 def subplot_pvt(xy, a, b, dy, title, ylabel, xlabel, col, line=1, column=1, rowspan=1, colspan=1):
+    mpl.rcParams['font.family'] = 'fantasy'
+    mpl.rcParams['font.fantasy'] = 'Times New Roman'
+    mpl.rcParams.update({'font.size': 16})
+
     plt.subplot2grid((line, column), (a, b), rowspan, colspan)
     x, y = xy
+
     plt.ylim(0, np.max(y) + dy)
     plt.xlim(0, np.max(x))
     plt.grid(True)
@@ -79,7 +85,6 @@ def subplot_pvt(xy, a, b, dy, title, ylabel, xlabel, col, line=1, column=1, rows
     plt.xlabel(xlabel, color='black', family='fantasy')
     plt.ylabel(ylabel, color='black', family='fantasy')
     plt.plot(x, y, col, linewidth=3)
-
 
 def test2():
     g = PVT.GasGeneral()
@@ -99,5 +104,5 @@ def test1():
     plt.plot(pp, rs)
     plt.show()
 
-test3()
-# test4()
+# test3()
+test4()
