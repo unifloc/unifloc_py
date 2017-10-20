@@ -11,6 +11,7 @@ UniflocPy
 """
 import unitconverter as un
 import math
+import scipy.optimize
 
 
 class ComponentGeneral:
@@ -143,7 +144,8 @@ class GasHC(GasGeneral):
 
     def calc_z(self, p_bar=un.psc_bar, t_c=un.tsc_c):
         self._calc_pt_d(p_bar, t_c)
-        self._z = self.z_dranchuk()
+        # self._z = self.z_dranchuk()
+        self._z = self.z_dranchuk_Newton()
         return self._z
 
     def z_dranchuk(self):
@@ -182,6 +184,39 @@ class GasHC(GasGeneral):
             - a_9 * (a_7 / self._t_pr_d + a_8 / self._t_pr_d ** 2) * rho_r ** 5 \
             + a_10 * (1 + a_11 * rho_r ** 2) * rho_r ** 2 / self._t_pr_d ** 3 * math.exp(-a_11 * rho_r ** 2) + 1
         return x
+
+
+    def z_dranchuk_Newton(self):
+
+        # Метод Ньютона - Рафсона
+        a_1 = 0.3265
+        a_2 = -1.07
+        a_3 = -0.5339
+        a_4 = 0.01569
+        a_5 = -0.05165
+        a_6 = 0.5475
+        a_7 = -0.7361
+        a_8 = 0.1844
+        a_9 = 0.1056
+        a_10 = 0.6134
+        a_11 = 0.721
+        # rho_r = (0.27 * self._p_pr_d / (z_d * self._t_pr_d))
+        myfunc = lambda z_d: -z_d + (a_1 + a_2 / self._t_pr_d + a_3 / self._t_pr_d ** 3
+                + a_4 / self._t_pr_d ** 4 + a_5 / self._t_pr_d ** 5) * (0.27 * self._p_pr_d / (z_d * self._t_pr_d)) \
+        + (a_6 + a_7 / self._t_pr_d + a_8 / self._t_pr_d ** 2) * (0.27 * self._p_pr_d / (z_d * self._t_pr_d)) ** 2 \
+        - a_9 * (a_7 / self._t_pr_d + a_8 / self._t_pr_d ** 2) * (0.27 * self._p_pr_d / (z_d * self._t_pr_d)) ** 5 \
+        + a_10 * (1 + a_11 * (0.27 * self._p_pr_d / (z_d * self._t_pr_d)) ** 2) * (0.27 * self._p_pr_d / (z_d * self._t_pr_d)) ** 2 / self._t_pr_d ** 3 * math.exp(-a_11 * (0.27 * self._p_pr_d / (z_d * self._t_pr_d)) ** 2) + 1
+
+        dermyfunc = lambda z_d: 0.01062882*a_10*a_11*self._p_pr_d**4*(0.0729*a_11*self._p_pr_d**2/(self._t_pr_d**2*z_d**2) + 1)*math.exp(-0.0729*a_11*self._p_pr_d**2/(self._t_pr_d**2*z_d**2))/(self._t_pr_d**7*z_d**5) - 0.01062882*a_10*a_11*self._p_pr_d**4*math.exp(-0.0729*a_11*self._p_pr_d**2/(self._t_pr_d**2*z_d**2))/(self._t_pr_d**7*z_d**5) - 0.1458*a_10*self._p_pr_d**2*(0.0729*a_11*self._p_pr_d**2/(self._t_pr_d**2*z_d**2) + 1)*math.exp(-0.0729*a_11*self._p_pr_d**2/(self._t_pr_d**2*z_d**2))/(self._t_pr_d**5*z_d**3) + 0.0071744535*a_9*self._p_pr_d**5*(a_7/self._t_pr_d + a_8/self._t_pr_d**2)/(self._t_pr_d**5*z_d**6) - 0.1458*self._p_pr_d**2*(a_6 + a_7/self._t_pr_d + a_8/self._t_pr_d**2)/(self._t_pr_d**2*z_d**3) - 0.27*self._p_pr_d*(a_1 + a_2/self._t_pr_d + a_3/self._t_pr_d**3 + a_4/self._t_pr_d**4 + a_5/self._t_pr_d**5)/(self._t_pr_d*z_d**2) - 1
+
+        z_d = scipy.optimize.newton(myfunc, x0 = 1, fprime = dermyfunc,
+                                   tol=0.001, maxiter=200)
+
+        #                     tol=1e-4
+        return z_d
+
+
+
 
 
 class OilGeneral(ComponentGeneral):

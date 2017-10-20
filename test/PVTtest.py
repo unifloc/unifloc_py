@@ -104,5 +104,29 @@ def test1():
     plt.plot(pp, rs)
     plt.show()
 
+
+def test5():
+    # Tест для расчета z-фактора газа
+
+    gas = PVT.GasHC()
+    ys = []
+    xs = np.arange(1, 300, 20)
+    ts = np.arange(-20, 500, 50)
+    for t in ts:
+        ys = []
+        for p in xs:
+            gas.calc_z(p, t)
+            ys.append(gas.z)
+        xy = xs, ys
+        plt.plot(xs, ys)
+    # plt.figure(figsize=(80, 40), dpi=100)
+    plt.suptitle("PVT свойства", size=16)
+    # subplot_pvt(xy, 0, 0, 0, 'Сверхсжимаемость', 'Z-фактор', 'Давление, атм', 'b', 1, 1, 1)
+    plt.show()
+
+
 # test3()
-test4()
+test5()
+
+# %time test4()
+
