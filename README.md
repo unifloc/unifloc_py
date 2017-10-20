@@ -12,6 +12,11 @@ unifloc on python
 maplotlib, seaborn (http://seaborn.pydata.org)
 
 
+#Полезные фичи:
+При тесте кода в IPython использовать 
+%time и %timeit 
+для оценки времени расчёта
+
 
 #Потенциал для оптимизации:
 
