@@ -16,49 +16,62 @@ import scipy.optimize
 
 class ComponentGeneral:
     """
-    Абстрактный класс для описания компонентоы углеводородных флюидов
+    Абстрактный класс для описания компонентов углеводородных флюидов
+    ключевое свойство - возможность пересчета состояния для заданных термобарических условий (давление и температура)
+                      - метод calc (p,t)
+    определяет ключевые свойства присущие всем компонентам
     """
 
     def __init__(self):
-        self._gamma = 1  # specific gravity of component, dimensionless
-        self._relative_density_sckgm3 = un.air_density_sckgm3
-        self._rho_kgm3 = 1  # density with dimension
-        self._mu_cp = 1  # dynamic viscosity
-        self._fvf_m3m3 = 1  # component formation volume factor
-        self._co_1atm = 1e-5  # component compressibility
+        self._gamma = 1                               # specific gravity of component, dimensionless
+        self._rho_ref_sckgm3 = un.air_density_sckgm3  # component reference pressure (used for specific pressure calc)
+        self._mu_cp = 1                               # dynamic viscosity
+        self._fvf_m3m3 = 1                            # component formation volume factor
+        self._co_1atm = 1e-5                          # component compressibility
         """ термобарические условия """
-        self._p_bar = un.psc_bar  # thermobaric conditions for all parameters
-        self._t_c = un.tsc_c  # can be set up by calc method
+        self._p_bar = un.psc_bar                      # pressure and temperature conditions for all parameters
+        self._t_c = un.tsc_c                          # can be set up by calc method
 
     def calc(self, p_bar, t_c):
-        """ recalculate all parameters according to some pressure and temperature"""
+        """
+        recalculate all parameters according to some pressure and temperature
+        """
         self._p_bar = p_bar
         self._t_c = t_c
         return 1
 
     """ ========= default properties definition ======= """
-    """ component density at specific conditions
-        read only
-    """
+
+    @property
+    def fvf_m3m3(self):
+        """
+        formation volume factor for specific component
+        must be overloaded
+        """
+        return self._fvf_m3m3
 
     @property
     def rho_kgm3(self):
-        return self._rho_kgm3
-
-    """ component density at standard condition 
-        read only 
-    """
+        """
+        component density at specific conditions
+        read only
+        """
+        return self._gamma * self._rho_ref_sckgm3 * self.fvf_m3m3
 
     @property
     def rho_sckgm3(self):
-        return self._gamma * self._relative_density_sckgm3
-
-    """ component viscosity at standard condition
+        """
+        component density at standard condition
         read only
-    """
+        """
+        return self._gamma * self._rho_ref_sckgm3
 
     @property
     def mu_cp(self):
+        """
+        component viscosity at standard condition
+        read only
+        """
         return self._mu_cp
 
     """ component specific density at standard condition"""
@@ -71,54 +84,75 @@ class ComponentGeneral:
     def gamma(self, value):
         self._gamma = value
 
+    @property
+    def p_bar(self):
+        return self._p_bar
+
+    @property
+    def p_atm(self):
+        return un.bar2atm(self._p_bar)
+
+    @property
+    def p_psi(self):
+        return un.bar2psi(self._p_bar)
+
+    @property
+    def t_c(self):
+        return self._t_c
+
+    @property
+    def t_k(self):
+        return un.c2k(self.t_c)
+
 
 class GasGeneral(ComponentGeneral):
+    """
+    Класс для описания свойств углеводородных газов
+    """
+    def __init__(self):
+        super().__init__()
+        self._gamma = un.gamma_gas_default
+        self._z = un.z_default # сверхсжимаемость
+
+    @property
+    def z(self):
+        """
+        коэффициент сверх сжимаемости газа (z factor)
+        :return: z factor calculated according to p and t by calc method
+        """
+        return self._z
+
+
+class GasHCsimple(GasGeneral):
     """
     Класс для описания свойств углеводородных газов
     """
 
     def __init__(self):
         super().__init__()
-        self._pseudo_pressure_mpa = 1
-        self._pseudo_temperature_k = 1
-        self.gamma = un.gamma_gas_default
-        self._z = self._calc_z()  # сверхсжимаемость
-        self._p_pr_d = 1  # приведенное давление
-        self._t_pr_d = 1  # приведенная температура  (безразмерная величина)
+        self._p_pc_mpa = 1      # pseudocritical pressure
+        self._t_pc_k = 1        # pseudocritical temperature
+        self._p_pr_d = 1        # pseudoreduced pressure
+        self._t_pr_d = 1        # pseudireduced temperature
 
-    @property
-    def z(self):
+    def _calc_pt_d(self ):
+        self._p_pr_d = self.p_atm / (self._p_pc_mpa * 10)
+        self._t_pr_d = self.t_k / self._t_pc_k
+
+    def _calc_z(self):
+        self._z = un.z_default   # default z constant set here  /  используем PT
+        # TODO need to make proper z calculation using direct calculation rule
         return self._z
 
-    def _calc_pt_d(self, p_atm, t_c):
-        self._p_pr_d = p_atm / (self._pseudo_pressure_mpa * 10)
-        self._t_pr_d = (t_c + 273.15) / self._pseudo_temperature_k
-
-    def _calc_z(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._z = un.z_default * (p_bar / p_bar * t_c / t_c)  # default z constant set here  /  используем PT
-        return self._z
-
-    def _calc_bg_m3m3(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._fvf_m3m3 = un.psc_bar / p_bar * (t_c / t_c)  # t_c - "использование"
+    def _calc_bg_m3m3(self):
+        self._fvf_m3m3 = un.psc_bar #/ p_bar * (t_c / t_c)  # t_c - "использование"
+        # TODO need to make calc here
         return self._fvf_m3m3
 
-    def _calc_mug_cp(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._mu_cp = 1 * p_bar / p_bar * t_c / t_c
+    def _calc_mug_cp(self):
+        self._mu_cp = 1 #* p_bar / p_bar * t_c / t_c
+        # TODO need to make calc here
         return self._mu_cp
-
-    @ComponentGeneral.gamma.setter
-    def gamma(self, value):
-        self._gamma = value
-        self._pseudo_pressure_mpa = 4.9 - 0.4 * self._gamma
-        self._pseudo_temperature_k = 95 + 171 * self._gamma
-
-    @property
-    def pseudo_temperature_k(self):
-        return self._pseudo_temperature_k
-
-    @property
-    def pseudo_pressure_mpa(self):
-        return self._pseudo_pressure_mpa
 
         # ============================================================================
         #    По Беггс Бриллу
@@ -132,6 +166,16 @@ class GasGeneral(ComponentGeneral):
         #         d = math.exp(0.715 - 1.128 * self.T_pr_d + 0.42 * self.T_pr_d ** 2)
         #         self.z_d = a + (1 - a) * math.exp(-b) + c * self.P_pr_d ** d
         # ============================================================================
+    def calc(self, p_bar, t_c):
+        self._p_bar = p_bar
+        self._t_c = t_c
+        p_atm = un.bar2atm(p_bar)
+        self._p_pc_mpa = 4.9 - 0.4 * self._gamma
+        self._t_pc_k = 95 + 171 * self._gamma
+        self._calc_pt_d(p_atm, t_c)
+        self._calc_bg_m3m3(p_bar, t_c)
+        self._calc_mug_cp(p_bar, t_c)
+        self._calc_z(p_bar, t_c)
 
 
 class GasHC(GasGeneral):

@@ -7,12 +7,13 @@ g = const.g   # gravity
 pi = const.pi
 psc_bar = 1   # pressure standard condition
 tsc_c = 15    # temperature standard condition
-air_density_sckgm3 = 1.225 # definition from https://en.wikipedia.org/wiki/Density_of_air
+air_density_sckgm3 = 1.225  # definition from https://en.wikipedia.org/wiki/Density_of_air
 z_default = 0.9
 gamma_gas_default = 0.8
 rsb_default_m3m3 = 100
 
-class AbstractUnit():
+
+class AbstractUnit:
     """
     Абстрактный класс для определения свойств размерной единицы измерения
     Не надо создавать объекты этого класса в явнов виде
@@ -24,10 +25,10 @@ class AbstractUnit():
        
     def __getitem__(self, key):
         # если значение или тип ключа некорректны, list выбросит исключение
-        return  self._value / self._unit[key]
+        return self._value / self._unit[key]
         
     def __getattr__(self, name):
-        return  self._value /  self._unit[name] 
+        return self._value / self._unit[name]
     
     def __str__(self):
         return str(self._value) + ' atm'
@@ -35,9 +36,10 @@ class AbstractUnit():
     def __setitem__(self, key, item):
         self._value = item * self._unit[key] 
         
-    def __setattr__(self, key, item):
-        if key in _unit:
-            print("device test")
+#    def __setattr__(self, key, item):
+
+#        if key in unit:
+#            print("device test")
 #        else:
 #            super(MyTest, self).__setattr__(name, value)
             # in python3+ you can omit the arguments to super:
