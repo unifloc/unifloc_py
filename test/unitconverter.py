@@ -3,6 +3,7 @@
 """
 import scipy.constants as const
 
+
 g = const.g   # gravity
 pi = const.pi
 psc_bar = 1   # pressure standard condition
@@ -11,6 +12,18 @@ air_density_sckgm3 = 1.225  # definition from https://en.wikipedia.org/wiki/Dens
 z_default = 0.9
 gamma_gas_default = 0.8
 rsb_default_m3m3 = 100
+
+
+class PT:
+    """
+    класс для задания термобарических условий для проведения расчетов
+    может делать преобразования размерных единиц для давления и температуры
+    подчеркивает необходимость совместного рассмотрения давления и температуры
+    снижает количество передаваемых переменных
+    """
+    def __init__(self, p_bar, t_c):
+        self.p_bar = p_bar
+        self.t_c = t_c
 
 
 class AbstractUnit:

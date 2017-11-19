@@ -12,6 +12,7 @@ UniflocPy
 import unitconverter as un
 import math
 import scipy.optimize
+import copy
 
 
 class ComponentGeneral:
@@ -29,15 +30,15 @@ class ComponentGeneral:
         self._fvf_m3m3 = 1                            # component formation volume factor
         self._co_1atm = 1e-5                          # component compressibility
         """ термобарические условия """
-        self._p_bar = un.psc_bar                      # pressure and temperature conditions for all parameters
-        self._t_c = un.tsc_c                          # can be set up by calc method
+        # self._p_bar = un.psc_bar                      # pressure and temperature conditions for all parameters
+        # self._t_c = un.tsc_c                          # can be set up by calc method
+        self._pt = un.PT(un.psc_bar,un.tsc_c)
 
-    def calc(self, p_bar, t_c):
+    def calc(self, pt):
         """
         recalculate all parameters according to some pressure and temperature
         """
-        self._p_bar = p_bar
-        self._t_c = t_c
+        self._pt = copy.copy(pt)
         return 1
 
     """ ========= default properties definition ======= """
@@ -86,19 +87,19 @@ class ComponentGeneral:
 
     @property
     def p_bar(self):
-        return self._p_bar
+        return self._pt.p_bar
 
     @property
     def p_atm(self):
-        return un.bar2atm(self._p_bar)
+        return un.bar2atm(self.p_bar)
 
     @property
     def p_psi(self):
-        return un.bar2psi(self._p_bar)
+        return un.bar2psi(self.p_bar)
 
     @property
     def t_c(self):
-        return self._t_c
+        return self._pt.t_c
 
     @property
     def t_k(self):
@@ -166,9 +167,8 @@ class GasHCsimple(GasGeneral):
         #         d = math.exp(0.715 - 1.128 * self.T_pr_d + 0.42 * self.T_pr_d ** 2)
         #         self.z_d = a + (1 - a) * math.exp(-b) + c * self.P_pr_d ** d
         # ============================================================================
-    def calc(self, p_bar, t_c):
-        self._p_bar = p_bar
-        self._t_c = t_c
+    def calc(self, pt):
+        super().calc(pt)
         p_atm = un.bar2atm(p_bar)
         self._p_pc_mpa = 4.9 - 0.4 * self._gamma
         self._t_pc_k = 95 + 171 * self._gamma
@@ -349,7 +349,7 @@ class OilGeneral(ComponentGeneral):
         else:
             return self.rsb_m3m3
 
-    def calc(self, p_atm, t_c):
+    def calc(self, pt):
         """ реализация расчета свойств нефти """
         self._rs_m3m3 = self._calc_rs_m3m3(p_atm, t_c)
         self._rho_kgm3 = self._calc_rho_kgm3(p_atm, t_c)
