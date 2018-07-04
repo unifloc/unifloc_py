@@ -80,3 +80,27 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
         pb_MPaa = (pb_MPaa - 0.1013) * rsb_old / max_rsb + 0.1013
 
     return pb_MPaa
+
+def unf_Rs_Standing_m3m3(p_MPaa, Pb_MPaa=0, Rsb_m3m3=0 , gamma_oil=0.86, gamma_gas=0.6, t_K=350):
+    """
+    Gas-oil ratio calculation inverse of Standing (1947) correlation for bubble point pressure
+
+    ref1 "A Pressure-Volume-Temperature Correlation for Mixtures of California Oil and Gases",
+    M.B. Standing, Drill. & Prod. Prac., API, 1947.
+
+    ref2  "Стандарт компании Юкос. Физические свойства нефти. Методы расчета." Афанасьев В.Ю., Хасанов М.М. и др. 2002 г
+
+    return bubble point pressure abs in MPa
+    p_MPaa,         pressure, MPa
+    gamma_oil=0.86, specific gas density (by water)
+    gamma_gas=0.6,  specific gas density (by air)
+    t_K=350         temperature, K
+    """
+    if Pb_MPaa==0 and Rsb_m3m3==0:
+        # мольная доля газа
+        yg = 1.225 + 0.001648 * t_K - 1.769 / gamma_oil
+        Rs_m3m3 = gamma_gas * (1.92*p_MPaa / 10**yg)**1.204
+    else:
+        Rs_m3m3=Rsb_m3m3*(p_MPaa/Pb_MPaa)**1.204
+    return Rs_m3m3
+
