@@ -96,7 +96,7 @@ def unf_Rs_Standing_m3m3(p_MPaa, Pb_MPaa=0, Rsb_m3m3=0 , gamma_oil=0.86, gamma_g
     gamma_gas=0.6,  specific gas density (by air)
     t_K=350         temperature, K
     """
-    if Pb_MPaa==0 and Rsb_m3m3==0:
+    if Pb_MPaa==0 or Rsb_m3m3==0:
         # мольная доля газа
         yg = 1.225 + 0.001648 * t_K - 1.769 / gamma_oil
         Rs_m3m3 = gamma_gas * (1.92*p_MPaa / 10**yg)**1.204
