@@ -168,6 +168,9 @@ def unf_Rsb_Mccain_m3m3(Psp_MPaa,Tsp_K,Rsp,gamma_oil):
     
     ref1 "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities",
     J. VELARDE, W.D. MCCAIN, 2002
+    
+    to be continued
+    
     """
     if Psp_MPaa>0 and Tsp_K>0:
         API = 141.5/gamma_oil - 131.5
@@ -184,7 +187,7 @@ def unf_Rsb_Mccain_m3m3(Psp_MPaa,Tsp_K,Rsp,gamma_oil):
         Rsb = 1.1618*Rsp # в случае если неизвестны условия в сепараторе, можно произвести приблизительную оценку
     else:
         Rsb = 0
-    Rsb=35.31467/6.289814 *Rsb
+    Rsb=6.289814/35.31467 *Rsb
     return Rsb
 
 def unf_gamma_gas_Mccain(Psp_MPaa,Rsp_m3m3, Rst_m3m3, gamma_gasSP, Tsp_K,gamma_oil):
@@ -193,13 +196,16 @@ def unf_gamma_gas_Mccain(Psp_MPaa,Rsp_m3m3, Rst_m3m3, gamma_gasSP, Tsp_K,gamma_o
     
     ref1 "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities",
     J. VELARDE, W.D. MCCAIN, 2002
+    
+    to be continued
+    
     """
     if Psp_MPaa>0 and Rsp_m3m3>0 and Rst_m3m3>0 and gamma_gasSP>0:
         API = 141.5/gamma_oil - 131.5
         Psp_psia = 145.03773800721814 * Psp_MPaa
         Tsp_F = 1.8*(Tsp_K - 273.15) + 32
-        Rsp_scfSTB = 6.289814/35.31467 * Rsp_m3m3
-        Rst_scfSTB = 6.289814/35.31467 * Rst_m3m3
+        Rsp_scfSTB = 5.61458333333333 * Rsp_m3m3
+        Rst_scfSTB = 5.61458333333333 * Rst_m3m3
     
         z1 = -17.275 + 7.9597*np.log(Psp_psia) - 1.1013*np.log(Psp_psia)**2 + 2.7735*10**(-2) * np.log(Psp_psia)**3 + 3.2287*10**(-3)*np.log(Psp_psia)**4
         z2 = -0.3354 - 0.3346*np.log(Rsp_scfSTB) + 0.1956*np.log(Rsp_scfSTB)**2 - 3.4374*10**(-2)*np.log(Rsp_scfSTB)**3 + 2.08*10**(-3)**np.log(Rsp_scfSTB)**4
@@ -215,3 +221,58 @@ def unf_gamma_gas_Mccain(Psp_MPaa,Rsp_m3m3, Rst_m3m3, gamma_gasSP, Tsp_K,gamma_o
     else:
         gamma_gas = 0
     return gamma_gas
+
+def unf_FVF_Mccain_m3m3_below(density_oilSTO_kgm3, Rs_m3m3, gamma_gas, density_oil_kgm3):
+    """  
+    Oil Formation Volume Factor according McCain correlation for pressure below bubble point pressure
+    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+    
+    to be continued
+    
+    """
+    density_oilSTO_lbcuft = 0.0624279606 * density_oilSTO_kgm3
+    density_oil_lbcuft = 0.0624279606 * density_oil_kgm3
+    Rs_scfSTB = 5.61458333333333 * Rs_m3m3
+    
+    bo = (density_oilSTO_lbcuft + 0.01357*Rs_scfSTB)/density_oil_lbcuft
+    return bo
+
+def unf_FVF_VB_m3m3_above(bob, cofb_1MPa, pb_MPa, p_MPa):
+    """  
+    Oil Formation Volume Factor according equation for pressure above bubble point pressure
+    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+    
+    ! Actually, this correlation is belonged ro Vasquez & Beggs (1980)
+    ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction. J Pet Technol 32 (6): 968-970. SPE-6719-PA
+    cofb_1MPa - oil compressibility
+    
+    to be continued
+    
+    """
+    if p_MPa <= pb_MPa:
+        bo = bob
+    else:
+        pb_psia = pb_MPa * 145.03773800721814
+        p_psia = p_MPa * 145.03773800721814
+        cofb_1psi = 1/145.03773800722 * cofb_1MPa   
+        bo = bob *np.exp(cofb_1psi * (pb_psia - p_psia))
+    return bo
+
+def unf_compressibility_oil_VB_1Mpa(Rs_m3m3, t_K, gamma_oil,p_MPa, gamma_gas=0.6):
+    """  
+    oil compressibility according to Vasquez & Beggs (1980) correlation 
+    ref1 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction. J Pet Technol 32 (6): 968-970. SPE-6719-PA
+   
+    to be continued
+    
+    """
+    if p_MPa > 0:
+        Rs_scfSTB = 5.61458333333333 * Rs_m3m3
+        t_F = 1.8*(t_K - 273.15) + 32
+        API = 141.5/gamma_oil - 131.5
+        p_psia = p_MPa * 145.03773800721814
+        co_1MPa = 145.03773800722 *(-1433 + 5*Rs_scfSTB + 17.2*t_F - 1180*gamma_gas + 12.61*API)/(10**5*p_psia)
+    else:
+        co_1MPa = 0
+    return co_1MPa
+    
