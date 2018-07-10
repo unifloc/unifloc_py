@@ -419,12 +419,54 @@ def unf_pseudocritical_properties_MPa_K(gamma_gas,Tc_H2S_K = 0,Tc_CO2_K = 0,Tc_N
         pc_H2S_psia = pc_H2S_MPa * 145.03773800721814
         pc_CO2_psia = pc_CO2_MPa * 145.03773800721814
         pc_N2_psia = pc_N2_MPa * 145.03773800721814
-        J = 1.1582* 10**(-1) - 4.5820*10**(-1)*y_H2S *(Tc_H2S_R/pc_H2S_psia) - 9.0348*10**(-1)*y_CO2*(Tc_CO2_R/pc_CO2_psia) -6.6026 * 10**(-1) * y_N2*(Tc_N2_R/pc_N2_psia) + 7.0729 * 10**(-1)*gamma_gas - 9.9397 * 10**(-2)*gamma_gas**2
-        K = 3.8216 - 6.5340 * 10**(-2)*y_H2S *(Tc_H2S_R/pc_H2S_psia) - 4.2113 * 10**(-1)*y_CO2*(Tc_CO2_R/pc_CO2_psia) -9.1249 * 10**(-1)* y_N2*(Tc_N2_R/pc_N2_psia) + 1.7438 * 10 * gamma_gas -3.2191 * gamma_gas**2
+        
+        J = 1.1582* 10**(-1) - 4.5820*10**(-1)*y_H2S *(Tc_H2S_R/pc_H2S_psia) -\
+        9.0348*10**(-1)*y_CO2*(Tc_CO2_R/pc_CO2_psia) -6.6026 * 10**(-1) * y_N2*(Tc_N2_R/pc_N2_psia) + \
+        7.0729 * 10**(-1)*gamma_gas - 9.9397 * 10**(-2)*gamma_gas**2
+        
+        K = 3.8216 - 6.5340 * 10**(-2)*y_H2S *(Tc_H2S_R/pc_H2S_psia) -\
+        4.2113 * 10**(-1)*y_CO2*(Tc_CO2_R/pc_CO2_psia) -9.1249 * 10**(-1)* y_N2*(Tc_N2_R/pc_N2_psia) + \
+        1.7438 * 10 * gamma_gas -3.2191 * gamma_gas**2
+        
         Tpc_R = K**2/J
         ppc_psia = Tpc_R / J
         Tpc_K =  (Tpc_R - 491.67)/1.8 + 273.15
         ppc_MPa = ppc_psia / 145.03773800721814
     return ppc_MPa,Tpc_K
 
+def unf_Zfactor_DAK(p_MPa,t_K,ppc_MPa,Tpc_K):
+    """
+    correlation for z-factor
+    ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
+    Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+    """
+    Ppr = p_MPa/ppc_MPa
+    Tpr = t_K / Tpc_K
+    epsilon = 0.000001
+    maxiter = 100
+    counter = 0
+    z_previous = 1
+    ropr = 0.27*(Ppr/(z_previous*Tpr))
+    z_current = 1 + (0.3265 - 1.0700/Tpr - 0.5339/Tpr**3 + 0.01569/Tpr**4 - 0.05165/Tpr**5) * ropr +\
+        (0.5475 -0.7361/Tpr + 0.1844/Tpr**2)*ropr**2 - 0.1056*(-0.7361/Tpr + 0.1844/Tpr**2)*ropr**5 + \
+        0.6134*(1+0.7210*ropr**2)*(ropr**2/Tpr**3)*np.exp(-0.7210/ropr**2) 
+    while (abs(z_current - z_previous) > epsilon and counter < maxiter):
+        if Ppr<=2:
+            z_previous = z_current + (z_current - z_previous)
+        elif Ppr<=3:
+            z_previous = z_current + (z_current - z_previous)/2
+        elif Ppr<=6:
+            z_previous = z_current + (z_current - z_previous)/3
+        else:
+            z_previous = z_current + (z_current - z_previous)/5
+        ropr = 0.27*(Ppr/(z_previous*Tpr))
+        z_current = 1 + (0.3265 - 1.0700/Tpr - 0.5339/Tpr**3 + 0.01569/Tpr**4 - 0.05165/Tpr**5) * ropr +\
+        (0.5475 -0.7361/Tpr + 0.1844/Tpr**2)*ropr**2 - 0.1056*(-0.7361/Tpr + 0.1844/Tpr**2)*ropr**5 + \
+        0.6134*(1+0.7210*ropr**2)*(ropr**2/Tpr**3)*np.exp(-0.7210/ropr**2)
+        counter = counter + 1
+    return z_current
+
+        
+    
+   
     
