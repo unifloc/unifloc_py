@@ -3,10 +3,13 @@
 Created on Sat May  5 13:59:06 2018
 
 @author: Rinat Khabibullin
+         Алексей Водопьям
 """
 import numpy as np
+import unittest
 
 # PVT свойства для нефти
+
 
 def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
@@ -84,7 +87,7 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     return pb_MPaa
 
    
-def unf_Rs_Standing_m3m3(p_MPaa, Pb_MPaa=0, Rsb_m3m3=0 , gamma_oil=0.86, gamma_gas=0.6, t_K=350):
+def unf_Rs_Standing_m3m3(p_MPaa, pb_MPaa=0, rsb_m3m3=0, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
     Gas-oil ratio calculation inverse of Standing (1947) correlation for bubble point pressure
 
@@ -98,16 +101,16 @@ def unf_Rs_Standing_m3m3(p_MPaa, Pb_MPaa=0, Rsb_m3m3=0 , gamma_oil=0.86, gamma_g
     gamma_oil=0.86, specific gas density (by water)
     gamma_gas=0.6,  specific gas density (by air)
     t_K=350,        temperature, K
-    Pb_MPaa=0,      buble point pressure, MPa
-    Rsb_m3m3=0,     gas-oil ratio at the bublepoint pressure, m3/m3
+    pb_MPaa=0,      buble point pressure, MPa
+    rsb_m3m3=0,     gas-oil ratio at the bublepoint pressure, m3/m3
     """
-    if Pb_MPaa==0 or Rsb_m3m3==0:
+    if pb_MPaa == 0 or rsb_m3m3 == 0:
         # мольная доля газа
         yg = 1.225 + 0.001648 * t_K - 1.769 / gamma_oil
-        Rs_m3m3 = gamma_gas * (1.92*p_MPaa / 10**yg)**1.204
+        rs_m3m3 = gamma_gas * (1.92*p_MPaa / 10**yg)**1.204
     else:
-        Rs_m3m3=Rsb_m3m3*(p_MPaa/Pb_MPaa)**1.204
-    return Rs_m3m3
+        rs_m3m3 = rsb_m3m3 * (p_MPaa / pb_MPaa) ** 1.204
+    return rs_m3m3
 
 def unf_Rs_Velarde_m3m3(p_MPaa, Pb_MPaa=10, Rsb_m3m3=100, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
@@ -178,21 +181,20 @@ def unf_Rsb_Mccain_m3m3(Psp_MPaa,Tsp_K,Rsp,gamma_oil):
         API = 141.5/gamma_oil - 131.5
         Psp_psia = 145.03773800721814 * Psp_MPaa
         Tsp_F = 1.8*(Tsp_K - 273.15) + 32
-    
         z1 = -8.005 + 2.7*np.log(Psp_psia) - 0.161*np.log(Psp_psia)**2
         z2 = 1.224 - 0.5*np.log(Tsp_F)
         z3 = -1.587 + 0.0441*np.log(API) - 2.29*10**(-5)*np.log(API)**2
         z = z1 + z2 + z3
         Rst = np.exp(3.955+0.83*z-0.024*z**2+0.075*z**3)
         Rsb = Rsp + Rst
-    elif Rsp>=0:
+    elif Rsp >= 0:
         Rsb = 1.1618*Rsp # в случае если неизвестны условия в сепараторе, можно произвести приблизительную оценку
     else:
         Rsb = 0
-    Rsb=6.289814/35.31467 *Rsb
+    Rsb = 6.289814/35.31467 * Rsb
     return Rsb
 
-def unf_gamma_gas_Mccain(Psp_MPaa,Rsp_m3m3, Rst_m3m3, gamma_gasSP, Tsp_K,gamma_oil):
+def unf_gamma_gas_Mccain(Psp_MPaa,Rsp_m3m3, Rst_m3m3, gamma_gasSP, Tsp_K, gamma_oil):
     """
     Correlation for separator gas specific gravity
     
@@ -466,7 +468,16 @@ def unf_Zfactor_DAK(p_MPa,t_K,ppc_MPa,Tpc_K):
         counter = counter + 1
     return z_current
 
-        
-    
+
+class TestPVT(unittest.TestCase):
+    def test_unf_pb_Standing_MPaa(self):
+        rsb_m3m3 = 100
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        t_K = 350
+        self.assertAlmostEqual(unf_pb_Standing_MPaa(rsb_m3m3,gamma_oil,gamma_gas,t_K),20.170210695316566, delta=0.0001)
+
+if __name__ == '__main__':
+    unittest.main()
    
     
