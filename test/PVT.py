@@ -11,6 +11,7 @@ UniflocPy
 """
 import unitconverter as un
 
+
 class ComponentGeneral:
     """
     Абстрактный класс для описания компонентоы углеводородных флюидов

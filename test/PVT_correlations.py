@@ -6,10 +6,9 @@ Created on Sat May  5 13:59:06 2018
          Alexey Vodopyan
 """
 import numpy as np
-
+import unittest
 
 # PVT свойства для нефти
-
 
 def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
@@ -495,3 +494,17 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
             ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
         counter = counter + 1
     return z_current
+
+
+class TestPVT(unittest.TestCase):
+    def test_unf_pb_Standing_MPaa(self):
+        rsb_m3m3 = 100
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        t_K = 350
+        self.assertAlmostEqual(unf_pb_Standing_MPaa(rsb_m3m3,gamma_oil,gamma_gas,t_K),20.170210695316566, delta=0.0001)
+
+if __name__ == '__main__':
+    unittest.main()
+   
+    
