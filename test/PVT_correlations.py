@@ -10,6 +10,7 @@ import unittest
 
 # PVT свойства для нефти
 
+
 def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
     bubble point pressure calculation according to Standing (1947) correlation
@@ -23,7 +24,7 @@ def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
     gamma_oil=0.86, specific gas density (by water)
     gamma_gas=0.6,  specific gas density (by air)
-    t_K=350         temperature, K
+    t_K=350,        temperature, K
     """
     min_rsb = 1.8
     rsb_old = rsb_m3m3
@@ -48,9 +49,9 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     
     return bubble point pressure abs in MPa
     rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
-    gamma_oil=0.86, specific gas density (by water)
+    gamma_oil=0.86, specific oil density (by water)
     gamma_gas=0.6,  specific gas density (by air)
-    t_K=350         temperature, K
+    t_K=350,        temperature, K
     """
 
     min_rsb = 1.8
@@ -93,10 +94,10 @@ def unf_rs_Standing_m3m3(p_MPaa, pb_MPaa=0, rsb_m3m3=0, gamma_oil=0.86, gamma_ga
     M.B. Standing, Drill. & Prod. Prac., API, 1947.
 
     ref2  "Стандарт компании Юкос. Физические свойства нефти. Методы расчета." Афанасьев В.Ю., Хасанов М.М. и др. 2002 г
-
-    return gas-oil ratio abs in m3/m3
+    может считать в случае если нет давления насыщения и газосодержания при давлении насыщения, корреляция не точная
+    return gas-oil ratio in m3/m3
     p_MPaa,         pressure, MPa
-    gamma_oil=0.86, specific gas density (by water)
+    gamma_oil=0.86, specific oil density (by water)
     gamma_gas=0.6,  specific gas density (by air)
     t_K=350,        temperature, K
     pb_MPaa=0,      buble point pressure, MPa
@@ -118,9 +119,9 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
     ref1 "Correlation of Black Oil Properties at Pressures Below Bubblepoint Pressure—A New Approach",
     J. VELARDE, T.A. BLASINGAME Texas A&M University, W.D. MCCAIN, JR. S.A. Holditch & Associates, Inc 1999
 
-    return gas-oil ratio abs in m3/m3
+    return gas-oil ratio in m3/m3
     p_MPaa,         pressure, MPaa
-    gamma_oil=0.86, specific gas density (by water)
+    gamma_oil=0.86, specific oil density (by water)
     gamma_gas=0.6,  specific gas density (by air)
     t_K=350,        temperature, K
     pb_MPaa=10,     buble point pressure, MPaa
@@ -162,7 +163,7 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
     return rs_m3m3
 
 
-def unf_rsb_Mccain_m3m3(psp_MPaa, tsp_K, rsp, gamma_oil):
+def unf_rsb_Mccain_m3m3(rsp_m3m3,gamma_oil, psp_MPaa=0, tsp_K=0):
     """
     Solution Gas-oil ratio at bubble point pressure calculation according to McCain (2002) correlation 
     taking into account the gas losses at separator and stock tank
@@ -170,9 +171,14 @@ def unf_rsb_Mccain_m3m3(psp_MPaa, tsp_K, rsp, gamma_oil):
     ref1 "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities",
     J. VELARDE, W.D. MCCAIN, 2002
     
-    to be continued
-    
+    return solution gas-oil ratio at bubble point pressure, rsb in m3/m3
+    часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
+    rsp_m3m3,             separator producing gas-oil ratio, m3m3
+    gamma_oil,            specific oil density(by water)
+    psp_MPaa = 0,         pressure in separator, MPaa
+    tsp_K = 0,            temperature in separator, K
     """
+    rsp_scfstb = 5.61458333333333 * rsp_m3m3
     if psp_MPaa > 0 and tsp_K > 0:
         api = 141.5 / gamma_oil - 131.5
         psp_psia = 145.03773800721814 * psp_MPaa
@@ -181,25 +187,31 @@ def unf_rsb_Mccain_m3m3(psp_MPaa, tsp_K, rsp, gamma_oil):
         z2 = 1.224 - 0.5 * np.log(tsp_F)
         z3 = -1.587 + 0.0441 * np.log(api) - 2.29 * 10 ** (-5) * np.log(api) ** 2
         z = z1 + z2 + z3
-        rst = np.exp(3.955 + 0.83 * z - 0.024 * z ** 2 + 0.075 * z ** 3)
-        rsb = rsp + rst
-    elif rsp >= 0:
-        rsb = 1.1618 * rsp  # в случае если неизвестны условия в сепараторе, можно произвести приблизительную оценку
+        rst_scfstb = np.exp(3.955 + 0.83 * z - 0.024 * z ** 2 + 0.075 * z ** 3)
+        rsb = rsp_scfstb + rst_scfstb
+    elif rsp_m3m3 >= 0:
+        rsb = 1.1618 * rsp_scfstb
     else:
         rsb = 0
-    rsb = 6.289814 / 35.31467 * rsb
+    rsb = 1 / 5.61458333333333 * rsb
     return rsb
 
 
-def unf_gamma_gas_Mccain(psp_MPaa, rsp_m3m3, rst_m3m3, gamma_gassp, tsp_K, gamma_oil):
+def unf_gamma_gas_Mccain(rsp_m3m3, rst_m3m3, gamma_gassp, gamma_oil, psp_MPaa=0, tsp_K=0):
     """
-    Correlation for separator gas specific gravity
+    Correlation for weighted-average specific gravities of surface gases
     
     ref1 "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities",
     J. VELARDE, W.D. MCCAIN, 2002
     
-    to be continued
-    
+    return weighted-average specific gravities of surface gases
+    часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
+    rsp_m3m3,             separator producing gas-oil ratio, m3m3
+    rst_m3m3,             stock-tank producing gas-oil ratio, m3m3
+    gamma_gassp,          separator gas specific gravity
+    gamma_oil,            specific oil density(by water)
+    psp_MPaa = 0,         pressure in separator, MPaa
+    tsp_K = 0,            temperature in separator, K
     """
     if psp_MPaa > 0 and rsp_m3m3 > 0 and rst_m3m3 > 0 and gamma_gassp > 0:
         api = 141.5 / gamma_oil - 131.5
@@ -207,17 +219,18 @@ def unf_gamma_gas_Mccain(psp_MPaa, rsp_m3m3, rst_m3m3, gamma_gassp, tsp_K, gamma
         tsp_F = 1.8 * (tsp_K - 273.15) + 32
         rsp_scfstb = 5.61458333333333 * rsp_m3m3
         rst_scfstb = 5.61458333333333 * rst_m3m3
-        z1 = -17.275 + 7.9597 * np.log(psp_psia) - 1.1013 * np.log(psp_psia) ** 2 + 2.7735 * 10 ** (-2) * np.log(
-            psp_psia) ** 3 + 3.2287 * 10 ** (-3) * np.log(psp_psia) ** 4
-        z2 = -0.3354 - 0.3346 * np.log(rsp_scfstb) + 0.1956 * np.log(rsp_scfstb) ** 2 - 3.4374 * 10 ** (-2) * np.log(
-            rsp_scfstb) ** 3 + 2.08 * 10 ** (-3) ** np.log(rsp_scfstb) ** 4
-        z3 = 3.705 - 0.4273 * np.log(api) + 1.818 * 10 ** (-2) * np.log(api) ** 2 - 3.459 * 10 ** (-4) * np.log(
-            api) ** 3 + 2.505 * 10 ** (-6) * np.log(api) ** 4
-        z4 = -155.52 + 629.61 * np.log(gamma_gassp) - 957.38 * np.log(gamma_gassp) ** 2 + 647.57 * np.log(
-            gamma_gassp) ** 3 - 163.26 * np.log(gamma_gassp) ** 4
-        z5 = 2.085 - 7.097 * 10 ** (-2) * np.log(tsp_F) + 9.859 * 10 ** (-4) * np.log(tsp_F) ** 2 - 6.312 * 10 ** (
-            -6) ** np.log(tsp_F) ** 3 + 1.4 * 10 ** (-8) * np.log(tsp_F) ** 4
+        z1 = -17.275 + 7.9597 * np.log(psp_psia) - 1.1013 * np.log(psp_psia) ** 2 + 2.7735 * 10 ** (-2) \
+            * np.log(psp_psia) ** 3 + 3.2287 * 10 ** (-3) * np.log(psp_psia) ** 4
+        z2 = -0.3354 - 0.3346 * np.log(rsp_scfstb) + 0.1956 * np.log(rsp_scfstb) ** 2 - 3.4374 * 10 ** (-2) \
+            * np.log(rsp_scfstb) ** 3 + 2.08 * 10 ** (-3) * np.log(rsp_scfstb) ** 4
+        z3 = 3.705 - 0.4273 * api + 1.818 * 10 ** (-2) * api ** 2 - 3.459 * 10 ** (-4) \
+            * api ** 3 + 2.505 * 10 ** (-6) * api ** 4
+        z4 = -155.52 + 629.61 * gamma_gassp - 957.38 * gamma_gassp ** 2 + 647.57 \
+            * gamma_gassp ** 3 - 163.26 * gamma_gassp ** 4
+        z5 = 2.085 - 7.097 * 10 ** (-2) * tsp_F + 9.859 * 10 ** (-4) * tsp_F ** 2 \
+            - 6.312 * 10 ** (-6) * tsp_F ** 3 + 1.4 * 10 ** (-8) * tsp_F ** 4
         z = z1 + z2 + z3 + z4 + z5
+        # Stock-tank gas specific gravity
         gamma_gasst = 1.219 + 0.198 * z + 0.0845 * z ** 2 + 0.03 * z ** 3 + 0.003 * z ** 4
         gamma_gas = (gamma_gassp * rsp_scfstb + gamma_gasst * rst_scfstb) / (rsp_scfstb + rst_scfstb)
     elif gamma_gassp >= 0:
@@ -227,18 +240,21 @@ def unf_gamma_gas_Mccain(psp_MPaa, rsp_m3m3, rst_m3m3, gamma_gassp, tsp_K, gamma
     return gamma_gas
 
 
-def unf_fvf_Mccain_m3m3_below(density_oilsto_kgm3, rs_m3m3, density_oil_kgm3):
+def unf_fvf_Mccain_m3m3_below(density_oilsto_kgm3, rs_m3m3, density_oil_kgm3, gamma_gas):
     """  
     Oil Formation Volume Factor according McCain correlation for pressure below bubble point pressure
     ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
     
-    to be continued
-    
+    return formation volume factor bo,m3m3
+    density_oilsto_kgm3,             density of stock-tank oil, kgm3
+    rs_m3m3,                         solution gas-oil ratio, m3m3
+    density_oil_kgm3,                Oil density at reservoir conditions, kgm3
+    gamma_gas,                       specific gas  density(by air)
     """
     density_oilsto_lbcuft = 0.0624279606 * density_oilsto_kgm3
     density_oil_lbcuft = 0.0624279606 * density_oil_kgm3
     rs_scfstb = 5.61458333333333 * rs_m3m3
-    bo = (density_oilsto_lbcuft + 0.01357 * rs_scfstb) / density_oil_lbcuft
+    bo = (density_oilsto_lbcuft + 0.01357 * rs_scfstb * gamma_gas) / density_oil_lbcuft
     return bo
 
 
@@ -251,10 +267,12 @@ def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
     noted that this is Standing correlation.
     ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
     J Pet Technol 32 (6): 968-970. SPE-6719-PA
-    cofb_1MPa - oil compressibility
-    
-    to be continued
-    
+
+    return formation volume factor bo,m3m3
+    bob,           formation volume factor at bubble point pressure, m3m3
+    cofb_1MPa,     weighted-average oil compressibility from bubblepoint pressure to a higher pressure of interest,1/MPa
+    pb_MPaa,       bubble point pressure, MPa
+    p_MPaa,        pressure, MPa
     """
     if p_MPaa <= pb_MPaa:
         bo = bob
@@ -271,17 +289,21 @@ def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0
     oil compressibility according to Vasquez & Beggs (1980) correlation 
     ref1 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
     J Pet Technol 32 (6): 968-970. SPE-6719-PA
-   
-    to be continued
-    
+
+    return coefficient of isothermal compressibility co_1MPa,1/MPa
+    rs_m3m3,             solution gas-oil ratio, m3m3
+    t_K,                 temperature, K
+    gamma_oil,      specific oil density (by water)
+    p_MPaa,              pressure, MPaa
+    gamma_gas=0.6,       specific gas density (by air)
     """
     if p_MPaa > 0:
         rs_scfstb = 5.61458333333333 * rs_m3m3
         t_F = 1.8 * (t_K - 273.15) + 32
         api = 141.5 / gamma_oil - 131.5
         p_psia = p_MPaa * 145.03773800721814
-        co_1MPa = 145.03773800722 * (-1433 + 5 * rs_scfstb + 17.2 * t_F - 1180 * gamma_gas + 12.61 * api) / (
-                    10 ** 5 * p_psia)
+        co_1MPa = 145.03773800722 * (-1433 + 5 * rs_scfstb + 17.2 * t_F - 1180 * gamma_gas + 12.61 * api) / \
+            (10 ** 5 * p_psia)
     else:
         co_1MPa = 0
     return co_1MPa
@@ -291,9 +313,12 @@ def unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K):
     """  
     Oil Formation Volume Factor according Standing equation at bubble point pressure
     ref1 Volumetric and phase behavior of oil field hydrocarbon systems / M.B. Standing Standing, M. B. 1981
-    
-    to be continued
-    
+
+    return formation volume factor at bubble point pressure bo,m3m3
+    rs_m3m3,             solution gas-oil ratio, m3m3
+    gamma_gas,       specific gas density (by air)
+    gamma_oil,      specific oil density (by water)
+    t_K,                 temperature, K
     """
     rs_scfstb = 5.61458333333333 * rs_m3m3
     t_F = 1.8 * (t_K - 273.15) + 32
@@ -304,11 +329,18 @@ def unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K):
 def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, gamma_oil, gamma_gassp = 0):
     """  
     Oil density according Standing, M.B., 1977; Witte, T.W., Jr., 1987; and McCain, W.D., Jr. and Hill, N.C.,
-1995 correlation.
+    1995 correlation.
     ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
-    
-    to be continued
-    
+
+    return oil density,kg/m3
+    p_MPaa,              pressure, MPaa
+    pb_MPaa,             bubble point pressure, MPaa
+    co_1MPa,             coefficient of isothermal compressibility, 1/MPa
+    rs_m3m3,             solution gas-oil ratio, m3m3
+    gamma_gas,           specific gas density (by air)
+    t_K,                 temperature, K
+    gamma_oil,           specific oil density (by water)
+    gamma_gassp = 0,     specific gas density in separator(by air)
     """
     rs_scfstb = 5.61458333333333 * rs_m3m3
     ro_po = 52.8 - 0.01 * rs_scfstb  # первое приближение
@@ -361,8 +393,6 @@ def unf_deadoilviscosity_Standing(gamma_oil, t_K):
     """
 #  Correlation for Oil viscosity according to Standing Correlation
 
-#    
-
 """ 
     не могу найти источник
     API = 141.5 / gamma_oil - 131.5
@@ -373,15 +403,32 @@ def unf_deadoilviscosity_Standing(gamma_oil, t_K):
 
 
 def unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K):
+    """
+    Correlation for dead oil viscosity
+    ref1 Beggs, H.D. and Robinson, J.R. “Estimating the Viscosity of Crude Oil Systems.”
+    Journal of Petroleum Technology. Vol. 27, No. 9 (1975)
+
+    return dead oil viscosity,cP
+    gamma_oil,           specific oil density (by water)
+    t_K,                 temperature, K
+    """
     api = 141.5 / gamma_oil - 131.5
     t_F = 1.8 * (t_K - 273.15) + 32
-    c = 10 ** (3.0324 - 0.02023 * api) / t_F ** (-1.163)
+    c = 10 ** (3.0324 - 0.02023 * api) * t_F ** (-1.163)
     viscosity_cP = 10 ** c - 1
     return viscosity_cP
 
 
 def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
-    # viscosity correlation for pressure below bubble point
+    """
+    Correlation for oil viscosity for pressure below bubble point
+    ref1 Beggs, H.D. and Robinson, J.R. “Estimating the Viscosity of Crude Oil Systems.”
+    Journal of Petroleum Technology. Vol. 27, No. 9 (1975)
+
+    return oil viscosity,cP
+    deadoilviscosity_cP,           dead oil viscosity,cP
+    rs_m3m3,                       solution gas-oil ratio, m3m3
+    """
     rs_scfstb = 5.61458333333333 * rs_m3m3
     a = 10.715 * (rs_scfstb + 100) ** (-0.515)
     b = 5.44 * (rs_scfstb + 150) ** (-0.338)
@@ -394,6 +441,11 @@ def unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_c
     viscosity correlation for pressure above bubble point
     ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
     J Pet Technol 32 (6): 968-970. SPE-6719-PA
+
+    return oil viscosity,cP
+    p_MPaa,                      pressure, MPaa
+    pb_MPaa,                     bubble point pressure, MPaa
+    bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP
     """
     p_psia = p_MPaa * 145.03773800721814
     pb_psia = pb_MPaa * 145.03773800721814
@@ -403,8 +455,17 @@ def unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_c
 
 
 def unf_undersaturatedoilviscosity_Petrovsky_cP(p_MPaa, pb_MPaa, bubblepointviscosity_cP):
-    # viscosity correlation for pressure above bubble point
-    # ref 1 Viscosity Correlations for Gulf of Mexico Crude Oils
+    """
+    viscosity correlation for pressure above bubble point
+    ref 1 Petrosky, G.E. and Farshad, F.F. “Viscosity Correlations for Gulf of Mexico Crude
+    Oils.” Paper SPE 29468. Presented at the SPE Production Operations Symposium,
+    Oklahoma City (1995)
+
+    return oil viscosity,cP
+    p_MPaa,                      pressure, MPaa
+    pb_MPaa,                     bubble point pressure, MPaa
+    bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP
+    """
     A = -1.0146 + 1.3322 * np.log(bubblepointviscosity_cP) - 0.4876 * np.log(
         bubblepointviscosity_cP) ** 2 - 1.15036 * np.log(bubblepointviscosity_cP) ** 3
     p_psia = p_MPaa * 145.03773800721814
@@ -414,7 +475,15 @@ def unf_undersaturatedoilviscosity_Petrovsky_cP(p_MPaa, pb_MPaa, bubblepointvisc
 
 
 def unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa):
-    # function for calculating the viscosity at any pressure
+    """
+    function for calculating the viscosity at any pressure
+
+    return oil viscosity,cP
+    deadoilviscosity_cP,           dead oil viscosity,cP
+    rs_m3m3,                       solution gas-oil ratio, m3m3
+    p_MPaa,                        pressure, MPaa
+    pb_MPaa,                       bubble point pressure, MPaa
+    """
     saturatedviscosity_cP = unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3)
     if p_MPaa <= pb_MPaa:
         viscosity_cP = saturatedviscosity_cP
@@ -430,21 +499,71 @@ def unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa)
 
 # PVT свойства для газа
 
-def unf_pseudocritical_properties_MPa_K(gamma_gas, tc_h2s_K=0, tc_co2_K=0, tc_n2_K=0, pc_h2s_MPaa=1, pc_co2_MPaa=1,
-                                        pc_n2_MPaa=1, y_h2s=0, y_co2=0, y_n2=0):
-    """
-    correlation for pseudocritical properties
+def unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2_K=0.0, pc_h2s_MPaa=1.0,
+                                        pc_co2_MPaa=1.0, pc_n2_MPaa=1.0, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
+    """"
+    correlation for pseudocritical temperature taking into account the presense of non-hydrocarbon gases
     ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for 
     Naturally Occurring Petroleum Gases.” Gas Reservoir Engineering. Reprint Series. Richardson,
     TX: SPE. Vol. 52 (1999) 186–200
+
+    return pseudocritical temperature, K
+    gamma_gas,           specific gas density (by air)
+    tc_h2s_K,            critical temperature for hydrogen sulfide, K
+    tc_co2_K,            critical temperature for carbon dioxide, K
+    tc_n2_K,             critical temperature for nitrogen, K
+    pc_h2s_MPaa,         critical pressure for hydrogen sulfide, MPaa
+    pc_co2_MPaa,         critical pressure for carbon dioxide, MPaa
+    pc_n2_MPaa,          critical pressure for nitrogen, MPaa
+    y_h2s,               mole fraction of the hydrogen sulfide
+    y_co2,               mole fraction of the carbon dioxide
+    y_n2,                mole fraction of the nitrogen
     """
     if pc_h2s_MPaa == 0 or pc_co2_MPaa == 0 or pc_n2_MPaa == 0:
         tpc_K = 0
+    else:
+        tc_h2s_R = 1.8 * tc_h2s_K
+        tc_co2_R = 1.8 * tc_co2_K
+        tc_n2_R = 1.8 * tc_n2_K
+        pc_h2s_psia = pc_h2s_MPaa * 145.03773800721814
+        pc_co2_psia = pc_co2_MPaa * 145.03773800721814
+        pc_n2_psia = pc_n2_MPaa * 145.03773800721814
+        J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
+            9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
+                        tc_n2_R / pc_n2_psia) + 7.0729 * 10 ** (-1) * gamma_gas - 9.9397 * 10 ** (-2) * gamma_gas ** 2
+        K = 3.8216 - 6.5340 * 10 ** (-2) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
+            4.2113 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
+                        tc_n2_R / pc_n2_psia) + 1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
+        tpc_R = K ** 2 / J
+        tpc_K = tpc_R / 1.8
+    return tpc_K
+
+def unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2_K=0.0, pc_h2s_MPaa=1.0,
+                                        pc_co2_MPaa=1.0, pc_n2_MPaa=1.0, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
+    """"
+    correlation for pseudocritical pressure taking into account the presense of non-hydrocarbon gases
+    ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for
+    Naturally Occurring Petroleum Gases.” Gas Reservoir Engineering. Reprint Series. Richardson,
+    TX: SPE. Vol. 52 (1999) 186–200
+
+    return pseudocritical pressure, MPa
+    gamma_gas,           specific gas density (by air)
+    tc_h2s_K,            critical temperature for hydrogen sulfide, K
+    tc_co2_K,            critical temperature for carbon dioxide, K
+    tc_n2_K,             critical temperature for nitrogen, K
+    pc_h2s_MPaa,         critical pressure for hydrogen sulfide, MPaa
+    pc_co2_MPaa,         critical pressure for carbon dioxide, MPaa
+    pc_n2_MPaa,          critical pressure for nitrogen, MPaa
+    y_h2s,               mole fraction of the hydrogen sulfide
+    y_co2,               mole fraction of the carbon dioxide
+    y_n2,                mole fraction of the nitrogen
+    """
+    if pc_h2s_MPaa == 0 or pc_co2_MPaa == 0 or pc_n2_MPaa == 0:
         ppc_MPa = 0
     else:
-        tc_h2s_R = 1.8 * (tc_h2s_K - 273.15) + 491.67
-        tc_co2_R = 1.8 * (tc_co2_K - 273.15) + 491.67
-        tc_n2_R = 1.8 * (tc_n2_K - 273.15) + 491.67
+        tc_h2s_R = 1.8 * tc_h2s_K
+        tc_co2_R = 1.8 * tc_co2_K
+        tc_n2_R = 1.8 * tc_n2_K
         pc_h2s_psia = pc_h2s_MPaa * 145.03773800721814
         pc_co2_psia = pc_co2_MPaa * 145.03773800721814
         pc_n2_psia = pc_n2_MPaa * 145.03773800721814
@@ -458,9 +577,8 @@ def unf_pseudocritical_properties_MPa_K(gamma_gas, tc_h2s_K=0, tc_co2_K=0, tc_n2
             1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
         tpc_R = K ** 2 / J
         ppc_psia = tpc_R / J
-        tpc_K = (tpc_R - 491.67) / 1.8 + 273.15
         ppc_MPa = ppc_psia / 145.03773800721814
-    return ppc_MPa, tpc_K
+    return ppc_MPa
 
 
 def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
@@ -468,6 +586,12 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     correlation for z-factor
     ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
     Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+
+    return z-factor
+    p_MPaa,                      pressure, MPaa
+    t_K,                         temperature, K
+    ppc_MPa                      pseudocritical pressure, MPa
+    tpc_K                        pseudocritical temperature, K
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
@@ -496,15 +620,640 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     return z_current
 
 
+def unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, gamma_gas):
+    """
+    Lee correlation for gas viscosity
+    ref 1 Lee, A.L., Gonzalez, M.H., and Eakin, B.E. “The Viscosity of Natural Gases.” Journal
+    of Petroleum Technology. Vol. 18 (August 1966) 997–1,000.
+
+    return gas viscosity,cP
+    t_K,                         temperature, K
+    p_MPaa,                      pressure, MPaa
+    z                            z-factor
+    gamma_gas                    specific gas density (by air)
+    """
+    t_R = 1.8 * t_K
+    m = 28.966 * gamma_gas  # Molar mass
+    a = ((9.379 + 0.01607 * m) * t_R ** 1.5)/(209.2 + 19.26 * m + t_R)
+    b = 3.448 + 986.4/t_R + 0.01009 * m
+    c = 2.447 - 0.2224 * b
+    ro_gas = p_MPaa * m/(z * t_K * 8.31)
+    gasviscosity_cP = 10**(-4) * a * np.exp(b * ro_gas**c)
+    return gasviscosity_cP
+
+
+def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
+    """
+    Equation for gas FVF
+
+    return formation volume factor for gas bg, m3/m3
+    t_K,                            temperature, K
+    p_MPaa,                         pressure, MPaa
+    z,                              z-factor
+    """
+    bg = 101.33 * 10**(-3) * t_K * z/ (1 * 293.15 * p_MPaa)
+    return bg
+
+
+# PVT свойства для воды
+
+def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
+    """
+    Modified Spivey et al. correlation for brine(water) density (2009)
+
+    ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+    Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+    Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+    5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+    52–61.
+    ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+
+    корреляция позволяет найти плотность соленой воды с растворенным в ней метаном
+
+    return density, kg/m3
+    t_K,                            temperature, K
+    p_MPaa,                         pressure, MPaa
+    s_ppm,                          salinity, ppm
+    par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
+    """
+    t_C = t_K - 273.15
+    s = s_ppm / 1000000
+    m = 1000 * s / (58.4428 * (1 - s))
+    # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
+    ro_w70 = (-0.127213 * (t_C/100)**2 + 0.645486 * (t_C/100) + 1.03265)/(-0.070291 * (t_C/100)**2 +
+                                                                          0.639589 * (t_C/100) + 1)
+    # Температурные коэффициенты сжимаемости чистой воды
+    ew = (4.221 * (t_C / 100)**2 - 3.478 * (t_C/100) + 6.221)/(0.5182 * (t_C/100)**2 - 0.4405 * (t_C/100) + 1)
+    fw = (-11.403 * (t_C / 100) ** 2 + 29.932 * (t_C / 100) + 27.952) / (0.20684 * (t_C / 100) ** 2 +
+                                                                         0.3768 * (t_C / 100) + 1)
+    iw70 = np.log(abs(ew + fw))/ew
+    iw = np.log(abs(ew*(p_MPaa/70) + fw))/ew
+    # Плотность чистой воды при T, P
+    ro_w = ro_w70 * np.exp(iw - iw70)
+    # Температурные коэффициенты плотности раствора
+    d_m1 = -1.1149 * 10 ** (-4) * (t_C/100)**2 + 1.7105 * 10 ** (-4) * (t_C/100) - 4.3766 * 10 ** (-4)
+    d_m2 = (-8.878 * 10 ** (-4) * (t_C/100)**2 - 1.388 * 10 ** (-4) - 2.96318 * 10 ** (-3))/(0.51103 * (t_C / 100) + 1)
+    d_m3 = (2.1466 * 10 ** (-3) * (t_C / 100) ** 2 + 1.2427 * 10 ** (-2) * (t_C / 100) + 4.2648 * 10 ** (-2)) / \
+           (-8.1009 * 10 ** (-2) * (t_C / 100) ** 2 + 0.525417 * (t_C / 100) + 1)
+    d_m4 = 2.356 * 10 ** (-4) * (t_C/100)**2 - 3.636 * 10 ** (-4) * (t_C/100) - 2.278 * 10 ** (-4)
+    # Плотность раствора воды с хлоридом натрия при давлении 70 MPa и температуре
+    ro_b70 = ro_w70 + d_m1 * m ** 2 + d_m2 * m ** 1.5 + d_m3 * m + d_m4 * m ** 0.5
+    # Температурные коэффициенты сжимаемости раствора
+    eb = ew + 0.1249
+    f_m1 = (-0.617 * (t_C / 100) ** 2 - 0.747 * (t_C / 100) - 0.4339) / (10.26 * (t_C / 100) + 1)
+    f_m2 = (9.917 * (t_C / 100) + 5.1128) / (3.892 * (t_C / 100) + 1)
+    f_m3 = 0.0365 * (t_C / 100) ** 2 - 0.0369 * (t_C / 100)
+    fb = fw + f_m1 * m ** 1.5 + f_m2 * m + f_m3 * m ** 0.5
+    ib70 = np.log(abs(eb + fb))/eb
+    ib = np.log(abs(eb * p_MPaa / 70 + fb)) / eb
+    # Плотность раствора при T, P
+    ro_b = ro_b70 * np.exp(ib - ib70)
+    if s == 0:
+        ro = ro_w
+    elif par == 0:
+        ro = ro_b
+    elif par == 1:
+        # Найдем растворимость метана в растворе
+        # Сперва определим давление насыщенных паров для чистой воды
+        eps = 1 - t_K/647.096
+        p_sigma = 22.064 * np.exp(647.096/t_K * (-7.85951783 * eps + 1.84408259 * eps ** 1.5 - 11.7866497 *
+                                                 eps ** 3 + 22.6807411 * eps ** 3.5 - 15.9619719 * eps ** 4 +
+                                                 1.80122502 * eps ** 7.5))
+        # Определим коэффициенты растворимости метана
+        a = -0.004462 * (t_C / 100) - 0.06763
+        b = -0.03602 * (t_C / 100) ** 2 + 0.18917 * (t_C / 100) + 0.97242
+        c = (0.6855 * (t_C / 100) ** 2 - 3.1992 * (t_C / 100) - 3.7968) / (0.07711 * (t_C / 100) ** 2 + 0.2229 *
+                                                                           (t_C / 100) + 1)
+        # Растворимость метана в чистой воде
+        m_ch4_w = np.exp(a * (np.log(p_MPaa - p_sigma))**2 + b * np.log(p_MPaa - p_sigma) + c)
+        # Далее найдем коэффициенты взаимодействия
+        lyambda = -0.80898 + 1.0827 * 10 ** (-3) * t_C + 183.85 / t_C + 3.924 * 10 ** (-4) * p_MPaa - 1.97 *\
+            10 ** (-6) * p_MPaa ** 2
+        dzeta = -3.89 * 10 ** (-3)
+        # Растворимость метана в растворе
+        # нужно отметить, что в обозначениях было сложно разобраться, для понимания этой формулы лучше читать статью
+        m_ch4_b = m_ch4_w * np.exp(-2 * lyambda * m - dzeta*m**2)
+        # Производные необходимые для расчета формулы
+        derivative1 = 7.6985890 * 10 ** (-2) - 5.0253331 * 10 ** (-5) * t_K - 30.092013 / t_K +\
+            4.8468502 * 10 ** 3 / t_K ** 2
+        derivative2 = 3.924 * 10 ** (-4) - 2 * 1.97 * 10 ** (-6) * p_MPaa
+        # Парциальный объем метана в растворе
+        v_ch4_b = 8.314467 * t_K * (derivative1 + 2 * m * derivative2)
+        # Удельный объем раствора без метана
+        v_b0 = 1 / ro_b
+        # Плотность раствора с растворенным в нем метаном
+        ro_b_ch4 = (1000 + m * 58.4428 + m_ch4_b * 16.043)/((1000 + m * 58.4428) * v_b0 + m_ch4_b * v_ch4_b)
+        ro = ro_b_ch4
+    else:
+        ro = 0
+    ro = ro * 1000
+    return ro
+
+
+def unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z=1.0, par=1):
+    """
+    Modified Spivey et al. correlation for brine(water) compressibility (2009)
+
+    ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+    Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+    Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+    5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+    52–61.
+    ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+
+    корреляция позволяет найти сжимаемость соленой воды с частично или полностью растворенным в ней метаном
+
+    return density, kg/m3
+    t_K,                            temperature, K
+    p_MPaa,                         pressure, MPaa
+    s_ppm,                          salinity, ppm
+    z=1,                            z-factor
+    par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
+                                    2 - brine containing partially dissolved methane
+    """
+    t_C = t_K - 273.15
+    s = s_ppm / 1000000
+    m = 1000 * s / (58.4428 * (1 - s))
+    # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
+    ro_w70 = (-0.127213 * (t_C / 100) ** 2 + 0.645486 * (t_C / 100) + 1.03265) / (-0.070291 * (t_C / 100) ** 2 +
+                                                                                  0.639589 * (t_C / 100) + 1)
+    # Температурные коэффициенты сжимаемости чистой воды
+    ew = (4.221 * (t_C / 100)**2 - 3.478 * (t_C/100) + 6.221)/(0.5182 * (t_C/100)**2 - 0.4405 * (t_C/100) + 1)
+    fw = (-11.403 * (t_C / 100) ** 2 + 29.932 * (t_C / 100) + 27.952) / (0.20684 * (t_C / 100) ** 2 +
+                                                                         0.3768 * (t_C / 100) + 1)
+    # Сжимаемость чистой воды при T, P
+    c_w = (1/70) * 1 / (ew * (p_MPaa/70) + fw)
+    # Температурные коэффициенты плотности раствора
+    d_m1 = -1.1149 * 10 ** (-4) * (t_C/100)**2 + 1.7105 * 10 ** (-4) * (t_C/100) - 4.3766 * 10 ** (-4)
+    d_m2 = (-8.878 * 10 ** (-4) * (t_C/100)**2 - 1.388 * 10 ** (-4) - 2.96318 * 10 ** (-3))/(0.51103 * (t_C / 100) + 1)
+    d_m3 = (2.1466 * 10 ** (-3) * (t_C / 100) ** 2 + 1.2427 * 10 ** (-2) * (t_C / 100) + 4.2648 * 10 ** (-2)) / \
+           (-8.1009 * 10 ** (-2) * (t_C / 100) ** 2 + 0.525417 * (t_C / 100) + 1)
+    d_m4 = 2.356 * 10 ** (-4) * (t_C/100)**2 - 3.636 * 10 ** (-4) * (t_C/100) - 2.278 * 10 ** (-4)
+    # Плотность раствора воды с хлоридом натрия при давлении 70 MPa и температуре
+    ro_b70 = ro_w70 + d_m1 * m ** 2 + d_m2 * m ** 1.5 + d_m3 * m + d_m4 * m ** 0.5
+    # Температурные коэффициенты сжимаемости раствора
+    eb = ew + 0.1249
+    f_m1 = (-0.617 * (t_C / 100) ** 2 - 0.747 * (t_C / 100) - 0.4339) / (10.26 * (t_C / 100) + 1)
+    f_m2 = (9.917 * (t_C / 100) + 5.1128) / (3.892 * (t_C / 100) + 1)
+    f_m3 = 0.0365 * (t_C / 100) ** 2 - 0.0369 * (t_C / 100)
+    fb = fw + f_m1 * m ** 1.5 + f_m2 * m + f_m3 * m ** 0.5
+    ib70 = np.log(abs(eb + fb)) / eb
+    ib = np.log(abs(eb * p_MPaa / 70 + fb)) / eb
+    # Плотность раствора при T, P
+    ro_b = ro_b70 * np.exp(ib - ib70)
+    # Сжимаемость соленого раствора при T, P
+    c_b = (1/70) * 1 / (eb * (p_MPaa/70) + fb)
+    # Найдем растворимость метана в растворе
+    # Сперва определим давление насыщенных паров для чистой воды
+    eps = 1 - t_K/647.096
+    p_sigma = 22.064 * np.exp(647.096/t_K * (-7.85951783 * eps + 1.84408259 * eps ** 1.5 - 11.7866497 * eps ** 3 +
+                                             22.6807411 * eps ** 3.5 - 15.9619719 * eps ** 4 + 1.80122502 * eps ** 7.5))
+    # Определим коэффициенты растворимости метана
+    a = -0.004462 * (t_C / 100) - 0.06763
+    b = -0.03602 * (t_C / 100) ** 2 + 0.18917 * (t_C / 100) + 0.97242
+    c = (0.6855 * (t_C / 100) ** 2 - 3.1992 * (t_C / 100) - 3.7968) / (0.07711 * (t_C / 100) ** 2 + 0.2229 * (t_C / 100)
+                                                                       + 1)
+    # Растворимость метана в чистой воде
+    m_ch4_w = np.exp(a * (np.log(p_MPaa - p_sigma))**2 + b * np.log(p_MPaa - p_sigma) + c)
+    # Далее найдем коэффициенты взаимодействия
+    lyambda = -0.80898 + 1.0827 * 10 ** (-3) * t_C + 183.85 / t_C + 3.924 * 10 ** (-4) * p_MPaa - 1.97 * \
+        10 ** (-6) * p_MPaa ** 2
+    dzeta = -3.89 * 10 ** (-3)
+    # Растворимость метана в растворе
+    # нужно отметить, что в обозначениях было сложно разобраться, для понимания этой формулы лучше читать статью
+    m_ch4_b = m_ch4_w * np.exp(-2 * lyambda * m - dzeta*m**2)
+    # Производные необходимые для расчета формулы
+    derivative1 = 7.6985890 * 10 ** (-2) - 5.0253331 * 10 ** (-5) * t_K - 30.092013 / t_K +\
+        4.8468502 * 10 ** 3 / t_K ** 2
+    derivative2 = 3.924 * 10 ** (-4) - 2 * 1.97 * 10 ** (-6) * p_MPaa
+    # Парциальный объем метана в растворе
+    v_ch4_b = 8.314467 * t_K * (derivative1 + 2 * m * derivative2)
+    # Удельный объем раствора без метана
+    v_b0 = 1 / ro_b
+    # Необходимые вторые производные
+    dderivative1 = - v_b0 * c_b
+    dderivative2 = 2 * (-1.97 * 10 ** (-6))
+    # Производная парциального объема метана в растворе
+    derivative_v_ch4_b = 8.314467 * t_K * (2 * m * dderivative2)
+    # Сжимаемость раствора в котором метан растворен полностью (однофазная система)
+    c_b_ch4_u = -((1000 + m * 58.4428) * dderivative1 + m_ch4_b * derivative_v_ch4_b) / ((1000 + m * 58.4428) * v_b0
+                                                                                        + m_ch4_b * v_ch4_b)
+    # Найдем сжимаемость раствора в случае двуфазной системы
+    # Необходимая производная от растворимости метана по давлению
+    derivative_m_ch4_b = m_ch4_w * ((2 * a * np.log(p_MPaa - p_sigma) + b)/(p_MPaa - p_sigma) - 2 * m * derivative2)
+    # Молярный объем метана в газовой фазе
+    vm_ch4_g = z * 8.314467 * t_K / p_MPaa
+    # Cжимаемость раствора в случае двуфазной системы
+    c_b_ch4_s = -((1000 + m * 58.4428) * dderivative1 + m_ch4_b * derivative_v_ch4_b + derivative_m_ch4_b *
+                 (v_ch4_b - vm_ch4_g)) / ((1000 + m * 58.4428) * v_b0 + m_ch4_b * v_ch4_b)
+    if s == 0:
+        c_1MPa = c_w
+    elif par == 0:
+        c_1MPa = c_b
+    elif par == 1:
+        c_1MPa = c_b_ch4_u
+    elif par == 2:
+        c_1MPa = c_b_ch4_s
+    else:
+        c_1MPa = 0
+    return c_1MPa
+
+
+def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
+    """
+    Modified Spivey et al. correlation for brine(water) formation volume factor (2009)
+
+    ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+    Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+    Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+    5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+    52–61.
+    ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+
+    корреляция позволяет найти объемный коэффициент для соленой воды с учетом растворенного метана
+
+    return density, kg/m3
+    t_K,                            temperature, K
+    p_MPaa,                         pressure, MPaa
+    s_ppm,                          salinity, ppm
+    """
+    t_C = t_K - 273.15
+    s = s_ppm / 1000000
+    m = 1000 * s / (58.4428 * (1 - s))
+    # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
+    ro_w70 = (-0.127213 * (t_C / 100) ** 2 + 0.645486 * (t_C / 100) + 1.03265) / (-0.070291 * (t_C / 100) ** 2 +
+                                                                                  0.639589 * (t_C / 100) + 1)
+    ro_w70_sc = (-0.127213 * (20 / 100) ** 2 + 0.645486 * (20 / 100) + 1.03265) / (-0.070291 * (20 / 100) ** 2 +
+                                                                                   0.639589 * (20 / 100) + 1)
+    # Температурные коэффициенты сжимаемости чистой воды
+    ew = (4.221 * (t_C / 100) ** 2 - 3.478 * (t_C / 100) + 6.221) / (
+                0.5182 * (t_C / 100) ** 2 - 0.4405 * (t_C / 100) + 1)
+    fw = (-11.403 * (t_C / 100) ** 2 + 29.932 * (t_C / 100) + 27.952) / (0.20684 * (t_C / 100) ** 2 +
+                                                                         0.3768 * (t_C / 100) + 1)
+    ew_sc = (4.221 * (20 / 100) ** 2 - 3.478 * (20 / 100) + 6.221) / (
+                0.5182 * (20 / 100) ** 2 - 0.4405 * (20 / 100) + 1)
+    fw_sc = (-11.403 * (20 / 100) ** 2 + 29.932 * (20 / 100) + 27.952) / (0.20684 * (20 / 100) ** 2 +
+                                                                          0.3768 * (20 / 100) + 1)
+    # Температурные коэффициенты плотности раствора
+    d_m1 = -1.1149 * 10 ** (-4) * (t_C / 100) ** 2 + 1.7105 * 10 ** (-4) * (t_C / 100) - 4.3766 * 10 ** (-4)
+    d_m2 = (-8.878 * 10 ** (-4) * (t_C / 100) ** 2 - 1.388 * 10 ** (-4) - 2.96318 * 10 ** (-3)) / (
+                0.51103 * (t_C / 100) + 1)
+    d_m3 = (2.1466 * 10 ** (-3) * (t_C / 100) ** 2 + 1.2427 * 10 ** (-2) * (t_C / 100) + 4.2648 * 10 ** (-2)) / \
+           (-8.1009 * 10 ** (-2) * (t_C / 100) ** 2 + 0.525417 * (t_C / 100) + 1)
+    d_m4 = 2.356 * 10 ** (-4) * (t_C / 100) ** 2 - 3.636 * 10 ** (-4) * (t_C / 100) - 2.278 * 10 ** (-4)
+    d_m1_sc = -1.1149 * 10 ** (-4) * (20 / 100) ** 2 + 1.7105 * 10 ** (-4) * (20 / 100) - 4.3766 * 10 ** (-4)
+    d_m2_sc = (-8.878 * 10 ** (-4) * (20 / 100) ** 2 - 1.388 * 10 ** (-4) - 2.96318 * 10 ** (-3)) / (
+            0.51103 * (20 / 100) + 1)
+    d_m3_sc = (2.1466 * 10 ** (-3) * (20 / 100) ** 2 + 1.2427 * 10 ** (-2) * (20 / 100) + 4.2648 * 10 ** (-2)) / \
+        (-8.1009 * 10 ** (-2) * (20 / 100) ** 2 + 0.525417 * (20 / 100) + 1)
+    d_m4_sc = 2.356 * 10 ** (-4) * (20 / 100) ** 2 - 3.636 * 10 ** (-4) * (20 / 100) - 2.278 * 10 ** (-4)
+    # Плотность раствора воды с хлоридом натрия при давлении 70 MPa и температуре
+    ro_b70 = ro_w70 + d_m1 * m ** 2 + d_m2 * m ** 1.5 + d_m3 * m + d_m4 * m ** 0.5
+    ro_b70_sc = ro_w70_sc + d_m1_sc * m ** 2 + d_m2_sc * m ** 1.5 + d_m3_sc * m + d_m4_sc * m ** 0.5
+    # Температурные коэффициенты сжимаемости раствора
+    eb = ew + 0.1249
+    eb_sc = ew_sc + 0.1249
+    f_m1 = (-0.617 * (t_C / 100) ** 2 - 0.747 * (t_C / 100) - 0.4339) / (10.26 * (t_C / 100) + 1)
+    f_m2 = (9.917 * (t_C / 100) + 5.1128) / (3.892 * (t_C / 100) + 1)
+    f_m3 = 0.0365 * (t_C / 100) ** 2 - 0.0369 * (t_C / 100)
+    f_m1_sc = (-0.617 * (20 / 100) ** 2 - 0.747 * (20 / 100) - 0.4339) / (10.26 * (20 / 100) + 1)
+    f_m2_sc = (9.917 * (20 / 100) + 5.1128) / (3.892 * 20 / 100 + 1)
+    f_m3_sc = 0.0365 * (20 / 100) ** 2 - 0.0369 * (20 / 100)
+    fb = fw + f_m1 * m ** 1.5 + f_m2 * m + f_m3 * m ** 0.5
+    fb_sc = fw_sc + f_m1_sc * m ** 1.5 + f_m2_sc * m + f_m3_sc * m ** 0.5
+    ib70 = np.log(abs(eb + fb)) / eb
+    ib70_sc = np.log(abs(eb_sc + fb_sc)) / eb_sc
+    ib = np.log(abs(eb * p_MPaa / 70 + fb)) / eb
+    ib_sc = np.log(abs(eb_sc * p_MPaa / 70 + fb_sc)) / eb_sc
+    # Плотность раствора при T, P
+    ro_b = ro_b70 * np.exp(ib - ib70)
+    ro_b_sc = ro_b70_sc * np.exp(ib_sc - ib70_sc)
+    # Найдем растворимость метана в растворе
+    # Сперва определим давление насыщенных паров для чистой воды
+    eps = 1 - t_K/647.096
+    p_sigma = 22.064 * np.exp(647.096/t_K * (-7.85951783 * eps + 1.84408259 * eps ** 1.5 - 11.7866497 * eps ** 3 +
+                                             22.6807411 * eps ** 3.5 - 15.9619719 * eps ** 4 + 1.80122502 * eps ** 7.5))
+    # Определим коэффициенты растворимости метана
+    a = -0.004462 * (t_C / 100) - 0.06763
+    b = -0.03602 * (t_C / 100) ** 2 + 0.18917 * (t_C / 100) + 0.97242
+    c = (0.6855 * (t_C / 100) ** 2 - 3.1992 * (t_C / 100) - 3.7968) / (0.07711 * (t_C / 100) ** 2 + 0.2229 * (t_C / 100)
+                                                                       + 1)
+    # Растворимость метана в чистой воде
+    m_ch4_w = np.exp(a * (np.log(p_MPaa - p_sigma))**2 + b * np.log(p_MPaa - p_sigma) + c)
+    # Далее найдем коэффициенты взаимодействия
+    lyambda = -0.80898 + 1.0827 * 10 ** (-3) * t_C + 183.85 / t_C + 3.924 * 10 ** (-4) * p_MPaa - 1.97 * 10 ** (-6) *\
+        p_MPaa ** 2
+    dzeta = -3.89 * 10 ** (-3)
+    # Растворимость метана в растворе
+    # нужно отметить, что в обозначениях было сложно разобраться, для понимания этой формулы лучше читать статью
+    m_ch4_b = m_ch4_w * np.exp(-2 * lyambda * m - dzeta*m**2)
+    # Производные необходимые для расчета формулы
+    derivative1 = 7.6985890 * 10 ** (-2) - 5.0253331 * 10 ** (-5) * t_K - 30.092013 / t_K + 4.8468502 * 10 ** 3 /\
+        t_K ** 2
+    derivative2 = 3.924 * 10 ** (-4) - 2 * 1.97 * 10 ** (-6) * p_MPaa
+    # Парциальный объем метана в растворе
+    v_ch4_b = 8.314467 * t_K * (derivative1 + 2 * m * derivative2)
+    # Удельный объем раствора без метана
+    v_b0 = 1 / ro_b
+    v_b0_sc = 1 / ro_b_sc
+    bw = ((1000 + m * 58.4428) * v_b0 + m_ch4_b * v_ch4_b)/((1000 + m * 58.4428) * v_b0_sc)
+    return bw
+
+
+"""
+def unf_gwr_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
+
+    
+    Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)
+
+    ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+    Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+    Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+    5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+    52–61.
+    ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+
+    корреляция позволяет найти газосодержание метана в соленой воде
+
+    return density, kg/m3
+    t_K,                            temperature, K
+    p_MPaa,                         pressure, MPaa
+    s_ppm,                          salinity, ppm
+    
+    
+    t_C = t_K - 273.15
+    s = s_ppm / 1000000
+    m = 1000 * s / (58.4428 * (1 - s))
+    ro_w70_sc = (-0.127213 * (20 / 100) ** 2 + 0.645486 * (20 / 100) + 1.03265) / (-0.070291 * (20 / 100) ** 2 +
+                                                                                   0.639589 * (20 / 100) + 1)
+    ew_sc = (4.221 * (20 / 100) ** 2 - 3.478 * (20 / 100) + 6.221) / (
+                0.5182 * (20 / 100) ** 2 - 0.4405 * (20 / 100) + 1)
+    fw_sc = (-11.403 * (20 / 100) ** 2 + 29.932 * (20 / 100) + 27.952) / (0.20684 * (20 / 100) ** 2 +
+                                                                          0.3768 * (20 / 100) + 1)
+                                                                          
+    тут надо разобраться
+    """
+
+
+def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
+    """
+    Mao-Duan correlation for brine(water) viscosity (2009)
+
+    ref 1 Mao, S., and Duan, Z. “The Viscosity of Aqueous Alkali-Chloride Solutions up to
+    623 K, 1,000 bar, and High Ionic Strength.” International Journal of Thermophysics.
+    Vol. 30 (2009) 1,510–1,523.
+    ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+
+    корреляция позволяет найти вязкость соленой воды
+
+    return density, kg/m3
+    t_K,                            temperature, K
+    p_MPaa,                         pressure, MPaa
+    s_ppm,                          salinity, ppm
+    """
+    t_C = t_K - 273.15
+    s = s_ppm / 1000000
+    m = 1000 * s / (58.4428 * (1 - s))
+    # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
+    ro_w70 = (-0.127213 * (t_C/100)**2 + 0.645486 * (t_C/100) + 1.03265)/(-0.070291 * (t_C/100)**2 +
+                                                                          0.639589 * (t_C/100) + 1)
+    # Температурные коэффициенты сжимаемости чистой воды
+    ew = (4.221 * (t_C / 100)**2 - 3.478 * (t_C/100) + 6.221)/(0.5182 * (t_C/100)**2 - 0.4405 * (t_C/100) + 1)
+    fw = (-11.403 * (t_C / 100) ** 2 + 29.932 * (t_C / 100) + 27.952) / (0.20684 * (t_C / 100) ** 2 +
+                                                                         0.3768 * (t_C / 100) + 1)
+    iw70 = np.log(abs(ew + fw))/ew
+    iw = np.log(abs(ew*(p_MPaa/70) + fw))/ew
+    # Плотность чистой воды при T, P
+    ro_w = ro_w70 * np.exp(iw - iw70)
+    # Вязкость чистой воды
+    viscosity = np.exp(0.28853170 * 10 ** 7 * t_K ** (-2) - 0.11072577 * 10 ** 5 * t_K ** (-1) - 0.90834095 * 10 +
+                       0.30925651 * 10 ** (-1) * t_K - 0.27407100 * 10 ** (-4) * t_K ** 2 + ro_w *
+                       (-0.19298951 * 10 ** 7 * t_K ** (-2) + 0.56216046 * 10 ** 4 * t_K ** (-1) + 0.13827250 *
+                        10 ** 2 - 0.47609523 * 10 ** (-1) * t_K + 0.35545041 * 10 ** (-4) * t_K ** 2))
+    # Коэффициенты, зависящие от температуры
+    a = -0.213119213 + 0.13651589 * 10 ** (-2) * t_K - 0.12191756 * 10 ** (-5) * t_K ** 2
+    b = -0.69161945 * 10 ** (-1) - 0.27292263 * 10 ** (-3) * t_K + 0.20852448 * 10 ** (-6) * t_K ** 2
+    c = -0.25988855 * 10 ** (-2) + 0.77989227 * 10 ** (-5) * t_K
+    # Относительная вязкость
+    viscosity_rel = np.exp(a * m + b * m ** 2 + c * m ** 3)
+    # Вязкость соленой воды
+    viscosity_cP = 1000 * viscosity * viscosity_rel
+    return viscosity_cP
+
+
+# Проверки функций на работоспособность
+
+
 class TestPVT(unittest.TestCase):
     def test_unf_pb_Standing_MPaa(self):
         rsb_m3m3 = 100
         gamma_oil = 0.86
         gamma_gas = 0.6
         t_K = 350
-        self.assertAlmostEqual(unf_pb_Standing_MPaa(rsb_m3m3,gamma_oil,gamma_gas,t_K),20.170210695316566, delta=0.0001)
+        self.assertAlmostEqual(unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil, gamma_gas, t_K), 20.170210695316566,
+                               delta=0.0001)
+
+    def test_unf_pb_Valko_MPaa(self):
+        rsb_m3m3 = 100
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        t_K = 350
+        self.assertAlmostEqual(unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil, gamma_gas, t_K), 22.694051278736964,
+                               delta=0.0001)
+
+    def test_unf_rs_Standing_m3m3(self):
+        p_MPaa = 10
+        pb_MPaa = 15
+        rsb = 200
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        t_K = 350
+        self.assertAlmostEqual(unf_rs_Standing_m3m3(p_MPaa, pb_MPaa, rsb, gamma_oil, gamma_gas, t_K),
+                               122.74847910146916, delta=0.0001)
+
+    def test_unf_rs_Velarde_m3m3(self):
+        p_MPaa = 10
+        pb_MPaa = 15
+        rsb = 250
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        t_K = 350
+        self.assertAlmostEqual(unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa, rsb, gamma_oil, gamma_gas, t_K),
+                               170.25302712587356, delta=0.0001)
+
+    def test_unf_rsb_Mccain_m3m3(self):
+        rsp_m3m3 = 150
+        gamma_oil = 0.86
+        psp_MPaa = 5
+        tsp_K = 320
+        self.assertAlmostEqual(unf_rsb_Mccain_m3m3(rsp_m3m3, gamma_oil, psp_MPaa, tsp_K),
+                               161.03286985548442, delta=0.0001)
+
+    def test_unf_gamma_gas_Mccain(self):
+        rsp_m3m3 = 30
+        rst_m3m3 = 20
+        gamma_gassp = 0.65
+        gamma_oil = 0.86
+        psp_MPaa = 5
+        tsp_K = 350
+        self.assertAlmostEqual(unf_gamma_gas_Mccain(rsp_m3m3, rst_m3m3, gamma_gassp, gamma_oil, psp_MPaa, tsp_K),
+                               0.7932830162938984, delta=0.0001)
+
+    def test_unf_fvf_Mccain_m3m3_below(self):
+        density_oilsto_kgm3 = 800
+        rs_m3m3 = 200
+        density_oil_kgm3 = 820
+        gamma_gas = 0.6
+        self.assertAlmostEqual(unf_fvf_Mccain_m3m3_below(density_oilsto_kgm3, rs_m3m3, density_oil_kgm3, gamma_gas),
+                               1.1542114715227887, delta=0.0001)
+
+    def test_unf_fvf_VB_m3m3_above(self):
+        bob = 1.3
+        cofb_1MPa = 3 * 10**(-3)
+        pb_MPaa = 12
+        p_MPaa = 15
+        self.assertAlmostEqual(unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa), 1.288352492404749, delta=0.0001)
+
+    def test_unf_compressibility_oil_VB_1Mpa(self):
+        rs_m3m3 = 200
+        t_K = 350
+        gamma_oil = 0.86
+        p_MPaa = 15
+        gamma_gas = 0.6
+        self.assertAlmostEqual(unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas),
+                               0.004546552811369566, delta=0.0001)
+
+    def test_unf_fvf_Standing_m3m3_saturated(self):
+        rs_m3m3 = 200
+        gamma_gas = 0.6
+        gamma_oil = 0.86
+        t_K = 350
+        self.assertAlmostEqual(unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K),
+                               1.5527836202040448, delta=0.0001)
+
+    def test_unf_density_oil_Mccain(self):
+        p_MPaa = 10
+        pb_MPaa = 12
+        co_1MPa = 3 * 10**(-3)
+        rs_m3m3 = 250
+        gamma_gas = 0.6
+        t_K = 350
+        gamma_oil = 0.86
+        gamma_gassp = 0
+        self.assertAlmostEqual(unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, gamma_oil,
+                               gamma_gassp), 630.0536681794456, delta=0.0001)
+
+    def test_unf_deadoilviscosity_Beggs_cP(self):
+        gamma_oil = 0.86
+        t_K = 350
+        self.assertAlmostEqual(unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K), 2.86938394460968, delta=0.0001)
+
+    def test_unf_saturatedoilviscosity_Beggs_cP(self):
+        deadoilviscosity_cP = 2.87
+        rs_m3m3 = 150
+        self.assertAlmostEqual(unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3), 0.5497153091178292,
+                               delta=0.0001)
+
+    def test_unf_undersaturatedoilviscosity_VB_cP(self):
+        p_MPaa = 10
+        pb_MPaa = 12
+        bubblepointviscosity_cP = 1
+        self.assertAlmostEqual(unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_cP),
+                               0.9767303348551418, delta=0.0001)
+
+    def test_unf_undersaturatedoilviscosity_Petrovsky_cP(self):
+        p_MPaa = 10
+        pb_MPaa = 12
+        bubblepointviscosity_cP = 1
+        self.assertAlmostEqual(unf_undersaturatedoilviscosity_Petrovsky_cP(p_MPaa, pb_MPaa, bubblepointviscosity_cP),
+                               0.9622774530985722, delta=0.0001)
+
+    def test_unf_oil_viscosity_Beggs_VB_cP(self):
+        deadoilviscosity_cP = 2.87
+        rs_m3m3 = 150
+        p_MPaa = 10
+        pb_MPaa = 12
+        self.assertAlmostEqual(unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa),
+                               0.5497153091178292, delta=0.0001)
+
+    def test_unf_pseudocritical_temperature_K(self):
+        gamma_gas = 0.6
+        tc_h2s_K = 373
+        tc_co2_K = 304
+        tc_n2_K = 125.9
+        pc_h2s_MPaa = 9.01
+        pc_co2_MPaa = 1
+        pc_n2_MPaa = 7.36
+        y_h2s = 0.01
+        y_co2 = 0.03
+        y_n2 = 0.02
+        self.assertAlmostEqual(unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K, tc_co2_K, tc_n2_K, pc_h2s_MPaa,
+                               pc_co2_MPaa, pc_n2_MPaa, y_h2s, y_co2, y_n2), 239.186917147216, delta=0.0001)
+
+    def test_unf_pseudocritical_pressure_MPa(self):
+        gamma_gas = 0.6
+        tc_h2s_K = 373
+        tc_co2_K = 304
+        tc_n2_K = 125.9
+        pc_h2s_MPaa = 9.01
+        pc_co2_MPaa = 1
+        pc_n2_MPaa = 7.36
+        y_h2s = 0.01
+        y_co2 = 0.03
+        y_n2 = 0.02
+        self.assertAlmostEqual(unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K, tc_co2_K, tc_n2_K, pc_h2s_MPaa,
+                               pc_co2_MPaa, pc_n2_MPaa, y_h2s, y_co2, y_n2), 7.477307083789863, delta=0.0001)
+
+    def test_unf_zfactor_DAK(self):
+        p_MPaa = 10
+        t_K = 350
+        ppc_MPa = 7.477307083789863
+        tpc_K = 239.186917147216
+        self.assertAlmostEqual(unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K), 0.8414026170318333, delta=0.0001)
+
+    def test_unf_gasviscosity_Lee_cP(self):
+        t_K = 350
+        p_MPaa = 10
+        z = 0.84
+        gamma_gas = 0.6
+        self.assertAlmostEqual(unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, gamma_gas), 0.015423237238038448, delta=0.0001)
+
+    def test_unf_gas_fvf_m3m3(self):
+        t_K = 350
+        p_MPaa = 10
+        z = 0.84
+        self.assertAlmostEqual(unf_gas_fvf_m3m3(t_K, p_MPaa, z), 0.010162381033600544, delta=0.0001)
+
+    def test_unf_density_brine_Spivey_kgm3(self):
+        t_K = 350
+        p_MPaa = 20
+        s_ppm = 10000
+        par = 1
+        self.assertAlmostEqual(unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par), 987.685677686006, delta=0.0001)
+
+    def test_unf_compressibility_brine_Spivey_1MPa(self):
+        t_K = 350
+        p_MPaa = 20
+        s_ppm = 10000
+        z = 1
+        par = 0
+        self.assertAlmostEqual(unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z, par), 0.0004241522548512511,
+                               delta=0.0001)
+
+    def test_unf_fvf_brine_Spivey_m3m3(self):
+        t_K = 350
+        p_MPaa = 20
+        s_ppm = 10000
+        self.assertAlmostEqual(unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm), 1.0279011434122953,
+                               delta=0.0001)
+
+    def test_unf_viscosity_brine_MaoDuan_cP(self):
+        t_K = 350
+        p_MPaa = 20
+        s_ppm = 10000
+        self.assertAlmostEqual(unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm), 0.3745199364964906,
+                               delta=0.0001)
+
 
 if __name__ == '__main__':
     unittest.main()
-   
-    
