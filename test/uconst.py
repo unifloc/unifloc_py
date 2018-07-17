@@ -51,9 +51,9 @@ def convert_pressure(val, old_scale, new_scale):
 
     Examples
     --------
-    >>> from scipy.constants import convert_temperature
-    >>> convert_temperature(np.array([-40, 40.0]), 'Celsius', 'Kelvin')
-    array([ 233.15,  313.15])
+    >>> import uconst
+    >>> uconst.convert_pressure(1,'atm','psi')
+    14.69594877551345
 
     """
     # Convert from `old_scale` to Pa
@@ -86,6 +86,22 @@ def convert_pressure(val, old_scale, new_scale):
                                   "are bar, atm, at and, MPa" % new_scale)
 
     return res
+
+
+def convert_length(val, old_scale, new_scale):
+    # TODO надо сделать конвертер для расстояний. Общая функция и набор быстрых функций
+    pass
+
+
+def convert_rate(val, old_scale, new_scale):
+    # TODO надо сделать конвертер для дебитов (объемных расходов). Общая функция и набор быстрых функций
+    pass
+
+
+def convert_GOR(val, old_scale, new_scale, gamma_oil=0.86):
+    # TODO надо сделать конвертер для газового фактора, газосодержания. Общая функция и набор быстрых функций
+    # в том числе надо чтобы поддерживалась конвертация между м3/м3 и м3/т
+    pass
 
 
 # simple unit conversion functions
