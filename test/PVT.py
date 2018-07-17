@@ -12,20 +12,21 @@ UniflocPy
 import unitconverter as un
 
 
-class ComponentGeneral:
+class FluidBlackOil:
     """
-    Абстрактный класс для описания компонентоы углеводородных флюидов
+    Описание смеси нефти, газа и воды по модели нелетучей нефти
+    
+    Описание флюида - скважинной продукции
+    Класс обеспечивает расчет свойств флюида при заданных термобарических условиях
     """
     def __init__(self):
-        self._gamma = 1          # specific gravity of component, dimensionless
+        self.gamma_gas = 0.8           # specific gravity of gas (by air), dimensionless
+        self.gamma_oil = 0.86          # specific gravity of oil 
+        self.gamma_wat = 1             # specific gravity of water 
         self._relative_density_sckgm3 = un.air_density_sckgm3
-        self._rho_kgm3 = 1       # density with dimension
-        self._mu_cp = 1          # dynamic viscosity
-        self._fvf_m3m3 = 1       # component formation volume factor
-        self._co_1atm = 1e-5     # component compressibility
         """ термобарические условия """
-        self._p_bar = un.psc_bar # thermobaric conditions for all parameters
-        self._t_c = un.tsc_c     # can be set up by calc method
+        self.p_bara = un.psc_bar        # thermobaric conditions for all parameters
+        self.t_c = un.tsc_c             # can be set up by calc method
 
     def calc(self, p_bar, t_c):
         """ recalculate all parameters according to some pressure and temperature"""
