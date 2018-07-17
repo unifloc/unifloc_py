@@ -4,15 +4,20 @@
 import scipy.constants as const
 import numpy as np
 
+# constants, which don't have in scipy.constants
+
+
 g = const.g   # gravity
 pi = const.pi
 psc_bar = 1   # pressure standard condition
 tsc_c = 15    # temperature standard condition
-const_at = 98066.5 # теническая атмосфера в Па
-air_density_sckgm3 = 1.225 # definition from https://en.wikipedia.org/wiki/Density_of_air
+const_at = 98066.5  # техническая атмосфера в Па
+air_density_sckgm3 = 1.225  # definition from https://en.wikipedia.org/wiki/Density_of_air
 z_default = 0.9
 gamma_gas_default = 0.8
 rsb_default_m3m3 = 100
+
+# complex unit conversion functions
 
 
 def convert_pressure(val, old_scale, new_scale):
@@ -105,6 +110,7 @@ def convert_GOR(val, old_scale, new_scale, gamma_oil=0.86):
 
 
 # simple unit conversion functions
+# pressure
 def psi2Pa(value):
     """
     converts pressure in psi to Pa
@@ -178,40 +184,226 @@ def Pa2at(value):
 
 
 def bar2psi(value):
+    """
+    converts pressure in bar to psi
+    :param value: pressure value in bar
+    :return: pressure value in psi
+    """
     return value * const.bar / const.psi
 
 
 def psi2bar(value):
+    """
+     converts pressure in psi to bar
+     :param value: pressure value in psi
+     :return: pressure value in bar
+     """
     return value / const.bar * const.psi
 
 
 def bar2atm(value=1):
+    """
+     converts pressure in bar to atm(standard atmosphere)
+     :param value: pressure value in bar
+     :return: pressure value in atm(standard atmosphere)
+     """
     return value * const.bar / const.atm
 
 
 def atm2bar(value=1):
+    """
+     converts pressure in atm(standard atmosphere) to bar
+     :param value: pressure value in atm(standard atmosphere)
+     :return: pressure value in bar
+     """
     return value * const.atm / const.bar
+
+# temperature
 
 
 def c2f(value):
+    """
+     converts temperature in C(degrees Celsius) to F(degrees Fahrenheit)
+     :param value: temperature in C(degrees Celsius)
+     :return: temperature in F(degrees Fahrenheit)
+     """
     return const.convert_temperature(value, 'C', 'F')
 
 
 def f2c(value):
+    """
+     converts temperature in F(degrees Fahrenheit) to C(degrees Celsius)
+     :param value: temperature in F(degrees Fahrenheit)
+     :return: temperature in C(degrees Celsius)
+     """
     return const.convert_temperature(value, 'F', 'K')
 
 
 def c2k(value):
+    """
+     converts temperature in C(degrees Celsius) to K(Kelvins)
+     :param value: temperature in C(degrees Celsius)
+     :return: temperature in K(Kelvins)
+     """
     return const.convert_temperature(value, 'C', 'K')
 
 
+def k2c(value):
+    """
+     converts temperature in K(Kelvins) to C(degrees Celsius)
+     :param value: temperature in K(Kelvins)
+     :return: temperature in C(degrees Celsius)
+     """
+    return const.convert_temperature(value, 'K', 'C')
+
+
+def k2f(value):
+    """
+     converts temperature in F(degrees Fahrenheit) to K(Kelvins)
+     :param value: temperature in F(degrees Fahrenheit)
+     :return: temperature in K(Kelvins)
+     """
+    return const.convert_temperature(value, 'K', 'F')
+
+
+def f2k(value):
+    """
+     converts temperature in F(degrees Fahrenheit) to K(Kelvins)
+     :param value: temperature in F(degrees Fahrenheit)
+     :return: temperature in K(Kelvins)
+     """
+    return const.convert_temperature(value, 'F', 'K')
+
+
+def f2r(value):
+    """
+     converts temperature in F(degrees Fahrenheit) to R(degrees Rankine)
+     :param value: temperature in F(degrees Fahrenheit)
+     :return: temperature in R(degrees Rankine)
+     """
+    return const.convert_temperature(value, 'F', 'R')
+
+
+def r2f(value):
+    """
+     converts temperature in R(degrees Rankine) to F(degrees Fahrenheit)
+     :param value: temperature in R(degrees Rankine)
+     :return: temperature in F(degrees Fahrenheit)
+     """
+    return const.convert_temperature(value, 'R', 'F')
+
+
+def c2r(value):
+    """
+     converts temperature in C(degrees Celsius) to R(degrees Rankine)
+     :param value: temperature in C(degrees Celsius)
+     :return: temperature in R(degrees Rankine)
+     """
+    return const.convert_temperature(value, 'C', 'R')
+
+
+def r2c(value):
+    """
+     converts temperature in R(degrees Rankine) to C(degrees Celsius)
+     :param value: temperature in C(degrees Celsius)
+     :return: temperature in R(degrees Rankine)
+     """
+    return const.convert_temperature(value, 'R', 'C')
+
+
+def k2r(value):
+    """
+     converts temperature in K(Kelvins) to R(degrees Rankine)
+     :param value: temperature in K(Kelvins)
+     :return: temperature in R(degrees Rankine)
+     """
+    return const.convert_temperature(value, 'K', 'R')
+
+
+def r2k(value):
+    """
+     converts temperature in R(degrees Rankine) to K(Kelvins)
+     :param value: temperature in R(degrees Rankine)
+     :return: temperature in K(Kelvins)
+     """
+    return const.convert_temperature(value, 'R', 'K')
+
+# length
+
+
+def m2in(value):
+    """
+    converts length in m(meters) to in(inches)
+    :param value: length in m(meters)
+    :return: length in in(inches)
+    """
+    return value / const.inch
+
+
+def in2m(value):
+    """
+    converts length in in(inches) to m(meters)
+    :param value: length in in(inches)
+    :return: length in m(meters)
+    """
+    return value * const.inch
+
+
+def m2ft(value):
+    """
+    converts length in m(meters) to ft(feet)
+    :param value: length in m(meters)
+    :return: length in ft(feet)
+    """
+    return value / const.foot
+
+
+def ft2m(value):
+    """
+    converts length in ft(feet) to m(meters)
+    :param value: length in ft(feet)
+    :return: length in m(meters)
+    """
+    return value * const.foot
+
+# rate
+
+
 def m3_2_bbl(value=1):
+    """
+     converts rate in m3(cubic metres) to bbl(barrels)
+     :param value: rate in m3(cubic metres)
+     :return: rate in bbl(barrels)
+     """
     return value / const.barrel
 
 
 def bbl2m3(value=1):
+    """
+     converts rate in m3(cubic metres) to bbl(barrels)
+     :param value: rate in m3(cubic metres)
+     :return: rate in bbl(barrels)
+     """
     return value / const.barrel
+
+# GOR
 
 
 def m3m3_2_m3t(value, gamma=1):
+    """
+     converts Gas-Oil Ratio in m3/m3(cubic metres/cubic meter) to m3/t(cubic metres/ton)
+     :param value: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter);
+            gamma=1: oil density(by air)
+     :return: Gas-Oil Ratio in m3/t(cubic metres/ton)
+     """
     return value * gamma
+
+
+def m3t2m3m3(value, gamma=1):
+    """
+     converts Gas-Oil Ratio in m3/t(cubic metres/ton) to m3/m3(cubic metres/cubic meter)
+     :param value: Gas-Oil Ratio in m3/t(cubic metres/ton);
+            gamma=1: oil density(by air)
+     :return: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)
+     """
+    return value / gamma
