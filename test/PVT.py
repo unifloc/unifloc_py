@@ -9,7 +9,7 @@ UniflocPy
 класс для расчета PVT свойств углеводородных флюидов и воды
 
 """
-import unitconverter as un
+import uconst as uc
 
 
 class FluidBlackOil:
@@ -18,216 +18,181 @@ class FluidBlackOil:
     
     Описание флюида - скважинной продукции
     Класс обеспечивает расчет свойств флюида при заданных термобарических условиях
+    по одному набору корреляционных зависимостей
+    классы потомки могут менять набор корреляционных зависимостей для уточнения расчета
     """
-    def __init__(self):
-        self.gamma_gas = 0.8           # specific gravity of gas (by air), dimensionless
-        self.gamma_oil = 0.86          # specific gravity of oil 
-        self.gamma_wat = 1             # specific gravity of water 
-        self._relative_density_sckgm3 = un.air_density_sckgm3
-        """ термобарические условия """
-        self.p_bara = un.psc_bar        # thermobaric conditions for all parameters
-        self.t_c = un.tsc_c             # can be set up by calc method
+    _pb_cal: float
 
-    def calc(self, p_bar, t_c):
-        """ recalculate all parameters according to some pressure and temperature"""
-        self._p_bar = p_bar
-        self._t_c = t_c
-        return 1
+    def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, 
+                 pbcal_bar=-1., tpb_C = 80):
+        """
+        создает флюид с заданными базовыми свойствами
 
-    """ ========= default properties definition ======= """
-    """ component density at specific conditions
-        read only
-    """
+        калибровочные параметры при необходимости надо задавать отдельно
+        :param gamma_oil:
+        :param gamma_gas:
+        :param gamma_wat:
+        :param rsb_m3m3:
+        """
+        self.gamma_gas = gamma_gas              # specific gravity of gas (by air), dimensionless
+        self.gamma_oil = gamma_oil              # specific gravity of oil
+        self.gamma_wat = gamma_wat              # specific gravity of water
+        self.rsb_m3m3 = rsb_m3m3                # solution gas ratio at bubble point
+        # термобарические условия
+        self.p_bar = uc.psc_bar                 # thermobaric conditions for all parameters
+        self.t_c = uc.tsc_c                     # can be set up by calc method
+        # калибровочные параметры
+        self.pbcal_bar = pbcal_bar            # давление насыщения, калибровочный параметр
+        self.tpb_C = tpb_C
+        self.bob_m3m3 = 0.0
+        self.muob_cP = 0.0
+
+        # расчетные параметры доступны только для чтения через свойства
+        self._pb_bar = 0.0
+        self.tpb_C = 0.0
+        self._mu_oil_cP = 0.0
+        self._mu_gas_cP = 0.0
+        self._mu_wat_cP = 0.0
+        self._rho_oil_kgm3 = 0.0
+        self._rho_gas_kgm3 = 0.0
+        self._rho_wat_kgm3 = 0.0
+        self._rs_m3m3 = 0.0
+        self._bo_m3m3 = 0.0
+        self._bg_m3m3 = 0.0
+        self._bw_m3m3 = 0.0
+        self._z = 0.0
+        self._compr_oil_1bar = 0.0
+        self._compr_gas_1bar = 0.0
+        self._compr_wat_1bar = 0.0
+        self._heatcap_oil_ = 0.0
+        self._heatcap_gas_ = 0.0
+        self._heatcap_wat_ = 0.0
+        self._sigma_oil_Nm = 0.0
+        self._sigma_wat_Nm = 0.0
+
+    # ========= default properties definition =======
     @property
-    def rho_kgm3(self):
-        return self._rho_kgm3
-
-    """ component density at standard condition 
-        read only 
-    """
-    @property
-    def rho_sckgm3(self):
-        return self._gamma * self._relative_density_sckgm3
-
-    """ component viscosity at standard condition
-        read only
-    """
-    @property
-    def mu_cp(self):
-        return self._mu_cp
-
-    """ component specific density at standard condition"""
-    @property
-    def gamma(self):
-        return self._gamma
-
-    @gamma.setter
-    def gamma(self, value):
-        self._gamma = value
-
-
-class GasGeneral(ComponentGeneral):
-    """
-    Класс для описания свойств углеводородных газов
-    """
-    def __init__(self):
-        super().__init__()
-        self._pseudo_pressure_mpa = 1
-        self._pseudo_temperature_k = 1
-        self.gamma = un.gamma_gas_default
-        self._z = self._calc_z()               # сверхсжимаемость
-
-    @property
-    def z(self):
-        return self._z
-
-    def _calc_z(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._z = un.z_default                 # default z constant set here
-        return self._z
-
-    def _calc_bg_m3m3(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._fvf_m3m3 = un.psc_bar / p_bar
-        return self._fvf_m3m3
-
-    def _calc_mug_cp(self, p_bar=un.psc_bar, t_c=un.tsc_c):
-        self._mu_cp = 1
-        return self._mu_cp
-
-    @ComponentGeneral.gamma.setter
-    def gamma(self, value):
-        self._gamma = value
-        self._pseudo_pressure_mpa = 4.9 - 0.4 * self._gamma
-        self._pseudo_temperature_k = 95 + 171 * self._gamma
+    def pb_bar(self):
+        """ return bubble point pressure an bar absolute"""
+        return self._pb_bar
 
     @property
-    def pseudo_temperature_k(self):
-        return self._pseudo_temperature_k
+    def mu_oil_cP(self):
+        """ return oil viscosity at working condition"""
+        return self._mu_oil_cP
 
     @property
-    def pseudo_pressure_mpa(self):
-        return self._pseudo_pressure_mpa
-
-
-class OilGeneral(ComponentGeneral):
-    """
-    Класс для описания свойств нефти по модели нелетучей нефти
-    в текущем виде описывает упрощенные зависимости для свойств нефти - прямые линии и константы
-    должен быть переопределен для учета более детальных свойств нефти с использованием корреляций
-    """
-    def __init__(self):
-        super().__init__()              # часть базовых свойств наследуется
-        self._gas = GasGeneral()        # create gas component
-        self.rsb_m3m3 = un.rsb_default_m3m3
-
-        self.pb_calibr_bar = 100        # калибровочное значение давления насыщения
-        self.tb_calibr_c = 50           # температуры для калибровки по давлению насыщения
-        self.bob_calibr_m3m3 = 1.2      # калибровочное значение объемного коэффициента
-        self.muob_calibr_cp = 1         # калибровочное значение вязкости при давлении насыщения
-        self.rhob_calibr_kgm3 = 700     # калибровочное значение плотности при давлении насыщения
-
-        """ расчетные свойства """
-        self._rs_m3m3 = 1
-        self._bo_m3m3 = 1
-        self._mu_cp = 1
+    def mu_gas_cP(self):
+        """ return gas viscosity at working condition"""
+        return self._mu_gas_cP
 
     @property
-    def gas(self):
-        return self._gas
+    def mu_wat_cP(self):
+        """ return water viscosity at working condition"""
+        return self._mu_wat_cP
+
+    @property
+    def rho_oil_kgm3(self):
+        """ return oil density at working condition"""
+        return self._rho_oil_kgm3
+
+    @property
+    def rho_gas_kgm3(self):
+        """ return gas density at working condition"""
+        return self._rho_gas_kgm3
+
+    @property
+    def rho_wat_kgm3(self):
+        """ return water density at working condition"""
+        return self._rho_wat_kgm3
 
     @property
     def rs_m3m3(self):
-        """ газосодержание """
+        """ return gas solution ratio at working condition"""
         return self._rs_m3m3
 
-    def _calc_rho_kgm3(self, p_bar, t_c):
-        """ тут должна быть реализация расчета плотности нефти
-            в упрощенном виде не зависит от температуры
-        """
-        if p_bar < self.pb_calibr_bar:
-            return -self.rhob_calibr_kgm3 / self.pb_calibr_bar * p_bar + 1.8 * self.rhob_calibr_kgm3
-        else:
-            return self.rhob_calibr_kgm3
-
-    def _calc_bo_m3m3(self, p_bar, t_c):
-        """ тут должна быть реализация расчета объемного коэффициента нефти
-        """
-        if p_bar < self.pb_calibr_bar:
-            return self.bob_calibr_m3m3 / self.pb_calibr_bar * p_bar
-        else:
-            return self.bob_calibr_m3m3
-
-    def _calc_mu_cp(self, p_bar, t_c):
-        """ тут должна быть реализация расчета вязкости нефти
-        """
-        if p_bar < self.pb_calibr_bar:
-            return -self.muob_calibr_cp / self.pb_calibr_bar * p_bar + 2 * self.muob_calibr_cp
-        else:
-            return self.muob_calibr_cp
-
-    def _calc_co_1atm(self, p_bar, t_c):
-        """ тут должна быть реализация расчета сжимаемости нефти
-        """
-        return (28.1 * self.rsb_m3m3 + 30.6 * (t_c + 273) - 1180
-                * self._gas.gamma + 1784 / self.gamma - 10910) \
-                / (100000 * p_bar)
-
-    def _calc_rs_m3m3(self, p_bar, t_c):
-        """ тут должна быть реализация расчета газосодержания
-        """
-        if p_bar < self.pb_calibr_bar:
-            return self.rsb_m3m3 / self.pb_calibr_bar * p_bar
-        else:
-            return self.rsb_m3m3
-
-    def calc(self, p_atm, t_c):
-        """ реализация расчета свойств нефти """
-        self._rs_m3m3 = self._calc_rs_m3m3(p_atm, t_c)
-        self._rho_kgm3 = self._calc_rho_kgm3(p_atm, t_c)
-        self._bo_m3m3 = self._calc_bo_m3m3(p_atm, t_c)
-        self._mu_cp = self._calc_mu_cp(p_atm, t_c)
-        self._co_1atm = self._calc_co_1atm(p_atm, t_c)
-
-
-class GasHC(GasGeneral):
-    """
-    класс реализующий расчет свойств газа на основе z фактора по Дранчуку
-    """
-    # TODO надо реализовать расчет свойств газа по аналогии с унифлокVBA
-    pass
-
-class OilStanding(OilGeneral):
-    """
-    класс реализующий расчет свойств нефти с использованием корреляции Стендинга (набор корреляций на основе Стендинга)
-    """
-    # TODO надо реализовать расчет свойств нефти по Стендингу по аналогии с унифлокVBA
-    pass
-
-
-class WaterGeneral(ComponentGeneral):
-    """
-    класс описывающий свойства воды
-    """
-    def __init__(self):
-        super().__init__()
-
-
-class Fluid:
-    """
-    класс описывающий флюид на основе модели нелетучей нефти
-    """
-    def __init__(self):
-        self._oil = OilGeneral()
-        self._water = ComponentGeneral()
-
-        self._qliq_m3day = 10   # liquid rate
-        self._fw = 0            # water cut, fraction
+    @property
+    def bo_m3m3(self):
+        """ return oil formation volume factor at working condition"""
+        return self._bo_m3m3
 
     @property
-    def fw(self):
-        return self._fw
+    def bg_m3m3(self):
+        """ return gas formation volume factor at working condition"""
+        return self._bg_m3m3
 
-    def calc_pvt(self, p_bar, t_c):
-        pass
+    @property
+    def bw_m3m3(self):
+        """ return water formation volume factor at working condition"""
+        return self._bw_m3m3
+
+    @property
+    def z(self):
+        """ return gas z factor (compressibility) at working condition"""
+        return self._z
+
+    @property
+    def compr_oil_1bar(self):
+        """ return oil compressibility at working condition"""
+        return self._compr_oil_1bar
+
+    @property
+    def compr_gas_1bar(self):
+        """ return gas compressibility at working condition"""
+        return self._compr_gas_1bar
+
+    @property
+    def compr_wat_1bar(self):
+        """ return water compressibility at working condition"""
+        return self._compr_wat_1bar
+
+    @property
+    def heatcap_oil_(self):
+        """ return oil heat capacity at working condition"""
+        return self._heatcap_oil_
+
+    @property
+    def heatcap_gas_(self):
+        """ return gas heat capacity at working condition"""
+        return self._heatcap_gas_
+
+    @property
+    def heatcap_wat_(self):
+        """ return water heat capacity at working condition"""
+        return self._heatcap_wat_
+
+    @property
+    def sigma_oil_Nm(self):
+        """ return oil surface tension  at working condition"""
+        return self._sigma_oil_Nm
+
+    @property
+    def sigma_wat_Nm(self):
+        """ return water surface tension at working condition"""
+        return self._sigma_wat_Nm
+
+    @property
+    def rho_gas_sckgm3(self):
+        """ component density at standard condition, read only """
+        return self.gamma_gas * uc.air_density_sckgm3
+
+    def calc(self, p_bar, t_c):
+        """ recalculate all parameters according to some pressure and temperature"""
+        self.p_bar = p_bar
+        self.t_c = t_c
+        return 1
+
+
+class FluidStanding(FluidBlackOil):
+    """
+    класс реализующий расчет свойств нефти с использованием
+    набора корреляций корреляций на основе Стендинга
+    """
+
+    def calc(self, p_bar, t_c):
+        """Расчет свойств нефти"""
+        return super().calc(p_bar, t_c)
+
 
 
 if __name__ == "__main__":
