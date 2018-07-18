@@ -109,6 +109,11 @@ def convert_GOR(val, old_scale, new_scale, gamma_oil=0.86):
     pass
 
 
+def convert_density(val, old_scale, new_scale):
+    # TODO надо сделать конвертер для плотности. Общая функция и набор быстрых функций
+    pass
+
+
 # simple unit conversion functions
 # pressure
 def psi2Pa(value):
@@ -407,3 +412,81 @@ def m3t2m3m3(value, gamma=1):
      :return: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)
      """
     return value / gamma
+
+
+def scfstb2m3m3(value):
+    """
+     converts Gas-Oil Ratio in scf/stb(standard cubic feet/standard barrel) to m3/m3(cubic metres/cubic meter)
+     :param value: Gas-Oil Ratio in scf/stb(standard cubic feet/standard barrel)
+     :return: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)
+     """
+    return value * (const.foot ** 3 / const.bbl)
+
+
+def m3m3_2_scfstb(value):
+    """
+     converts Gas-Oil Ratio in m3/m3(cubic metres/cubic meter) to scf/stb(standard cubic feet/standard barrel)
+     :param value: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)
+     :return: Gas-Oil Ratio in scf/stb(standard cubic feet/standard barrel)
+     """
+    return value / (const.foot ** 3 / const.bbl)
+
+
+# density
+
+
+def api2gamma_oil(value):
+    """
+     converts density in API(American Petroleum Institute gravity) to gamma_oil (oil relative density by water)
+     :param value: density in API(American Petroleum Institute gravity)
+     :return: oil relative density by water
+     """
+    return (value + 131.5) / 141.5
+
+
+def gamma_oil2api(value):
+    """
+     converts density in API(American Petroleum Institute gravity) to gamma_oil (oil relative density by water)
+     :param value: oil relative density by water
+     :return: density in API(American Petroleum Institute gravity)
+     """
+    return 141.5 / value - 131.5
+
+
+def kgm3_2_lbft3(value):
+    """
+     converts density in kg/m3(kilogrammes/cubic meter) to lb/ft3(pounds/cubic feet)
+     :param value: density in kgm3(kilogrammes/cubic meter)
+     :return: density in lb/ft3(pounds/cubic feet)
+     """
+    return value * (const.foot ** 3 / const.lb)
+
+
+def lbft3_2_kgm3(value):
+    """
+     converts density in lb/ft3(pounds/cubic feet) to kgm3(kilogrammes/cubic meter)
+     :param value: density in lb/ft3(pounds/cubic feet)
+     :return: density in kgm3(kilogrammes/cubic meter)
+     """
+    return value / (const.foot ** 3 / const.lb)
+
+
+# compressibility
+
+
+def compr_1pa_2_1psi(value):
+    """
+     converts compressibility in 1/pa to 1/psi
+     :param value: compressibility in 1/pa
+     :return: compressibility in 1/psi
+     """
+    return value * const.psi
+
+
+def compr_1psi_2_1pa(value):
+    """
+     converts compressibility in 1/psi to 1/pa
+     :param value: compressibility in 1/psi
+     :return: compressibility in 1/pa
+     """
+    return value / const.psi

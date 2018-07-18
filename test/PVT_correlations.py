@@ -7,6 +7,7 @@ Created on Sat May  5 13:59:06 2018
 """
 import numpy as np
 import unittest
+import uconst as uc
 
 # PVT свойства для нефти
 
@@ -127,11 +128,11 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
     pb_MPaa=10,     buble point pressure, MPaa
     rsb_m3m3=100,   gas-oil ratio at the bublepoint pressure, m3/m3
     """
-    api = 141.5 / gamma_oil - 131.5  # в будущем когда разберусь с классами и тд нужно сделать через конвертор
-    t_F = 1.8 * (t_K - 273.15) + 32  # в будущем когда разберусь с классами и тд нужно сделать через конвертор
-    pb_psia = 145.03773800721814 * pb_MPaa  # в будущем когда разберусь с классами и тд нужно сделать через конвертор
+    api = uc.gamma_oil2api(gamma_oil)
+    t_F = uc.k2f(t_K)
+    pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
     if pb_psia > 14.7:
-        pr = (p_MPaa * 145.03773800721814 - 14.7) / (pb_psia - 14.7)
+        pr = (uc.Pa2psi(p_MPaa * 10 ** 6) - 14.7) / (pb_psia - 14.7)
     else:
         pr = 0
     if pr <= 0:
@@ -155,7 +156,7 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
         a1 = A0 * gamma_gas ** A1 * api ** A2 * t_F ** A3 * (pb_psia - 14.7) ** A4
         a2 = B0 * gamma_gas ** B1 * api ** B2 * t_F ** B3 * (pb_psia - 14.7) ** B4
         a3 = C0 * gamma_gas ** C1 * api ** C2 * t_F ** C3 * (pb_psia - 14.7) ** C4
-        pr = (p_MPaa * 145.03773800721814 - 14.7) / (pb_psia - 14.7)
+        pr = (uc.Pa2psi(p_MPaa * 10 ** 6) - 14.7) / (pb_psia - 14.7)
         rsr = a1 * pr ** a2 + (1 - a1) * pr ** a3
         rs_m3m3 = rsr * rsb_m3m3
     else:
@@ -178,11 +179,11 @@ def unf_rsb_Mccain_m3m3(rsp_m3m3,gamma_oil, psp_MPaa=0, tsp_K=0):
     psp_MPaa = 0,         pressure in separator, MPaa
     tsp_K = 0,            temperature in separator, K
     """
-    rsp_scfstb = 5.61458333333333 * rsp_m3m3
+    rsp_scfstb = uc.m3m3_2_scfstb(rsp_m3m3)
     if psp_MPaa > 0 and tsp_K > 0:
-        api = 141.5 / gamma_oil - 131.5
-        psp_psia = 145.03773800721814 * psp_MPaa
-        tsp_F = 1.8 * (tsp_K - 273.15) + 32
+        api = uc.gamma_oil2api(gamma_oil)
+        psp_psia = uc.Pa2psi(psp_MPaa * 10 ** 6)
+        tsp_F = uc.k2f(tsp_K)
         z1 = -8.005 + 2.7 * np.log(psp_psia) - 0.161 * np.log(psp_psia) ** 2
         z2 = 1.224 - 0.5 * np.log(tsp_F)
         z3 = -1.587 + 0.0441 * np.log(api) - 2.29 * 10 ** (-5) * np.log(api) ** 2
@@ -193,7 +194,7 @@ def unf_rsb_Mccain_m3m3(rsp_m3m3,gamma_oil, psp_MPaa=0, tsp_K=0):
         rsb = 1.1618 * rsp_scfstb
     else:
         rsb = 0
-    rsb = 1 / 5.61458333333333 * rsb
+    rsb = uc.scfstb2m3m3(rsb)
     return rsb
 
 
@@ -214,11 +215,11 @@ def unf_gamma_gas_Mccain(rsp_m3m3, rst_m3m3, gamma_gassp, gamma_oil, psp_MPaa=0,
     tsp_K = 0,            temperature in separator, K
     """
     if psp_MPaa > 0 and rsp_m3m3 > 0 and rst_m3m3 > 0 and gamma_gassp > 0:
-        api = 141.5 / gamma_oil - 131.5
-        psp_psia = 145.03773800721814 * psp_MPaa
-        tsp_F = 1.8 * (tsp_K - 273.15) + 32
-        rsp_scfstb = 5.61458333333333 * rsp_m3m3
-        rst_scfstb = 5.61458333333333 * rst_m3m3
+        api = uc.gamma_oil2api(gamma_oil)
+        psp_psia = uc.Pa2psi(psp_MPaa * 10 ** 6)
+        tsp_F = uc.k2f(tsp_K)
+        rsp_scfstb = uc.m3m3_2_scfstb(rsp_m3m3)
+        rst_scfstb = uc.m3m3_2_scfstb(rst_m3m3)
         z1 = -17.275 + 7.9597 * np.log(psp_psia) - 1.1013 * np.log(psp_psia) ** 2 + 2.7735 * 10 ** (-2) \
             * np.log(psp_psia) ** 3 + 3.2287 * 10 ** (-3) * np.log(psp_psia) ** 4
         z2 = -0.3354 - 0.3346 * np.log(rsp_scfstb) + 0.1956 * np.log(rsp_scfstb) ** 2 - 3.4374 * 10 ** (-2) \
@@ -251,10 +252,10 @@ def unf_fvf_Mccain_m3m3_below(density_oilsto_kgm3, rs_m3m3, density_oil_kgm3, ga
     density_oil_kgm3,                Oil density at reservoir conditions, kgm3
     gamma_gas,                       specific gas  density(by air)
     """
-    density_oilsto_lbcuft = 0.0624279606 * density_oilsto_kgm3
-    density_oil_lbcuft = 0.0624279606 * density_oil_kgm3
-    rs_scfstb = 5.61458333333333 * rs_m3m3
-    bo = (density_oilsto_lbcuft + 0.01357 * rs_scfstb * gamma_gas) / density_oil_lbcuft
+    density_oilsto_lbft3 = uc.kgm3_2_lbft3(density_oilsto_kgm3)
+    density_oil_lbft3 = uc.kgm3_2_lbft3(density_oil_kgm3)
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
+    bo = (density_oilsto_lbft3 + 0.01357 * rs_scfstb * gamma_gas) / density_oil_lbft3
     return bo
 
 
@@ -277,9 +278,9 @@ def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
     if p_MPaa <= pb_MPaa:
         bo = bob
     else:
-        pb_psia = pb_MPaa * 145.03773800721814
-        p_psia = p_MPaa * 145.03773800721814
-        cofb_1psi = 1 / 145.03773800722 * cofb_1MPa
+        pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
+        p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
+        cofb_1psi = uc.compr_1pa_2_1psi(cofb_1MPa / 10 ** 6)
         bo = bob * np.exp(cofb_1psi * (pb_psia - p_psia))
     return bo
 
@@ -298,12 +299,12 @@ def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0
     gamma_gas=0.6,       specific gas density (by air)
     """
     if p_MPaa > 0:
-        rs_scfstb = 5.61458333333333 * rs_m3m3
-        t_F = 1.8 * (t_K - 273.15) + 32
-        api = 141.5 / gamma_oil - 131.5
-        p_psia = p_MPaa * 145.03773800721814
-        co_1MPa = 145.03773800722 * (-1433 + 5 * rs_scfstb + 17.2 * t_F - 1180 * gamma_gas + 12.61 * api) / \
-            (10 ** 5 * p_psia)
+        rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
+        t_F = uc.k2f(t_K)
+        api = uc.gamma_oil2api(gamma_oil)
+        p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
+        co_1MPa = uc.compr_1psi_2_1pa(10 ** 6 * (-1433 + 5 * rs_scfstb + 17.2 * t_F - 1180 * gamma_gas + 12.61 *
+                                                 api) / (10 ** 5 * p_psia))
     else:
         co_1MPa = 0
     return co_1MPa
@@ -320,8 +321,8 @@ def unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K):
     gamma_oil,      specific oil density (by water)
     t_K,                 temperature, K
     """
-    rs_scfstb = 5.61458333333333 * rs_m3m3
-    t_F = 1.8 * (t_K - 273.15) + 32
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
+    t_F = uc.k2f(t_K)
     bo = 0.972 + 1.47 * 10 ** (-4) * (rs_scfstb * (gamma_gas / gamma_oil) ** 0.5 + 1.25 * t_F) ** 1.175
     return bo
 
@@ -342,7 +343,7 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
     gamma_oil,           specific oil density (by water)
     gamma_gassp = 0,     specific gas density in separator(by air)
     """
-    rs_scfstb = 5.61458333333333 * rs_m3m3
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     ro_po = 52.8 - 0.01 * rs_scfstb  # первое приближение
     if gamma_gassp == 0:  # если нет данных о плотности газа в сепараторе
         gamma_gassp = gamma_gas
@@ -358,8 +359,8 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
         ro_po = (rs_scfstb * gamma_gas + 4600 * gamma_oil) / (73.71 + rs_scfstb * gamma_gas / ro_a)
         ro_po_current = ro_po
         counter = counter + 1
-    p_psia = p_MPaa * 145.03773800721814
-    t_F = 1.8 * (t_K - 273.15) + 32
+    p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
+    t_F = uc.k2f(t_K)
     if p_MPaa < pb_MPaa:
         dro_p = (0.167 + 16.181 * 10 ** (-0.0425 * ro_po)) * (p_psia / 1000) - 0.01 * (
                     0.299 + 263 * 10 ** (-0.0603 * ro_po)) * (p_psia / 1000) ** 2
@@ -368,26 +369,39 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
                     0.0216 - 0.0233 * 10 ** (-0.0161 * ro_bs)) * (t_F - 60) ** 0.475
         ro_or = ro_bs - dro_t
     else:
-        pb_psia = p_MPaa * 145.03773800721814
-        dro_p = (0.167 + 16.181 * 10 ** (-0.0425 * ro_po))(pb_psia / 1000) - 0.01 * (
+        pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
+        dro_p = (0.167 + 16.181 * 10 ** (-0.0425 * ro_po)) * (pb_psia / 1000) - 0.01 * (
                     0.299 + 263 * 10 ** (-0.0603 * ro_po)) * (pb_psia / 1000) ** 2
         ro_bs = ro_po + dro_p
         dro_t = (0.00302 + 1.505 * ro_bs ** (-0.951)) * (t_F - 60) ** 0.938 - (
                     0.0216 - 0.0233 * 10 ** (-0.0161 * ro_bs)) * (t_F - 60) ** 0.475
         ro_orb = ro_bs - dro_t
-        co_1psi = 1 / 145.03773800722 * co_1MPa
+        co_1psi = uc.compr_1pa_2_1psi(co_1MPa / 10 ** 6)
         ro_or = ro_orb * np.exp(co_1psi * (p_psia - pb_psia))
-    ro_or = 1 / 0.0624279606 * ro_or
+    ro_or = uc.lbft3_2_kgm3(ro_or)
     return ro_or
 
 
-"""
-def unf_density_oil_Standing
-    
+def unf_density_oil_Standing(p_MPaa,pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_gas, gamma_oil):
+    """
+    Oil density according Standing correlation.
+    ref1 book Brill 2006, Production Optimization Using Nodal Analysis
+
+    return oil density,kg/m3
+    p_MPaa,              pressure, MPaa
+    pb_MPaa,             bubble point pressure, MPaa
+    co_1MPa,             coefficient of isothermal compressibility, 1/MPa
+    rs_m3m3,             solution gas-oil ratio, m3m3
+    b0_m3m3,             oil formation volume factor, m3m3
+    gamma_gas,           specific gas density (by air)
+    gamma_oil,           specific oil density (by water)
+    """
+    po = (1000 * gamma_oil + 1.224 * gamma_gas * rs_m3m3) / bo_m3m3
+    if p_MPaa > pb_MPaa:
+        po = po * np.exp(co_1MPa * (p_MPaa - pb_MPaa))
     return po
-    
-    позже допишу плотность, не получается найти источник
-"""
+
+
 """
 def unf_deadoilviscosity_Standing(gamma_oil, t_K):
     """
@@ -412,8 +426,8 @@ def unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K):
     gamma_oil,           specific oil density (by water)
     t_K,                 temperature, K
     """
-    api = 141.5 / gamma_oil - 131.5
-    t_F = 1.8 * (t_K - 273.15) + 32
+    api = uc.gamma_oil2api(gamma_oil)
+    t_F = uc.k2f(t_K)
     c = 10 ** (3.0324 - 0.02023 * api) * t_F ** (-1.163)
     viscosity_cP = 10 ** c - 1
     return viscosity_cP
@@ -429,7 +443,7 @@ def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
     deadoilviscosity_cP,           dead oil viscosity,cP
     rs_m3m3,                       solution gas-oil ratio, m3m3
     """
-    rs_scfstb = 5.61458333333333 * rs_m3m3
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     a = 10.715 * (rs_scfstb + 100) ** (-0.515)
     b = 5.44 * (rs_scfstb + 150) ** (-0.338)
     viscosity_cP = a * deadoilviscosity_cP ** b
@@ -447,7 +461,7 @@ def unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_c
     pb_MPaa,                     bubble point pressure, MPaa
     bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP
     """
-    p_psia = p_MPaa * 145.03773800721814
+    p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
     pb_psia = pb_MPaa * 145.03773800721814
     m = 2.6 * p_psia ** 1.187 * np.exp(-11.513 - 8.98 * 10 ** (-5) * p_psia)
     viscosity_cP = bubblepointviscosity_cP * (p_psia / pb_psia) ** m
@@ -468,8 +482,8 @@ def unf_undersaturatedoilviscosity_Petrovsky_cP(p_MPaa, pb_MPaa, bubblepointvisc
     """
     A = -1.0146 + 1.3322 * np.log(bubblepointviscosity_cP) - 0.4876 * np.log(
         bubblepointviscosity_cP) ** 2 - 1.15036 * np.log(bubblepointviscosity_cP) ** 3
-    p_psia = p_MPaa * 145.03773800721814
-    pb_psia = pb_MPaa * 145.03773800721814
+    p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
+    pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
     viscosity_cP = bubblepointviscosity_cP + 1.3449 * 10 ** (-3) * (p_psia - pb_psia) * 10 ** A
     return viscosity_cP
 
@@ -522,12 +536,12 @@ def unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n
     if pc_h2s_MPaa == 0 or pc_co2_MPaa == 0 or pc_n2_MPaa == 0:
         tpc_K = 0
     else:
-        tc_h2s_R = 1.8 * tc_h2s_K
-        tc_co2_R = 1.8 * tc_co2_K
-        tc_n2_R = 1.8 * tc_n2_K
-        pc_h2s_psia = pc_h2s_MPaa * 145.03773800721814
-        pc_co2_psia = pc_co2_MPaa * 145.03773800721814
-        pc_n2_psia = pc_n2_MPaa * 145.03773800721814
+        tc_h2s_R = uc.k2r(tc_h2s_K)
+        tc_co2_R = uc.k2r(tc_co2_K)
+        tc_n2_R = uc.k2r(tc_n2_K)
+        pc_h2s_psia = uc.Pa2psi(10 ** 6 * pc_h2s_MPaa)
+        pc_co2_psia = uc.Pa2psi(10 ** 6 * pc_co2_MPaa)
+        pc_n2_psia = uc.Pa2psi(10 ** 6 * pc_n2_MPaa)
         J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
             9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + 7.0729 * 10 ** (-1) * gamma_gas - 9.9397 * 10 ** (-2) * gamma_gas ** 2
@@ -535,7 +549,7 @@ def unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n
             4.2113 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + 1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
         tpc_R = K ** 2 / J
-        tpc_K = tpc_R / 1.8
+        tpc_K = uc.r2k(tpc_R)
     return tpc_K
 
 def unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2_K=0.0, pc_h2s_MPaa=1.0,
@@ -561,12 +575,12 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2
     if pc_h2s_MPaa == 0 or pc_co2_MPaa == 0 or pc_n2_MPaa == 0:
         ppc_MPa = 0
     else:
-        tc_h2s_R = 1.8 * tc_h2s_K
-        tc_co2_R = 1.8 * tc_co2_K
-        tc_n2_R = 1.8 * tc_n2_K
-        pc_h2s_psia = pc_h2s_MPaa * 145.03773800721814
-        pc_co2_psia = pc_co2_MPaa * 145.03773800721814
-        pc_n2_psia = pc_n2_MPaa * 145.03773800721814
+        tc_h2s_R = uc.k2r(tc_h2s_K)
+        tc_co2_R = uc.k2r(tc_co2_K)
+        tc_n2_R = uc.k2r(tc_n2_K)
+        pc_h2s_psia = uc.Pa2psi(10 ** 6 * pc_h2s_MPaa)
+        pc_co2_psia = uc.Pa2psi(10 ** 6 * pc_co2_MPaa)
+        pc_n2_psia = uc.Pa2psi(10 ** 6 * pc_n2_MPaa)
         J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
             9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + \
@@ -577,7 +591,7 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2
             1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
         tpc_R = K ** 2 / J
         ppc_psia = tpc_R / J
-        ppc_MPa = ppc_psia / 145.03773800721814
+        ppc_MPa = uc.psi2Pa(ppc_psia / 10 ** 6)
     return ppc_MPa
 
 
@@ -632,7 +646,7 @@ def unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, gamma_gas):
     z                            z-factor
     gamma_gas                    specific gas density (by air)
     """
-    t_R = 1.8 * t_K
+    t_R = uc.k2r(t_K)
     m = 28.966 * gamma_gas  # Molar mass
     a = ((9.379 + 0.01607 * m) * t_R ** 1.5)/(209.2 + 19.26 * m + t_R)
     b = 3.448 + 986.4/t_R + 0.01009 * m
@@ -676,7 +690,7 @@ def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
     s_ppm,                          salinity, ppm
     par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
     """
-    t_C = t_K - 273.15
+    t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
     # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
@@ -771,7 +785,7 @@ def unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z=1.0, par=1):
     par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
                                     2 - brine containing partially dissolved methane
     """
-    t_C = t_K - 273.15
+    t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
     # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
@@ -877,7 +891,7 @@ def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
     p_MPaa,                         pressure, MPaa
     s_ppm,                          salinity, ppm
     """
-    t_C = t_K - 273.15
+    t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
     # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
@@ -1011,7 +1025,7 @@ def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
     p_MPaa,                         pressure, MPaa
     s_ppm,                          salinity, ppm
     """
-    t_C = t_K - 273.15
+    t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
     # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
@@ -1142,6 +1156,17 @@ class TestPVT(unittest.TestCase):
         gamma_gassp = 0
         self.assertAlmostEqual(unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, gamma_oil,
                                gamma_gassp), 630.0536681794456, delta=0.0001)
+
+    def test_unf_density_oil_Standing(self):
+        p_MPaa = 10
+        pb_MPaa = 12
+        co_1MPa = 3 * 10**(-3)
+        rs_m3m3 = 250
+        bo_m3m3 = 1.1
+        gamma_gas = 0.6
+        gamma_oil = 0.86
+        self.assertAlmostEqual(unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_gas, gamma_oil
+                                                        ), 948.7272727272725, delta=0.0001)
 
     def test_unf_deadoilviscosity_Beggs_cP(self):
         gamma_oil = 0.86
