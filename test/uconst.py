@@ -490,3 +490,21 @@ def compr_1psi_2_1pa(value):
      :return: compressibility in 1/pa
      """
     return value / const.psi
+
+
+def compr_1pa_2_1bar(value):
+    """
+     converts compressibility in 1/pa to 1/bar
+     :param value: compressibility in 1/pa
+     :return: compressibility in 1/bar
+     """
+    return value * const.bar
+
+
+def compr_1bar_2_1pa(value):
+    """
+     converts compressibility in 1/bar to 1/pa
+     :param value: compressibility in 1/bar
+     :return: compressibility in 1/pa
+     """
+    return value / const.bar

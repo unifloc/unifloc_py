@@ -121,4 +121,9 @@ def test1():
     plt.plot(pp, rs)
     plt.show()
 
-test3()
+
+def test4():
+    fl = PVT.FluidBlackOil()
+    fl.calc(10, 20)
+
+test4()

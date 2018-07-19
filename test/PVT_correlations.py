@@ -45,7 +45,7 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
     bubble point pressure calculation according to Valko McCain (2002) correlation
 
-    ref SPE  "Reservoir oil bubblepoint pressures revisited; solution gas–oilratios and surface gas specific gravities"
+    ref SPE  "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities"
     W. D. McCain Jr.,P.P. Valko, 
     
     return bubble point pressure abs in MPa
@@ -294,7 +294,7 @@ def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0
     return coefficient of isothermal compressibility co_1MPa,1/MPa
     rs_m3m3,             solution gas-oil ratio, m3m3
     t_K,                 temperature, K
-    gamma_oil,      specific oil density (by water)
+    gamma_oil,           specific oil density (by water)
     p_MPaa,              pressure, MPaa
     gamma_gas=0.6,       specific gas density (by air)
     """
@@ -365,8 +365,8 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
         dro_p = (0.167 + 16.181 * 10 ** (-0.0425 * ro_po)) * (p_psia / 1000) - 0.01 * (
                     0.299 + 263 * 10 ** (-0.0603 * ro_po)) * (p_psia / 1000) ** 2
         ro_bs = ro_po + dro_p
-        dro_t = (0.00302 + 1.505 * ro_bs ** (-0.951)) * (t_F - 60) ** 0.938 - (
-                    0.0216 - 0.0233 * 10 ** (-0.0161 * ro_bs)) * (t_F - 60) ** 0.475
+        dro_t = (0.00302 + 1.505 * ro_bs ** (-0.951)) * (t_F - 60) ** 0.938 - (0.0216 - 0.0233 * 10 ** (-0.0161 * ro_bs)
+                                                                               ) * (t_F - 60) ** 0.475
         ro_or = ro_bs - dro_t
     else:
         pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
@@ -554,8 +554,7 @@ def unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa):
 
 # PVT свойства для газа
 
-def unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2_K=0.0, pc_h2s_MPaa=1.0,
-                                        pc_co2_MPaa=1.0, pc_n2_MPaa=1.0, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
+def unf_pseudocritical_temperature_K(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     """"
     correlation for pseudocritical temperature taking into account the presense of non-hydrocarbon gases
     ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for 
@@ -574,27 +573,24 @@ def unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n
     y_co2,               mole fraction of the carbon dioxide
     y_n2,                mole fraction of the nitrogen
     """
-    if pc_h2s_MPaa == 0 or pc_co2_MPaa == 0 or pc_n2_MPaa == 0:
-        tpc_K = 0
-    else:
-        tc_h2s_R = uc.k2r(tc_h2s_K)
-        tc_co2_R = uc.k2r(tc_co2_K)
-        tc_n2_R = uc.k2r(tc_n2_K)
-        pc_h2s_psia = uc.Pa2psi(10 ** 6 * pc_h2s_MPaa)
-        pc_co2_psia = uc.Pa2psi(10 ** 6 * pc_co2_MPaa)
-        pc_n2_psia = uc.Pa2psi(10 ** 6 * pc_n2_MPaa)
-        J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
-            9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
+    tc_h2s_R = uc.k2r(373.6)
+    tc_co2_R = uc.k2r(304.13)
+    tc_n2_R = uc.k2r(126.25)
+    pc_h2s_psia = uc.Pa2psi(10 ** 6 * 9.007)
+    pc_co2_psia = uc.Pa2psi(10 ** 6 * 7.375)
+    pc_n2_psia = uc.Pa2psi(10 ** 6 * 3.4)
+    J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - 9.0348 * 10 ** (-1) * y_co2 *\
+        (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + 7.0729 * 10 ** (-1) * gamma_gas - 9.9397 * 10 ** (-2) * gamma_gas ** 2
-        K = 3.8216 - 6.5340 * 10 ** (-2) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
-            4.2113 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
+    K = 3.8216 - 6.5340 * 10 ** (-2) * y_h2s * (tc_h2s_R / pc_h2s_psia) - 4.2113 * 10 ** (-1) * y_co2 \
+        * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + 1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
-        tpc_R = K ** 2 / J
-        tpc_K = uc.r2k(tpc_R)
+    tpc_R = K ** 2 / J
+    tpc_K = uc.r2k(tpc_R)
     return tpc_K
 
-def unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2_K=0.0, pc_h2s_MPaa=1.0,
-                                        pc_co2_MPaa=1.0, pc_n2_MPaa=1.0, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
+
+def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     """"
     correlation for pseudocritical pressure taking into account the presense of non-hydrocarbon gases
     ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for
@@ -613,26 +609,21 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K=0.0, tc_co2_K=0.0, tc_n2
     y_co2,               mole fraction of the carbon dioxide
     y_n2,                mole fraction of the nitrogen
     """
-    if pc_h2s_MPaa == 0 or pc_co2_MPaa == 0 or pc_n2_MPaa == 0:
-        ppc_MPa = 0
-    else:
-        tc_h2s_R = uc.k2r(tc_h2s_K)
-        tc_co2_R = uc.k2r(tc_co2_K)
-        tc_n2_R = uc.k2r(tc_n2_K)
-        pc_h2s_psia = uc.Pa2psi(10 ** 6 * pc_h2s_MPaa)
-        pc_co2_psia = uc.Pa2psi(10 ** 6 * pc_co2_MPaa)
-        pc_n2_psia = uc.Pa2psi(10 ** 6 * pc_n2_MPaa)
-        J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
+    tc_h2s_R = uc.k2r(373.6)
+    tc_co2_R = uc.k2r(304.13)
+    tc_n2_R = uc.k2r(126.25)
+    pc_h2s_psia = uc.Pa2psi(10 ** 6 * 9.007)
+    pc_co2_psia = uc.Pa2psi(10 ** 6 * 7.375)
+    pc_n2_psia = uc.Pa2psi(10 ** 6 * 3.4)
+    J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
             9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
-                        tc_n2_R / pc_n2_psia) + \
-            7.0729 * 10 ** (-1) * gamma_gas - 9.9397 * 10 ** (-2) * gamma_gas ** 2
-        K = 3.8216 - 6.5340 * 10 ** (-2) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
+                        tc_n2_R / pc_n2_psia) + 7.0729 * 10 ** (-1) * gamma_gas - 9.9397 * 10 ** (-2) * gamma_gas ** 2
+    K = 3.8216 - 6.5340 * 10 ** (-2) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
             4.2113 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
-                        tc_n2_R / pc_n2_psia) + \
-            1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
-        tpc_R = K ** 2 / J
-        ppc_psia = tpc_R / J
-        ppc_MPa = uc.psi2Pa(ppc_psia / 10 ** 6)
+                        tc_n2_R / pc_n2_psia) + 1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
+    tpc_R = K ** 2 / J
+    ppc_psia = tpc_R / J
+    ppc_MPa = uc.psi2Pa(ppc_psia / 10 ** 6)
     return ppc_MPa
 
 
@@ -673,6 +664,50 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
             ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
         counter = counter + 1
     return z_current
+
+
+def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
+    """
+    correlation for gas compressibility
+    ref 1 Mattar, L., Brar, G.S., and Aziz, K. 1975. Compressibility of Natural Gases.
+    J Can Pet Technol 14 (4): 77. PETSOC-75-04-08
+
+    return for gas compressibility
+    p_MPaa,                      pressure, MPaa
+    t_K,                         temperature, K
+    ppc_MPa                      pseudocritical pressure, MPa
+    tpc_K                        pseudocritical temperature, K
+    """
+    ppr = p_MPaa / ppc_MPa
+    tpr = t_K / tpc_K
+    epsilon = 0.000001
+    maxiter = 100
+    counter = 0
+    z_previous = 1
+    ropr = 0.27 * (ppr / (z_previous * tpr))
+    z_current = 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr + \
+        (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
+        ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
+    while abs(z_current - z_previous) > epsilon and counter < maxiter:
+        if ppr <= 2:
+            z_previous = z_current + (z_current - z_previous)
+        elif ppr <= 3:
+            z_previous = z_current + (z_current - z_previous) / 2
+        elif ppr <= 6:
+            z_previous = z_current + (z_current - z_previous) / 3
+        else:
+            z_previous = z_current + (z_current - z_previous) / 5
+        ropr = 0.27 * (ppr / (z_previous * tpr))
+        z_current = 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr + \
+            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
+            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
+        counter = counter + 1
+    z_derivative = 0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5 + 2 * ropr *\
+        (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) - 5 * 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 4 +\
+            2 * 0.6134 * ropr / tpr * (1 + 0.7210 * ropr ** 2 - 0.7210 ** 2 * ropr ** 4) * np.exp(-0.7210 / ropr ** 2)
+    cpr = 1 / ropr - 0.27 / (z_current ** 2 * tpr) * (z_derivative / (1 + ropr * z_derivative / z_current))
+    cg = cpr / ppc_MPa
+    return cg
 
 
 def unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, gamma_gas):
@@ -1244,31 +1279,19 @@ class TestPVT(unittest.TestCase):
 
     def test_unf_pseudocritical_temperature_K(self):
         gamma_gas = 0.6
-        tc_h2s_K = 373
-        tc_co2_K = 304
-        tc_n2_K = 125.9
-        pc_h2s_MPaa = 9.01
-        pc_co2_MPaa = 1
-        pc_n2_MPaa = 7.36
         y_h2s = 0.01
         y_co2 = 0.03
         y_n2 = 0.02
-        self.assertAlmostEqual(unf_pseudocritical_temperature_K(gamma_gas, tc_h2s_K, tc_co2_K, tc_n2_K, pc_h2s_MPaa,
-                               pc_co2_MPaa, pc_n2_MPaa, y_h2s, y_co2, y_n2), 239.186917147216, delta=0.0001)
+        self.assertAlmostEqual(unf_pseudocritical_temperature_K(gamma_gas, y_h2s, y_co2, y_n2), 198.0708725589674,
+                               delta=0.0001)
 
     def test_unf_pseudocritical_pressure_MPa(self):
         gamma_gas = 0.6
-        tc_h2s_K = 373
-        tc_co2_K = 304
-        tc_n2_K = 125.9
-        pc_h2s_MPaa = 9.01
-        pc_co2_MPaa = 1
-        pc_n2_MPaa = 7.36
         y_h2s = 0.01
         y_co2 = 0.03
         y_n2 = 0.02
-        self.assertAlmostEqual(unf_pseudocritical_pressure_MPa(gamma_gas, tc_h2s_K, tc_co2_K, tc_n2_K, pc_h2s_MPaa,
-                               pc_co2_MPaa, pc_n2_MPaa, y_h2s, y_co2, y_n2), 7.477307083789863, delta=0.0001)
+        self.assertAlmostEqual(unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s, y_co2, y_n2), 5.09893164741181,
+                               delta=0.0001)
 
     def test_unf_zfactor_DAK(self):
         p_MPaa = 10
@@ -1340,6 +1363,14 @@ class TestPVT(unittest.TestCase):
         gamma_gas = 0.6
         p_MPaa = 10
         self.assertAlmostEqual(unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa), 1.7091714311161692,
+                               delta=0.0001)
+
+    def test_unf_compressibility_gas_Mattar_1MPa(self):
+        p_MPaa = 10
+        t_K = 350
+        ppc_MPa = 7.477307083789863
+        tpc_K = 239.186917147216
+        self.assertAlmostEqual(unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K), 0.47717077711622113,
                                delta=0.0001)
 
 
