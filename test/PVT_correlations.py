@@ -402,20 +402,6 @@ def unf_density_oil_Standing(p_MPaa,pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_ga
     return po
 
 
-"""
-def unf_deadoilviscosity_Standing(gamma_oil, t_K):
-    """
-#  Correlation for Oil viscosity according to Standing Correlation
-
-""" 
-    не могу найти источник
-    API = 141.5 / gamma_oil - 131.5
-    viscosity__cP = (0.32 + 1.8 * (10 ** 7) / (API ** 4.53)) * \
-    (360 / (1.8 * (t__C + 273) - 260)) ** (10 ** (0.43 + 8.33 / (API)))
-    return viscosity__cP
-"""
-
-
 def unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K):
     """
     Correlation for dead oil viscosity
@@ -505,6 +491,61 @@ def unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa)
         viscosity_cP = unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, saturatedviscosity_cP)
     return viscosity_cP
 
+
+def unf_pb_Glaso_MPaa(rs_m3m3, t_K, gamma_oil, gamma_gas):
+    """
+    Glaso correlation(1980) for bubble point pressure
+    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
+    :param rs_m3m3: gas-oil ratio in m3/m3
+    :param t_K: temperature in K
+    :param gamma_oil: oil density (by water)
+    :param gamma_gas: gas density (by air)
+    :return: bubble point pressure im MPa abs
+    """
+    # TODO также необходимо дополнить код, поправками на неув составляющую в нефти, в статье есть
+    api = uc.gamma_oil2api(gamma_oil)
+    t_F = uc.k2f(t_K)
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
+    pb = (rs_scfstb / gamma_gas) ** 0.816 * (t_F ** 0.172 / api ** 0.989)
+    pb = uc.psi2Pa(10 ** (1.7669 + 1.7447 * np.log10(pb) - 0.30218 * np.log10(pb) ** 2)) / 10 ** 6
+    return pb
+
+
+def unf_fvf_Glaso_m3m3_saturated(rs_m3m3, t_K, gamma_oil, gamma_gas):
+    """
+    Glaso correlation(1980) for formation volume factor at bubble point pressure
+    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
+    :param rs_m3m3: gas-oil ratio in m3/m3
+    :param t_K: temperature in K
+    :param gamma_oil: oil density (by water)
+    :param gamma_gas: gas density (by air)
+    :return: formation volume factor at bubble point pressure in m3/m3
+    """
+    t_F = uc.k2f(t_K)
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
+    bob = rs_scfstb * (gamma_gas / gamma_oil) ** 0.526 + 0.968 * t_F
+    bob = 10 ** (-6.58511 + 2.91329 * np.log10(bob) - 0.27683 * np.log10(bob) ** 2) + 1
+    return bob
+
+
+def unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa):
+    """
+    Glaso correlation(1980) for total formation volume factor below bubble point pressure
+    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
+    :param rs_m3m3: gas-oil ratio in m3/m3
+    :param t_K: temperature in K
+    :param gamma_oil: oil density (by water)
+    :param gamma_gas: gas density (by air)
+    :param p_MPaa: pressure in MPaa
+    :return: total formation volume factor below bubble point pressure in m3/m3
+    """
+    t_F = uc.k2f(t_K)
+    rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
+    p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
+    bt = rs_scfstb * t_F ** 0.5 / gamma_gas ** 0.3 * gamma_oil ** (2.9 * 10 ** (-0.00027 * rs_scfstb)) * p_psia ** \
+        (-1.1089)
+    bt = 10 ** (8.0135 * 10 ** (-2) + 4.7257 * 10 ** (-1) * np.log10(bt) + 1.7351 * 10 ** (-1) * np.log10(bt) ** 2)
+    return bt
 
 """
 В дальнейшем функции для нефти будут дополняться, а пока перейдем к PVT для газа
@@ -1269,14 +1310,36 @@ class TestPVT(unittest.TestCase):
         t_K = 350
         p_MPaa = 20
         s_ppm = 10000
-        self.assertAlmostEqual(unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm), 1.0279011434122953,
-                               delta=0.0001)
+        self.assertAlmostEqual(unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm), 1.0279011434122953, delta=0.0001)
 
     def test_unf_viscosity_brine_MaoDuan_cP(self):
         t_K = 350
         p_MPaa = 20
         s_ppm = 10000
-        self.assertAlmostEqual(unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm), 0.3745199364964906,
+        self.assertAlmostEqual(unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm), 0.3745199364964906, delta=0.0001)
+
+    def test_unf_pb_Glaso_MPaa(self):
+        rs_m3m3 = 100
+        t_K = 350
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        self.assertAlmostEqual(unf_pb_Glaso_MPaa(rs_m3m3, t_K, gamma_oil, gamma_gas), 23.365669948236604, delta=0.0001)
+
+    def test_unf_fvf_Glaso_m3m3_saturated(self):
+        rs_m3m3 = 100
+        t_K = 350
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        self.assertAlmostEqual(unf_fvf_Glaso_m3m3_saturated(rs_m3m3, t_K, gamma_oil, gamma_gas), 1.2514004319480372,
+                               delta=0.0001)
+
+    def test_unf_fvf_Glaso_m3m3_below(self):
+        rs_m3m3 = 100
+        t_K = 350
+        gamma_oil = 0.86
+        gamma_gas = 0.6
+        p_MPaa = 10
+        self.assertAlmostEqual(unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa), 1.7091714311161692,
                                delta=0.0001)
 
 

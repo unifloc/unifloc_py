@@ -10,6 +10,7 @@ UniflocPy
 
 """
 import uconst as uc
+import PVT_correlations as PVT
 
 
 class FluidBlackOil:
@@ -192,7 +193,6 @@ class FluidStanding(FluidBlackOil):
     def calc(self, p_bar, t_c):
         """Расчет свойств нефти"""
         return super().calc(p_bar, t_c)
-
 
 
 if __name__ == "__main__":
