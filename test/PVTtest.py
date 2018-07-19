@@ -124,6 +124,6 @@ def test1():
 
 def test4():
     fl = PVT.FluidBlackOil()
-    fl.calc(10, 20)
+    fl.calc(100, 20)
 
 test4()
