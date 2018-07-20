@@ -272,7 +272,8 @@ class FluidMcCain(FluidBlackOil):
         cw_1MPa = PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm, z, self.par_wat)
         bw_m3m3 = PVT.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, self.s_ppm)
         mu_wat_cP = PVT.unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, self.s_ppm)
-        # output (для понимания отдельно внизу вынесено)
+        # output (для понимания отдельно внизу вынесено), надо убрать наверное, оставить только пересчеты того,
+        # что необходимо и не было вычислено выше
         # oil
 
         # self._rs_m3m3 = self._rs_m3m3
@@ -292,6 +293,22 @@ class FluidMcCain(FluidBlackOil):
         self._mu_wat_cP = mu_wat_cP
         self._bw_m3m3 = bw_m3m3
         return 1
+
+
+class FluidFlow():
+    """класс для описания потока флюида"""
+    def __init__(self):
+        self.fl = FluidMcCain() # по умолчанию задаем какой то флюид
+        self.qliq_m3day = 0     # дебит жидкости
+        self.fw = 0             # обводненность
+
+    def calc(self, p_bar, t_c):
+        """расчет свойств потока для заданных термобарических условий"""
+        self.fl.calc(p_bar, t_c)
+
+    # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
+    # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
+
 
 if __name__ == "__main__":
     print("Вы запустили модуль напрямую, а не импортировали его.")
