@@ -133,6 +133,13 @@ def Pa2psi(value):
     """
     return value / const.psi
 
+def MPa2psi(value):
+    """
+    converts pressure in psi to MPa
+    :param value: pressure value in psi
+    :return: pressure value in Pa
+    """
+    return value * const.mega / const.psi
 
 def bar2Pa(value):
     """
@@ -141,6 +148,14 @@ def bar2Pa(value):
     :return: pressure value in Pa
     """
     return value * const.bar
+
+def bar2MPa(value):
+    """
+    converts pressure in bar to Pa
+    :param value: pressure value in bar
+    :return: pressure value in Pa
+    """
+    return value * const.bar / const.mega
 
 
 def Pa2bar(value):
@@ -151,6 +166,13 @@ def Pa2bar(value):
     """
     return value / const.bar
 
+def MPa2bar(value):
+    """
+    converts pressure in MPa to bar
+    :param value: pressure value in Pa
+    :return: pressure value in bar
+    """
+    return value * const.mega / const.bar
 
 def atm2Pa(value):
     """

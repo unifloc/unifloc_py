@@ -130,9 +130,10 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
     """
     api = uc.gamma_oil2api(gamma_oil)
     t_F = uc.k2f(t_K)
-    pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
+    pb_psia = uc.MPa2psi(pb_MPaa)
     if pb_psia > 14.7:
-        pr = (uc.Pa2psi(p_MPaa * 10 ** 6) - 14.7) / (pb_psia - 14.7)
+        # TODO тут похоже идет перевод из абсолютных давлений в избыточные - может вынести это в отдельные фукнции?
+        pr = (uc.MPa2psi(p_MPaa) - 14.7) / (pb_psia - 14.7)
     else:
         pr = 0
     if pr <= 0:

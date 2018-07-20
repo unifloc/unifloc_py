@@ -123,7 +123,10 @@ def test1():
 
 
 def test4():
-    fl = PVT.FluidBlackOil()
+    fl = PVT.FluidMcCain()
     fl.calc(100, 20)
+    print(fl.pb_bar)
+    # TODO здесь для проверки надо вызвать побольше свойств классла, может графики нарисовать и потом тесты сделать
+
 
 test4()
