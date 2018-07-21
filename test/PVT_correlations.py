@@ -703,6 +703,7 @@ def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
             (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
             ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
         counter = counter + 1
+    ropr = 0.27 * (ppr / (z_current * tpr))
     z_derivative = 0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5 + 2 * ropr *\
         (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) - 5 * 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 4 +\
             2 * 0.6134 * ropr / tpr * (1 + 0.7210 * ropr ** 2 - 0.7210 ** 2 * ropr ** 4) * np.exp(-0.7210 / ropr ** 2)

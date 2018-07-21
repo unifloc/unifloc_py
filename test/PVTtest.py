@@ -124,9 +124,207 @@ def test1():
 
 def test4():
     fl = PVT.FluidMcCain()
-    fl.calc(100, 20)
-    print(fl.pb_bar)
-    # TODO здесь для проверки надо вызвать побольше свойств классла, может графики нарисовать и потом тесты сделать
+    p_bar = 100
+    t_C = 20
+    fl.calc(p_bar, t_C)
+    print('P, bar = ', p_bar)
+    print('T, C = ', t_C)
+    print('Oil PVT properties ')
+    print('Bubble point pressure, bar = ', fl.pb_bar)
+    print('Gas-oil ratio, m3/m3 = ', fl.rs_m3m3)
+    print('Viscosity, cP = ', fl.mu_oil_cP)
+    print('Compressibility, 1/bar = ', fl.compr_oil_1bar)
+    print('Formation Volume Factor, m3/m3 = ', fl.bo_m3m3)
+    print('Density, kg/m3 = ', fl.rho_oil_kgm3)
+    print('Gas PVT properties ')
+    print('Z-factor = ', fl.z)
+    print('Viscosity, cP = ', fl.mu_gas_cP)
+    print('Compressibility, 1/bar = ', fl.compr_gas_1bar)
+    print('Formation Volume Factor, m3/m3 = ', fl.bg_m3m3)
+    print('Water PVT properties ')
+    print('Density, kg/m3 = ', fl.rho_wat_kgm3)
+    print('Viscosity, cP = ', fl.mu_wat_cP)
+    print('Compressibility, 1/bar = ', fl.compr_wat_1bar)
+    print('Formation Volume Factor, m3/m3 = ', fl.bw_m3m3)
+
+    # Графички
+    p_0 = 10
+    p_n = 400
+    dp = 5
+    p_bar = np.arange(p_0, p_n, dp)
+    t_C = 25
+    pb = []
+    rs = []
+    mu_oil = []
+    compr_oil = []
+    bo = []
+    rho_oil = []
+    z = []
+    mu_gas = []
+    compr_gas = []
+    bg = []
+    rho_wat = []
+    mu_wat = []
+    compr_wat = []
+    bw = []
+    for p in p_bar:
+        fl.calc(p, t_C)
+        pb.append(fl.pb_bar)
+        rs.append(fl.rs_m3m3)
+        mu_oil.append(fl.mu_oil_cP)
+        compr_oil.append(fl.compr_oil_1bar)
+        bo.append(fl.bo_m3m3)
+        rho_oil.append(fl.rho_oil_kgm3)
+        z.append(fl.z)
+        mu_gas.append(fl.mu_gas_cP)
+        compr_gas.append(fl.compr_gas_1bar)
+        bg.append(fl.bg_m3m3)
+        rho_wat.append(fl.rho_wat_kgm3)
+        mu_wat.append(fl.mu_wat_cP)
+        compr_wat.append(fl.compr_wat_1bar)
+        bw.append(fl.bw_m3m3)
+
+    """Давление насыщения"""
+    plt.subplot(351)
+    plt.ylim(0, np.max(pb) + 10)
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Давление насыщения', color='black', family='fantasy')
+    plt.ylabel('Pb, бар', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, pb, 'b', linewidth=3)
+
+    """Газссодержание нефти"""
+    plt.subplot(352)
+    plt.ylim(0, np.max(rs) + 10)
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Газосодержание', color='black', family='fantasy')
+    plt.ylabel('Rs, м3/м3', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, rs, 'b', linewidth=3)
+
+    """Вязкость нефти"""
+    plt.subplot(353)
+    plt.ylim(0, np.max(mu_oil) + 10)
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Вязкость', color='black', family='fantasy')
+    plt.ylabel('Mu, сП', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, mu_oil, 'b', linewidth=3)
+
+    """Сжимаемость нефти"""
+    plt.subplot(354)
+    plt.ylim(0, np.max(compr_oil))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Сжимаемость', color='black', family='fantasy')
+    plt.ylabel('co, 1/бар', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, compr_oil, 'b', linewidth=3)
+
+    """Объемный коэффициент нефти """
+    plt.subplot(355)
+    plt.ylim(0, np.max(bo))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Объемный коэффициент нефти', color='black', family='fantasy')
+    plt.ylabel('bo,м3/м3', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, bo, 'b', linewidth=3)
+
+    """Плотность нефти """
+    plt.subplot(356)
+    plt.ylim(0, np.max(rho_oil) + 10)
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Плотность нефти', color='black', family='fantasy')
+    plt.ylabel('rho, кг/м3', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, rho_oil, 'b', linewidth=3)
+
+    """z-фактор """
+    plt.subplot(357)
+    plt.ylim(0, np.max(z))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('z - фактор', color='black', family='fantasy')
+    plt.ylabel('z', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, z, 'b', linewidth=3)
+
+    """Вязкость газа """
+    plt.subplot(358)
+    plt.ylim(0, np.max(mu_gas))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Вязкость газа', color='black', family='fantasy')
+    plt.ylabel('mu_gas, сП', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, mu_gas, 'b', linewidth=3)
+
+    """Сжимаемость газа """
+    plt.subplot(359)
+    plt.ylim(0, np.max(compr_gas))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Сжимаемость газа', color='black', family='fantasy')
+    plt.ylabel('compr_gas, 1/бар', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, compr_gas, 'b', linewidth=3)
+
+    """Объемный коэффициент газа """
+    plt.subplot(3, 5, 10)
+    plt.ylim(0, np.max(bg))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Объемный коэффициент газа', color='black', family='fantasy')
+    plt.ylabel('bg, м3/м3', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, bg, 'b', linewidth=3)
+
+    """Плотность воды """
+    plt.subplot(3, 5, 11)
+    plt.ylim(0, np.max(rho_wat))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Плотность воды', color='black', family='fantasy')
+    plt.ylabel('rho_wat, кг/м3', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, rho_wat, 'b', linewidth=3)
+
+    """Вязкость воды """
+    plt.subplot(3, 5, 12)
+    plt.ylim(0, np.max(mu_wat))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Вязкость воды', color='black', family='fantasy')
+    plt.ylabel('mu_wat, сП', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, mu_wat, 'b', linewidth=3)
+
+    """Сжимаемость воды """
+    plt.subplot(3, 5, 13)
+    plt.ylim(0, np.max(compr_wat))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Сжимаемость воды', color='black', family='fantasy')
+    plt.ylabel('compr_wat, 1/бар', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, compr_wat, 'b', linewidth=3)
+
+    """Сжимаемость воды """
+    plt.subplot(3, 5, 14)
+    plt.ylim(0, np.max(bw))
+    plt.xlim(0, p_n)
+    plt.grid(True)
+    plt.title('Объемный коэффициент воды', color='black', family='fantasy')
+    plt.ylabel('bw, м3/м3', color='black', family='fantasy')
+    plt.xlabel('Давление, бар', color='black', family='fantasy')
+    plt.plot(p_bar, bw, 'b', linewidth=3)
+    plt.show()
+
 
 
 test4()

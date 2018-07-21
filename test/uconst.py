@@ -6,7 +6,6 @@ import numpy as np
 
 # constants, which don't have in scipy.constants
 
-
 g = const.g   # gravity
 pi = const.pi
 psc_bar = 1   # pressure standard condition
@@ -16,6 +15,7 @@ air_density_sckgm3 = 1.225  # definition from https://en.wikipedia.org/wiki/Dens
 z_default = 0.9
 gamma_gas_default = 0.8
 rsb_default_m3m3 = 100
+rho_w_kgm3_sc = 1000
 
 # complex unit conversion functions
 
@@ -530,3 +530,21 @@ def compr_1bar_2_1pa(value):
      :return: compressibility in 1/pa
      """
     return value / const.bar
+
+
+def compr_1mpa_2_1bar(value):
+    """
+     converts compressibility in 1/mpa to 1/bar
+     :param value: compressibility in 1/mpa
+     :return: compressibility in 1/bar
+     """
+    return value * const.bar / const.mega
+
+
+def compr_1bar_2_1mpa(value):
+    """
+     converts compressibility in 1/bar to 1/mpa
+     :param value: compressibility in 1/bar
+     :return: compressibility in 1/mpa
+     """
+    return value * const.mega / const.bar

@@ -110,7 +110,7 @@ class FluidBlackOil:
     @property
     def rho_oil_stkgm3(self):
         """ return oil density at working condition"""
-        return self._rho_oil_kgm3 * 1000  # TODO заменить 1000 на константу с референсной плотностью воды
+        return self.gamma_oil * uc.rho_w_kgm3_sc
 
     @property
     def rho_gas_kgm3(self):
@@ -236,21 +236,22 @@ class FluidMcCain(FluidBlackOil):
         # внутри rs есть проверка на давление насыщения
         self._rs_m3m3 = PVT.unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa, self.rsb_m3m3, self.gamma_oil, self.gamma_gas, t_K)
         co_1MPa = PVT.unf_compressibility_oil_VB_1Mpa(self._rs_m3m3, t_K, self.gamma_oil, p_MPaa, self.gamma_gas)
+        self._compr_oil_1bar = uc.compr_1mpa_2_1bar(co_1MPa)
         # внутри rho есть проверка на давление насыщения
         self._rho_oil_kgm3 = PVT.unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, self._rs_m3m3, self.gamma_gas, t_K,
                                                         self.gamma_oil, self.gamma_gassp)
         # оценим значение объемного коэффициента
-        if p_MPaa > pb_MPaa:
-            self._bo_m3m3 = PVT.unf_fvf_VB_m3m3_above(self._bo_m3m3, co_1MPa, pb_MPaa, p_MPaa)
-        else:
-            self._bo_m3m3 = PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self._rs_m3m3, self._rho_oil_kgm3,
-                                                          self.gamma_gas)
         # оценим значение объемного коэффициента при давлении насыщения
         self._bob_m3m3 = PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self.rsb_m3m3, self._rho_oil_kgm3,
                                                        self.gamma_gas)
+        if p_MPaa > pb_MPaa:
+            self._bo_m3m3 = PVT.unf_fvf_VB_m3m3_above(self._bob_m3m3, co_1MPa, pb_MPaa, p_MPaa)
+        else:
+            self._bo_m3m3 = PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self._rs_m3m3, self._rho_oil_kgm3,
+                                                          self.gamma_gas)
         # проверим необходимость калибровки значения объемного коэффициента
         if self.bobcal_m3m3 > 0:
-            b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 -1)
+            b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
             self._bo_m3m3 = b_fact * self._bo_m3m3
         # оценим значение вязкости
         self._mu_deadoil_cP = PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, t_K)
@@ -259,39 +260,20 @@ class FluidMcCain(FluidBlackOil):
         if self.muobcal_cP > 0:
             mu_fact = self.muobcal_cP / self._muob_cP
             self._mu_oil_cP = mu_fact * self._mu_oil_cP
-        # TODO далее для газа и воды надо зарефакторить код аналогично нефти
         # gas
         tpc_K = PVT.unf_pseudocritical_temperature_K(self.gamma_gas, self.y_h2s, self.y_co2, self.y_n2)
         ppc_MPa = PVT.unf_pseudocritical_pressure_MPa(self.gamma_gas, self.y_h2s, self.y_co2, self.y_n2)
-        z = PVT.unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K)
-        mu_gas_cP = PVT.unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, self.gamma_gas)
-        bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, z)
-        cg_1MPa = PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K)
+        self._z = PVT.unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K)
+        self._mu_gas_cP = PVT.unf_gasviscosity_Lee_cP(t_K, p_MPaa, self._z, self.gamma_gas)
+        self._bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, self._z)
+        self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
+                                                                                            ppc_MPa, tpc_K))
         # water
-        rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
-        cw_1MPa = PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm, z, self.par_wat)
-        bw_m3m3 = PVT.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, self.s_ppm)
-        mu_wat_cP = PVT.unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, self.s_ppm)
-        # output (для понимания отдельно внизу вынесено), надо убрать наверное, оставить только пересчеты того,
-        # что необходимо и не было вычислено выше
-        # oil
-
-        # self._rs_m3m3 = self._rs_m3m3
-        #self._mu_oil_cP = mu_oil_cP
-        #self._bo_m3m3 = self._bo_m3m3
-       # self._rho_oil_kgm3 = self._rho_oil_kgm3
-        self._compr_oil_1bar = uc.compr_1pa_2_1bar(co_1MPa / 10 ** 6)# TODO надо избавиться везде от 10**6 - перенести в функции пересчета размерностей и лучше использовать или 1e6 или уже готовую константу
-
-        # gas
-        self._mu_gas_cP = mu_gas_cP
-        self._z = z
-        self._compr_gas_1bar = uc.compr_1pa_2_1bar(cg_1MPa / 10 ** 6)
-        self._bg_m3m3 = bg_m3m3
-        # brine
-        self._rho_wat_kgm3 = rho_wat_kgm3
-        self._compr_wat_1bar = uc.compr_1pa_2_1bar(cw_1MPa / 10 ** 6)
-        self._mu_wat_cP = mu_wat_cP
-        self._bw_m3m3 = bw_m3m3
+        self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
+        self._compr_wat_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm,
+                                                                                              self._z, self.par_wat))
+        self._bw_m3m3 = PVT.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, self.s_ppm)
+        self._mu_wat_cP = PVT.unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, self.s_ppm)
         return 1
 
 
