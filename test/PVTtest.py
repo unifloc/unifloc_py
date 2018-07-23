@@ -1,4 +1,5 @@
 import PVT
+import PVT_correlations
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -146,7 +147,6 @@ def test4():
     print('Viscosity, cP = ', fl.mu_wat_cP)
     print('Compressibility, 1/bar = ', fl.compr_wat_1bar)
     print('Formation Volume Factor, m3/m3 = ', fl.bw_m3m3)
-
     # Графички
     p_0 = 10
     p_n = 400
@@ -184,9 +184,11 @@ def test4():
         compr_wat.append(fl.compr_wat_1bar)
         bw.append(fl.bw_m3m3)
 
+    plt.subplots_adjust(left=0.04, right=0.999, top=0.98, bottom=0.04)  # чтобы пошире и было меньше наплывания
+
     """Давление насыщения"""
     plt.subplot(351)
-    plt.ylim(0, np.max(pb) + 10)
+    plt.ylim(np.min(pb) - 10, np.max(pb) + 10)
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Давление насыщения', color='black', family='fantasy')
@@ -206,7 +208,7 @@ def test4():
 
     """Вязкость нефти"""
     plt.subplot(353)
-    plt.ylim(0, np.max(mu_oil) + 10)
+    plt.ylim(0, np.max(mu_oil) + 5)
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Вязкость', color='black', family='fantasy')
@@ -216,7 +218,7 @@ def test4():
 
     """Сжимаемость нефти"""
     plt.subplot(354)
-    plt.ylim(0, np.max(compr_oil))
+    plt.ylim(0, 1.1 * np.max(compr_oil))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Сжимаемость', color='black', family='fantasy')
@@ -226,7 +228,7 @@ def test4():
 
     """Объемный коэффициент нефти """
     plt.subplot(355)
-    plt.ylim(0, np.max(bo))
+    plt.ylim(0.9 * np.min(bo), 1.1 * np.max(bo))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Объемный коэффициент нефти', color='black', family='fantasy')
@@ -236,7 +238,7 @@ def test4():
 
     """Плотность нефти """
     plt.subplot(356)
-    plt.ylim(0, np.max(rho_oil) + 10)
+    plt.ylim(0.9 * np.min(rho_oil), np.max(rho_oil) + 10)
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Плотность нефти', color='black', family='fantasy')
@@ -246,7 +248,7 @@ def test4():
 
     """z-фактор """
     plt.subplot(357)
-    plt.ylim(0, np.max(z))
+    plt.ylim(0.9 * np.min(z), 1.1 * np.max(z))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('z - фактор', color='black', family='fantasy')
@@ -256,7 +258,7 @@ def test4():
 
     """Вязкость газа """
     plt.subplot(358)
-    plt.ylim(0, np.max(mu_gas))
+    plt.ylim(0, 1.1 * np.max(mu_gas))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Вязкость газа', color='black', family='fantasy')
@@ -266,7 +268,7 @@ def test4():
 
     """Сжимаемость газа """
     plt.subplot(359)
-    plt.ylim(0, np.max(compr_gas))
+    plt.ylim(0, 1.1 * np.max(compr_gas))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Сжимаемость газа', color='black', family='fantasy')
@@ -276,7 +278,7 @@ def test4():
 
     """Объемный коэффициент газа """
     plt.subplot(3, 5, 10)
-    plt.ylim(0, np.max(bg))
+    plt.ylim(0, 1.1 * np.max(bg))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Объемный коэффициент газа', color='black', family='fantasy')
@@ -286,7 +288,7 @@ def test4():
 
     """Плотность воды """
     plt.subplot(3, 5, 11)
-    plt.ylim(0, np.max(rho_wat))
+    plt.ylim(0.9 * np.min(rho_wat), 1.1 * np.max(rho_wat))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Плотность воды', color='black', family='fantasy')
@@ -296,7 +298,7 @@ def test4():
 
     """Вязкость воды """
     plt.subplot(3, 5, 12)
-    plt.ylim(0, np.max(mu_wat))
+    plt.ylim(0.9 * np.min(mu_wat), 1.1 * np.max(mu_wat))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Вязкость воды', color='black', family='fantasy')
@@ -306,7 +308,7 @@ def test4():
 
     """Сжимаемость воды """
     plt.subplot(3, 5, 13)
-    plt.ylim(0, np.max(compr_wat))
+    plt.ylim(0.9 * np.min(compr_wat), 1.1 * np.max(compr_wat))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Сжимаемость воды', color='black', family='fantasy')
@@ -314,9 +316,9 @@ def test4():
     plt.xlabel('Давление, бар', color='black', family='fantasy')
     plt.plot(p_bar, compr_wat, 'b', linewidth=3)
 
-    """Сжимаемость воды """
+    """Объемный коэф """
     plt.subplot(3, 5, 14)
-    plt.ylim(0, np.max(bw))
+    plt.ylim(0.9 * np.min(bw), 1.1 * np.max(bw))
     plt.xlim(0, p_n)
     plt.grid(True)
     plt.title('Объемный коэффициент воды', color='black', family='fantasy')

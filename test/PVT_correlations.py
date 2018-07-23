@@ -8,6 +8,7 @@ Created on Sat May  5 13:59:06 2018
 import numpy as np
 import unittest
 import uconst as uc
+import scipy.optimize as opt
 
 # PVT свойства для нефти
 
@@ -578,6 +579,7 @@ def unf_pseudocritical_temperature_K(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     tc_co2_R = uc.k2r(304.13)
     tc_n2_R = uc.k2r(126.25)
     pc_h2s_psia = uc.Pa2psi(10 ** 6 * 9.007)
+
     pc_co2_psia = uc.Pa2psi(10 ** 6 * 7.375)
     pc_n2_psia = uc.Pa2psi(10 ** 6 * 3.4)
     J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - 9.0348 * 10 ** (-1) * y_co2 *\
@@ -642,29 +644,19 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
-    epsilon = 0.000001
-    maxiter = 100
-    counter = 0
-    z_previous = 1
-    ropr = 0.27 * (ppr / (z_previous * tpr))
-    z_current = 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr + \
-        (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
-        ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
-    while abs(z_current - z_previous) > epsilon and counter < maxiter:
-        if ppr <= 2:
-            z_previous = z_current + (z_current - z_previous)
-        elif ppr <= 3:
-            z_previous = z_current + (z_current - z_previous) / 2
-        elif ppr <= 6:
-            z_previous = z_current + (z_current - z_previous) / 3
-        else:
-            z_previous = z_current + (z_current - z_previous) / 5
-        ropr = 0.27 * (ppr / (z_previous * tpr))
-        z_current = 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr + \
-            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
+
+    def f(variables):
+        z = variables[0]
+        ropr = variables[1]
+        func = np.zeros(2)
+        func[0] = 0.27 * (ppr / (z * tpr)) - ropr
+        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
+            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
             ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
-        counter = counter + 1
-    return z_current
+        return func
+    solution = opt.fsolve(f, np.array([1.0, 0.03]))  # по идее лучше постоянно менять приближение,
+    # вероятно могут быть проблемы, необходимо задать функцию примерного расчета z
+    return solution[0]
 
 
 def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
@@ -681,33 +673,23 @@ def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
-    epsilon = 0.000001
-    maxiter = 100
-    counter = 0
-    z_previous = 1
-    ropr = 0.27 * (ppr / (z_previous * tpr))
-    z_current = 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr + \
-        (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
-        ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
-    while abs(z_current - z_previous) > epsilon and counter < maxiter:
-        if ppr <= 2:
-            z_previous = z_current + (z_current - z_previous)
-        elif ppr <= 3:
-            z_previous = z_current + (z_current - z_previous) / 2
-        elif ppr <= 6:
-            z_previous = z_current + (z_current - z_previous) / 3
-        else:
-            z_previous = z_current + (z_current - z_previous) / 5
-        ropr = 0.27 * (ppr / (z_previous * tpr))
-        z_current = 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr + \
-            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * \
+
+    def f(variables):
+        z = variables[0]
+        ropr = variables[1]
+        func = np.zeros(2)
+        func[0] = 0.27 * (ppr / (z * tpr)) - ropr
+        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
+            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
             ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
-        counter = counter + 1
-    ropr = 0.27 * (ppr / (z_current * tpr))
-    z_derivative = 0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5 + 2 * ropr *\
-        (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) - 5 * 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 4 +\
-            2 * 0.6134 * ropr / tpr * (1 + 0.7210 * ropr ** 2 - 0.7210 ** 2 * ropr ** 4) * np.exp(-0.7210 / ropr ** 2)
-    cpr = 1 / ropr - 0.27 / (z_current ** 2 * tpr) * (z_derivative / (1 + ropr * z_derivative / z_current))
+        return func
+    solution = np.array(opt.fsolve(f, np.array([1.0, 0.03])))
+    z_derivative = 0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5 + 2 *\
+        solution[1] * (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) - 5 * 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
+        solution[1] ** 4 + 2 * 0.6134 * solution[1] / tpr * (1 + 0.7210 * solution[1] ** 2 - 0.7210 ** 2 *
+                                                             solution[1] ** 4) * np.exp(-0.7210 / solution[1] ** 2)
+    cpr = 1 / solution[1] - 0.27 / (solution[0] ** 2 * tpr) * (z_derivative / (1 + solution[1] * z_derivative /
+                                                                               solution[0]))
     cg = cpr / ppc_MPa
     return cg
 
