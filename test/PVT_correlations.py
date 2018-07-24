@@ -88,6 +88,23 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     return pb_MPaa
 
 
+def unf_pb_AlMarhoun_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
+    """
+    bubble point pressure calculation according to Al-Marhoun (1985) correlation
+
+    Middle-East oil
+
+    ref1 PYT Correlations for Middle East Crude Oils, Muhammad All AI.Marhoun, Journal of Petroleum Technology. May 1988
+
+    return bubble point pressure abs in MPa
+    rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
+    gamma_oil=0.86, specific gas density (by water)
+    gamma_gas=0.6,  specific gas density (by air)
+    t_K=350,        temperature, K
+    """
+    pass
+
+
 def unf_rs_Standing_m3m3(p_MPaa, pb_MPaa=0, rsb_m3m3=0, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
     Gas-oil ratio calculation inverse of Standing (1947) correlation for bubble point pressure
@@ -354,6 +371,7 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
     counter = 0
     ro_po_current = ro_po
     ro_po_previous = 0
+    # TODO в идеале нужно также как для z-фактора сделать через scipy а не через цикл
     while abs(ro_po_current - ro_po_previous) > epsilon and counter < maxiter:
         ro_po_previous = ro_po_current
         ro_a = -49.8930 + 85.0149 * gamma_gassp - 3.70373 * gamma_gassp * ro_po +\
@@ -548,6 +566,27 @@ def unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa):
         (-1.1089)
     bt = 10 ** (8.0135 * 10 ** (-2) + 4.7257 * 10 ** (-1) * np.log10(bt) + 1.7351 * 10 ** (-1) * np.log10(bt) ** 2)
     return bt
+
+
+def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
+    """
+    :param p_MPaa: pressure in MPaa
+    :param rsb_m3m3: gas-oil ratio at bubble poinr pressure, m3/m3
+    :param t_K: temperature in K
+    :param gamma_oil: specific oil density(by water)
+    :param gamma_gassp: specific gas density(by air) in separator
+    :return: reservoir free gas specific gravity
+
+    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+    """
+    api = uc.gamma_oil2api(gamma_oil)
+    rsb_scfstb = uc.m3m3_2_scfstb(rsb_m3m3)
+    p_psia = uc.MPa2psi(p_MPaa)
+    t_F = uc.k2f(t_K)
+    gamma_gasr = 1 / (-208.0797 / p_psia + 22.885 / p_psia ** 2 - 0.000063641 * p_psia + 3.38346 / t_F ** 0.5 -
+                      0.000992 * t_F - 0.000081147 * rsb_scfstb - 0.001956 * api + 1.081956 / gamma_gassp + 0.394035 *
+                      gamma_gassp ** 2)
+    return gamma_gasr
 
 """
 В дальнейшем функции для нефти будут дополняться, а пока перейдем к PVT для газа
@@ -1034,10 +1073,9 @@ def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
     return bw
 
 
-"""
-def unf_gwr_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
+def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
 
-    
+    """
     Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)
 
     ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
@@ -1049,24 +1087,69 @@ def unf_gwr_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
 
     корреляция позволяет найти газосодержание метана в соленой воде
 
-    return density, kg/m3
-    t_K,                            temperature, K
-    p_MPaa,                         pressure, MPaa
+    return GWR, m3/m3
     s_ppm,                          salinity, ppm
-    
-    
-    t_C = t_K - 273.15
+    z,                              z-factor
+    """
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
-    ro_w70_sc = (-0.127213 * (20 / 100) ** 2 + 0.645486 * (20 / 100) + 1.03265) / (-0.070291 * (20 / 100) ** 2 +
-                                                                                   0.639589 * (20 / 100) + 1)
-    ew_sc = (4.221 * (20 / 100) ** 2 - 3.478 * (20 / 100) + 6.221) / (
-                0.5182 * (20 / 100) ** 2 - 0.4405 * (20 / 100) + 1)
-    fw_sc = (-11.403 * (20 / 100) ** 2 + 29.932 * (20 / 100) + 27.952) / (0.20684 * (20 / 100) ** 2 +
-                                                                          0.3768 * (20 / 100) + 1)
-                                                                          
-    тут надо разобраться
-    """
+    t_C_sc = 20
+    t_K_sc = 293.15
+    p_MPaa_sc = 0.1013
+    # Первым шагом вычисляется плотность чистой воды при давлении 70 MPa и температуре
+    ro_w70_sc = (-0.127213 * (t_C_sc/100)**2 + 0.645486 * (t_C_sc/100) + 1.03265)/(-0.070291 * (t_C_sc/100)**2 +
+                                                                                   0.639589 * (t_C_sc/100) + 1)
+    # Температурные коэффициенты сжимаемости чистой воды
+    ew_sc = (4.221 * (t_C_sc / 100) ** 2 - 3.478 * (t_C_sc / 100) + 6.221) / (0.5182 * (t_C_sc / 100) ** 2 - 0.4405 *
+                                                                              (t_C_sc / 100) + 1)
+    fw_sc = (-11.403 * (t_C_sc / 100) ** 2 + 29.932 * (t_C_sc / 100) + 27.952) / (0.20684 * (t_C_sc / 100) ** 2 +
+                                                                                  0.3768 * (t_C_sc / 100) + 1)
+    # Температурные коэффициенты плотности раствора
+    d_m1 = -1.1149 * 10 ** (-4) * (t_C_sc/100)**2 + 1.7105 * 10 ** (-4) * (t_C_sc/100) - 4.3766 * 10 ** (-4)
+    d_m2 = (-8.878 * 10 ** (-4) * (t_C_sc/100)**2 - 1.388 * 10 ** (-4) - 2.96318 * 10 ** (-3))/(0.51103 * (t_C_sc /
+                                                                                                           100) + 1)
+    d_m3 = (2.1466 * 10 ** (-3) * (t_C_sc / 100) ** 2 + 1.2427 * 10 ** (-2) * (t_C_sc / 100) + 4.2648 * 10 ** (-2)) / \
+           (-8.1009 * 10 ** (-2) * (t_C_sc / 100) ** 2 + 0.525417 * (t_C_sc / 100) + 1)
+    d_m4 = 2.356 * 10 ** (-4) * (t_C_sc/100)**2 - 3.636 * 10 ** (-4) * (t_C_sc/100) - 2.278 * 10 ** (-4)
+    # Плотность раствора воды с хлоридом натрия при давлении 70 MPa и температуре
+    ro_b70_sc = ro_w70_sc + d_m1 * m ** 2 + d_m2 * m ** 1.5 + d_m3 * m + d_m4 * m ** 0.5
+    # Температурные коэффициенты сжимаемости раствора
+    eb_sc = ew_sc + 0.1249
+    f_m1 = (-0.617 * (t_C_sc / 100) ** 2 - 0.747 * (t_C_sc / 100) - 0.4339) / (10.26 * (t_C_sc / 100) + 1)
+    f_m2 = (9.917 * (t_C_sc / 100) + 5.1128) / (3.892 * (t_C_sc / 100) + 1)
+    f_m3 = 0.0365 * (t_C_sc / 100) ** 2 - 0.0369 * (t_C_sc / 100)
+    fb_sc = fw_sc + f_m1 * m ** 1.5 + f_m2 * m + f_m3 * m ** 0.5
+    ib70_sc = np.log(abs(eb_sc + fb_sc))/eb_sc
+    ib_sc = np.log(abs(eb_sc * p_MPaa_sc / 70 + fb_sc)) / eb_sc
+    # Плотность раствора при T, P
+    ro_b_sc = ro_b70_sc * np.exp(ib_sc - ib70_sc)
+    # Найдем растворимость метана в растворе
+    # Сперва определим давление насыщенных паров для чистой воды
+    eps = 1 - t_K_sc/647.096
+    p_sigma = 22.064 * np.exp(647.096/t_K_sc * (-7.85951783 * eps + 1.84408259 * eps ** 1.5 - 11.7866497 *
+                                                eps ** 3 + 22.6807411 * eps ** 3.5 - 15.9619719 * eps ** 4 +
+                                                1.80122502 * eps ** 7.5))
+    # Определим коэффициенты растворимости метана
+    a = -0.004462 * (t_C_sc / 100) - 0.06763
+    b = -0.03602 * (t_C_sc / 100) ** 2 + 0.18917 * (t_C_sc / 100) + 0.97242
+    c = (0.6855 * (t_C_sc / 100) ** 2 - 3.1992 * (t_C_sc / 100) - 3.7968) / (0.07711 * (t_C_sc / 100) ** 2 + 0.2229 *
+                                                                             (t_C_sc / 100) + 1)
+    # Растворимость метана в чистой воде
+    m_ch4_w = np.exp(a * (np.log(p_MPaa_sc - p_sigma))**2 + b * np.log(p_MPaa_sc - p_sigma) + c)
+    # Далее найдем коэффициенты взаимодействия
+    lyambda = -0.80898 + 1.0827 * 10 ** (-3) * t_C_sc + 183.85 / t_C_sc + 3.924 * 10 ** (-4) * p_MPaa_sc - 1.97 * 10 **\
+        (-6) * p_MPaa_sc ** 2
+    dzeta = -3.89 * 10 ** (-3)
+    # Растворимость метана в растворе
+    # нужно отметить, что в обозначениях было сложно разобраться, для понимания этой формулы лучше читать статью
+    m_ch4_b = m_ch4_w * np.exp(-2 * lyambda * m - dzeta*m**2)
+    # Удельный объем раствора без метана
+    v_b0_sc = 1 / ro_b_sc
+    # Молярный объем метана в газовой фазе
+    vm_ch4_g_sc = z * 8.314467 * t_K_sc / p_MPaa_sc
+    # Найдем GWR
+    gwr = m_ch4_b * vm_ch4_g_sc / ((1000 + m * 58.4428) * v_b0_sc)
+    return gwr
 
 
 def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
@@ -1356,6 +1439,21 @@ class TestPVT(unittest.TestCase):
         tpc_K = 239.186917147216
         self.assertAlmostEqual(unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K), 0.47717077711622113,
                                delta=0.0001)
+
+
+    def test_unf_McCain_specificgravity(self):
+        p_MPaa = 10
+        rsb_m3m3 = 100
+        t_K = 350
+        gamma_oil = 0.8
+        gamma_gassp = 0.6
+        self.assertAlmostEqual(unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp), 0.6004849666507259,
+                               delta=0.0001)
+
+    def test_unf_gwr_brine_Spivey_m3m3(self):
+        s_ppm = 10000
+        z = 1
+        self.assertAlmostEqual(unf_gwr_brine_Spivey_m3m3(s_ppm, z), 0.0013095456419714546, delta=0.0001)
 
 
 if __name__ == '__main__':
