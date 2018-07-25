@@ -211,6 +211,7 @@ class FluidStanding(FluidBlackOil):
     def calc(self, p_bar, t_c):
         pass
 
+
 class FluidMcCain(FluidBlackOil):
     """
     класс реализующий расчет свойств нефти с использованием
@@ -277,12 +278,12 @@ class FluidMcCain(FluidBlackOil):
         return 1
 
 
-class FluidFlow():
+class FluidFlow:
     """класс для описания потока флюида"""
     def __init__(self):
-        self.fl = FluidMcCain() # по умолчанию задаем какой то флюид
-        self.qliq_m3day = 0     # дебит жидкости
-        self.fw = 0             # обводненность
+        self.fl = FluidMcCain()  # по умолчанию задаем какой то флюид
+        self.qliq_m3day = 0      # дебит жидкости
+        self.fw = 0              # обводненность
 
     def calc(self, p_bar, t_c):
         """расчет свойств потока для заданных термобарических условий"""

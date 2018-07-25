@@ -669,6 +669,26 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     return ppc_MPa
 
 
+def unf_zfactor(ppr,tpr):
+    """
+    correlation for z-factor
+
+    используется для приближения функции дранчука
+
+    return z-factor
+    ppr             preudoreduced pressure
+    tpr             pseudoreduced temperature
+    """
+    a = 1.39 * (tpr - 0.92) ** 0.5 - 0.36 * tpr - 0.101
+    b = ppr * (0.62 - 0.23 * tpr) + ppr ** 2 * (0.006 / (tpr - 0.86) - 0.037) + 0.32 * ppr ** 6 / np.exp(20.723 *
+                                                                                                         (tpr - 1))
+    c = 0.132 - 0.32 * np.log(tpr) / np.log(10)
+    d = np.exp(0.715 - 1.128 * tpr + 0.42 * tpr ** 2)
+
+    z = a + (1 - a) * np.exp(-b) + c * ppr ** d
+    return z
+
+
 def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     correlation for z-factor
@@ -683,18 +703,47 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
+    z0 = unf_zfactor(ppr, tpr)
+    ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
         z = variables[0]
         ropr = variables[1]
         func = np.zeros(2)
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
-        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
+        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
             (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
             ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
         return func
-    solution = opt.fsolve(f, np.array([1.0, 0.03]))  # по идее лучше постоянно менять приближение,
-    # вероятно могут быть проблемы, необходимо задать функцию примерного расчета z
+    solution = opt.fsolve(f, np.array([z0, ropr0]))
+    return solution[0]
+
+
+def unf_zfactor_DAK_ppr(ppr, tpr):
+    """
+    correlation for z-factor
+    ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
+    Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+
+    return z-factor
+    p_MPaa,                      pressure, MPaa
+    t_K,                         temperature, K
+    ppc_MPa                      pseudocritical pressure, MPa
+    tpc_K                        pseudocritical temperature, K
+    """
+    z0 = unf_zfactor(ppr, tpr)
+    ropr0 = 0.27 * (ppr / (z0 * tpr))
+
+    def f(variables):
+        z = variables[0]
+        ropr = variables[1]
+        func = np.zeros(2)
+        func[0] = 0.27 * (ppr / (z * tpr)) - ropr
+        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
+            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
+            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
+        return func
+    solution = opt.fsolve(f, np.array([z0, ropr0]))
     return solution[0]
 
 
