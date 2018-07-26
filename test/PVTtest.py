@@ -11,7 +11,8 @@ mpl.rcParams['font.fantasy'] = 'Times New Roman'
 
 # не понимаю как считывать с файла в зависимости от входного параметра и потом строить график
 # поэтому файл можно менять только с руки
-data = pd.read_csv(r"Standing-Katz Chart Data\sk_tpr_150.txt", sep=';')
+# TODO разобраться как сделать динамическое считывание файлов в зависимости от входного tpr
+data = pd.read_csv(r"Standing-Katz Chart Data\sk_tpr_280.txt", sep=';')
 df = pd.DataFrame(data)
 ppr = df['x']
 z = df['y']
@@ -19,7 +20,7 @@ z = df['y']
 plt.ylim(0.9 * z.min, 1.1 * z.max)
 plt.xlim(0, z.max)
 """
-tpr = 1.70  # менять это значение и в названии файла число в там без точек
+tpr = 2.8  # менять это значение и в названии файла число в там без точек
 pylab.grid(True)
 pylab.title('z - фактор', color='black', family='fantasy')
 pylab.ylabel('z', color='black', family='fantasy')

@@ -669,23 +669,27 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     return ppc_MPa
 
 
-def unf_zfactor(ppr,tpr):
+def unf_zfactor_BrillBeggs(ppr,tpr):
     """
-    correlation for z-factor
+    correlation for z-factor according Beggs & Brill correlation (1977)
 
     используется для приближения функции дранчука
+
+    Можно использовать при tpr<=2 и ppr<=4
+    при tpr <== 1.5 ppr<=10
 
     return z-factor
     ppr             preudoreduced pressure
     tpr             pseudoreduced temperature
     """
     a = 1.39 * (tpr - 0.92) ** 0.5 - 0.36 * tpr - 0.101
-    b = ppr * (0.62 - 0.23 * tpr) + ppr ** 2 * (0.006 / (tpr - 0.86) - 0.037) + 0.32 * ppr ** 6 / np.exp(20.723 *
-                                                                                                         (tpr - 1))
-    c = 0.132 - 0.32 * np.log(tpr) / np.log(10)
-    d = np.exp(0.715 - 1.128 * tpr + 0.42 * tpr ** 2)
-
-    z = a + (1 - a) * np.exp(-b) + c * ppr ** d
+    b = (0.62 - 0.23 * tpr) * ppr
+    c = (0.066/(tpr - 0.86) - 0.037) * ppr ** 2
+    d = (0.32/(10 ** (9 * (tpr - 1)))) * ppr ** 6
+    e = b + c + d
+    f = (0.132 - 0.32 * np.log10(tpr))
+    g = 10 ** (0.3106 - 0.49 * tpr + 0.1824 * tpr ** 2)
+    z = a + (1 - a) * np.exp(-e) + f * ppr ** g
     return z
 
 
@@ -703,7 +707,7 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
-    z0 = unf_zfactor(ppr, tpr)
+    z0 = 0.1
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
@@ -731,20 +735,17 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
     ppc_MPa                      pseudocritical pressure, MPa
     tpc_K                        pseudocritical temperature, K
     """
-    z0 = unf_zfactor(ppr, tpr)
-    ropr0 = 0.27 * (ppr / (z0 * tpr))
+    z0 = unf_zfactor_BrillBeggs(ppr, tpr)
 
-    def f(variables):
-        z = variables[0]
-        ropr = variables[1]
-        func = np.zeros(2)
-        func[0] = 0.27 * (ppr / (z * tpr)) - ropr
-        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
-            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
-            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
+    def f(z):
+        func = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) *\
+               (0.27 * (ppr / (z * tpr))) + (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * (0.27 * (ppr / (z * tpr))) **\
+               2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * (0.27 * (ppr / (z * tpr))) ** 5 + 0.6134 *\
+               (1 + 0.7210 * (0.27 * (ppr / (z * tpr))) ** 2) * ((0.27 * (ppr / (z * tpr))) ** 2 / tpr ** 3) *\
+               np.exp(-0.7210 / (0.27 * (ppr / (z * tpr))) ** 2)
         return func
-    solution = opt.fsolve(f, np.array([z0, ropr0]))
-    return solution[0]
+    solution = opt.newton(f, z0, maxiter=150, tol=1e-4)
+    return solution
 
 
 def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
@@ -1504,6 +1505,10 @@ class TestPVT(unittest.TestCase):
         z = 1
         self.assertAlmostEqual(unf_gwr_brine_Spivey_m3m3(s_ppm, z), 0.0013095456419714546, delta=0.0001)
 
+    def test_unf_zfactor_BrillBeggs(self):
+        ppr = 2
+        tpr = 2
+        self.assertAlmostEqual(unf_zfactor_BrillBeggs(ppr,tpr), 0.9540692750239955, delta=0.0001)
 
 if __name__ == '__main__':
     unittest.main()
