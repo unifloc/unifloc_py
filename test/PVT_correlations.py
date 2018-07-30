@@ -736,6 +736,20 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
     tpc_K                        pseudocritical temperature, K
     """
     z0 = unf_zfactor_BrillBeggs(ppr, tpr)
+    A = np.array([0.3265, -1.0700, -0.5339, 0.01569, -0.05165, 0.5475, -0.7361,
+                 0.1844, 0.1056, 0.6134, 0.7210])
+
+    # взял у руслана производную но что-то не помогает :(
+
+    def dranhuck_eq_deriv(z):
+        d = 0.27*ppr/z
+        exp_cf = np.exp((-A[10]*d**2)/tpr**2)
+        k = 2*A[9]*A[10]*(1+A[10]*d**2/tpr**2)*d**4*exp_cf/(tpr**7)
+        c1 = d*(A[0]+A[1]/tpr+A[2]/tpr**3+A[3]/tpr**4+A[4]/tpr**5)/(z*tpr)
+        c2 = (2*d**2)*(A[5]+A[6]/tpr+A[7]/tpr**2)/(z*tpr**2)
+        c3 = (5*A[8]*d**5)*(A[6]/tpr+A[7]/tpr**2)/(z*tpr**5)
+        c4 = A[9]*d**2*exp_cf*(2+4*A[10]*d**2/tpr**2)/(z*tpr*5)
+        return -1-c1-c2+c3-c4+k/z
 
     def f(z):
         func = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) *\
@@ -744,7 +758,7 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
                (1 + 0.7210 * (0.27 * (ppr / (z * tpr))) ** 2) * ((0.27 * (ppr / (z * tpr))) ** 2 / tpr ** 3) *\
                np.exp(-0.7210 / (0.27 * (ppr / (z * tpr))) ** 2)
         return func
-    solution = opt.newton(f, z0, maxiter=150, tol=1e-4)
+    solution = opt.newton(f, z0, dranhuck_eq_deriv, maxiter=150, tol=1e-4)
     return solution
 
 
