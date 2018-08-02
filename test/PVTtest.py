@@ -9,29 +9,29 @@ import PVT_correlations
 mpl.rcParams['font.family'] = 'fantasy'
 mpl.rcParams['font.fantasy'] = 'Times New Roman'
 
-# не понимаю как считывать с файла в зависимости от входного параметра и потом строить график
-# поэтому файл можно менять только с руки
-# TODO разобраться как сделать динамическое считывание файлов в зависимости от входного tpr
-data = pd.read_csv(r"Standing-Katz Chart Data\sk_tpr_105.txt", sep=';')
-df = pd.DataFrame(data)
-ppr = df['x']
-z = df['y']
-"""
-plt.ylim(0.9 * z.min, 1.1 * z.max)
-plt.xlim(0, z.max)
-"""
-tpr = 1.05  # менять это значение и в названии файла число в там без точек
-pylab.grid(True)
-pylab.title('z - фактор', color='black', family='fantasy')
-pylab.ylabel('z', color='black', family='fantasy')
-pylab.xlabel('Давление, бар', color='black', family='fantasy')
-pppr = []
-zz = []
+
+def get_z_curve_StandingKatz(tpr):
+    """
+    Функция позволяет считать данные из нужного файла в зависимости от входного tpr и построить график
+    Допустимые значения tpr = 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3
+    :param tpr: температура приведенная
+    :return: данные из графика стендинга для этой температуры
+    """
+    data = pd.read_csv('Standing-Katz Chart Data\sk_tpr_{}.txt'.format(int(tpr*100)), sep=';')
+    ppr = np.array(pd.DataFrame(data)['x'])
+    z = np.array(pd.DataFrame(data)['y'])
+    return ppr, z
+
+
+# Сравним расчетный график с графиком Стендинга
+tpr = 2.2
+ppr, z = get_z_curve_StandingKatz(tpr)
+z_calc = []
 for p in ppr:
-    pppr.append(p)
-    zz.append(PVT_correlations.unf_zfactor_DAK_ppr(p, tpr))
+    z_calc.append(PVT_correlations.unf_zfactor_DAK_ppr(p, tpr))
 pylab.plot(ppr, z, label='По графикам Стендинга-Катца')
-pylab.plot(pppr, zz, label='расчетный')
+pylab.plot(ppr, z_calc, label='расчетный')
+pylab.grid()
 pylab.legend()
 pylab.show()
 
