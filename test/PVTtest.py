@@ -15,7 +15,7 @@ def get_z_curve_StandingKatz(tpr):
     Функция позволяет считать данные из нужного файла в зависимости от входного tpr и построить график
     Допустимые значения tpr = 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3
     :param tpr: температура приведенная
-    :return: данные из графика стендинга для этой температуры
+    :return: данные из графика Cтендинга для этой температуры
     """
     data = pd.read_csv('Standing-Katz Chart Data\sk_tpr_{}.txt'.format(int(tpr*100)), sep=';')
     ppr = np.array(pd.DataFrame(data)['x'])
@@ -24,13 +24,23 @@ def get_z_curve_StandingKatz(tpr):
 
 
 # Сравним расчетный график с графиком Стендинга
-tpr = 2.2
+tpr = 1.2
 ppr, z = get_z_curve_StandingKatz(tpr)
 z_calc = []
+pogr = []
+i = 0
 for p in ppr:
     z_calc.append(PVT_correlations.unf_zfactor_DAK_ppr(p, tpr))
+    pogr.append((z[i]-z_calc[i])/z[i] * 100)
+    i += 1
+pylab.subplot(211)
 pylab.plot(ppr, z, label='По графикам Стендинга-Катца')
 pylab.plot(ppr, z_calc, label='расчетный')
+pylab.title('Сравнение графиков для tpr={}'.format(tpr))
+pylab.grid()
+pylab.legend()
+pylab.subplot(212)
+pylab.plot(ppr, pogr, label='погрешность в %')
 pylab.grid()
 pylab.legend()
 pylab.show()

@@ -658,10 +658,10 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     pc_co2_psia = uc.Pa2psi(10 ** 6 * 7.375)
     pc_n2_psia = uc.Pa2psi(10 ** 6 * 3.4)
     J = 1.1582 * 10 ** (-1) - 4.5820 * 10 ** (-1) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
-            9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
+        9.0348 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 6.6026 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + 7.0729 * 10 ** (-1) * gamma_gas - 9.9397 * 10 ** (-2) * gamma_gas ** 2
     K = 3.8216 - 6.5340 * 10 ** (-2) * y_h2s * (tc_h2s_R / pc_h2s_psia) - \
-            4.2113 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
+        4.2113 * 10 ** (-1) * y_co2 * (tc_co2_R / pc_co2_psia) - 9.1249 * 10 ** (-1) * y_n2 * (
                         tc_n2_R / pc_n2_psia) + 1.7438 * 10 * gamma_gas - 3.2191 * gamma_gas ** 2
     tpc_R = K ** 2 / J
     ppc_psia = tpc_R / J
@@ -699,6 +699,8 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
     Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
 
+    range of applicability is (0.2<=ppr<30 and 1.0<tpr<=3.0) and also ppr < 1.0 for 0.7 < tpr < 1.0
+
     return z-factor
     p_MPaa,                      pressure, MPaa
     t_K,                         temperature, K
@@ -729,37 +731,38 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
     ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
     Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
 
+    range of applicability is (0.2<=ppr<30 and 1.0<tpr<=3.0) and also ppr < 1.0 for 0.7 < tpr < 1.0
+
     return z-factor
     p_MPaa,                      pressure, MPaa
     t_K,                         temperature, K
     ppc_MPa                      pseudocritical pressure, MPa
     tpc_K                        pseudocritical temperature, K
     """
-    z0 = unf_zfactor_BrillBeggs(ppr, tpr)
-    A = np.array([0.3265, -1.0700, -0.5339, 0.01569, -0.05165, 0.5475, -0.7361,
-                 0.1844, 0.1056, 0.6134, 0.7210])
+    z0 = 1
+    ropr0 = 0.27 * (ppr / (z0 * tpr))
 
-    # взял у руслана производную но что-то не помогает :(
-
-    def dranhuck_eq_deriv(z):
-        d = 0.27*ppr/z
-        exp_cf = np.exp((-A[10]*d**2)/tpr**2)
-        k = 2*A[9]*A[10]*(1+A[10]*d**2/tpr**2)*d**4*exp_cf/(tpr**7)
-        c1 = d*(A[0]+A[1]/tpr+A[2]/tpr**3+A[3]/tpr**4+A[4]/tpr**5)/(z*tpr)
-        c2 = (2*d**2)*(A[5]+A[6]/tpr+A[7]/tpr**2)/(z*tpr**2)
-        c3 = (5*A[8]*d**5)*(A[6]/tpr+A[7]/tpr**2)/(z*tpr**5)
-        c4 = A[9]*d**2*exp_cf*(2+4*A[10]*d**2/tpr**2)/(z*tpr*5)
-        return -1-c1-c2+c3-c4+k/z
-
+    def f(variables):
+        z = variables[0]
+        ropr = variables[1]
+        func = np.zeros(2)
+        func[0] = 0.27 * (ppr / (z * tpr)) - ropr
+        func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
+            (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
+            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 * ropr ** 2)
+        return func
+    solution = opt.fsolve(f, np.array([z0, ropr0]))
+    """
     def f(z):
-        func = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) *\
+        func = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) *\
                (0.27 * (ppr / (z * tpr))) + (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * (0.27 * (ppr / (z * tpr))) **\
                2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) * (0.27 * (ppr / (z * tpr))) ** 5 + 0.6134 *\
                (1 + 0.7210 * (0.27 * (ppr / (z * tpr))) ** 2) * ((0.27 * (ppr / (z * tpr))) ** 2 / tpr ** 3) *\
-               np.exp(-0.7210 / (0.27 * (ppr / (z * tpr))) ** 2)
+               np.exp(-0.7210 * (0.27 * (ppr / (z * tpr))) ** 2)
         return func
-    solution = opt.newton(f, z0, dranhuck_eq_deriv, maxiter=150, tol=1e-4)
-    return solution
+    solution = opt.newton(f, z0, maxiter=150, tol=1e-4)
+    """
+    return solution[0]
 
 
 def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
