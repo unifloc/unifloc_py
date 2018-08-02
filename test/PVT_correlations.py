@@ -709,17 +709,16 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
-    z0 = 0.1
+    z0 = 1
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
-        z = variables[0]
-        ropr = variables[1]
+        z,ropr = variables
         func = np.zeros(2)
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
         func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
             (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
-            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
+            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 * ropr ** 2)
         return func
     solution = opt.fsolve(f, np.array([z0, ropr0]))
     return solution[0]
@@ -743,8 +742,7 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
-        z = variables[0]
-        ropr = variables[1]
+        z,ropr = variables
         func = np.zeros(2)
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
         func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
@@ -779,6 +777,8 @@ def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
+    z0 = 1
+    ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
         z = variables[0]
@@ -787,13 +787,13 @@ def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
         func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
             (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) * ropr ** 2 - 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
-            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 / ropr ** 2)
+            ropr ** 5 + 0.6134 * (1 + 0.7210 * ropr ** 2) * (ropr ** 2 / tpr ** 3) * np.exp(-0.7210 * ropr ** 2)
         return func
-    solution = np.array(opt.fsolve(f, np.array([1.0, 0.03])))
+    solution = np.array(opt.fsolve(f, np.array([z0, ropr0])))
     z_derivative = 0.3265 - 1.0700 / tpr - 0.5339 / tpr ** 3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5 + 2 *\
         solution[1] * (0.5475 - 0.7361 / tpr + 0.1844 / tpr ** 2) - 5 * 0.1056 * (-0.7361 / tpr + 0.1844 / tpr ** 2) *\
-        solution[1] ** 4 + 2 * 0.6134 * solution[1] / tpr * (1 + 0.7210 * solution[1] ** 2 - 0.7210 ** 2 *
-                                                             solution[1] ** 4) * np.exp(-0.7210 / solution[1] ** 2)
+        solution[1] ** 4 + 2 * 0.6134 * solution[1] / tpr ** 3 * (1 + 0.7210 * solution[1] ** 2 - 0.7210 ** 2 *
+                                                             solution[1] ** 4) * np.exp(-0.7210 * solution[1] ** 2)
     cpr = 1 / solution[1] - 0.27 / (solution[0] ** 2 * tpr) * (z_derivative / (1 + solution[1] * z_derivative /
                                                                                solution[0]))
     cg = cpr / ppc_MPa
@@ -831,7 +831,7 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     p_MPaa,                         pressure, MPaa
     z,                              z-factor
     """
-    bg = 101.33 * 10**(-3) * t_K * z/ (1 * 293.15 * p_MPaa)
+    bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa)
     return bg
 
 

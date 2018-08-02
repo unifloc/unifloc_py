@@ -25,7 +25,7 @@ class FluidBlackOil:
     _pb_cal: float
 
     def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0,
-                 y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C = 80, bobcal_m3m3 =1.2, muobcal_cP=0.5 ):
+                 y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5 ):
         """
         создает флюид с заданными базовыми свойствами
 
@@ -270,6 +270,7 @@ class FluidMcCain(FluidBlackOil):
         self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
                                                                                             ppc_MPa, tpc_K))
         # water
+        # TODO НУЖНО ДОБАВИТЬ GWR
         self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
         self._compr_wat_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm,
                                                                                               self._z, self.par_wat))

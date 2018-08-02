@@ -47,9 +47,9 @@ pylab.show()
 
 
 def test4():
-    fl = PVT.FluidMcCain()
-    p_0 = 10
-    p_n = 400
+    fl = PVT.FluidMcCain(rsb_m3m3=50)
+    p_0 = 5
+    p_n = 300
     dp = 5
     p_bar = np.arange(p_0, p_n, dp)
     t_C = 150
@@ -225,7 +225,7 @@ def test4():
     plt.ylabel('bw, м3/м3', color='black', family='fantasy')
     plt.xlabel('Давление, бар', color='black', family='fantasy')
     plt.plot(p_bar, bw, 'b', linewidth=3)
-    # plt.show()
+    plt.show()
 
 
 test4()
