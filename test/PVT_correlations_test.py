@@ -1,7 +1,7 @@
 """
 tests for PVT_correlations functions
 """
-import PVT_correlations as PVTfunc
+import uPVT.PVT_correlations as PVTfunc
 import matplotlib.pyplot as plt
 import numpy as np
 

@@ -6,11 +6,11 @@ Created on Mon Sept 04 2017
 
 UniflocPy
 
-класс для расчета PVT свойств углеводородных флюидов и воды
+класс для расчета uPVT свойств углеводородных флюидов и воды
 
 """
-import uconst as uc
-import PVT_correlations as PVT
+import uscripts.uconst as uc
+import uPVT.PVT_correlations as PVT
 
 
 class FluidBlackOil:

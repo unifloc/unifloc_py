@@ -1,10 +1,10 @@
-import PVT
+import uPVT.PVT as PVT
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import pandas as pd
 import pylab
-import PVT_correlations
+import uPVT.PVT_correlations as PVTcorr
 
 mpl.rcParams['font.family'] = 'fantasy'
 mpl.rcParams['font.fantasy'] = 'Times New Roman'
@@ -17,7 +17,7 @@ def get_z_curve_StandingKatz(tpr):
     :param tpr: температура приведенная
     :return: данные из графика Cтендинга для этой температуры
     """
-    data = pd.read_csv('Standing-Katz Chart Data\sk_tpr_{}.txt'.format(int(tpr*100)), sep=';')
+    data = pd.read_csv('..\data\Standing-Katz Chart Data\sk_tpr_{}.txt'.format(int(tpr*100)), sep=';')
     ppr = np.array(pd.DataFrame(data)['x'])
     z = np.array(pd.DataFrame(data)['y'])
     return ppr, z
@@ -30,7 +30,7 @@ z_calc = []
 pogr = []
 i = 0
 for p in ppr:
-    z_calc.append(PVT_correlations.unf_zfactor_DAK_ppr(p, tpr))
+    z_calc.append(PVTcorr.unf_zfactor_DAK_ppr(p, tpr))
     pogr.append((z[i]-z_calc[i])/z[i] * 100)
     i += 1
 pylab.subplot(211)

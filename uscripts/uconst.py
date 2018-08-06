@@ -1,8 +1,8 @@
 """
 описание констант и методов конвертации единиц измерения для унифлока
 """
-import scipy.constants as const
 import numpy as np
+import scipy.constants as const
 
 # constants, which don't have in scipy.constants
 
@@ -56,8 +56,8 @@ def convert_pressure(val, old_scale, new_scale):
 
     Examples
     --------
-    >>> import uconst
-    >>> uconst.convert_pressure(1,'atm','psi')
+    >>> import uscripts
+    >>> uscripts.convert_pressure(1,'atm','psi')
     14.69594877551345
 
     """
