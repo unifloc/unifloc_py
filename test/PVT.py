@@ -204,8 +204,8 @@ class FluidBlackOil:
 
 class FluidStanding(FluidBlackOil):
     """
-    класс реализующий расчет свойств нефти с использованием
-    набора корреляция на основе Standing
+    класс, реализующий расчет свойств нефти с использованием
+    набора корреляций на основе Standing
     """
 
     def calc(self, p_bar, t_c):
@@ -268,7 +268,7 @@ class FluidStanding(FluidBlackOil):
 
 class FluidMcCain(FluidBlackOil):
     """
-    класс реализующий расчет свойств нефти с использованием
+    класс, реализующий расчет свойств нефти с использованием
     набора корреляций на основе McCain
     """
 

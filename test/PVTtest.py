@@ -24,7 +24,7 @@ def get_z_curve_StandingKatz(tpr):
 
 
 # Сравним расчетный график с графиком Стендинга
-tpr = 2
+tpr = 1.05
 ppr, z = get_z_curve_StandingKatz(tpr)
 z_calc = []
 pogr = []
