@@ -7,7 +7,7 @@ Created on Wed Jul 26 2018
 """
 import numpy as np
 import unittest
-import uconst as uc
+import uscripts as uc
 
 # Функции для расчета градиента давления по корреляции Ансари
 

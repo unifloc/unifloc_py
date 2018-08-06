@@ -7,10 +7,10 @@ Created on Sat May  5 13:59:06 2018
 """
 import numpy as np
 import unittest
-import uconst as uc
+import uscripts.uconst as uc
 import scipy.optimize as opt
 
-# PVT свойства для нефти
+# uPVT свойства для нефти
 
 
 def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
@@ -591,11 +591,11 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
     return gamma_gasr
 
 """
-В дальнейшем функции для нефти будут дополняться, а пока перейдем к PVT для газа
+В дальнейшем функции для нефти будут дополняться, а пока перейдем к uPVT для газа
 """
 
 
-# PVT свойства для газа
+# uPVT свойства для газа
 
 def unf_pseudocritical_temperature_K(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     """"
@@ -837,7 +837,7 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     return bg
 
 
-# PVT свойства для воды
+# uPVT свойства для воды
 
 def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
     """
