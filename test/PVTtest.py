@@ -24,7 +24,7 @@ def get_z_curve_StandingKatz(tpr):
 
 
 # Сравним расчетный график с графиком Стендинга
-tpr = 1.2
+tpr = 2
 ppr, z = get_z_curve_StandingKatz(tpr)
 z_calc = []
 pogr = []
@@ -45,9 +45,22 @@ pylab.grid()
 pylab.legend()
 pylab.show()
 
+# построим все графики Стендинга сразу
+tpr = [1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3]
+
+for t in tpr:
+    ppr_standing, z_standing = get_z_curve_StandingKatz(t)
+    pylab.plot(ppr_standing, z_standing, label='tpr = {}'.format(t))
+pylab.grid()
+pylab.title('Графики Стендинга-Катца для различных значений tpr')
+pylab.legend()
+pylab.xlabel('ppr')
+pylab.ylabel('z')
+pylab.show()
+
 
 def test4():
-    fl = PVT.FluidMcCain(rsb_m3m3=50)
+    fl = PVT.FluidStanding(rsb_m3m3=50)
     p_0 = 5
     p_n = 300
     dp = 5

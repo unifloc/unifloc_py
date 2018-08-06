@@ -120,14 +120,16 @@ def unf_rs_Standing_m3m3(p_MPaa, pb_MPaa=0, rsb_m3m3=0, gamma_oil=0.86, gamma_ga
     gamma_gas=0.6,  specific gas density (by air)
     t_K=350,        temperature, K
     pb_MPaa=0,      buble point pressure, MPa
-    rsb_m3m3=0,     gas-oil ratio at the bublepoint pressure, m3/m3
+    rsb_m3m3=0,     gas-oil ratio at the bubble point pressure, m3/m3
     """
     if pb_MPaa == 0 or rsb_m3m3 == 0:
         # мольная доля газа
         yg = 1.225 + 0.001648 * t_K - 1.769 / gamma_oil
         rs_m3m3 = gamma_gas * (1.92 * p_MPaa / 10 ** yg) ** 1.204
-    else:
+    elif p_MPaa < pb_MPaa:
         rs_m3m3 = rsb_m3m3 * (p_MPaa / pb_MPaa) ** 1.204
+    else:
+        rs_m3m3 = rsb_m3m3
     return rs_m3m3
 
 
@@ -402,7 +404,7 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
     return ro_or
 
 
-def unf_density_oil_Standing(p_MPaa,pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_gas, gamma_oil):
+def unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_gas, gamma_oil):
     """
     Oil density according Standing correlation.
     ref1 book Brill 2006, Production Optimization Using Nodal Analysis
@@ -669,7 +671,7 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     return ppc_MPa
 
 
-def unf_zfactor_BrillBeggs(ppr,tpr):
+def unf_zfactor_BrillBeggs(ppr, tpr):
     """
     correlation for z-factor according Beggs & Brill correlation (1977)
 
@@ -742,7 +744,7 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
-        z,ropr = variables
+        z, ropr = variables
         func = np.zeros(2)
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
         func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\

@@ -205,26 +205,80 @@ class FluidBlackOil:
 class FluidStanding(FluidBlackOil):
     """
     класс реализующий расчет свойств нефти с использованием
-    набора корреляций корреляций на основе McCain
+    набора корреляция на основе Standing
     """
-    # TODO здесь аналогично McCain надо сделать расчет свойств нефти на основе Стендинга
+
     def calc(self, p_bar, t_c):
-        pass
+        """Расчет свойств нефти на основе набора корреляций Standing"""
+        super().calc(p_bar, t_c)
+        # подготовим внутренние переменные для расчетов
+        p_MPaa = uc.bar2MPa(self.p_bar)
+        pbcal_MPaa = uc.bar2MPa(self.pbcal_bar)
+        t_K = uc.c2k(self.t_c)
+        # найдем значение давления насыщения по Standing
+        pb_MPaa = PVT.unf_pb_Standing_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, t_K)
+        self._pb_bar = uc.MPa2bar(pb_MPaa)
+        # TODO необходимо будет сделать калибровку при любом P,T любого свойства
+        if pbcal_MPaa > 0:
+            p_fact = pb_MPaa / pbcal_MPaa
+            # сдвигаем шкалу по давлению для расчета, если задана калибровка
+            p_MPaa = p_fact * p_MPaa
+            self._pb_bar = self._pb_bar / p_fact
+        # внутри rs есть проверка на давление насыщения
+        self._rs_m3m3 = PVT.unf_rs_Standing_m3m3(p_MPaa, pb_MPaa, self.rsb_m3m3, self.gamma_oil, self.gamma_gas, t_K)
+        co_1MPa = PVT.unf_compressibility_oil_VB_1Mpa(self._rs_m3m3, t_K, self.gamma_oil, p_MPaa, self.gamma_gas)
+        self._compr_oil_1bar = uc.compr_1mpa_2_1bar(co_1MPa)
+        # оценим значение объемного коэффициента
+        # оценим значение объемного коэффициента при давлении насыщения
+        self._bob_m3m3 = PVT.unf_fvf_Standing_m3m3_saturated(self.rsb_m3m3, self.gamma_gas, self.gamma_oil, t_K)
+        if p_MPaa > pb_MPaa:
+            self._bo_m3m3 = PVT.unf_fvf_VB_m3m3_above(self._bob_m3m3, co_1MPa, pb_MPaa, p_MPaa)
+        else:
+            self._bo_m3m3 = PVT.unf_fvf_Standing_m3m3_saturated(self._rs_m3m3, self.gamma_gas, self.gamma_oil, t_K)
+        # проверим необходимость калибровки значения объемного коэффициента
+        if self.bobcal_m3m3 > 0:
+            b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
+            self._bo_m3m3 = b_fact * self._bo_m3m3
+        self._rho_oil_kgm3 = PVT.unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, self._rs_m3m3, self._bo_m3m3,
+                                                          self.gamma_gas, self.gamma_oil)
+        # оценим значение вязкости
+        self._mu_deadoil_cP = PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, t_K)
+        self._muob_cP = PVT.unf_saturatedoilviscosity_Beggs_cP(self._mu_deadoil_cP, self.rsb_m3m3)
+        self._mu_oil_cP = PVT.unf_oil_viscosity_Beggs_VB_cP(self._mu_deadoil_cP, self._rs_m3m3, p_MPaa, pb_MPaa)
+        if self.muobcal_cP > 0:
+            mu_fact = self.muobcal_cP / self._muob_cP
+            self._mu_oil_cP = mu_fact * self._mu_oil_cP
+        # gas
+        tpc_K = PVT.unf_pseudocritical_temperature_K(self.gamma_gas, self.y_h2s, self.y_co2, self.y_n2)
+        ppc_MPa = PVT.unf_pseudocritical_pressure_MPa(self.gamma_gas, self.y_h2s, self.y_co2, self.y_n2)
+        self._z = PVT.unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K)
+        self._mu_gas_cP = PVT.unf_gasviscosity_Lee_cP(t_K, p_MPaa, self._z, self.gamma_gas)
+        self._bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, self._z)
+        self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
+                                                                                            ppc_MPa, tpc_K))
+        # water
+        # TODO НУЖНО ДОБАВИТЬ GWR
+        self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
+        self._compr_wat_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm,
+                                                                                              self._z, self.par_wat))
+        self._bw_m3m3 = PVT.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, self.s_ppm)
+        self._mu_wat_cP = PVT.unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, self.s_ppm)
+        return 1
 
 
 class FluidMcCain(FluidBlackOil):
     """
     класс реализующий расчет свойств нефти с использованием
-    набора корреляций корреляций на основе McCain
+    набора корреляций на основе McCain
     """
 
     def calc(self, p_bar, t_c):
         """Расчет свойств нефти на основе набора корреляций McCain"""
         super().calc(p_bar, t_c)
         # подготовим внутренние переменные для расчетов
-        p_MPaa = uc.bar2MPa(p_bar)
+        p_MPaa = uc.bar2MPa(self.p_bar)
         pbcal_MPaa = uc.bar2MPa(self.pbcal_bar)
-        t_K = uc.c2k(t_c)
+        t_K = uc.c2k(self.t_c)
         # найдем значение давления насыщения по Valko McCain
         pb_MPaa = PVT.unf_pb_Valko_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, t_K)
         self._pb_bar = uc.MPa2bar(pb_MPaa)
