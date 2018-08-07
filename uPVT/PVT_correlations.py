@@ -185,7 +185,7 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
     return rs_m3m3
 
 
-def unf_rsb_Mccain_m3m3(rsp_m3m3,gamma_oil, psp_MPaa=0, tsp_K=0):
+def unf_rsb_Mccain_m3m3(rsp_m3m3, gamma_oil, psp_MPaa=0, tsp_K=0):
     """
     Solution Gas-oil ratio at bubble point pressure calculation according to McCain (2002) correlation 
     taking into account the gas losses at separator and stock tank
