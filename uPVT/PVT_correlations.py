@@ -1434,7 +1434,7 @@ class TestPVT(unittest.TestCase):
         t_K = 350
         ppc_MPa = 7.477307083789863
         tpc_K = 239.186917147216
-        self.assertAlmostEqual(unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K), 0.8414026170318333, delta=0.0001)
+        self.assertAlmostEqual(unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K), 0.8607752185760458, delta=0.0001)
 
     def test_unf_gasviscosity_Lee_cP(self):
         t_K = 350
@@ -1506,7 +1506,7 @@ class TestPVT(unittest.TestCase):
         t_K = 350
         ppc_MPa = 7.477307083789863
         tpc_K = 239.186917147216
-        self.assertAlmostEqual(unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K), 0.47717077711622113,
+        self.assertAlmostEqual(unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K), 0.4814932416304309,
                                delta=0.0001)
 
 
@@ -1528,6 +1528,7 @@ class TestPVT(unittest.TestCase):
         ppr = 2
         tpr = 2
         self.assertAlmostEqual(unf_zfactor_BrillBeggs(ppr,tpr), 0.9540692750239955, delta=0.0001)
+
 
 if __name__ == '__main__':
     unittest.main()
