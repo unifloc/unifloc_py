@@ -299,10 +299,7 @@ def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
     if p_MPaa <= pb_MPaa:
         bo = bob
     else:
-        pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
-        p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
-        cofb_1psi = uc.compr_1pa_2_1psi(cofb_1MPa / 10 ** 6)
-        bo = bob * np.exp(cofb_1psi * (pb_psia - p_psia))
+        bo = bob * np.exp(cofb_1MPa * (pb_MPaa - p_MPaa))
     return bo
 
 
@@ -1338,7 +1335,7 @@ class TestPVT(unittest.TestCase):
         cofb_1MPa = 3 * 10**(-3)
         pb_MPaa = 12
         p_MPaa = 15
-        self.assertAlmostEqual(unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa), 1.288352492404749, delta=0.0001)
+        self.assertAlmostEqual(unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa), 1.2883524924047487, delta=0.0001)
 
     def test_unf_compressibility_oil_VB_1Mpa(self):
         rs_m3m3 = 200

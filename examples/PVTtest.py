@@ -36,7 +36,7 @@ for p in ppr:
 pylab.subplot(211)
 pylab.plot(ppr, z, label='По графикам Стендинга-Катца')
 pylab.plot(ppr, z_calc, label='расчетный')
-pylab.title('Сравнение графиков для tpr={}'.format(tpr))
+pylab.title('Сравнение графиков для tpr = {}'.format(tpr))
 pylab.grid()
 pylab.legend()
 pylab.subplot(212)

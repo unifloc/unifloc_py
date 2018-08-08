@@ -7,7 +7,8 @@ Created on Wed Jul 26 2018
 """
 import numpy as np
 import unittest
-import uscripts as uc
+import uscripts.uconst as uc
+import scipy.optimize as opt
 
 # Функции для расчета градиента давления по корреляции Ансари
 
@@ -53,7 +54,7 @@ def unf_velocity_dispersed2bubble(sigma_liq_Nm, rho_liq_kgm3, rho_gas_kgm3, f, v
                               vel_liq_super_ms + vel_gas_super) \
                   ** 1.2 - 0.725 + 4.15 * (vel_gas_super / (vel_gas_super + vel_liq_super_ms)) ** 0.5
         return disp_eq
-    vel_gas_super_disp_ms = fsolve(dispersedbubble_equation, vel_gas_super0_ms)
+    vel_gas_super_disp_ms = opt.fsolve(dispersedbubble_equation, np.array(vel_gas_super0_ms))
     return vel_gas_super_disp_ms
 
 
@@ -72,6 +73,7 @@ def unf_velocity_dispersed2slug(vel_liq_super_ms):
 
 
 def unf_velocity_slug2annular():
+
     pass
 
 
