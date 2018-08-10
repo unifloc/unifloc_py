@@ -9,7 +9,7 @@ UniflocPy
 класс для расчета PVT свойств углеводородных флюидов и воды
 
 """
-import unitconverter as un
+authentication token
 
 class ComponentGeneral:
     """
