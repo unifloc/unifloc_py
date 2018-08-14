@@ -1,40 +1,44 @@
 from pandas import read_csv
-import pandas as pd
 from os.path import dirname
 
 
-class Motor(object):
+class MotorBase(object):
+    """
+    Класс общающийся с базой данных ПЭД. Забирает коэффициенты
+    отцифрованных кривых
+    """
 
-    def __init__(self, motor_base: pd.DataFrame.astype, company: str,
-                 frequency_nom: int, d__mm: int) -> None:
-        self.motor_base = motor_base
+    def __init__(self, company: str, frequency_nom: int, d__mm: int) -> None:
         self.company = company
         self.frequency_nom = frequency_nom
         self.d__mm = d__mm
         self.nominal_power_kW = None
+        self.motor_base = read_csv('{}/db/db_motor.csv'.format(
+            dirname(__file__)), sep=';')
 
     @property
     def current_coefficient(self):
-        return get_coefficient(self.motor_base, self.company,
-                               self.frequency_nom, self.d__mm, parameter='I')
+        return _get_coefficient(self.company, self.frequency_nom, self.d__mm,
+                                parameter='I', motor_base=self.motor_base)
 
     @property
     def frequency_coefficient(self):
-        return get_coefficient(self.motor_base, self.company,
-                               self.frequency_nom, self.d__mm, parameter='f')
+        return _get_coefficient(self.company, self.frequency_nom, self.d__mm,
+                                parameter='f', motor_base=self.motor_base)
 
     @property
     def cos_coefficient(self):
-        return get_coefficient(self.motor_base, self.company,
-                               self.frequency_nom, self.d__mm, parameter='cos')
+        return _get_coefficient(self.company, self.frequency_nom, self.d__mm,
+                                parameter='cos', motor_base=self.motor_base)
 
     @property
     def efficient_coefficient(self):
-        return get_coefficient(self.motor_base, self.company,
-                               self.frequency_nom, self.d__mm, parameter='eff')
+        return _get_coefficient(self.company, self.frequency_nom, self.d__mm,
+                                parameter='eff', motor_base=self.motor_base)
 
 
-def get_coefficient(motor_base, company, frequency_nom, d__mm, parameter):
+def _get_coefficient(company, frequency_nom, d__mm, parameter, motor_base):
+
     current_motor = motor_base.loc[motor_base['Company'] == company]\
         .loc[motor_base['frequency_nom'] == frequency_nom]\
         .loc[motor_base['d_mm'] == d__mm]
@@ -44,7 +48,3 @@ def get_coefficient(motor_base, company, frequency_nom, d__mm, parameter):
         coefficient = (current_motor['{}_{}'.format(parameter, i)].values[0])
         coefficients.append(coefficient)
     return coefficients
-
-
-# TODO: сделать чтобы база уже в классе лежала
-motor_base =read_csv('{}/db/db_motor.csv'.format(dirname(__file__)), sep=';')
