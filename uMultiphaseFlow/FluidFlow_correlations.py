@@ -122,19 +122,25 @@ def unf_velocity_slug2annular(sigma_liq_Nm, rho_liq_kgm3, rho_gas_kgm3, vel_gas_
     theta = 90  # TODO можно потом попробовать поиграться с углом, хот эта корреляция для вертикальной трубы
     y_m = uc.g * np.sin(theta * uc.pi / 180) * (rho_liq_kgm3 - rho_c) / dpdl_sc
     delta_0 = 0.25
-    if f_e > 0.9:
-        equation2solve = y_m - (1 + 300 * delta_0) / ((1 - 4 * delta_0 * (1 - delta_0)) ** 2.5 * 4 * delta_0 *
-                                                      (1 - delta_0)) + x_m ** 2 / (4 * delta_0 * (1 - delta_0)) ** 3
-    else:
-        equation2solve = y_m - (1 + 24 * (rho_liq_kgm3 / rho_gas_kgm3) ** (1/3) * delta_0) /\
-                         ((1 - 4 * delta_0 * (1 - delta_0)) ** 2.5 * 4 * delta_0 * (1 - delta_0)) +\
-                         x_m ** 2 / (4 * delta_0 * (1 - delta_0)) ** 3
-    delta = opt.newton(equation2solve, delta_0)
+
+    def equation(delta):
+        if f_e > 0.9:
+            equation2solve = y_m - (1 + 300 * delta) / ((1 - 4 * delta * (1 - delta)) ** 2.5 * 4 * delta *
+                                                      (1 - delta)) + x_m ** 2 / (4 * delta * (1 - delta)) ** 3
+        else:
+            equation2solve = y_m - (1 + 24 * (rho_liq_kgm3 / rho_gas_kgm3) ** (1/3) * delta) /\
+                         ((1 - 4 * delta * (1 - delta)) ** 2.5 * 4 * delta * (1 - delta)) +\
+                         x_m ** 2 / (4 * delta * (1 - delta)) ** 3
+        return equation2solve
+    delta = opt.newton(equation, delta_0)
     critery1 = (4 * delta * (1 - delta)) + lyambda_lc * (d_m - 2 * delta * d_m) ** 2 / d_m ** 2
     delta_0 = 0.25
-    equation2solve = y_m - (2 - 1.5 * 4 * delta_0 * (1 - delta_0)) * x_m ** 2 / ((4 * delta_0 * (1 - delta_0)) ** 3 *
-                                                                                 (1 - 1.5 * 4 * delta_0*(1 - delta_0)))
-    delta_min = opt.newton(equation2solve, delta_0)
+
+    def equation(delta):
+        equation2solve = y_m - (2 - 1.5 * 4 * delta * (1 - delta)) * x_m ** 2 / ((4 * delta * (1 - delta)) ** 3 *
+                                                                                 (1 - 1.5 * 4 * delta*(1 - delta)))
+        return equation2solve
+    delta_min = opt.newton(equation, delta_0)
     critery2 = delta_min - delta
     return vel_gas_super_slug2annular, critery1, critery2
 

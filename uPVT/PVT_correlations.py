@@ -834,6 +834,18 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     return bg
 
 
+# uPVT свойства для сжимаемости нефти(требует немного свойств газа)
+
+def unf_weightedcompressibility_oil_Mccain_1MPa_greater(gamma_oil, gamma_gas, pb_MPa, p_MPa, rsb_m3m3, tres_K, gamma_gassp = 0):
+    pass
+
+def unf_compressibility_oil_Mccain_1MPa_greater(gamma_oil, gamma_gas, pb_MPa, p_MPa, rsb_m3m3, tres_K, gamma_gassp = 0):
+    pass
+
+def unf_compressibility_oil_Mccain_1MPa_lower():
+    pass
+
+
 # uPVT свойства для воды
 
 def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
