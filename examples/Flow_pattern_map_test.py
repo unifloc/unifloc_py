@@ -11,6 +11,8 @@ f_m = 1.49 * 10 ** (-2)
 vel_gas = np.arange(0.01, 40, 0.005)  # иногда проскакивает пересечение, в этом случае нужно менять эпсилон и шаг
 epsilon = 0.01
 beta = 90
+mu_liq = 0.68 * 10 ** (-3)
+mu_gas = 1.9 * 10 ** (-5)
 
 # Считаем скорости для графиков
 vel_gas_bubble2slug = []
@@ -77,3 +79,17 @@ plt.text(np.min(vel_gas_dispersedbubble2bubble) + 0.03, np.max(vel_liq_dispersed
 plt.text(np.min(vel_gas_dispersedbubble2churn) + 8, 0.04, 'Annular', size=14)
 plt.text(np.min(vel_gas_bubble2slug) + 0.06, 0.04, 'Slug', size=14)
 plt.show()
+vel_liq = 0.1
+vel_gas = 3
+beta = 0
+mu_liq = 0.68 * 10 ** (-3)
+mu_gas = 1.9 * 10 ** (-5)
+rho_liq = 993
+rho_gas = 1.14
+d_m = 0.05
+x = Fluid.parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+print(x)
+y = Fluid.parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
+print(y)
+h_l = Fluid.combined_momentum_equation(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq, beta)
+print(h_l)

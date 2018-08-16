@@ -38,13 +38,127 @@ def reynolds_number(rho, vel, d_m, mu):
     """
     function for determining Reynolds number
 
-    :param rho:
-    :param vel:
-    :param d_m:
-    :param mu:
-    :return:
+    :param rho: density
+    :param vel: velocity
+    :param d_m: pipe diameter
+    :param mu: viscosity
+    :return: Reynolds number
     """
     return rho * vel * d_m / mu
+
+
+def determing_coefficients(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq):
+    """
+    function for determining coefficients m, n, c_l, c_g
+
+    :param d_m: pipe diameter
+    :param rho_liq: liquid density
+    :param rho_gas: gas density
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :param vel_gas: superficial gas velocity
+    :param vel_liq: superficial liquid velocity
+    :return: array of c_l, n, c_g, m
+    """
+    if reynolds_number(rho_liq, vel_liq, d_m, mu_liq) < 2300:
+        c_l = 16
+        n = 1
+    else:
+        c_l = 0.046
+        n = 0.2
+    if reynolds_number(rho_gas, vel_gas, d_m, mu_gas) < 2300:
+        c_g = 16
+        m = 1
+    else:
+        c_g = 0.046
+        m = 0.2
+    return np.array([c_l, n, c_g, m])
+
+
+def parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq):
+    """
+    Function for determining Lockhart and Martinelli parameter X
+
+    :param d_m: pipe diameter
+    :param rho_liq: liquid density
+    :param rho_gas: gas density
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :param vel_gas: superficial gas velocity
+    :param vel_liq: superficial liquid velocity
+    :return: Lockhart and Martinelli parameter X
+    """
+    a = determing_coefficients(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+    c_l = a[0]
+    n = a[1]
+    c_g = a[2]
+    m = a[3]
+    x = (((4 * c_l / d_m) * reynolds_number(rho_liq, vel_liq, d_m, mu_liq) ** (-n) * (rho_liq * vel_liq ** 2 / 2)) /
+         ((4 * c_g / d_m) * reynolds_number(rho_gas, vel_gas, d_m, mu_gas) ** (-m) * (rho_gas * vel_gas **
+                                                                                      2 / 2))) ** 0.5
+    return x
+
+
+def parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta):
+    """
+    Function for determining Lockhart and Martinelli parameter Y
+
+    :param d_m: pipe diameter
+    :param rho_liq: liquid density
+    :param rho_gas: gas density
+    :param mu_gas: gas viscosity
+    :param vel_gas: superficial gas velocity
+    :param beta: angle of inclination from the horizontal
+    :return: Lockhart and Martinelli parameter Y
+    """
+    if reynolds_number(rho_gas, vel_gas, d_m, mu_gas) < 2300:
+        c_g = 16
+        m = 1
+    else:
+        c_g = 0.046
+        m = 0.2
+    y = ((rho_liq - rho_gas) * uc.g * np.sin(beta * uc.pi / 180)) / ((4 * c_g / d_m) * reynolds_number(rho_gas, vel_gas,
+                                                                                                       d_m, mu_gas) **
+                                                                     (-m) * (rho_gas * vel_gas ** 2 / 2))
+    return y
+
+
+def combined_momentum_equation(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq, beta):
+    """
+    Function for determining equilibrium dimensionless liquid level in stratified flow
+
+    :param d_m: pipe diameter
+    :param rho_liq: liquid density
+    :param rho_gas: gas density
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :param vel_gas: superficial gas velocity
+    :param vel_liq: superficial liquid velocity
+    :param beta: angle of inclination from the horizontal
+    :return: h_l
+    """
+    x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+    y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
+    a = determing_coefficients(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+    n = a[1]
+    m = a[3]
+    h_l_0 = 0.42
+
+    def equation2solve(h_l):
+        a_l = 0.25 * (uc.pi - (np.cos(2 * h_l - 1)) ** (-1) + (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
+        a_g = 0.25 * ((np.cos(2 * h_l - 1)) ** (-1) - (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
+        s_l = uc.pi - (np.cos(2 * h_l - 1)) ** (-1)
+        s_g = (np.cos(2 * h_l - 1)) ** (-1)
+        s_i = (1 - (2 * h_l - 1) ** 2) ** 0.5
+        v_l = (0.25 * uc.pi) / a_l
+        v_g = (0.25 * uc.pi) / a_g
+        d_l = 4 * a_l / s_l
+        d_g = 4 * a_g / (s_g + s_i)
+        equation = x ** 2 * ((v_l * d_l) ** (-n) * v_l ** 2 * s_l / a_l) - ((v_g * d_g) ** (-m) * v_g ** 2 *
+                                                                            (s_g / a_g + s_i / a_l + s_i / a_g)) + 4 * y
+        return equation
+    h_l = opt.fsolve(equation2solve, np.array(h_l_0))
+    return h_l
 
 
 def bubble2slug(vel_gas, rho_liq, rho_gas, sigma, beta):
