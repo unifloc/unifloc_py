@@ -834,6 +834,22 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     return bg
 
 
+def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
+    """
+    Equation for gas density
+
+    :param t_K: temperature
+    :param p_MPaa: pressure
+    :param gamma_gas: specific gas density by air
+    :param z: z-factor
+    :return: gas density
+    """
+    m = gamma_gas * 0.029
+    p_Pa = 10 ** 6 * p_MPaa
+    rho_gas = p_Pa * m / (z * 8.31 * t_K)
+    return rho_gas
+
+
 # uPVT свойства для сжимаемости нефти(требует немного свойств газа)
 
 
@@ -1539,7 +1555,14 @@ class TestPVT(unittest.TestCase):
     def test_unf_zfactor_BrillBeggs(self):
         ppr = 2
         tpr = 2
-        self.assertAlmostEqual(unf_zfactor_BrillBeggs(ppr,tpr), 0.9540692750239955, delta=0.0001)
+        self.assertAlmostEqual(unf_zfactor_BrillBeggs(ppr, tpr), 0.9540692750239955, delta=0.0001)
+
+    def test_unf_gas_density_kgm3(self):
+        t_K = 350
+        p_MPaa = 10
+        gamma_gas = 0.6
+        z = 1
+        self.assertAlmostEqual(unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 59.82465188241361, delta=0.0001)
 
 
 if __name__ == '__main__':

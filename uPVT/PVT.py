@@ -256,6 +256,7 @@ class FluidStanding(FluidBlackOil):
         self._bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, self._z)
         self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
                                                                                             ppc_MPa, tpc_K))
+        self._rho_gas_kgm3 = PVT.unf_gas_density_kgm3(t_K, p_MPaa, self.gamma_gas, self._z)
         # water
         # TODO НУЖНО ДОБАВИТЬ GWR
         self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
@@ -323,6 +324,7 @@ class FluidMcCain(FluidBlackOil):
         self._bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, self._z)
         self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
                                                                                             ppc_MPa, tpc_K))
+        self._rho_gas_kgm3 = PVT.unf_gas_density_kgm3(t_K, p_MPaa, self.gamma_gas, self._z)
         # water
         # TODO НУЖНО ДОБАВИТЬ GWR
         self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
