@@ -123,10 +123,12 @@ def parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta):
     return y
 
 
-def combined_momentum_equation(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq, beta):
+def combined_momentum_equation(x, y, d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq):
     """
     Function for determining equilibrium dimensionless liquid level in stratified flow
 
+    :param x: Lockhart and Martinelli parameter X
+    :param y: Lockhart and Martinelli parameter Y
     :param d_m: pipe diameter
     :param rho_liq: liquid density
     :param rho_gas: gas density
@@ -134,21 +136,18 @@ def combined_momentum_equation(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, v
     :param mu_gas: gas viscosity
     :param vel_gas: superficial gas velocity
     :param vel_liq: superficial liquid velocity
-    :param beta: angle of inclination from the horizontal
     :return: h_l
     """
-    x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
-    y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
     a = determing_coefficients(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
     n = a[1]
     m = a[3]
     h_l_0 = 0.42
 
     def equation2solve(h_l):
-        a_l = 0.25 * (uc.pi - (np.cos(2 * h_l - 1)) ** (-1) + (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
-        a_g = 0.25 * ((np.cos(2 * h_l - 1)) ** (-1) - (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
-        s_l = uc.pi - (np.cos(2 * h_l - 1)) ** (-1)
-        s_g = (np.cos(2 * h_l - 1)) ** (-1)
+        a_l = 0.25 * (uc.pi - np.arccos(2 * h_l - 1) + (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
+        a_g = 0.25 * (np.arccos(2 * h_l - 1) - (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
+        s_l = uc.pi - np.arccos(2 * h_l - 1)
+        s_g = np.arccos(2 * h_l - 1)
         s_i = (1 - (2 * h_l - 1) ** 2) ** 0.5
         v_l = (0.25 * uc.pi) / a_l
         v_g = (0.25 * uc.pi) / a_g
@@ -159,6 +158,25 @@ def combined_momentum_equation(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, v
         return equation
     h_l = opt.fsolve(equation2solve, np.array(h_l_0))
     return h_l
+
+
+def dimensionless_variables(h_l):
+    """
+    Function for determining dimensionless variables which depending on dimensionless liquid level in stratified flow
+
+    :param h_l: dimensionless liquid level in stratified flow
+    :return: a_l, a_g, s_l, s_g, s_i, v_l, v_g, d_l, d_g
+    """
+    a_l = 0.25 * (uc.pi - np.arccos(2 * h_l - 1) + (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
+    a_g = 0.25 * (np.arccos(2 * h_l - 1) - (2 * h_l - 1) * (1 - (2 * h_l - 1) ** 2) ** 0.5)
+    s_l = uc.pi - np.arccos(2 * h_l - 1)
+    s_g = np.arccos(2 * h_l - 1)
+    s_i = (1 - (2 * h_l - 1) ** 2) ** 0.5
+    v_l = (0.25 * uc.pi) / a_l
+    v_g = (0.25 * uc.pi) / a_g
+    d_l = 4 * a_l / s_l
+    d_g = 4 * a_g / (s_g + s_i)
+    return a_l, a_g, s_l, s_g, s_i, v_l, v_g, d_l, d_g
 
 
 def bubble2slug(vel_gas, rho_liq, rho_gas, sigma, beta):
@@ -221,11 +239,34 @@ def churn2annular(sigma, rho_liq, rho_gas):
     return 3.1 * ((uc.g * sigma * (rho_liq - rho_gas)) / rho_gas ** 2) ** 0.25
 
 
-def stratified2nonstratified(rho_gas, rho_liq, vel_gas, d_m, beta):
+def stratified2nonstratified(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas):
     """
+    function for construction of boundary transition from stratified to nonstratified structure
+
+    :param rho_gas: gas density
+    :param rho_liq: liquid density
+    :param vel_gas: superficial gas velocity
+    :param d_m: pipe diameter
+    :param beta: angle of inclination from the horizontal
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :return: superficial liquid velocity
     """
-    (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
-    pass
+    froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
+    vel_liq_0 = 1
+
+    def equation2solve(vel_liq):
+        x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
+        h_l = combined_momentum_equation(x, y, d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        variables = dimensionless_variables(h_l)
+        v_g = variables[6]
+        s_i = variables[4]
+        a_g = variables[1]
+        equation = froude_number ** 2 * (v_g ** 2 * s_i / ((1 - h_l) ** 2 * a_g)) - 1
+        return equation
+    vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
+    return vel_liq
 
 
 def slug2churn(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta):
@@ -277,4 +318,67 @@ def slug2elongatedbubble(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta):
     return vel_liq
 
 
+def stratifiedsmooth2stratifiedwavy_c(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas):
+    """
+    function for construction of boundary transition from stratified-smooth to stratified-wavy structure
+    resulting from the "wind" effect
 
+    :param rho_gas: gas density
+    :param rho_liq: liquid density
+    :param vel_gas: superficial gas velocity
+    :param d_m: pipe diameter
+    :param beta: angle of inclination from the horizontal
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :return: superficial liquid velocity
+    """
+    froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
+    vel_liq_0 = 1
+
+    def equation2solve(vel_liq):
+        re_sl = reynolds_number(rho_liq, vel_liq, d_m, mu_liq)
+        k = froude_number * re_sl ** 0.5
+        x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
+        h_l = combined_momentum_equation(x, y, d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        variables = dimensionless_variables(h_l)
+        v_g = variables[6]
+        s = 0.01
+        v_l = variables[5]
+        equation = k - 2 / (v_l ** 0.5 * v_g * s ** 0.5)
+        return equation
+    vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
+    return vel_liq
+
+
+def stratifiedsmooth2stratifiedwavy_m(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas):
+    """
+    function for construction of boundary transition from stratified-smooth to stratified-wavy structure
+    resulting from the "wind" effect
+
+    :param rho_gas: gas density
+    :param rho_liq: liquid density
+    :param vel_gas: superficial gas velocity
+    :param d_m: pipe diameter
+    :param beta: angle of inclination from the horizontal
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :return: superficial liquid velocity
+    """
+    froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
+    vel_liq_0 = 1
+
+    def equation2solve(vel_liq):
+        re_sl = reynolds_number(rho_liq, vel_liq, d_m, mu_liq)
+        k = froude_number * re_sl ** 0.5
+        x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
+        h_l = combined_momentum_equation(x, y, d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        variables = dimensionless_variables(h_l)
+        v_g = variables[6]
+        s = 0.01
+        v_l = variables[5]
+        equation = k - 2 / (v_l ** 0.5 * v_g * s ** 0.5)
+        return equation
+    vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
+    return vel_liq
