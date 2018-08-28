@@ -80,20 +80,21 @@ plt.text(np.min(vel_gas_dispersedbubble2churn) + 8, 0.04, 'Annular', size=14)
 plt.text(np.min(vel_gas_bubble2slug) + 0.06, 0.04, 'Slug', size=14)
 plt.show()
 
-
-beta = 0
+beta = 90
 mu_liq = 0.68 * 10 ** (-3)
 mu_gas = 1.9 * 10 ** (-5)
 rho_liq = 993
-rho_gas = 1.14
+rho_gas = 194
 d_m = 0.05
-vel_gas = np.arange(0.1, 40, 0.5)
-vel_liq_stratified2nonstratified = []
+vel_gas = np.arange(20, 50, 0.5)
+vel_liq_annular2intermittent = []
 for vel in vel_gas:
-    vel_liq_stratified2nonstratified.append(Fluid.stratified2nonstratified(rho_gas, rho_liq, vel, d_m, beta, mu_liq,
-                                                                           mu_gas))
-plt.loglog(vel_gas, vel_liq_stratified2nonstratified)
-plt.show()
+    a = Fluid.annular2intermittent(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel, beta)
+    vel_liq_annular2intermittent.append(a)
+print(vel_liq_annular2intermittent)
+# plt.loglog(vel_gas, vel_liq_annular2intermittent)
+# plt.show()
+
 
 """
 x = Fluid.parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)

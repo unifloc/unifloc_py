@@ -712,7 +712,7 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
-        z,ropr = variables
+        z, ropr = variables
         func = np.zeros(2)
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
         func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\

@@ -382,3 +382,30 @@ def stratifiedsmooth2stratifiedwavy_m(rho_gas, rho_liq, vel_gas, d_m, beta, mu_l
         return equation
     vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
     return vel_liq
+
+
+def annular2intermittent(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, beta):
+    """
+    function for construction of boundary transition from annular to intermittent structure
+
+    :param d_m: pipe diameter
+    :param rho_liq: liquid density
+    :param rho_gas: gas density
+    :param mu_liq: liquid viscosity
+    :param mu_gas: gas viscosity
+    :param vel_gas: superficial gas velocity
+    :return: superficial liquid velocity
+    """
+    vel_liq_0 = 1
+    sigma_l = 0.24
+    h_l = 4 * (sigma_l - sigma_l ** 2)
+    y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
+
+    def equation2solve(vel_liq):
+        x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
+        equation = ((2 - 1.5 * h_l) * x ** 2) / (h_l ** 3 * (1 - 1.5 * h_l)) - y
+        return equation
+    solution = opt.fsolve(equation2solve, np.array(vel_liq_0))
+    # solution = opt.least_squares(equation2solve, np.array(vel_liq_0), bounds=(0, 10000))
+    return solution
+# (1 + 75 * h_l) / ((1 - h_l) ** 2.5 * h_l) - (1 / h_l ** 3) * x ** 2 -\
