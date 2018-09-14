@@ -219,9 +219,9 @@ def dispersedbubble2bubble(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta):
     vel_liq_0 = 1
 
     def equation2solve(vel_liq):
-        d_c = diameter_min(vel_gas, rho_liq, sigma, rho_gas, f_m, beta, vel_liq)
         equation = (0.725 + 4.15 * (vel_gas / (vel_gas + vel_liq)) ** 0.5) * (sigma / rho_liq) ** 0.6 *\
-                   ((2 * f_m) / d_m * (vel_gas + vel_liq) ** 3) ** (-0.4) - d_c
+                   ((f_m * (vel_gas + vel_liq) ** 3) / (2 * d_m)) ** (-0.4) - 2 * (0.4 * sigma / ((rho_liq - rho_gas)
+                                                                                                  * uc.g)) ** 0.5
         return equation
     vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
     return vel_liq
@@ -252,9 +252,10 @@ def stratified2nonstratified(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_ga
     :param mu_gas: gas viscosity
     :return: superficial liquid velocity
     """
-    froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
-    vel_liq_0 = 1
 
+    froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
+    vel_liq_0 = 0.005
+    
     def equation2solve(vel_liq):
         x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
         y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
@@ -293,7 +294,7 @@ def slug2churn(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta):
     return vel_liq
 
 
-def slug2elongatedbubble(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta):
+def slug2elongatedbubble(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta, vel_liq):
     """
     function for construction of boundary transition from slug to elongated bubble structure
 
@@ -306,16 +307,16 @@ def slug2elongatedbubble(vel_gas, rho_liq, sigma, rho_gas, f_m, d_m, beta):
     :param beta: angle of inclination from the horizontal
     :return: superficial liquid velocity
     """
-    vel_liq_0 = 1
+    # vel_liq_0 = 1
 
     def equation2solve(vel_liq):
         d_c = diameter_min(vel_gas, rho_liq, sigma, rho_gas, f_m, beta, vel_liq)
         equation = 0.058 * (d_c * (2 * f_m / d_m * (vel_gas + vel_liq) ** 3) ** 0.4 * (rho_liq / sigma) ** 0.6 -
                             0.725) ** 2
         return equation
-
-    vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
-    return vel_liq
+    func = equation2solve(vel_liq)
+    # vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
+    return func
 
 
 def stratifiedsmooth2stratifiedwavy_c(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas):
@@ -333,11 +334,12 @@ def stratifiedsmooth2stratifiedwavy_c(rho_gas, rho_liq, vel_gas, d_m, beta, mu_l
     :return: superficial liquid velocity
     """
     froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
-    vel_liq_0 = 1
+    vel_liq_0 = 0.0000001
 
     def equation2solve(vel_liq):
         re_sl = reynolds_number(rho_liq, vel_liq, d_m, mu_liq)
         k = froude_number * re_sl ** 0.5
+        # k = froude_number ** 2 * re_sl
         x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
         y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
         h_l = combined_momentum_equation(x, y, d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
@@ -366,7 +368,7 @@ def stratifiedsmooth2stratifiedwavy_m(rho_gas, rho_liq, vel_gas, d_m, beta, mu_l
     :return: superficial liquid velocity
     """
     froude_number = (rho_gas / (rho_liq - rho_gas)) ** 0.5 * vel_gas / (d_m * uc.g * np.cos(beta * uc.pi / 180)) ** 0.5
-    vel_liq_0 = 1
+    vel_liq_0 = 0.00001
 
     def equation2solve(vel_liq):
         re_sl = reynolds_number(rho_liq, vel_liq, d_m, mu_liq)
@@ -375,16 +377,16 @@ def stratifiedsmooth2stratifiedwavy_m(rho_gas, rho_liq, vel_gas, d_m, beta, mu_l
         y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
         h_l = combined_momentum_equation(x, y, d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
         variables = dimensionless_variables(h_l)
-        v_g = variables[6]
-        s = 0.01
-        v_l = variables[5]
-        equation = k - 2 / (v_l ** 0.5 * v_g * s ** 0.5)
+        a_l = variables[0]
+        a_g = variables[1]
+        a = a_l + a_g
+        equation = vel_liq / (uc.g * d_m) ** 0.5 - 1.5 * (h_l ** 0.5 * a_l / a)
         return equation
     vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
     return vel_liq
 
 
-def annular2intermittent(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, beta):
+def annular2intermittent(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq):
     """
     function for construction of boundary transition from annular to intermittent structure
 
@@ -396,16 +398,113 @@ def annular2intermittent(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, beta):
     :param vel_gas: superficial gas velocity
     :return: superficial liquid velocity
     """
-    vel_liq_0 = 1
+    # vel_liq_0 = 1
     sigma_l = 0.24
     h_l = 4 * (sigma_l - sigma_l ** 2)
-    y = parameter_y(d_m, rho_liq, rho_gas, mu_gas, vel_gas, beta)
 
     def equation2solve(vel_liq):
         x = parameter_x(d_m, rho_liq, rho_gas, mu_liq, mu_gas, vel_gas, vel_liq)
-        equation = ((2 - 1.5 * h_l) * x ** 2) / (h_l ** 3 * (1 - 1.5 * h_l)) - y
+        equation = (1 + 75 * h_l) / ((1 - h_l) ** 2.5 * h_l) - (1 / h_l ** 3) * x ** 2 -\
+                   ((2 - 1.5 * h_l) * x ** 2) / (h_l ** 3 * (1 - 1.5 * h_l))
         return equation
-    solution = opt.fsolve(equation2solve, np.array(vel_liq_0))
-    # solution = opt.least_squares(equation2solve, np.array(vel_liq_0), bounds=(0, 10000))
-    return solution
-# (1 + 75 * h_l) / ((1 - h_l) ** 2.5 * h_l) - (1 / h_l ** 3) * x ** 2 -\
+    func = equation2solve(vel_liq)
+    # vel_liq = opt.fsolve(equation2solve, np.array(vel_liq_0))
+    # vel_liq = opt.least_squares(equation2solve, np.array(vel_liq_0), bounds=(0, 10000))
+    return func
+
+
+def str2nonstr_dim(h_l):
+    variables = dimensionless_variables(h_l)
+    v_g = variables[6]
+    s_i = variables[4]
+    a_g = variables[1]
+    froude_number_0 = 0.001
+
+    def equation2solve(froude_number):
+        equation = froude_number ** 2 * (v_g ** 2 * s_i / ((1 - h_l) ** 2 * a_g)) - 1
+        return equation
+    froude_number = opt.fsolve(equation2solve, np.array(froude_number_0)xtol)
+    return froude_number
+
+
+def strw2srts_dim(h_l):
+    variables = dimensionless_variables(h_l)
+    v_g = variables[6]
+    s = 0.01
+    v_l = variables[5]
+    k_0 = 1
+
+    def equation2solve(k):
+        equation = k - 2 / (v_l ** 0.5 * v_g * s ** 0.5)
+        return equation
+    k = opt.fsolve(equation2solve, np.array(k_0))
+    return k
+
+
+def annular(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas, sigma_liq):
+    vel_liq_0 = 1
+
+    def equation2solve_general(vel_liq):
+        f_e = 1 - np.exp(-0.125 * ((10 ** 4 * vel_gas * mu_gas / sigma_liq) * (rho_gas / rho_liq) ** 0.5 - 1.5))
+        n_ref = rho_liq * vel_liq * d_m * (1 - f_e) / mu_liq
+        n_resl = reynolds_number(rho_liq, vel_liq, d_m, mu_liq)
+        if n_ref < 2300 and n_ref != 0:
+            f_f = 64 / n_ref
+        elif n_ref != 0:
+            f_f = 0.184 * n_ref ** (-0.2)
+        else:
+            f_f = 1
+        if n_resl < 2300 and n_resl != 0:
+            f_sl = 64 / n_resl
+        elif n_resl != 0:
+            f_sl = 0.184 * n_resl ** (-0.2)
+        else:
+            f_sl = 1
+
+        v_sc = vel_gas + vel_liq * f_e
+        lyambda_lc = vel_liq * f_e / (vel_gas + vel_liq * f_e)
+        rho_c = rho_gas * (1 - lyambda_lc) + rho_liq * lyambda_lc
+        mu_c = mu_gas * (1 - lyambda_lc) + mu_liq * lyambda_lc
+        n_resc = rho_c * v_sc * d_m / mu_c
+        if n_resc < 2300 and n_resc != 0:
+            f_sc = 64 / n_resc
+        else:
+            f_sc = 0.184 * n_resc ** (-0.2)
+        c_l, n_l, c_c, n_c = determing_coefficients(d_m, rho_liq, rho_c, mu_liq, mu_c, v_sc, vel_liq)
+        gradient_sl = - f_sl * rho_liq * vel_liq ** 2 / (2 * d_m)
+        gradient_sc = -f_sc * rho_c * v_sc ** 2 / (2 * d_m)
+        # gradient_sl = -c_l * 4 * (rho_liq * vel_liq * d_m / mu_liq) ** (-n_l) * (rho_liq * vel_liq ** 2) / (2 * d_m)
+        # gradient_sc = -c_c * 4 * (rho_c * v_sc * d_m / mu_c) ** (-n_c) * (rho_c * v_sc ** 2) / (2 * d_m)
+        x = (-gradient_sl / -gradient_sc) ** 0.5
+        y = (rho_liq - rho_c) * uc.g * np.sin(beta * uc.pi / 180) / (-gradient_sc)
+
+        h_lf_0 = 0.2
+
+        def equation2solve(h_lf):
+            delta_0 = 0.05
+
+            def equation2solve_0(delta):
+                equation = 4 * delta ** 2 - 4 * delta + h_lf
+                return equation
+            delta = opt.fsolve(equation2solve_0, delta_0)
+            if f_e > 0.9:
+                i = (1 + 300 * delta)
+            else:
+                i = (1 + 24 * (rho_liq / rho_gas) ** (1/3) * delta)
+            equation = x ** 2 * (1 - f_e) ** 2 / h_lf ** 3 * (f_f / f_sl) - i / (h_lf * (1 - h_lf) ** 2.5) + y
+            return equation
+        h_lf = opt.fsolve(equation2solve, np.array(h_lf_0))
+        # h_lf = opt.least_squares(equation2solve, np.array(h_lf_0), bounds=(0, 100000))
+        h_lf_min_0 = 0.25
+
+        def equation2solve_2(h_lf_min):
+            equation = y - ((2 - 1.5 * h_lf_min) * (1 - f_e) ** 2) / (h_lf_min ** 3 * (1 - 1.5 * h_lf_min)) *\
+                       (f_f / f_sl) * x ** 2
+            return equation
+        # h_lf_min = opt.least_squares(equation2solve_2, np.array(h_lf_min_0), bounds=(0, 100000))
+        h_lf_min = opt.fsolve(equation2solve_2, np.array(h_lf_min_0))
+        equation = h_lf[0] - h_lf_min[0]
+        return equation
+    vel_liq = opt.fsolve(equation2solve_general, np.array(vel_liq_0))
+    # vel_liq = opt.least_squares(equation2solve_general, np.array(vel_liq_0), bounds=(0, 100000))
+    return vel_liq

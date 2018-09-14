@@ -8,6 +8,7 @@ Created on Wed Jul 26 2018
 import numpy as np
 import uscripts.uconst as uc
 import scipy.optimize as opt
+import uMultiphaseFlow.Flow_pattern_map as pt
 
 # Функции для расчета градиента давления по корреляции Ансари
 
@@ -149,6 +150,7 @@ def unf_velocity_slug2annular(sigma_liq_Nm, rho_liq_kgm3, rho_gas_kgm3, vel_gas_
 def unf_flowpattern_prediction(sigma_liq_Nm, rho_liq_kgm3, rho_gas_kgm3, f, vel_gas_super_ms, vel_liq_super_ms, d_m):
     """
     Функция для определения структуры потока газожидкостной смеси
+
     :param sigma_liq_Nm:
     :param rho_liq_kgm3:
     :param rho_gas_kgm3:
@@ -169,12 +171,78 @@ def unf_flowpattern_prediction(sigma_liq_Nm, rho_liq_kgm3, rho_gas_kgm3, f, vel_
     pass
 
 
-def unf_bubbleflow_model():
+def unf_dispersedbubbleflow_model(rho_liq_kgm3, rho_gas_kgm3, lyambda_l, vel_liq_super_ms, vel_gas_super_ms, mu_liq_cP,
+                                  mu_gas_cP, d_m):
+    """
+    Функция для расчета потерь давления для dispersed-bubble structure
 
-    pass
+    :param rho_liq_kgm3:
+    :param rho_gas_kgm3:
+    :param lyambda_l:
+    :param vel_liq_super_ms:
+    :param vel_gas_super_ms:
+    :param mu_liq_cP:
+    :param mu_gas_cP:
+    :param d_m:
+    :return:
+    """
+    rho_tp = rho_liq_kgm3 * lyambda_l + rho_gas_kgm3 * (1 - lyambda_l)
+    vel_tp = vel_liq_super_ms + vel_gas_super_ms
+    mu_tp = mu_liq_cP * lyambda_l + mu_gas_cP * (1 - lyambda_l)
+
+    n_re_tp = pt.reynolds_number(rho_tp, vel_tp, d_m, mu_tp)
+    # TODO f = function(n_re_tp)
+    f = 0.01
+
+    dpdl_el = rho_tp * uc.g
+    dpdl_f = f * rho_tp * vel_tp ** 2 / (2 * d_m)
+    dpdl_sum = dpdl_el + dpdl_f
+    return dpdl_sum
+
+
+def unf_bubblyflow_model(sigma_liq_Nm, rho_liq_kgm3, rho_gas_kgm3, vel_liq_super_ms, vel_gas_super_ms, mu_liq_cP,
+                         mu_gas_cP, d_m):
+    """
+    Функция для расчета потерь давления для bubbly structure
+
+    :param sigma_liq_Nm:
+    :param rho_liq_kgm3:
+    :param rho_gas_kgm3:
+    :param vel_liq_super_ms:
+    :param vel_gas_super_ms:
+    :param mu_liq_cP:
+    :param mu_gas_cP:
+    :param d_m:
+    :return:
+    """
+
+    h_l_0 = 0.25
+
+    def equation2solve(h_l):
+        equation = 1.53 * (uc.g * sigma_liq_Nm * (rho_liq_kgm3 - rho_gas_kgm3) / rho_liq_kgm3 ** 2) ** 0.25 * h_l **
+        0.5 - vel_gas_super_ms / (1 - h_l) + 1.2 * (vel_gas_super_ms + vel_liq_super_ms)
+        return equation
+    h_l = opt.fsolve(equation2solve, np.array(h_l_0))[0]
+
+    rho_tp = rho_liq_kgm3 * h_l + rho_gas_kgm3 * (1 - h_l)
+    vel_tp = vel_liq_super_ms + vel_gas_super_ms
+    mu_tp = mu_liq_cP * h_l + mu_gas_cP * (1 - h_l)
+
+    n_re_tp = pt.reynolds_number(rho_tp, vel_tp, d_m, mu_tp)
+    # TODO f = function(n_re_tp)
+    f = 0.01
+
+    dpdl_el = rho_tp * uc.g
+    dpdl_f = f * rho_tp * vel_tp ** 2 / (2 * d_m)
+    dpdl_sum = dpdl_el + dpdl_f
+    return dpdl_sum
 
 
 def unf_slugflow_model():
+    vel_tb = 1.2 * (vel_gas_super_ms + vel_liq_super_ms) + 0.35 * (uc.g * d_m * (rho_liq_kgm3 - rho_gas_kgm3) /
+                                                                   rho_liq_kgm3) ** 0.5
+    vel_gls = 1.2 * (vel_gas_super_ms + vel_liq_super_ms) + 1.53 * (uc.g * sigma_liq_Nm * (rho_liq_kgm3 - rho_gas_kgm3) /
+                                                                   rho_liq_kgm3 ** 2) ** 0.25 *
     pass
 
 
