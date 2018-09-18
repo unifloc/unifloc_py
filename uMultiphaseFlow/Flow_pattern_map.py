@@ -423,7 +423,7 @@ def str2nonstr_dim(h_l):
     def equation2solve(froude_number):
         equation = froude_number ** 2 * (v_g ** 2 * s_i / ((1 - h_l) ** 2 * a_g)) - 1
         return equation
-    froude_number = opt.fsolve(equation2solve, np.array(froude_number_0)xtol)
+    froude_number = opt.fsolve(equation2solve, np.array(froude_number_0))
     return froude_number
 
 
@@ -441,8 +441,7 @@ def strw2srts_dim(h_l):
     return k
 
 
-def annular(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas, sigma_liq):
-    vel_liq_0 = 1
+def annular(rho_gas, rho_liq, vel_gas, d_m, beta, mu_liq, mu_gas, sigma_liq, vel_liq_0):
 
     def equation2solve_general(vel_liq):
         f_e = 1 - np.exp(-0.125 * ((10 ** 4 * vel_gas * mu_gas / sigma_liq) * (rho_gas / rho_liq) ** 0.5 - 1.5))

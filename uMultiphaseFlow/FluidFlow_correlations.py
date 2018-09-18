@@ -8,7 +8,129 @@ Created on Wed Jul 26 2018
 import numpy as np
 import uscripts.uconst as uc
 import scipy.optimize as opt
-import uMultiphaseFlow.Flow_pattern_map as pt
+
+# Корреляция Беггса-Брилла для многофазного потока
+
+def unf_liguid_holdup_BeggsBrill(lyambda_l, flow_pattern, n_lv, n_fr, theta):
+    """
+
+    :param lyambda_l:
+    :param flow_pattern:
+    :param n_lv:
+    :param n_fr:
+    :param theta:
+    :return:
+    """
+    a = (0.98, 0.855, 1.065)
+    b = (0.4846, 0.5351, 0.5824)
+    c = (0.0868, 0.0173, 0.0609)
+    e = (0.011, 2.96, 1, 4.7)
+    f = (-3.768, 0.305, 0, -0.3692)
+    g = (3.539, -0.4473, 0, 0.1244)
+    h = (-1.614, 0.0978, 0, -0.5056)
+    theta_rad = theta * uc.pi / 180
+    h_l0 = a(flow_pattern) * lyambda_l ** b(flow_pattern) / n_fr ** c(flow_pattern)
+    cc = max(0, (1 - lyambda_l) * np.log(e(flow_pattern) * lyambda_l ** f(flow_pattern) * n_lv ** g(flow_pattern) *
+                                        n_fr ** h(flow_pattern)))
+    incl_factor = 1 + cc * (np.sin(1.8 * theta_rad) - 0.333 * (np.sin(1.8 * theta_rad)) ** 3) # в экселе тут плюс стоит
+    if theta >0:
+        h_l = max(min(h_l0 * incl_factor * 0.924, 1), lyambda_l) # поправка Payne et al для восходящего потока
+    else:
+        h_l = min(h_l0 * incl_factor * 0.685, 1) # поправка Payne et al для нисходящего потока
+    return h_l
+
+def unf_friction_factor_BeggsBrill(n_re, d_m, e, rough_pipe = 0):
+    """
+
+    :param n_re:
+    :param d_m:
+    :param e:
+    :param rough_pipe:
+    :return:
+    """
+    if n_re > 2000:
+        if rough_pipe > 0:
+            f_n_0 = (-2 * np.log10((2 * e / d_m) / 3.7 - 5.02 / n_re * np.log10((2 * e / d_m) / 3.7 + 13 / n_re
+                                                                                ))) ** (-2)
+
+            def equation2solve(f_n):
+                f_n_new = (1.74 - 2 * np.log10(2 * e / d_m + 18.7 / (n_re * f_n ** 0.5))) ** (-2)
+                equation = abs(f_n_new - f_n)
+                return equation
+            f_n = opt.fsolve(equation2solve, np.array(f_n_0), xtol = 0.001)
+        else:
+            f_n = 0.0056 + 0.5 * n_re ** (-0.32)
+    else:
+        f_n = 64 / n_re
+    return f_n
+
+
+def unf_BeggsBrill_gradient(vel_gas_super_ms, vel_liq_super_ms, rho_liq_kgm3, rho_gas_kgm3, mu_lig_cP, mu_gas_cP,
+                            d_m, sigma_liq_Nm, theta, e, rough_pipe = 0):
+    """
+    Function for calculation pressure-gradient according Beggs&Brill correlation(1973)
+    with Payne et al modification(1979)
+    :param vel_gas_super_ms:
+    :param vel_liq_super_ms:
+    :param rho_liq_kgm3:
+    :param rho_gas_kgm3:
+    :param mu_lig_cP:
+    :param mu_gas_cP:
+    :param d_m:
+    :param sigma_liq_Nm:
+    :param theta:
+    :param e:
+    :param rough_pipe:
+    :return:
+    """
+    n_fr = (vel_gas_super_ms + vel_liq_super_ms) ** 2 / (uc.g * d_m)
+    n_lv = vel_liq_super_ms * (rho_liq_kgm3 / (uc.g * sigma_liq_Nm)) ** 0.25
+    lyambda_l = vel_liq_super_ms / (vel_liq_super_ms + vel_gas_super_ms)
+    vel_mix_ms = vel_gas_super_ms + vel_liq_super_ms
+    rho_mix_kgm3 = rho_liq_kgm3 * lyambda_l + rho_gas_kgm3 * (1 - lyambda_l)
+    mu_mix_cP = mu_lig_cP * lyambda_l + mu_gas_cP * (1 - lyambda_l)
+    n_re = 1000 * rho_mix_kgm3 * vel_mix_ms * d_m / mu_mix_cP
+    theta_rad = theta * np.pi / 180
+
+    # Блок определения структуры потока
+    l1 = 316 * lyambda_l ** 0.302
+    l2 = 0.000925 * lyambda_l ** (-2.468)
+    l3 = 0.1 * lyambda_l ** (-1.452)
+    l4 = 0.5 * lyambda_l ** (-6.738)
+
+    if (n_fr >= l1 and lyambda_l < 0.4) or (n_fr > l4 and lyambda_l >= 0.4):
+        flow_pattern = 2
+    elif (l1 >= n_fr > l3 and 0.4 > lyambda_l >= 0.01) or (lyambda_l >= 0.4 and l3 < n_fr <= l4):
+        flow_pattern = 1
+    elif l3 >= n_fr >= l2 and 0.4 > lyambda_l >= 0.01:
+        flow_pattern = 3
+    else:
+        flow_pattern = 0
+
+    # Блок определения объемного содержания жидкости
+    if flow_pattern != 3 and theta >=0:
+        h_l = unf_liguid_holdup_BeggsBrill(lyambda_l, flow_pattern, n_lv, n_fr, theta)
+    elif theta>=0:
+        a = (l3 - n_fr) / (l3 - l2)
+        h_l = a * unf_liguid_holdup_BeggsBrill(lyambda_l, 0, n_lv, n_fr, theta) + (1 - a) * unf_liguid_holdup_BeggsBrill(
+            lyambda_l, 1, n_lv, n_fr, theta)
+    else:
+        h_l = unf_liguid_holdup_BeggsBrill(lyambda_l, 3, n_lv, n_fr, theta)
+
+    # Блок определения коэффициента трения
+    f_n = unf_friction_factor_BeggsBrill(n_re, d_m, e, rough_pipe)
+    y = max(lyambda_l / h_l ** 2, 0.001) # нужно это уточнить у Рината Альфредовича
+    if  1.2 > y > 1:
+        s = np.log(2.2 * y -1.2)
+    else:
+        s = np.log(y) / (-0.0523 + 3.182 * np.log(y) - 0.8725 * (np.log(y)) ** 2 + 0.01853 * (np.log(y)) ** 4)
+    f = f_n * np.exp(s)
+    rho_s = rho_liq_kgm3 * h_l + rho_gas_kgm3 * (1 - h_l)
+    e_k  = 0 # нужно уточнить по поводу этого почему не используется
+    dpdl = (f * rho_mix_kgm3 * vel_mix_ms ** 2 / (2 * d_m) + rho_s * uc.g * np.sin(theta_rad)) / (1 - e_k)
+    return dpdl
+
+
 
 # Функции для расчета градиента давления по корреляции Ансари
 

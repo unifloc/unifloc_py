@@ -91,10 +91,13 @@ beta = 90
 sigma = 0.03
 f_m = 1.49 * 10 ** (-2)
 vel_liq_annular = []
-vel_gas = np.arange(0.1, 30, 0.1)
-a = pt.annular(rho_gas, rho_liq, 50, d_m, beta, mu_liq, mu_gas, sigma)
+vel_gas = np.arange(10, 50, 0.5)
+a = pt.annular(rho_gas, rho_liq, 50, d_m, beta, mu_liq, mu_gas, sigma, 0)
+b = 0.1
 for vel in vel_gas:
-    vel_liq_annular.append(pt.annular(rho_gas, rho_liq, vel, d_m, beta, mu_liq, mu_gas, sigma))
+    vel_liq_0 = abs(b)
+    b = pt.annular(rho_gas, rho_liq, vel, d_m, beta, mu_liq, mu_gas, sigma, vel_liq_0)
+    vel_liq_annular.append(b)
 plt.plot(vel_gas, vel_liq_annular, label='annular')
 plt.legend(loc='best')
 plt.grid()
