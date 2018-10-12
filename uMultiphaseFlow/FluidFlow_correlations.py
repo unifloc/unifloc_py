@@ -8,14 +8,120 @@ Created on Wed Jul 26 2018
 import numpy as np
 import uscripts.uconst as uc
 import scipy.optimize as opt
+from scipy.integrate import odeint
 import uPVT.PVT as PVT
+
+# Расчет распределения температуры в скважине
 
 # Корреляция Беггса-Брилла для многофазного потока
 
 
+def BHP_BeggsBrill(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm, theta, e, wct, rough_pipe=0, gamma_oil=0.86,
+                   gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0, y_n2=0,
+                   s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5):
+
+    p_bar = pressure_drop_BeggsBrill(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm, theta, e, wct, rough_pipe, gamma_oil,
+                             gamma_gas, gamma_wat, rsb_m3m3, gamma_gassp, y_h2s, y_co2, y_n2,
+                             s_ppm, par_wat, pbcal_bar, tpb_C, bobcal_m3m3, muobcal_cP)[1]
+    BHP_bar = p_bar[-1]
+    return BHP_bar
+
+
+def pressure_drop_BeggsBrill_odeint(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm, theta, e, wct, rough_pipe=0, gamma_oil=0.86,
+                             gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0, y_n2=0,
+                             s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5):
+    """
+    Расчет кривой распределения давления по Беггсу-Бриллу c применением odeint
+
+    :param l:
+    :param p1:
+    :param t1:
+    :param t2:
+    :param d_m:
+    :param q_liq_m3d:
+    :param sigma_liq_Nm:
+    :param theta:
+    :param e:
+    :param wct:
+    :param rough_pipe:
+    :param gamma_oil:
+    :param gamma_gas:
+    :param gamma_wat:
+    :param rsb_m3m3:
+    :param gamma_gassp:
+    :param y_h2s:
+    :param y_co2:
+    :param y_n2:
+    :param s_ppm:
+    :param par_wat:
+    :param pbcal_bar:
+    :param tpb_C:
+    :param bobcal_m3m3:
+    :param muobcal_cP:
+    :return:
+    """
+    step = 20
+    l_array = np.linspace(0, l, step)
+    q_oil_m3d = q_liq_m3d * (1 - wct)
+    q_gas_m3d = q_oil_m3d * rsb_m3m3
+    q_water_m3d = q_liq_m3d * wct
+    t_array = np.linspace(t1, t2, step)
+
+    def BB_gradient(l_array, t_array):
+
+        fl = PVT.FluidMcCain(gamma_oil, gamma_gas, gamma_wat, rsb_m3m3, gamma_gassp, y_h2s, y_co2, y_n2,
+                             s_ppm, par_wat, pbcal_bar, tpb_C, bobcal_m3m3, muobcal_cP)
+        fl.calc(p1, t_array)
+        q_liq = (q_oil_m3d * fl.bo_m3m3 + q_water_m3d * fl.bw_m3m3)
+        q_gas = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.bg_m3m3)
+        vel_gas_super_ms = q_gas / (86400 * uc.pi * d_m ** 2 / 4)
+        vel_liq_super_ms = q_liq / (86400 * uc.pi * d_m ** 2 / 4)
+        rho_liq_kgm3 = ((fl.rho_oil_kgm3 + fl.rs_m3m3 * fl.rho_gas_kgm3) / fl.bo_m3m3) * (1 - wct) + \
+                       fl.rho_wat_kgm3 / fl.bw_m3m3 * wct
+        rho_gas_kgm3 = fl.rho_gas_kgm3
+        mu_liq_cP = fl.mu_oil_cP * (1 - wct) + fl.mu_wat_cP * wct
+        mu_gas_cP = fl.mu_gas_cP
+        dpdl = uc.Pa2bar(unf_BeggsBrill_gradient(vel_gas_super_ms, vel_liq_super_ms, rho_liq_kgm3, rho_gas_kgm3,
+                                                 mu_liq_cP, mu_gas_cP, d_m, sigma_liq_Nm, theta, e, rough_pipe))
+        return dpdl
+    p_array = odeint(BB_gradient, p1, l_array, args=t_array)
+
+    return l_array, p_array
+
+
 def pressure_drop_BeggsBrill(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm, theta, e, wct, rough_pipe=0, gamma_oil=0.86,
-                             gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0, y_n2 =0,
-                             s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP = 0.5):
+                             gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0, y_n2=0,
+                             s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5):
+    """
+    Расчет кривой распределения давления по Беггсу-Бриллу
+
+    :param l:
+    :param p1:
+    :param t1:
+    :param t2:
+    :param d_m:
+    :param q_liq_m3d:
+    :param sigma_liq_Nm:
+    :param theta:
+    :param e:
+    :param wct:
+    :param rough_pipe:
+    :param gamma_oil:
+    :param gamma_gas:
+    :param gamma_wat:
+    :param rsb_m3m3:
+    :param gamma_gassp:
+    :param y_h2s:
+    :param y_co2:
+    :param y_n2:
+    :param s_ppm:
+    :param par_wat:
+    :param pbcal_bar:
+    :param tpb_C:
+    :param bobcal_m3m3:
+    :param muobcal_cP:
+    :return:
+    """
     p_calc = p1
     p_pvt = 0
     t_calc = t1
@@ -40,8 +146,8 @@ def pressure_drop_BeggsBrill(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm, theta,
             fl.calc(p_pvt, t_pvt)
             q_liq = (q_oil_m3d * fl.bo_m3m3 + q_water_m3d * fl.bw_m3m3)
             q_gas = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.bg_m3m3)
-            vel_gas_super_ms = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.bg_m3m3) / (86400 * uc.pi * d_m ** 2 / 4)
-            vel_liq_super_ms = (q_oil_m3d * fl.bo_m3m3 + q_water_m3d * fl.bw_m3m3) / (86400 * uc.pi * d_m ** 2 / 4)
+            vel_gas_super_ms = q_gas / (86400 * uc.pi * d_m ** 2 / 4)
+            vel_liq_super_ms = q_liq / (86400 * uc.pi * d_m ** 2 / 4)
             rho_liq_kgm3 = ((fl.rho_oil_kgm3 + fl.rs_m3m3 * fl.rho_gas_kgm3) / fl.bo_m3m3) * (1 - wct) +\
                 fl.rho_wat_kgm3 / fl.bw_m3m3 * wct
             rho_gas_kgm3 = fl.rho_gas_kgm3
