@@ -3,12 +3,6 @@ from scipy.optimize import fsolve
 import numpy as np
 
 
-"""
-Расчет Г-образной схемы замещения асинхронного двигателя
-Источник: Лабораторная работа по расчету АД. Гридин
-"""
-
-
 def calc_resistances(nom_power__W, nom_voltage__V, nom_slip, nom_efficient,
                      motor_lamda, alfa_0 = 0.61, moments_division = 1.05):
 
@@ -19,7 +13,7 @@ def calc_resistances(nom_power__W, nom_voltage__V, nom_slip, nom_efficient,
     :param nom_voltage__V: номинальное напряджение АД
     :param nom_slip: номинальное скольжение АД
     :param nom_efficient: номинальный КПД АД
-    :param motor_lamda: отнощение максимального момента к номинальному
+    :param motor_lamda: отношение максимального момента к номинальному
     :return: r_2_: активное сопротивление обмотки ротора приведенное к ротору
              r_1: активное сопротивление обмотки статора
              x_k: индуктивное сопротивление обмоток при неподвижном роторе
@@ -130,6 +124,7 @@ def motor_data_loading(motor_power__W, nom_power__W, nom_voltage__V, nom_slip,
                        nom_efficient, nom_cos, frequency__Hz, voltage__V,
                        r_1__Om, r_2__Om, x_k__Om, moments_division=1.05):
     """
+    Расчет характеристик ПЭД в зависимости от загрузки
 
     :param motor_power__W: рабочая мощность ПЭД
     :param nom_power__W: номинальная мощность АД

@@ -48,3 +48,14 @@ def _get_coefficient(company, frequency_nom, d__mm, parameter, motor_base):
         coefficient = (current_motor['{}_{}'.format(parameter, i)].values[0])
         coefficients.append(coefficient)
     return coefficients
+
+
+def _def_get_value(coefficient, motor_loading):
+
+    value = coefficient[0] + coefficient[1] * motor_loading + \
+            coefficient[2] * motor_loading**2 + coefficient[3] * \
+            motor_loading**3 + coefficient[4] * motor_loading**4 + \
+            coefficient[5] * motor_loading**5 + coefficient[6] * \
+            motor_loading**6
+
+    return value
