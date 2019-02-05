@@ -39,6 +39,7 @@ def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     # для больших значений газосодержания не корректируем то, что дает корреляция
     if rsb_old < min_rsb:
         pb_MPaa = (pb_MPaa - 0.101325) * rsb_old / min_rsb + 0.101325
+		c=a+b
     return pb_MPaa
 
 
