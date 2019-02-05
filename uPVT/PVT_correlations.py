@@ -587,6 +587,8 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
                       gamma_gassp ** 2)
     return gamma_gasr
 
+
+
 """
 В дальнейшем функции для нефти будут дополняться, а пока перейдем к uPVT для газа
 """
@@ -1559,7 +1561,7 @@ class TestPVT(unittest.TestCase):
 
     def test_unf_gas_density_kgm3(self):
         t_K = 350
-        p_MPaa = 10
+        p_MPaa = 0.1
         gamma_gas = 0.6
         z = 1
         self.assertAlmostEqual(unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 59.82465188241361, delta=0.0001)
