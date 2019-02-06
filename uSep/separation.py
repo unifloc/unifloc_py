@@ -2,25 +2,29 @@
 """
 Created on Sat Feb  2 12:25:50 2019
 
-@author: olegk
+Модуль с функциями рассчета есстественной и общей сепарацией
+
+В данный момент реализовано:
+    1. Новая методика Маркеза, скопированная с VBA
+
+@author: oleg kobzar
 """
-import sys
-sys.path.append('../')
+#импорт модулей
+import sys #для подключения других частей unifloc
+sys.path.append('../') #для подключения других частей unifloc
 import uPVT.PVT as PVT
 import math
-import matplotlib.pyplot as plt
-import pandas as pd
 
-data = pd.read_excel('SepTestData.xlsx')
+
+
 
 pi = math.pi
-print(pi)
 const_g=9.81
 
 def unf_calc_natural_separation(dtub_m, dcas_m, qliq_scm3day,
                                qg_sc_m3day, bo_m3m3, bg_m3m3,
                                sigma_o,
-                               rho_osc, rho_gsc, wct, Units=1):
+                               rho_osc, rho_gsc, wct, units=1):
     if qliq_scm3day == 0 or dtub_m == dcas_m:
         print('ll')
         return 1
@@ -113,30 +117,31 @@ def MF_SeparNat_d(pin_atm=q_sm3day, qliq_m3day=q_sm3day,wct_perc=wct_perc,
     pass
 
 
+
+
+
+'''Дальше идет неактивный кусок кода, считающий коэффициент
+    естесственной сепарации и сравнивая его с результатами VBA, 
+    находящимися в файле SepTestData.xlsx
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
 fluid=PVT.FluidStanding(gammaoil,gammagas,gammawater,rsb_m3m3)
-print(fluid.calc(pintake_atm,tintake_c))
-
-#qgas_scm3day=qgas_scm3day(q_sm3day*(1-wct_perc/100))
+fluid.calc(pintake_atm,tintake_c)
 
 
-#out(fluid.)
+data = pd.read_excel('SepTestData.xlsx')
+
 out(dintake_mm,'dintake_mm')
 out(dcasing_mm,'dcasing_mm')
 out(q_sm3day,'Qliq_scm3day')
-#out(qgas_scm3day,'qgas_scm3day')
 out(fluid.bo_m3m3,'bo_m3m3')
 out(fluid.bg_m3m3,'bg_m3m3')
 out(fluid.sigma_oil_Nm,'sigma_oil_Nm')
 out(fluid.rho_oil_stkgm3,'rho_oil_stkgm3')
 out(fluid.rho_gas_sckgm3,'rho_gas_sckgm3')
 out(wct_perc,'wct')
-'''naturalsep=unf_calc_natural_separation(dintake_mm/1000,dcasing_mm/1000,
-                                       q_sm3day,
-                                       qgas_scm3day,fluid.bo_m3m3,
-                                       fluid.bg_m3m3,
-                                       24,fluid.rho_oil_stkgm3,
-                                       fluid.rho_gas_sckgm3,wct_perc)
-out(naturalsep,'naturalsep')'''
 
 def getvalues(start=1,stop=300,step=10):
     q=[]
@@ -160,5 +165,4 @@ plt.xlabel('qliq_scm3day')
 plt.title('different sigma_o, wct=22')
 plt.legend()
 plt.show()
-print(result[0])
-print(fluid.bo_m3m3)
+'''
