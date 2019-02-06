@@ -7,9 +7,6 @@
 ###Artem Kiyan
 ###Oleg Kobzar
 ###Mikhail Poleshko
-###Artur Shabonas
-
-
 
 * - недоделанные функции
 
