@@ -37,6 +37,7 @@ def prep_plot(func, tset, goset, ggset, rsbset, plot_title, plot_xlab, plot_ylab
     plt_.xlabel(plot_xlab, color = 'black')
     plt_.legend()
 
+
 def pb_Standing_test():
     rsb_max = 200
     rsbset =  np.arange(1, rsb_max, 2)

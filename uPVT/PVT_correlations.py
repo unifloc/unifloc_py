@@ -185,7 +185,7 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
     return rs_m3m3
 
 
-def unf_rsb_Mccain_m3m3(rsp_m3m3,gamma_oil, psp_MPaa=0, tsp_K=0):
+def unf_rsb_Mccain_m3m3(rsp_m3m3, gamma_oil, psp_MPaa=0, tsp_K=0):
     """
     Solution Gas-oil ratio at bubble point pressure calculation according to McCain (2002) correlation 
     taking into account the gas losses at separator and stock tank
@@ -299,10 +299,7 @@ def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
     if p_MPaa <= pb_MPaa:
         bo = bob
     else:
-        pb_psia = uc.Pa2psi(pb_MPaa * 10 ** 6)
-        p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
-        cofb_1psi = uc.compr_1pa_2_1psi(cofb_1MPa / 10 ** 6)
-        bo = bob * np.exp(cofb_1psi * (pb_psia - p_psia))
+        bo = bob * np.exp(cofb_1MPa * (pb_MPaa - p_MPaa))
     return bo
 
 
@@ -590,6 +587,8 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
                       gamma_gassp ** 2)
     return gamma_gasr
 
+
+
 """
 В дальнейшем функции для нефти будут дополняться, а пока перейдем к uPVT для газа
 """
@@ -715,7 +714,7 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
     def f(variables):
-        z,ropr = variables
+        z, ropr = variables
         func = np.zeros(2)
         func[0] = 0.27 * (ppr / (z * tpr)) - ropr
         func[1] = -z + 1 + (0.3265 - 1.0700 / tpr - 0.5339 / tpr**3 + 0.01569 / tpr ** 4 - 0.05165 / tpr ** 5) * ropr +\
@@ -835,6 +834,37 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     """
     bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa)
     return bg
+
+
+def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
+    """
+    Equation for gas density
+
+    :param t_K: temperature
+    :param p_MPaa: pressure
+    :param gamma_gas: specific gas density by air
+    :param z: z-factor
+    :return: gas density
+    """
+    m = gamma_gas * 0.029
+    p_Pa = 10 ** 6 * p_MPaa
+    rho_gas = p_Pa * m / (z * 8.31 * t_K)
+    return rho_gas
+
+
+# uPVT свойства для сжимаемости нефти(требует немного свойств газа)
+
+
+def unf_weightedcompressibility_oil_Mccain_1MPa_greater(gamma_oil, gamma_gas, pb_MPa, p_MPa, rsb_m3m3, tres_K, gamma_gassp = 0):
+    pass
+
+
+def unf_compressibility_oil_Mccain_1MPa_greater(gamma_oil, gamma_gas, pb_MPa, p_MPa, rsb_m3m3, tres_K, gamma_gassp = 0):
+    pass
+
+
+def unf_compressibility_oil_Mccain_1MPa_lower():
+    pass
 
 
 # uPVT свойства для воды
@@ -1338,7 +1368,7 @@ class TestPVT(unittest.TestCase):
         cofb_1MPa = 3 * 10**(-3)
         pb_MPaa = 12
         p_MPaa = 15
-        self.assertAlmostEqual(unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa), 1.288352492404749, delta=0.0001)
+        self.assertAlmostEqual(unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa), 1.2883524924047487, delta=0.0001)
 
     def test_unf_compressibility_oil_VB_1Mpa(self):
         rs_m3m3 = 200
@@ -1434,7 +1464,7 @@ class TestPVT(unittest.TestCase):
         t_K = 350
         ppc_MPa = 7.477307083789863
         tpc_K = 239.186917147216
-        self.assertAlmostEqual(unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K), 0.8414026170318333, delta=0.0001)
+        self.assertAlmostEqual(unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K), 0.8607752185760458, delta=0.0001)
 
     def test_unf_gasviscosity_Lee_cP(self):
         t_K = 350
@@ -1506,7 +1536,7 @@ class TestPVT(unittest.TestCase):
         t_K = 350
         ppc_MPa = 7.477307083789863
         tpc_K = 239.186917147216
-        self.assertAlmostEqual(unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K), 0.47717077711622113,
+        self.assertAlmostEqual(unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K), 0.4814932416304309,
                                delta=0.0001)
 
 
@@ -1527,7 +1557,15 @@ class TestPVT(unittest.TestCase):
     def test_unf_zfactor_BrillBeggs(self):
         ppr = 2
         tpr = 2
-        self.assertAlmostEqual(unf_zfactor_BrillBeggs(ppr,tpr), 0.9540692750239955, delta=0.0001)
+        self.assertAlmostEqual(unf_zfactor_BrillBeggs(ppr, tpr), 0.9540692750239955, delta=0.0001)
+
+    def test_unf_gas_density_kgm3(self):
+        t_K = 350
+        p_MPaa = 0.1
+        gamma_gas = 0.6
+        z = 1
+        self.assertAlmostEqual(unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 59.82465188241361, delta=0.0001)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -204,8 +204,8 @@ class FluidBlackOil:
 
 class FluidStanding(FluidBlackOil):
     """
-    класс реализующий расчет свойств нефти с использованием
-    набора корреляция на основе Standing
+    класс, реализующий расчет свойств нефти с использованием
+    набора корреляций на основе Standing
     """
 
     def calc(self, p_bar, t_c):
@@ -256,6 +256,7 @@ class FluidStanding(FluidBlackOil):
         self._bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, self._z)
         self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
                                                                                             ppc_MPa, tpc_K))
+        self._rho_gas_kgm3 = PVT.unf_gas_density_kgm3(t_K, p_MPaa, self.gamma_gas, self._z)
         # water
         # TODO НУЖНО ДОБАВИТЬ GWR
         self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
@@ -268,7 +269,7 @@ class FluidStanding(FluidBlackOil):
 
 class FluidMcCain(FluidBlackOil):
     """
-    класс реализующий расчет свойств нефти с использованием
+    класс, реализующий расчет свойств нефти с использованием
     набора корреляций на основе McCain
     """
 
@@ -323,10 +324,11 @@ class FluidMcCain(FluidBlackOil):
         self._bg_m3m3 = PVT.unf_gas_fvf_m3m3(t_K, p_MPaa, self._z)
         self._compr_gas_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K,
                                                                                             ppc_MPa, tpc_K))
+        self._rho_gas_kgm3 = PVT.unf_gas_density_kgm3(t_K, p_MPaa, self.gamma_gas, self._z)
         # water
         # TODO НУЖНО ДОБАВИТЬ GWR
         self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
-        self._compr_wat_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm,
+        self._compr_wat_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm,     
                                                                                               self._z, self.par_wat))
         self._bw_m3m3 = PVT.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, self.s_ppm)
         self._mu_wat_cP = PVT.unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, self.s_ppm)
