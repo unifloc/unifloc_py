@@ -43,7 +43,7 @@ pylab.subplot(212)
 pylab.plot(ppr, pogr, label='погрешность в %')
 pylab.grid()
 pylab.legend()
-pylab.show()
+#pylab.show()
 
 # построим все графики Стендинга сразу
 tpr = [1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3]
@@ -56,7 +56,7 @@ pylab.title('Графики Стендинга-Катца для различн�
 pylab.legend()
 pylab.xlabel('ppr')
 pylab.ylabel('z')
-pylab.show()
+#pylab.show()
 
 
 def test4():
@@ -241,4 +241,15 @@ def test4():
     plt.show()
 
 
-test4()
+fl = PVT.FluidStanding(gamma_oil=0.8, gamma_gas=0.8, gamma_wat=1.0, rsb_m3m3=150.0, bobcal_m3m3=-1, muobcal_cP=-1)
+p = np.arange(1, 211, 10)
+t_C=20
+bo=[]
+for pi in p:
+    fl.calc(pi, t_C)
+    bo.append(fl.bo_m3m3)
+
+print(bo)
+
+
+#test4()
