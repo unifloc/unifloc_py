@@ -4,3 +4,6 @@ __pycache__/
 *.vpp.bak*
 .ipynb_checkpoints/
 .cache
+/test/.idea
+/test/.vscode
+.pytest_cache/
