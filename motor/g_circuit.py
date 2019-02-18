@@ -1,6 +1,5 @@
 import math
 from scipy.optimize import fsolve
-import numpy as np
 
 
 def calc_resistances(nom_power__W, nom_voltage__V, nom_slip, nom_efficient,
