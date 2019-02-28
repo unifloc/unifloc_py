@@ -21,6 +21,7 @@ import sys #для подключения других частей unifloc
 sys.path.append('../') #для подключения других частей unifloc
 import uPVT.PVT as PVT
 import math
+import numpy as np
 
 
 
@@ -167,6 +168,60 @@ def unf_calc_total_separation(natsep, sepgassep):
  
 
 
+
+
+
+
+
+def sigma_og_BF(p_atm, t_c,gamma_o,wc_perc=0):
+    #calculate surface tension according Baker Sverdloff correlation
+    #расчет коэффициента поверхностного натяжения газ-нефть
+    #st=serfase tension = поверхностное натяжение
+    wc=wc_perc/100
+    t_f=t_c*1.8+32
+    p_psia=p_atm/0.068046
+    p_mpa=p_atm/10
+    oil_API=141.5/gamma_o-131.5 #???
+    st68=39-0.2571*oil_API
+    st100=37.5-0.2571*oil_API
+    if t_f<68:
+        sto=st68
+    else:
+        tst=t_f
+        if t_f>100:
+            tst=100
+        sto=(68-(((tst-68)*(st68-st100))/32))*(1-(0.024*p_psia**(0.45)))
+    #TOD stw, st calc_ST
+    stw74=(75-(1.108*p_psia**(0.349)))
+    stw280=(53-(0.1048*p_psia**(0.637)))
+    if t_f<74:
+        stw=stw74
+    else:
+        tstw=t_f
+        if t_f>280:
+            tstw=280
+        stw=stw74-(((tstw-74)*(stw74-stw280))/206)
+    stw=10**(-(1.19+0.01*p_mpa))*1000
+    st=(stw*wc)+sto*(1-wc)
+    
+    return st
+
+#поверхностное натяжение между газом и разгазированной нефтью, дин/см
+def sigma_od(t,gamma_oil):
+    return (1.17013-1.694*10**(-3)*(1.8*t+32))*(38.085-0.259*(141.5/gamma_oil-131.5))
+
+#коэффициент сниженя поверхностного натяжения от газосодержания, дин/см
+def relativesigma_go_od(rs):
+    return (0.056379+0.94362*np.exp(-21.6128*10**(-3)*rs))
+
+#итоговое поверхностное натяжение по корреляции Абдул-Маджид с нефтяного инжиниринга, дин/см
+def sigma_og(t,gamma_oil,rs):
+    return sigma_od(t,gamma_oil)*relativesigma_go_od(rs)
+
+
+
+
+
 '''Тестовые функции, тестирующие как отдельные функции для сепарации
     Последняя функция объединяет в себе все тесты
     Сравнивается факт с должным значением, 
@@ -175,6 +230,8 @@ def unf_calc_total_separation(natsep, sepgassep):
     Вывод:
         название функции + работает/неработает
 '''
+#TODO перейти на pytest
+
 work_right=' -work right'
 dont_work=' -work wrong - ERROR!!!'
 
