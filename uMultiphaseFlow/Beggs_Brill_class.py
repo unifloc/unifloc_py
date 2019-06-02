@@ -7,28 +7,14 @@ oleg.kobzarius@gmail.com
 """
 # TODO добавить поправку для коэффициента трения
 import math
+import Friction_Bratland as fr  # модуль для расчета коэффициента трения
 
 const_g_m2sec = 9.8
 
 # TODO добавить учет расчета сверху вниз
-def __friction_coefficient__(Re, epsilon, d):
-    # TODO исправить коэффициент
-    """
-    (2.12 и 2.13)
-    :param Re:
-    :return: коэффициент трения
-    """
-    if Re < 3000:
-        return 64 / Re
-    if 3000 <= Re < (10 * d / epsilon):
-        return 0.3164 / Re ** 0.25
-    if (10 * d / epsilon) <= Re < (560 * d / epsilon):
-        return 0.11 * (epsilon / d + 68 / Re) ** 0.25
-    if Re >= (560 * d / epsilon):
-        return 0.11 * (epsilon / d) ** 0.25
 
 
-def __out__(a, b):
+def __out__(a, b):  # вспомогательная функция
     print(str(a) + " =  " + str(b) + '\n')
 
 
@@ -96,11 +82,13 @@ class Beggs_Brill_cor():
     """
     def __init__(self):
         self.mu_oil_pasec = 0.97 * 10 ** (-3)
-        self.sigma_kgsec2 = 8.41 * 10 ** (-3)
         self.mu_gas_pasec = 0.016 * 10 ** (-3)
         self.mu_water_pasec = 1 * 10 ** (-3)
-        self.watercut_percent = 0
         self.mu_liquid_pas = None
+
+        self.sigma_kgsec2 = 8.41 * 10 ** (-3)
+        self.watercut_percent = 0
+
         self.epsilon_friction_m = 18.288 * 10 ** (-6)
         self.diametr_inner_m = 0.152
 
@@ -159,6 +147,10 @@ class Beggs_Brill_cor():
         self.volume_liquid_content_with_Pains_cor = None
         self.grad_pam = None
         self.print_all = True
+
+
+        # импорт модуля для расчета коэффициента трения
+        self.module_friction = fr.Friction(self.number_Re, self.epsilon_friction_m, self.diametr_inner_m)
 
     def calc_grad(self, PT):
         """
@@ -242,7 +234,7 @@ class Beggs_Brill_cor():
 
             self.number_Re = self.rhon_kgm3 * self.vm_msec * self.diametr_inner_m / self.mu_mix_noslip_pas
 
-            self.friction_coefficient = __friction_coefficient__(self.number_Re, self.epsilon_friction_m,
+            self.friction_coefficient = self.module_friction.calc_f(self.number_Re, self.epsilon_friction_m,
                                                                  self.diametr_inner_m)
 
             self.y = self.liquid_content / self.volume_liquid_content_with_Pains_cor ** 2
@@ -302,7 +294,6 @@ class PT():
 
 
 PT_example = PT(11.713, 82)
-
 class_example = Beggs_Brill_cor()
 class_example.print_all = False
 result_grad = class_example.calc_grad(PT_example)
