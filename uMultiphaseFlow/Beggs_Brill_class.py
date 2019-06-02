@@ -116,10 +116,8 @@ class Beggs_Brill_cor():
         self.volume_liquid_rate_in_condition_m3sec = 0  # объемный дебит жидкости при данных условиях (P,T)
         self.volume_gas_rate_in_condition_m3sec = 0  # объемный дебит газа при данных условиях (P,T)
 
-        self.liquid_content = None
-
         self.pressure_bar = 117.13
-        self.pressure_pa = self.pressure_bar * 10 ** 5
+        self.pressure_pa = 117.13 * 10 ** 5
         self.temperature_c = 82
 
         self.correction_factor_betta = None
@@ -130,7 +128,7 @@ class Beggs_Brill_cor():
         self.vsg_msec = 0  # приведенная скорость газа (3.11)
         self.vm_msec = 0  # приведенная (общая) скорость смеси (3.12)
 
-        self.liquid_content = 0  # объемное содержание жидкости при отсутствии проскальзывания (3.8)
+        self.liquid_content = None  # объемное содержание жидкости при отсутствии проскальзывания (3.8)
 
         self.val_number_Fr = None
 
@@ -148,7 +146,6 @@ class Beggs_Brill_cor():
         self.grad_pam = None
         self.print_all = True
 
-
         # импорт модуля для расчета коэффициента трения
         self.module_friction = fr.Friction(self.number_Re, self.epsilon_friction_m, self.diametr_inner_m)
 
@@ -158,7 +155,7 @@ class Beggs_Brill_cor():
         :param PT: начальные условия в виде экземляра класса PT
         :return: градиент давления, Па / м
         """
-        self.pressure_pa = PT.p_pa
+        self.pressure_pa = PT.p_mpa * 10 ** 6
         self.temperature_c = PT.T_C
         if self.pressure_pa <= 0:
             self.grad_pam = 0
@@ -253,8 +250,8 @@ class Beggs_Brill_cor():
             self.rhos_kgm3 = (self.rho_liquid_kgm3 * self.volume_liquid_content_with_Pains_cor +
                              self.rho_gas_kgm3 * (1 - self.volume_liquid_content_with_Pains_cor))
 
-            self.grad_pam = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m +
-                             self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad) / ( 1 - self.Ek))
+            self.grad_pam = ((self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m +
+                             self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)) / ( 1 - self.Ek))
 
             if self.print_all:
                 __out__('Ap', self.Ap)
