@@ -39,7 +39,7 @@ def __calc_hltetta__(data):
         a = 1.065
         b = 0.5824
         c = 0.0609
-    data.hl0 = a * data.liquid_content ** b / data.val_number_Fr ** c
+    data.volume_liquid_content_with_zero_angle = a * data.liquid_content ** b / data.val_number_Fr ** c
 
     data.Nlv = (data.vsl_msec * (data.rho_liquid_kgm3 / (const_g_m2sec * data.sigma_kgsec2)) ** (1 / 4))
 
@@ -68,7 +68,7 @@ def __calc_hltetta__(data):
                                     ((math.sin(1.8 * data.angle_rad)) - (1/3) *
                                     (math.sin(1.8 * data.angle_rad))**3))
 
-    data.volume_liquid_content_with_angle = data.hl0 * data.angle_correction_factor
+    data.volume_liquid_content_with_angle = data.volume_liquid_content_with_zero_angle * data.angle_correction_factor
 
     if data.angle_grad > 0:
         data.volume_liquid_content_with_Pains_cor = 0.924 * data.volume_liquid_content_with_angle
@@ -148,6 +148,11 @@ class Beggs_Brill_cor():
 
         # импорт модуля для расчета коэффициента трения
         self.module_friction = fr.Friction(self.number_Re, self.epsilon_friction_m, self.diametr_inner_m)
+
+        self.friction_grad = None
+        self.density_grad = None
+        self.friction_grad_part = None
+        self.density_grad_part = None
 
     def calc_grad(self, PT):
         """
@@ -253,13 +258,13 @@ class Beggs_Brill_cor():
             self.grad_pam = ((self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m +
                              self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)) / ( 1 - self.Ek))
 
-            #self.friction_grad = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m)
+            self.friction_grad = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m)
 
-            #self.density_grad = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
+            self.density_grad = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
 
-            #self.friction_part = self.friction_grad / ( 1 - self.Ek) / self.grad_pam * 100
+            self.friction_grad_part = self.friction_grad / ( 1 - self.Ek) / self.grad_pam * 100
 
-            #self.density_part = self.density_grad / (1 - self.Ek) / self.grad_pam * 100
+            self.density_grad_part = self.density_grad / (1 - self.Ek) / self.grad_pam * 100
 
             #self.grad_pam2 = (self.friction_grad + self.density_grad) / (1 - self.Ek)
 
