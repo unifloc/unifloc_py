@@ -47,9 +47,9 @@ class Friction():
             self.f = p1 + (p2 - p1) / (3100 - 2300) * (self.number_re - 2300)  # TODO должна быть прямая линия
         if 3100 < self.number_re <= 20000:
             mistake = sp.fsolve(self.__correlation__, 0.02)
-            p3 = self.f
+            p3 = float(self.f)
             p2 = 0.04
-            self.f = p2 + (p3 - p2) / (20000 - 3100) * (self.number_re - 3100)  # TODO должна быть прямая линия
+            self.f = p2 + ((p3) - (p2)) / (20000 - 3100) * (self.number_re - 3100)  # TODO должна быть прямая линия
         if self.number_re > 20000:
             mistake = sp.fsolve(self.__correlation__, 0.02)
         self.f = float(self.f)  # fsolve выдает numpy array, перевод в float
