@@ -116,8 +116,8 @@ class Beggs_Brill_cor():
         self.volume_liquid_rate_in_condition_m3sec = 0  # объемный дебит жидкости при данных условиях (P,T)
         self.volume_gas_rate_in_condition_m3sec = 0  # объемный дебит газа при данных условиях (P,T)
 
-        self.pressure_bar = 117.13
         self.pressure_pa = 117.13 * 10 ** 5
+        self.pressure_bar = self.pressure_pa / 10 ** 6
         self.temperature_c = 82
 
         self.correction_factor_betta = None
@@ -155,7 +155,7 @@ class Beggs_Brill_cor():
         :param PT: начальные условия в виде экземляра класса PT
         :return: градиент давления, Па / м
         """
-        self.pressure_pa = PT.p_mpa * 10 ** 6
+        self.pressure_pa = PT.p_pa
         self.temperature_c = PT.T_C
         if self.pressure_pa <= 0:
             self.grad_pam = 0
@@ -253,6 +253,19 @@ class Beggs_Brill_cor():
             self.grad_pam = ((self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m +
                              self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)) / ( 1 - self.Ek))
 
+            #self.friction_grad = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m)
+
+            #self.density_grad = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
+
+            #self.friction_part = self.friction_grad / ( 1 - self.Ek) / self.grad_pam * 100
+
+            #self.density_part = self.density_grad / (1 - self.Ek) / self.grad_pam * 100
+
+            #self.grad_pam2 = (self.friction_grad + self.density_grad) / (1 - self.Ek)
+
+
+
+
             if self.print_all:
                 __out__('Ap', self.Ap)
                 __out__('volume_oil_rate_in_condition_m3sec', self.volume_oil_rate_in_condition_m3sec)
@@ -290,10 +303,64 @@ class PT():
         self.p_pa = self.p_mpa * 10 ** 6
 
 
-PT_example = PT(11.713, 82)
-class_example = Beggs_Brill_cor()
-class_example.print_all = False
-result_grad = class_example.calc_grad(PT_example)
-print(result_grad / 10**5)
-print(class_example.grad_pam / 10 ** 5)
+#PT_example = PT(11.713, 82)
+#class_example = Beggs_Brill_cor()
+#class_example.print_all = False
+#result_grad = class_example.calc_grad(PT_example)
+#print(result_grad / 10**5)
+#print(class_example.grad_pam / 10 ** 5)
+
+'''import sys
+sys.path.append('../')
+import uPVT.PVT as PVT
+
+fluid = PVT.FluidStanding()
+hydr_cor = Beggs_Brill_cor()
+
+p_initial_mpa = 7
+t_initial_c = 90
+h_initial_m = 3000
+step_m = 10
+step_cm = 0.03
+
+
+PT = PT(p_initial_mpa, t_initial_c)
+
+hydr_cor.gas_rate_on_surface_m3day = hydr_cor.oil_rate_on_surface_m3day * fluid.rsb_m3m3
+
+h_list = [h_initial_m]
+p_list = [p_initial_mpa]
+t_list = [t_initial_c]
+
+for i in range(300):
+    if PT.p_mpa > 0:
+        fluid.calc(PT.p_mpa * 10, PT.T_C)
+        hydr_cor.print_all = False
+        hydr_cor.mu_gas_pasec = fluid.mu_gas_cP / 1000
+        hydr_cor.mu_oil_pasec = fluid.mu_oil_cP / 1000
+        hydr_cor.rho_oil_kgm3 = fluid.rho_oil_kgm3
+        hydr_cor.rho_gas_kgm3 = (3.5 * 10** (-3) * fluid.gamma_gas * PT.p_mpa * 10**6 /
+                                 fluid.z / (fluid.t_c + 273.15)
+                                 )
+
+        hydr_cor.rs_m3m3 = fluid.rs_m3m3
+        hydr_cor.bg_m3m3 = fluid.bg_m3m3
+        hydr_cor.bo_m3m3 = fluid.bo_m3m3
+        grad_pam = hydr_cor.calc_grad(PT)
+
+        p = p_list[-1] - step_m * grad_pam / 10 ** 6
+        t = t_list[-1] - step_m * step_cm
+        h = h_list[-1] - step_m
+
+    if p > 0:
+        p_list.append(p)
+    else:
+        p_list.append(p_list[-1])
+
+    t_list.append(t)
+    h_list.append(h)
+
+    PT.p_mpa = p
+    PT.p_pa = p * 10 ** 6
+    PT.T_C = t'''
 
