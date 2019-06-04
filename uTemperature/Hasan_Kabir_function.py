@@ -393,3 +393,32 @@ def temp_fluid(distance_m, p_pa, delta0=1, data=def_prop):
 
 
 print(3)
+
+# Ниже пример использования
+'''sys_prop=system_properties()
+depth_m = 2550
+pbh_pa=25*10**6
+c=pbh_pa/depth_m
+tei=sys_prop.tei_c
+gg=sys_prop.gg_cm
+tff, tfg, p=[], [], []
+
+for i in range(1,depth_m,10):
+    p_val=pbh_pa-c*i
+    tg=tei-gg*i
+    tfg.append(tg)
+    p.append(p_val)
+l=np.asarray(list(range(1,depth_m,10)))
+p=np.asarray(p)
+tfg=np.asarray(tfg)
+mistake=p*0+1
+
+tff=temp_fluid(l,p,mistake,sys_prop)
+
+print(tff[-1])
+l = 2550
+p = 10**6
+
+mistake=p*0+1
+tff=temp_fluid(l,p,mistake,sys_prop)
+print(tff)'''
