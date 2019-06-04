@@ -5,7 +5,7 @@ Bratland O. Pipe flow 1: single-phase flow assurance
 //Fonte: http://www.drbratland.com/download-two-free-books-on-flow-assurance. – 2009.
 """
 
-import scipy.optimize as sp
+import scipy.optimize as sp  # модуль для решения уравения
 import math
 
 
@@ -29,6 +29,12 @@ class Friction():
         self.u_s = 1  # подстроечный параметр для сбивки к экспериментальным исследованиям
 
     def __correlation__(self, f):
+        """
+        Основная корреляция Ove Bartland для расчета коэффициента трения
+        При решении уравнения с помощью fsolve результат сохраняется в атрибуте
+        :param f: коэффициент трения
+        :return: разница между расчитанным f и приближенным f для примения fsolve
+        """
         self.f = f
         in_log10_part_first = ((1.547 / self.number_re / self.f ** (1/2))**(0.9445 * self.u_s))
         in_log10_part_second = ((self.absolute_roughness_m / 3.7 / self.d_m) ** self.u_s)
@@ -36,6 +42,13 @@ class Friction():
         return result - self.f
 
     def calc_f(self, number_re, epsilon_m, d_m):
+        """
+        Метод для расчета коэффициента трения
+        :param number_re: Число Рейнольдса
+        :param epsilon_m: Абсолютная шероховатость
+        :param d_m: Внутрениний диаметр трубы
+        :return: коэффициент трения f
+        """
         self.number_re = number_re
         self.absolute_roughness_m = epsilon_m
         self.d_m = d_m
@@ -46,7 +59,7 @@ class Friction():
             p2 = 0.04
             self.f = p1 + (p2 - p1) / (3100 - 2300) * (self.number_re - 2300)  # TODO должна быть прямая линия
         if 3100 < self.number_re <= 20000:
-            mistake = sp.fsolve(self.__correlation__, 0.02)
+            mistake = sp.fsolve(self.__correlation__, 0.02)  # TODO разобраться с выбором начального приближения
             p3 = float(self.f)
             p2 = 0.04
             self.f = p2 + ((p3) - (p2)) / (20000 - 3100) * (self.number_re - 3100)  # TODO должна быть прямая линия

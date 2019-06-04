@@ -111,10 +111,10 @@ class Beggs_Brill_cor():
         self.angle_rad = self.angle_grad * math.pi / 180
         self.Ap = None  # поперечная площадь трубы
 
-        self.volume_oil_rate_in_condition_m3sec = 0  # объемный дебит нефти при данных условиях (P,T)
-        self.volume_water_rate_in_condition_m3sec = 0  # объемный дебит воды при данных условиях (P,T)
-        self.volume_liquid_rate_in_condition_m3sec = 0  # объемный дебит жидкости при данных условиях (P,T)
-        self.volume_gas_rate_in_condition_m3sec = 0  # объемный дебит газа при данных условиях (P,T)
+        self.volume_oil_rate_in_PT_m3sec = 0  # объемный дебит нефти при данных условиях (P,T)
+        self.volume_water_rate_in_PT_m3sec = 0  # объемный дебит воды при данных условиях (P,T)
+        self.volume_liquid_rate_in_PT_m3sec = 0  # объемный дебит жидкости при данных условиях (P,T)
+        self.volume_gas_rate_in_PT_m3sec = 0  # объемный дебит газа при данных условиях (P,T)
 
         self.pressure_pa = 117.13 * 10 ** 5
         self.pressure_bar = self.pressure_pa / 10 ** 6
@@ -143,16 +143,16 @@ class Beggs_Brill_cor():
         self.Ek = None
         self.rhos_kgm3 = None
         self.volume_liquid_content_with_Pains_cor = None
-        self.grad_pam = None
+        self.result_grad_pam = None
         self.print_all = True
 
         # импорт модуля для расчета коэффициента трения
         self.module_friction = fr.Friction(self.number_Re, self.epsilon_friction_m, self.diametr_inner_m)
 
-        self.friction_grad = None
-        self.density_grad = None
-        self.friction_grad_part = None
-        self.density_grad_part = None
+        self.friction_grad_pam = None
+        self.density_grad_pam = None
+        self.friction_grad_part_percent = None
+        self.density_grad_part_percent = None
 
     def calc_grad(self, PT):
         """
@@ -163,30 +163,30 @@ class Beggs_Brill_cor():
         self.pressure_pa = PT.p_pa
         self.temperature_c = PT.T_C
         if self.pressure_pa <= 0:
-            self.grad_pam = 0
+            self.result_grad_pam = 0
             return 0
         else:
 
             self.Ap = math.pi * self.diametr_inner_m ** 2 / 4  # площадь поперечного сечения трубы, м2
 
-            self.volume_oil_rate_in_condition_m3sec = self.oil_rate_on_surface_m3day * self.bo_m3m3 / 86400  # (3.1)
+            self.volume_oil_rate_in_PT_m3sec = self.oil_rate_on_surface_m3day * self.bo_m3m3 / 86400  # (3.1)
 
-            self.volume_water_rate_in_condition_m3sec = self.water_rate_on_surface_m3day * self.bw_m3m3 / 86400
+            self.volume_water_rate_in_PT_m3sec = self.water_rate_on_surface_m3day * self.bw_m3m3 / 86400
 
-            self.volume_liquid_rate_in_condition_m3sec = self.volume_oil_rate_in_condition_m3sec + self.volume_water_rate_in_condition_m3sec
+            self.volume_liquid_rate_in_PT_m3sec = self.volume_oil_rate_in_PT_m3sec + self.volume_water_rate_in_PT_m3sec
 
-            self.vsl_msec = self.volume_liquid_rate_in_condition_m3sec / self.Ap  # приведенная скорость жидкости (3.10)
+            self.vsl_msec = self.volume_liquid_rate_in_PT_m3sec / self.Ap  # приведенная скорость жидкости (3.10)
 
-            self.volume_gas_rate_in_condition_m3sec = (self.gas_rate_on_surface_m3day -
-                                                       self.oil_rate_on_surface_m3day * self.rs_m3m3 -
-                                                       self.water_rate_on_surface_m3day * self.rsw_m3m3) * self.bg_m3m3 / 86400  # (3.3)
+            self.volume_gas_rate_in_PT_m3sec = (self.gas_rate_on_surface_m3day -
+                                                self.oil_rate_on_surface_m3day * self.rs_m3m3 -
+                                                self.water_rate_on_surface_m3day * self.rsw_m3m3) * self.bg_m3m3 / 86400  # (3.3)
 
-            self.vsg_msec = self.volume_gas_rate_in_condition_m3sec / self.Ap  # приведенная скорость газа (3.11)
+            self.vsg_msec = self.volume_gas_rate_in_PT_m3sec / self.Ap  # приведенная скорость газа (3.11)
 
             self.vm_msec = self.vsl_msec + self.vsg_msec  # приведенная скорость смеси
 
-            self.liquid_content = self.volume_liquid_rate_in_condition_m3sec / (
-                    self.volume_liquid_rate_in_condition_m3sec + self.volume_gas_rate_in_condition_m3sec)  # содержание жидкости в потоке
+            self.liquid_content = self.volume_liquid_rate_in_PT_m3sec / (
+                    self.volume_liquid_rate_in_PT_m3sec + self.volume_gas_rate_in_PT_m3sec)  # содержание жидкости в потоке
 
             self.val_number_Fr = self.vm_msec ** 2 / const_g_m2sec / self.diametr_inner_m  # (4.109)
 
@@ -255,34 +255,32 @@ class Beggs_Brill_cor():
             self.rhos_kgm3 = (self.rho_liquid_kgm3 * self.volume_liquid_content_with_Pains_cor +
                              self.rho_gas_kgm3 * (1 - self.volume_liquid_content_with_Pains_cor))
 
-            self.grad_pam = ((self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m +
-                             self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)) / ( 1 - self.Ek))
+            self.result_grad_pam = ((self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m +
+                                     self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)) / ( 1 - self.Ek))
 
-            self.friction_grad = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m)
+            self.friction_grad_pam = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.diametr_inner_m)
 
-            self.density_grad = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
+            self.density_grad_pam = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
 
-            self.friction_grad_part = self.friction_grad / ( 1 - self.Ek) / self.grad_pam * 100
+            self.friction_grad_part_percent = self.friction_grad_pam / (1 - self.Ek) / self.result_grad_pam * 100
 
-            self.density_grad_part = self.density_grad / (1 - self.Ek) / self.grad_pam * 100
+            self.density_grad_part_percent = self.density_grad_pam / (1 - self.Ek) / self.result_grad_pam * 100
 
-            #self.grad_pam2 = (self.friction_grad + self.density_grad) / (1 - self.Ek)
 
 
 
 
             if self.print_all:
                 __out__('Ap', self.Ap)
-                __out__('volume_oil_rate_in_condition_m3sec', self.volume_oil_rate_in_condition_m3sec)
-                __out__('volume_liquid_rate_in_condition_m3sec', self.volume_liquid_rate_in_condition_m3sec)
+                __out__('volume_oil_rate_in_condition_m3sec', self.volume_oil_rate_in_PT_m3sec)
+                __out__('volume_liquid_rate_in_condition_m3sec', self.volume_liquid_rate_in_PT_m3sec)
                 __out__('vsl_msec', self.vsl_msec)
-                __out__('volume_gas_rate_in_condition_m3sec', self.volume_gas_rate_in_condition_m3sec)
+                __out__('volume_gas_rate_in_condition_m3sec', self.volume_gas_rate_in_PT_m3sec)
                 __out__('vsg_msec', self.vsg_msec)
                 __out__('vsm_msec', self.vm_msec)
                 __out__('liquid_content', self.liquid_content)
                 __out__('val_number_Fr', self.val_number_Fr)
                 __out__('flow_regime', self.flow_regime)
-                __out__('EL', self.EL)
                 __out__('Nlv', self.Nlv)
                 __out__('correction_factor_betta', self.correction_factor_betta)
                 __out__('angle_correction_factor', self.angle_correction_factor)
@@ -297,9 +295,9 @@ class Beggs_Brill_cor():
                 __out__('result_friction', self.result_friction)
                 __out__('Ek', self.Ek)
                 __out__('rhos_kgm3', self.rhos_kgm3)
-                __out__('grad_barm', self.grad_pam / 10 ** 5)
+                __out__('grad_barm', self.result_grad_pam / 10 ** 5)
 
-            return self.grad_pam
+            return self.result_grad_pam
 
 class PT():
     def __init__(self, p_mpa, t_c):
@@ -313,59 +311,5 @@ class PT():
 #class_example.print_all = False
 #result_grad = class_example.calc_grad(PT_example)
 #print(result_grad / 10**5)
-#print(class_example.grad_pam / 10 ** 5)
-
-'''import sys
-sys.path.append('../')
-import uPVT.PVT as PVT
-
-fluid = PVT.FluidStanding()
-hydr_cor = Beggs_Brill_cor()
-
-p_initial_mpa = 7
-t_initial_c = 90
-h_initial_m = 3000
-step_m = 10
-step_cm = 0.03
-
-
-PT = PT(p_initial_mpa, t_initial_c)
-
-hydr_cor.gas_rate_on_surface_m3day = hydr_cor.oil_rate_on_surface_m3day * fluid.rsb_m3m3
-
-h_list = [h_initial_m]
-p_list = [p_initial_mpa]
-t_list = [t_initial_c]
-
-for i in range(300):
-    if PT.p_mpa > 0:
-        fluid.calc(PT.p_mpa * 10, PT.T_C)
-        hydr_cor.print_all = False
-        hydr_cor.mu_gas_pasec = fluid.mu_gas_cP / 1000
-        hydr_cor.mu_oil_pasec = fluid.mu_oil_cP / 1000
-        hydr_cor.rho_oil_kgm3 = fluid.rho_oil_kgm3
-        hydr_cor.rho_gas_kgm3 = (3.5 * 10** (-3) * fluid.gamma_gas * PT.p_mpa * 10**6 /
-                                 fluid.z / (fluid.t_c + 273.15)
-                                 )
-
-        hydr_cor.rs_m3m3 = fluid.rs_m3m3
-        hydr_cor.bg_m3m3 = fluid.bg_m3m3
-        hydr_cor.bo_m3m3 = fluid.bo_m3m3
-        grad_pam = hydr_cor.calc_grad(PT)
-
-        p = p_list[-1] - step_m * grad_pam / 10 ** 6
-        t = t_list[-1] - step_m * step_cm
-        h = h_list[-1] - step_m
-
-    if p > 0:
-        p_list.append(p)
-    else:
-        p_list.append(p_list[-1])
-
-    t_list.append(t)
-    h_list.append(h)
-
-    PT.p_mpa = p
-    PT.p_pa = p * 10 ** 6
-    PT.T_C = t'''
+#print(class_example.result_grad_pam / 10 ** 5)
 
