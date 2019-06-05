@@ -1,3 +1,7 @@
+"""
+Модуль-интерфейс-инструмент для извлечения данных из расчетов разных корреляций
+"""
+
 class Data():
 
     def __init__(self):
@@ -9,12 +13,12 @@ class Data():
         self.distance_list = []
         self.amounts_of_param_in_one_banch = None
 
-    def get_data(self, Beggs_Brill):
+    def get_data(self, method_or_correlation):
         """
-        Получение атрибутов (всех данных) из класса
+        Получение атрибутов (всех данных) из расчетного класса
         """
 
-        this_data = Beggs_Brill.__dict__
+        this_data = method_or_correlation.__dict__
         self.dicts.append(this_data)
         for key, value in this_data.items():  # преобразование словаря в итерируемый список
             temp = [key, value]
