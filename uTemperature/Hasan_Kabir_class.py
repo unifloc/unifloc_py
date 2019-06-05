@@ -9,7 +9,7 @@ pi = math.pi
 
 
 
-def fc_var2(p_pa, mt_kgs, rp_sm3sm3, gamma_api, gamma_gas, gg_cm):
+def __fc_var2__(p_pa, mt_kgs, rp_sm3sm3, gamma_api, gamma_gas, gg_cm):
     """
     Корреляция Sagar et al. (1991) для расчетра Fc
     физически - совокупность влияния эффекта Джоуля-Томпсона и
@@ -42,7 +42,7 @@ def fc_var2(p_pa, mt_kgs, rp_sm3sm3, gamma_api, gamma_gas, gg_cm):
 
 
 
-def number_pr(cp, mu, k):
+def __number_pr__(cp, mu, k):
     """
     Рассчет числа Прандтля
     :param cp: Теплоемкость,  Дж / кг / С
@@ -71,16 +71,16 @@ def han_var2(mu_an_pas, cp_an_jkgc, k_an_wmc, delta_temp_an_c, rho_an_kgm3, bett
                               sys_prop.rho_an_km3, sys_prop.betta_1c,
                               sys_prop.rci_m, sys_prop.rto_m)
     """
-    npr = number_pr(cp_an_jkgc, mu_an_pas, k_an_wmc)
+    npr = __number_pr__(cp_an_jkgc, mu_an_pas, k_an_wmc)
     ngr = rho_an_kgm3 ** 2 * betta_1c * const_g_m2sec * delta_temp_an_c * (rci_m - rto_m) ** 3 / mu_an_pas ** 2
     han = 0.049 * (ngr * npr) ** (1 / 3) * npr ** 0.074 * k_an_wmc / (rto_m * math.log(rci_m / rto_m))
     han = 0.25 * han
     return han
 
 
-def hf(ql_m3sec, qg_m3sec, rhol_kgm3, rhog_kgm3,
-       mul_pas, mug_pas, kl_wmc, kg_wmc,
-       cpl_jkgc, cpg_jkgc, rti_m):
+def __hf__(ql_m3sec, qg_m3sec, rhol_kgm3, rhog_kgm3,
+           mul_pas, mug_pas, kl_wmc, kg_wmc,
+           cpl_jkgc, cpg_jkgc, rti_m):
     """
     Рассчет коэффициента конвективной теплоотдачи в НКТ
     :param ql_m3sec: расход жидкости, м3 / сек
@@ -107,14 +107,14 @@ def hf(ql_m3sec, qg_m3sec, rhol_kgm3, rhog_kgm3,
     kn = kl_wmc*llambda+kg_wmc*(1-llambda)
     cpn = (cpl_jkgc*rhol_kgm3*llambda+cpg_jkgc*rhog_kgm3*(1-llambda))/rhon
     nren = rhon * vm * d / mun
-    nprn = number_pr(cpn, mun, kn)
+    nprn = __number_pr__(cpn, mun, kn)
     nnu = 0.023 * nren**0.8 * nprn ** 0.3
     return nnu*kn/d
 
 
-def temp_fluid_c(rhon, vm, at,
-                 cpm, u, rto_m,
-                 fc, tei_c, gg_cm, distance_m):
+def __temp_fluid_c__(rhon, vm, at,
+                     cpm, u, rto_m,
+                     fc, tei_c, gg_cm, distance_m):
     """
     Расчет температуры флюида в НКТ
     :param rhon: средняя плотность флюида, кг / м3
@@ -135,9 +135,9 @@ def temp_fluid_c(rhon, vm, at,
     return (tei_c-gg_cm*distance_m)+a*(1-np.exp(-distance_m/a))*(gg_cm - const_g_m2sec / cpm + fc)
 
 
-def uto(hf, han, tempd, rti_m,
-        rto_m, rco_m, rci_m,
-        rwb_m, ke_wmc, kcem_wmc, kt_wmc):
+def __uto__(hf, han, tempd, rti_m,
+            rto_m, rco_m, rci_m,
+            rwb_m, ke_wmc, kcem_wmc, kt_wmc):
     """
     Общий коэффициент теплопередачи, состоящий из нескольких частей
     :param hf: конвективный коэффициет теплоотдачи в НКТ, Ватт / м2 / С
@@ -163,9 +163,9 @@ def uto(hf, han, tempd, rti_m,
     return 1/(first_part+second_part+third_part+fourth_part+fifth_part+sixth_part)/rto_m
 
 
-def temp_diff_an(tr_c, gg_cm, distance_m,
-                 rto_m, u, tf_c,
-                 rti_m, han):
+def __temp_diff_an__(tr_c, gg_cm, distance_m,
+                     rto_m, u, tf_c,
+                     rti_m, han):
     """
     Разница температур в затрубном пространстве
     :param tr_c: температура пласта на забое, С
@@ -182,10 +182,6 @@ def temp_diff_an(tr_c, gg_cm, distance_m,
     q = 2*pi*rto_m*u*(tf_c-tg_c)  # тепловой поток
     temp_diff_an = q/(2*pi*rti_m*han)
     return temp_diff_an
-
-
-
-
 
 
 class Hasan_Kabir_cor():
@@ -281,44 +277,37 @@ class Hasan_Kabir_cor():
         self.rp = self.qg_m3sec / self.ql_m3sec
         self.mt = self.rhon_kgm3 * self.vm_msec * self.ap_m2
 
-        self.val_hf = hf(self.ql_m3sec, self.qg_m3sec, self.rhol_kgm3, self.rhog_kgm3,
-                         self.mul_pas, self.mug_pas, self.kl_wmc,
-                         self.kg_wmc, self.cpl_jkgc, self.cpg_jkgc,
-                         self.rti_m)
-        self.val_han = han_var2(self.mu_an_pas, self.cp_an_jkgc, self.k_an_wmc,
+        self.val_hf = __hf__(self.ql_m3sec, self.qg_m3sec, self.rhol_kgm3, self.rhog_kgm3, self.mul_pas, self.mug_pas,
+                             self.kl_wmc, self.kg_wmc, self.cpl_jkgc, self.cpg_jkgc, self.rti_m)
+        self.val_han = float(han_var2(self.mu_an_pas, self.cp_an_jkgc, self.k_an_wmc,
                                 self.delta, self.rho_an_kgm3,
-                                self.betta_1c, self.rci_m, self.rto_m)
+                                self.betta_1c, self.rci_m, self.rto_m))  #TODO для борьбы с fsolve
         self.val_td = self.ke_wmc * self.time_sec / (self.rhoe_kgm3 * self.cpe_jkgc*(math.pow(self.rwb_m, 2)))
         if self.val_td <= 1.5:
             self.val_tempd = 1.1281 * math.sqrt(self.val_td) * (1 - 0.3 * math.sqrt(self.val_td))
         elif self.val_td > 1.5:
             self.val_tempd =  (0.4063 + 1 / 2 * math.log(self.val_td)) * (1 + 0.6 / self.val_td)
-        self.val_uto = uto(self.val_hf, self.val_han, self.val_tempd,
-                           self.rti_m, self.rto_m, self.rco_m,
-                           self.rci_m, self.rwb_m, self.ke_wmc,
-                           self.kcem_wmc, self.kt_wmc)
-        self.val_fc = fc_var2(self.p_pa, self.mt, self.rp, self.gamma_api, self.gamma_gas, self.gg_cm)
-        self.val_temp_fluid_c = temp_fluid_c(self.rhon_kgm3, self.vm_msec, self.ap_m2, self.cpn, self.val_uto,
-                                             self.rto_m, self.val_fc,
-                                             self.tei_c, self.gg_cm,
-                                             self.distance_m)
-        self.val_temp_diff_an = temp_diff_an(self.tei_c, self.gg_cm, self.distance_m,
-                                             self.rto_m, self.val_uto, self.val_temp_fluid_c,
-                                             self.rti_m, self.val_han)
+        self.val_uto = __uto__(self.val_hf, self.val_han, self.val_tempd, self.rti_m, self.rto_m, self.rco_m,
+                               self.rci_m, self.rwb_m, self.ke_wmc, self.kcem_wmc, self.kt_wmc)
+        self.val_fc = __fc_var2__(self.p_pa, self.mt, self.rp, self.gamma_api, self.gamma_gas, self.gg_cm)
+        self.val_temp_fluid_c = __temp_fluid_c__(self.rhon_kgm3, self.vm_msec, self.ap_m2, self.cpn, self.val_uto,
+                                                 self.rto_m, self.val_fc, self.tei_c, self.gg_cm, self.distance_m)
+        self.val_temp_diff_an = __temp_diff_an__(self.tei_c, self.gg_cm, self.distance_m, self.rto_m, self.val_uto,
+                                                 self.val_temp_fluid_c, self.rti_m, self.val_han)
         result = self.val_temp_diff_an - self.delta
-        return result
+        return float(result)  #TODO для борьбы с fsolve
 
-    def calc_t_c_fluid(self, l, p):
+    def calc_t_c_fluid(self, distance_m, p_pa):
         """
         Метод расчета температуры флюида
-        :param l: расстояние от забоя до точки расчета
-        :param p: давление в точке расчета
+        :param distance_m: расстояние от забоя до точки расчета
+        :param p_pa: давление в точке расчета
         :return: температура в точке расчета
         """
-        self.distance_m = l
-        self.p_pa = p
+        self.distance_m = distance_m
+        self.p_pa = p_pa
         delta = fsolve(self.__temp_diff_an_iter__, 1)
-        return self.val_temp_fluid_c
+        return float(self.val_temp_fluid_c)  # TODO можно ли так делать, всегда единственное решение?
 
 # пример использования класса
 
