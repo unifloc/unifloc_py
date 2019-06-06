@@ -10,6 +10,9 @@ pi = math.pi
 # TODO добавить эффект Джоуля-Томпсона
 # TODO это точно методика Хасана и Кабира?
 # TODO начальная точка расчета, не сходится fsolve
+# TODO отредактировать параметры потока и noslip liquid content
+
+
 def __fc_var2__(p_pa, mt_kgs, rp_sm3sm3, gamma_api, gamma_gas, gg_cm):
     """
     Корреляция Sagar et al. (1991) для расчетра Fc
