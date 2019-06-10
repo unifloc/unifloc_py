@@ -32,7 +32,6 @@ class Cable():
         self.sigma_bandage_Ccm_V = self.sigma_braids_ribbons_Ccm_V
         self.sigma_pillow_Ccm_V = self.sigma_braids_ribbons_Ccm_V
 
-
         self.sigma_o = 750  # материала оболочки
         self.sigma_b = 1000  # материала бандажа поверх оболочки
         self.sigma_p = 3  # материала подушки под броней

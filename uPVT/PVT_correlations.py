@@ -1564,7 +1564,7 @@ class TestPVT(unittest.TestCase):
         p_MPaa = 0.1
         gamma_gas = 0.6
         z = 1
-        self.assertAlmostEqual(unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 59.82465188241361, delta=0.0001)
+        self.assertAlmostEqual(unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 0.5982465188241361, delta=0.0001)
 
 
 if __name__ == '__main__':

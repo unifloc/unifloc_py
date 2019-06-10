@@ -1,6 +1,8 @@
 """
 2018 August 09 14:26
 """
+import sys
+sys.path.append('../')
 import uMultiphaseFlow.FluidFlow_correlations as Flow
 import matplotlib.pyplot as plt
 import numpy as np
