@@ -1,6 +1,8 @@
 """
 tests for PVT_correlations functions
 """
+import sys
+sys.path.append('../')
 import uPVT.PVT_correlations as PVTfunc
 import matplotlib.pyplot as plt
 import numpy as np
