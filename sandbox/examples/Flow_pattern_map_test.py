@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import uMultiphaseFlow.Flow_pattern_map as pt
+import sandbox.uMultiphaseFlow.Flow_pattern_map as pt
 """
 # Исходные данные
 sigma = 2*8.41 * 10 ** (-3)
@@ -103,7 +103,7 @@ plt.legend(loc='best')
 plt.grid()
 plt.show()
 
-"""
+
 # Тестинг функций
 vel_gas = 10
 func3 = []
@@ -122,4 +122,3 @@ plt.legend(loc='best')
 plt.grid()
 plt.show()
 print(np.min(func3))
-"""

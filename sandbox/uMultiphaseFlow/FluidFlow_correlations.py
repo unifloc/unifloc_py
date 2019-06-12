@@ -6,10 +6,10 @@ Created on Wed Jul 26 2018
          Alexey Vodopyan
 """
 import numpy as np
-import uscripts.uconst as uc
+import uniflocpy.uTools.uconst as uc
 import scipy.optimize as opt
 from scipy.integrate import odeint
-import uPVT.PVT as PVT
+import uniflocpy.uPVT.PVT_fluids as PVT
 
 # Расчет распределения температуры в скважине
 

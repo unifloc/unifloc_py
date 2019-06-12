@@ -5,7 +5,7 @@ Created on Mon Aug 13 2018
          Alexey Vodopyan
 """
 import numpy as np
-import uscripts.uconst as uc
+import uniflocpy.uTools.uconst as uc
 import scipy.optimize as opt
 
 
