@@ -350,32 +350,3 @@ class FluidFlow:
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
 
-# Проверка флюидов через условную "хеш" сумму параметров после calc(P,T)
-
-
-class TestFluid(unittest.TestCase):
-    def test_FluidStanding(self):
-        pressure_bar = 100
-        temp_c = 80
-        fluid = FluidStanding()
-        fluid.calc(pressure_bar, temp_c)
-        sum = 0
-        for i in fluid.__dict__.items():
-            sum += i[-1]
-        self.assertAlmostEqual(sum, 2118.8391250450486,
-                               delta=0.0001)
-
-    def test_FluidMcCain(self):
-        pressure_bar = 100
-        temp_c = 80
-        fluid = FluidMcCain()
-        fluid.calc(pressure_bar, temp_c)
-        sum = 0
-        for i in fluid.__dict__.items():
-            sum += i[-1]
-        self.assertAlmostEqual(sum, 2624.679427463553,
-                               delta=0.0001)  # TODO cлишком большая разница со Стендингом, проверить (плотность и др.)
-
-
-if __name__ == '__main__':
-    unittest.main()

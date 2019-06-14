@@ -546,11 +546,3 @@ def compr_1bar_2_1mpa(value):
      """
     return value * const.mega / const.bar
 
-
-class TestConverters(unittest.TestCase):  # TODO продолжать ли тестирование?
-    def test_convert_pressure(self):
-        ar = 1
-        self.assertAlmostEqual(convert_pressure(ar, 'atm', 'psi'), 14.69594878, 5)
-
-if __name__ == '__main__':
-    unittest.main()

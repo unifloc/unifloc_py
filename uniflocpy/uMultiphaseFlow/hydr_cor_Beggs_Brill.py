@@ -273,17 +273,3 @@ class PT():
         self.T_C = t_c
         self.p_pa = self.p_mpa * 10 ** 6
 
-
-class TestBB(unittest.TestCase):
-    def test_Beggs_Brill_calc_grad(self):
-        hydr_cor = Beggs_Brill_cor()
-        pressure_mpa = 11.713
-        temperature_c = 82
-        PT_test = PT(pressure_mpa, temperature_c)
-        self.assertAlmostEqual(hydr_cor.calc_grad(PT_test), 4602.417176719269,
-                               delta=0.00000001)
-
-
-if __name__ == '__main__':
-    unittest.main()
-

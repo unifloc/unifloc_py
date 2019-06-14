@@ -323,15 +323,3 @@ class Hasan_Kabir_cor():
             delta = fsolve(self.__temp_diff_an_iter__, 1)
             return float(self.val_temp_fluid_c)  # TODO можно ли так делать, всегда единственное решение?
 
-
-class TestTempCor(unittest.TestCase):
-    def test_calc_t_c_fluid(self):
-        distance_from_bh = 10
-        pressure_pa = 20*10**6
-        temp_cor = Hasan_Kabir_cor()
-        self.assertAlmostEqual(temp_cor.calc_t_c_fluid(distance_from_bh, pressure_pa), 93.23420470524496,
-                               delta=0.00000001)
-
-
-if __name__ == '__main__':
-    unittest.main()

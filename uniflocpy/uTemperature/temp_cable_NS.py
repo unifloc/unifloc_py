@@ -127,23 +127,3 @@ class Cable():
         return self.__calc_i_a__(self.t_permanently_permissible_c, self.t_env_c, s_c_val, s_env_val, rt_val)
 
 
-class TestTempCable(unittest.TestCase):
-    def test_calc_i_max_a(self):
-        cable = Cable()
-        cable.cabel_type = 'Round'
-        t_max_c = 120
-        t_env_c = 90
-        self.assertAlmostEqual(cable.calc_i_max_a(t_max_c, t_env_c), 65.0923992910633,
-                               delta=0.0001)
-
-    def test_calc_t_max_cable_c(self):
-        cable = Cable()
-        cable.cabel_type = 'Flat'
-        t_f_c = 120
-        i_a = 30
-        self.assertAlmostEqual(cable.calc_t_max_cable_c(t_f_c, i_a), 126.81955779,
-                               delta=0.0001)
-
-
-if __name__ == '__main__':
-    unittest.main()
