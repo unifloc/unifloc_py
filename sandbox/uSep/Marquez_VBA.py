@@ -60,7 +60,7 @@ class Marquez_separation_VBA():
         self.natural_separation = None
         self.total_separation = None
 
-    def __sigma_og_BF__(self, p_atm, t_c, gamma_o, wc_perc=0):
+    def __sigma_og_BF__(self, p_atm, t_c, gamma_o, wc_perc=0): # перенесено в PVT_corr без воды
         # calculate surface tension according Baker Sverdloff correlation
         # расчет коэффициента поверхностного натяжения газ-нефть
         # st=serfase tension = поверхностное натяжение
@@ -92,7 +92,7 @@ class Marquez_separation_VBA():
         st = (stw * wc) + sto * (1 - wc)
         return st
 
-    def __surface_tension_AM_og_din_cm__(self, t_c, gamma_oil, rs):
+    def __surface_tension_AM_og_din_cm__(self, t_c, gamma_oil, rs):  # перенесено в PVT_corr
         surface_tension_dead_oil = (1.17013 - 1.694 * 10 ** (-3) * (1.8 * t_c + 32)) * (
                     38.085 - 0.259 * (141.5 / gamma_oil - 131.5))
         relative_surface_tension_go_od = (0.056379 + 0.94362 * np.exp(-21.6128 * 10 ** (-3) * rs))

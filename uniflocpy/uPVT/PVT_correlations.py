@@ -1296,3 +1296,47 @@ def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
     viscosity_cP = 1000 * viscosity * viscosity_rel
     return viscosity_cP
 
+# Корреляцияные зависимости для нефтяных систем
+
+
+def unf_surface_tension_go_Abdul_Majeed_dynes_cm(t_K, gamma_oil, rs_m3m3):
+    """
+    Корреляция Абдул-Маджида (2000 г.) для поверхностного натяжения нефти, насыщенной газом
+    Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
+    :param t_K: температура, градусы Кельвина
+    :param gamma_oil: относительная плотность нефти
+    :param rs_m3m3: газосодержание, м3 / м3
+    :return: поверхностное натяжение на границе нефть-газ, дин / см
+    """
+    t_C = uc.k2c(t_K)
+    surface_tension_dead_oil_dynes_cm = (1.17013 - 1.694 * 10 ** (-3) * (1.8 * t_C + 32)) * (
+                38.085 - 0.259 * (141.5 / gamma_oil - 131.5))
+    relative_surface_tension_go_od = (0.056379 + 0.94362 * np.exp(-21.6128 * 10 ** (-3) * rs_m3m3))
+    return surface_tension_dead_oil_dynes_cm * relative_surface_tension_go_od
+
+
+def unf_surface_tension_go_Baker_Swerdloff_dynes_cm(t_K, gamma_oil, p_MPa):
+    """
+    Корреляция Бэйкера и Свердлоффа (1955 г.) для поверхностного натяжения нефти, насыщенной газом
+    Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
+    :param t_K: температура, градусы Кельвина
+    :param gamma_oil: относительная плотность нефти
+    :param p_MPa: давление, МПа
+    :return:
+    """
+    p_bar = uc.convert_pressure(p_MPa, 'MPa', 'bar')
+    t_C = uc.k2c(t_K)
+    surface_tension_dead_oil_20_c_dynes_cm = 39 - 0.2571 * (141.5 / gamma_oil - 131.5 )
+    surface_tension_dead_oil_38_c_dynes_cm = 37.5 - 0.2571 * (141.5 / gamma_oil - 131.5 )
+    if t_C <= 20:
+        surface_tension_dead_oil_dynes_cm = surface_tension_dead_oil_20_c_dynes_cm
+    elif t_C >= 38:
+        surface_tension_dead_oil_dynes_cm = surface_tension_dead_oil_38_c_dynes_cm
+    else:
+        surface_tension_dead_oil_dynes_cm = (surface_tension_dead_oil_20_c_dynes_cm -
+                                             (t_C - 20) * (surface_tension_dead_oil_20_c_dynes_cm -
+                                                           surface_tension_dead_oil_38_c_dynes_cm) / 18)
+    surface_tension_go_Baker_Swerdloff_dynes_cm = (surface_tension_dead_oil_dynes_cm *
+                                                   np.exp(-125.1763 * 10 ** (-4) * p_bar))
+    return surface_tension_go_Baker_Swerdloff_dynes_cm
+

@@ -294,6 +294,20 @@ class TestPVT(unittest.TestCase):
         z = 1
         self.assertAlmostEqual(PVT_correlations.unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 0.5982465188241361, delta=0.0001)
 
+    def test_unf_surface_tension_go_Abdul_Majeed_dynes_cm(self):
+        t_K = 350
+        rs_m3m3 = 50
+        gamma_oil = 0.6
+        z = 1
+        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_go_Abdul_Majeed_dynes_cm(t_K, gamma_oil, rs_m3m3), 3.673109943227455, delta=0.0001)
+
+    def test_unf_surface_tension_go_Baker_Swerdloff_dynes_cm(self):
+        t_K = 350
+        p_MPaa = 0.1
+        gamma_oil = 0.6
+        z = 1
+        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_go_Baker_Swerdloff_dynes_cm(t_K, gamma_oil, p_MPaa), 10.54309596387229, delta=0.0001)
+
 # лучше запустите все тесты в run_all_tests.py
 # но, для тестирования только данного модуля воспользуйтесь следующими функциями
 # calcTestSuite = unittest.TestSuite()
