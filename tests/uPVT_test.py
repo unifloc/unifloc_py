@@ -13,7 +13,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 2118.8391250450486,
+        self.assertAlmostEqual(sum, 11196.766954412516,
                                delta=0.0001)
 
     def test_FluidMcCain(self):
@@ -294,20 +294,85 @@ class TestPVT(unittest.TestCase):
         z = 1
         self.assertAlmostEqual(PVT_correlations.unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z), 0.5982465188241361, delta=0.0001)
 
-    def test_unf_surface_tension_go_Abdul_Majeed_dynes_cm(self):
+    def test_unf_surface_tension_go_Abdul_Majeed_Nm(self):
         t_K = 350
         rs_m3m3 = 50
         gamma_oil = 0.6
         z = 1
-        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_go_Abdul_Majeed_dynes_cm(t_K, gamma_oil, rs_m3m3), 3.673109943227455, delta=0.0001)
+        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_go_Abdul_Majeed_Nm(t_K, gamma_oil, rs_m3m3),
+                               0.003673109943227455, delta=0.0001)
 
-    def test_unf_surface_tension_go_Baker_Swerdloff_dynes_cm(self):
+    def test_unf_surface_tension_go_Baker_Swerdloff_Nm(self):
         t_K = 350
         p_MPaa = 0.1
         gamma_oil = 0.6
         z = 1
-        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_go_Baker_Swerdloff_dynes_cm(t_K, gamma_oil, p_MPaa), 10.54309596387229, delta=0.0001)
+        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_go_Baker_Swerdloff_Nm(t_K, gamma_oil, p_MPaa),
+                               0.01054309596387229, delta=0.0001)
 
+    def test_unf_heat_capacity_oil_Gambill_JkgC(self):
+        gamma_oil = 0.8
+        t_c = 60
+        self.assertAlmostEqual(PVT_correlations.unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c),
+                               2110.7207148850844,
+                               delta=0.0001)
+
+    def test_unf_heat_capacity_oil_Wes_Wright_JkgC(self):
+        gamma_oil = 0.8
+        t_c = 60
+        self.assertAlmostEqual(PVT_correlations.unf_heat_capacity_oil_Wes_Wright_JkgC(gamma_oil, t_c),
+                               2162.0, delta=0.0001)
+
+    def test_unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK(self):
+        gamma_oil = 0.8
+        t_c = 60
+        self.assertAlmostEqual(PVT_correlations.unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK(gamma_oil, t_c),
+                               0.10999860144810972, delta=0.0001)
+
+    def test_unf_thermal_conductivity_oil_Smith_WmK(self):
+        gamma_oil = 0.8
+        t_c = 60
+        self.assertAlmostEqual(PVT_correlations.unf_thermal_conductivity_oil_Smith_WmK(gamma_oil, t_c),
+                               0.16568762875, delta=0.0001)
+
+    def test_unf_thermal_conductivity_oil_Cragoe_WmK(self):
+        gamma_oil = 0.8
+        t_c = 60
+        self.assertAlmostEqual(PVT_correlations.unf_thermal_conductivity_oil_Cragoe_WmK(gamma_oil, t_c),
+                               0.1427090525,
+                               delta=0.0001)
+
+    def test_unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(self):
+        p_MPaa = 3
+        gamma_gas = 0.8
+        t_K = 300
+        self.assertAlmostEqual(PVT_correlations.unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas),
+                               2471.4603282835255,
+                               delta=0.0001)
+
+    def test_unf_thermal_conductivity_gas_methane_WmK(self):
+        t_c = 20
+        self.assertAlmostEqual(PVT_correlations.unf_thermal_conductivity_gas_methane_WmK(t_c),
+                               0.033390322580645164,
+                               delta=0.0001)
+
+    def test_unf_heat_capacity_water_IAPWS_JkgC(self):
+        t_c = 20
+        self.assertAlmostEqual(PVT_correlations.unf_heat_capacity_water_IAPWS_JkgC(t_c),
+                               4184.92592,
+                               delta=0.0001)
+
+    def test_unf_thermal_conductivity_water_IAPWS_WmC(self):
+        t_c = 20
+        self.assertAlmostEqual(PVT_correlations.unf_thermal_conductivity_water_IAPWS_WmC(t_c),
+                               0.5992595999999999,
+                               delta=0.0001)
+
+    def test_unf_thermal_expansion_coefficient_water_IAPWS_1C(self):
+        t_c = 20
+        self.assertAlmostEqual(PVT_correlations.unf_thermal_expansion_coefficient_water_IAPWS_1C(t_c),
+                               0.00022587,
+                               delta=0.0001)
 # лучше запустите все тесты в run_all_tests.py
 # но, для тестирования только данного модуля воспользуйтесь следующими функциями
 # calcTestSuite = unittest.TestSuite()

@@ -588,6 +588,77 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
     return gamma_gasr
 
 
+def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
+    """
+    Oil heat capacity in SI. Gambill correlation
+    :param gamma_oil: specific oil density(by water)
+    :param t_c: temperature in C
+    :return: heat capacity in SI - JkgC
+
+    ref1 Book: Brill J. P., Mukherjee H. K. Multiphase flow in wells. –
+        Society of Petroleum Engineers, 1999. – Т. 17. in Page 122
+    """
+    t_f = uc.c2f(t_c)
+    api = uc.gamma_oil2api(gamma_oil)
+    heat_capacity_oil_btulbmF = ((0.388 + 0.00045 * t_f) / gamma_oil ** (1/2) )
+    return uc.btulbmF2kJkgK(heat_capacity_oil_btulbmF) * 1000
+
+
+def unf_heat_capacity_oil_Wes_Wright_JkgC(gamma_oil, t_c):
+    """
+    Oil heat capacity in SI. Wes Wright method
+    :param gamma_oil: specific oil density(by water)
+    :param t_c: temperature in C
+    :return: heat capacity in SI - JkgC
+
+    ref1 https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8
+    """
+    return ((2 * 10** (-3) * t_c - 1.429 ) * gamma_oil +
+            (2.67 * 10 ** (-3)) * t_c + 3.049) * 1000
+
+
+def unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK(gamma_oil, t_c):
+    """
+    Oil thermal conductivity Abdul-Seoud and Moharam correlation
+    :param gamma_oil: specific oil density(by water)
+    :param t_c: temperature in C
+    :return: thermal conductivity in SI - wt / m K
+
+    ref1 Tovar L. P. et al. Overview and computational approach for studying the physicochemical characterization
+    of high-boiling-point petroleum fractions (350 C+) //
+    Oil & Gas Science and Technology–Revue d’IFP Energies nouvelles. – 2012. – Т. 67. – №. 3. – С. 451-477.
+    """
+    t_k = uc.c2k(t_c)
+    return (2.540312 * (gamma_oil / t_k) ** 0.5) - 0.014485
+
+
+def unf_thermal_conductivity_oil_Smith_WmK(gamma_oil, t_c):
+    """
+    Oil thermal conductivity Smith correlation for 273 < T < 423 K
+    :param gamma_oil: specific oil density(by water)
+    :param t_c: temperature in C
+    :return: thermal conductivity in SI - wt / m K
+
+    ref1 Das D. K., Nerella S., Kulkarni D. Thermal properties of petroleum and gas-to-liquid products //
+    Petroleum science and technology. – 2007. – Т. 25. – №. 4. – С. 415-425.   """
+    t_k = uc.c2k(t_c)
+    return (0.137 / (gamma_oil * 1000) * (1 - 0.00054 * (t_k - 273)) * 10 ** 3)
+
+
+def unf_thermal_conductivity_oil_Cragoe_WmK(gamma_oil, t_c):
+    """
+    Oil thermal conductivity Cragoe correlation for 273 < T < 423 K
+    :param gamma_oil: specific oil density(by water)
+    :param t_c: temperature in C
+    :return: thermal conductivity in SI - wt / m K
+
+    ref1 Das D. K., Nerella S., Kulkarni D. Thermal properties of petroleum and gas-to-liquid products //
+    Petroleum science and technology. – 2007. – Т. 25. – №. 4. – С. 415-425.   """
+    t_k = uc.c2k(t_c)
+    return (0.118 /(gamma_oil * 1000) * (1 - 0.00054 * (t_k - 273)) * 10 ** 3)
+
+
+
 
 """
 В дальнейшем функции для нефти будут дополняться, а пока перейдем к uPVT для газа
@@ -851,7 +922,36 @@ def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
     rho_gas = p_Pa * m / (z * 8.31 * t_K)
     return rho_gas
 
+def unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas):
+    """
+    gas heat capacity by Mahmood Moshfeghian for 0.1 to 20 MPa
+    t should be noted that the concept of heat capacity is valid only for the single phase region.
+    :param p_MPaa: pressure, MPaa
+    :param t_K: temperature, K
+    :param gamma_gas: specific gas density by air
+    :return: gas heat capacity in JkgC = JkgK
 
+    ref1 https://www.jmcampbell.com/tip-of-the-month/2009/07/
+    variation-of-natural-gas-heat-capacity-with-temperature-pressure-and-relative-density/
+    """
+    t_c = uc.k2c(t_K)
+    a = 0.9
+    b = 1.014
+    c = -0.7
+    d = 2.170
+    e = 1.015
+    f = 0.0214
+    return ((a * (b**t_c) * (t_c**c) + d * (e**p_MPaa) * (p_MPaa**f)) * ((gamma_gas / 0.60) ** 0.025)) * 1000
+
+
+def unf_thermal_conductivity_gas_methane_WmK(t_c): # TODO заменить
+    """
+    Данная функкия является линейным приближением табличных значений при 1 бар
+    требует корректировки, является временной затычкой, взята от безысходности
+    :param t_c: температура в С
+    :return: теплопроводность в Вт / м К
+    """
+    return (42.1 + (42.1 - 33.1)/(80-18)*(t_c - 80))/1000
 # uPVT свойства для сжимаемости нефти(требует немного свойств газа)
 
 
@@ -1296,33 +1396,96 @@ def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
     viscosity_cP = 1000 * viscosity * viscosity_rel
     return viscosity_cP
 
+
+# TODO добавить для термодинамических свойств воды учет давления, температуры, солености
+"""
+Следующие свойства взяты при давлении 1 бар для дистилированной воды
+за границей применимости 5 < T < 95 C произведена линейная экстраполяция
+"""
+
+
+def unf_heat_capacity_water_IAPWS_JkgC(t_c):  # TODO заменить
+    """
+    Теплоемкость дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
+    выше диапазона - линейная экстраполяция
+    :param t_c: температура в С
+    :return: теплоемкость в Дж / кг С
+
+    ref1 https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/
+    """
+    def cor_in_range_5_95(t_c):
+        return (4.214 - 2.286*10**(-3) * t_c +
+               4.991 * 10**(-5) * t_c ** 2 -
+               4.519 * 10**(-7) * t_c ** 3 +
+               1.857 * 10**(-9) * t_c ** 4)
+    if t_c < 95:
+        return cor_in_range_5_95(t_c)* 1000
+    else:
+        return (cor_in_range_5_95(95) +
+                (cor_in_range_5_95(95) - cor_in_range_5_95(85)) / 10 *
+                (t_c - 95)) * 1000
+
+
+def unf_thermal_conductivity_water_IAPWS_WmC(t_c):  # TODO заменить
+    """
+    Теплопроводность дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
+    выше диапазона - линейная экстраполяция
+    :param t_c: температура в С
+    :return: теплопроводность в Вт / м С
+
+    ref1 https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/
+    """
+    def cor_in_range_5_95(t_c):
+        return (0.5636 + 1.946 * 10**(-3) * t_c -
+                8.151 * 10** (-6) *t_c **2)
+    if t_c < 95:
+        return cor_in_range_5_95(t_c)
+    else:
+        return (cor_in_range_5_95(95) +
+                (cor_in_range_5_95(95) - cor_in_range_5_95(85)) / 10 *
+                (t_c - 95))
+
+
+def unf_thermal_expansion_coefficient_water_IAPWS_1C(t_c):  # TODO заменить
+    """
+    Коэффициент термического расширения дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
+    выше диапазона - линейная экстраполяция
+    :param t_c: температура в С
+    :return: Коэффициент термического расширения в 1 / с
+
+    ref1 https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/
+    """
+    return 7.957 * 10**(-5) + 7.315 * 10**(-6) * t_c
+
+
 # Корреляцияные зависимости для нефтяных систем
 
 
-def unf_surface_tension_go_Abdul_Majeed_dynes_cm(t_K, gamma_oil, rs_m3m3):
+def unf_surface_tension_go_Abdul_Majeed_Nm(t_K, gamma_oil, rs_m3m3):
     """
     Корреляция Абдул-Маджида (2000 г.) для поверхностного натяжения нефти, насыщенной газом
     Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
     :param t_K: температура, градусы Кельвина
     :param gamma_oil: относительная плотность нефти
     :param rs_m3m3: газосодержание, м3 / м3
-    :return: поверхностное натяжение на границе нефть-газ, дин / см
+    :return: поверхностное натяжение на границе нефть-газ, Н / м
     """
     t_C = uc.k2c(t_K)
     surface_tension_dead_oil_dynes_cm = (1.17013 - 1.694 * 10 ** (-3) * (1.8 * t_C + 32)) * (
                 38.085 - 0.259 * (141.5 / gamma_oil - 131.5))
     relative_surface_tension_go_od = (0.056379 + 0.94362 * np.exp(-21.6128 * 10 ** (-3) * rs_m3m3))
-    return surface_tension_dead_oil_dynes_cm * relative_surface_tension_go_od
+    surface_tension_dynes_cm = surface_tension_dead_oil_dynes_cm * relative_surface_tension_go_od
+    return uc.dyncm2nm(surface_tension_dynes_cm)
 
 
-def unf_surface_tension_go_Baker_Swerdloff_dynes_cm(t_K, gamma_oil, p_MPa):
+def unf_surface_tension_go_Baker_Swerdloff_Nm(t_K, gamma_oil, p_MPa):
     """
     Корреляция Бэйкера и Свердлоффа (1955 г.) для поверхностного натяжения нефти, насыщенной газом
     Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
     :param t_K: температура, градусы Кельвина
     :param gamma_oil: относительная плотность нефти
     :param p_MPa: давление, МПа
-    :return:
+    :return: поверхностное натяжения на границе нефть-газ в Н /м
     """
     p_bar = uc.convert_pressure(p_MPa, 'MPa', 'bar')
     t_C = uc.k2c(t_K)
@@ -1338,5 +1501,6 @@ def unf_surface_tension_go_Baker_Swerdloff_dynes_cm(t_K, gamma_oil, p_MPa):
                                                            surface_tension_dead_oil_38_c_dynes_cm) / 18)
     surface_tension_go_Baker_Swerdloff_dynes_cm = (surface_tension_dead_oil_dynes_cm *
                                                    np.exp(-125.1763 * 10 ** (-4) * p_bar))
-    return surface_tension_go_Baker_Swerdloff_dynes_cm
+
+    return uc.dyncm2nm(surface_tension_go_Baker_Swerdloff_dynes_cm)
 

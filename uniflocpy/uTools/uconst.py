@@ -546,3 +546,18 @@ def compr_1bar_2_1mpa(value):
      """
     return value * const.mega / const.bar
 
+def btulbmF2kJkgK(value):
+    """
+    converts heat capacity from FIELD to SI
+    :param value: heat capacity in Btu/lbm F
+    :return: heat capacity in kJ/kgK equal to kJ/kgC
+    """
+    return value * 4.186
+
+def dyncm2nm(value):
+    """
+    converts surface tension
+    :param value: surface tension in dyn / cm
+    :return: surface tension in N / m
+    """
+    return value / 1000
