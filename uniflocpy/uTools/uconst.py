@@ -561,3 +561,11 @@ def dyncm2nm(value):
     :return: surface tension in N / m
     """
     return value / 1000
+
+def c2r(value):
+    """
+    coverts celsius to rankie (temperature)
+    :param value: celsius
+    :return: rankie
+    """
+    return c2f(value) + 459.67

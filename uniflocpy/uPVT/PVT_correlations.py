@@ -1504,3 +1504,26 @@ def unf_surface_tension_go_Baker_Swerdloff_Nm(t_K, gamma_oil, p_MPa):
 
     return uc.dyncm2nm(surface_tension_go_Baker_Swerdloff_dynes_cm)
 
+
+def unf_surface_tension_gw_Sutton_Nm(rho_water_kgm3, rho_gas_kgm3, t_c):  # TODO поправка на соленость добавить
+    """
+    Корреляция Саттона для поверхностного натяжения на границе вода-газ
+    :param rho_water_kgm3: плотность воды кг / м3
+    :param rho_gas_kgm3:  плотность газа кг / м3
+    :param t_c: температура в С
+    :return: поверхностное натяжение на границе вода-газ, Н / м
+
+    ref 1 Pereira L. et al. Interfacial tension of reservoir fluids: an integrated experimental
+    and modelling investigation : дис. – Heriot-Watt University, 2016. page 41
+
+    ref2 Ling K. et al. A new correlation to calculate oil-water interfacial tension
+    //SPE Kuwait International Petroleum Conference and Exhibition. – Society of Petroleum Engineers, 2012.
+
+    """
+    rho_water_gcm3 = rho_water_kgm3 / 1000
+    rho_gas_gcm3 = rho_gas_kgm3 / 1000
+    t_r = uc.c2r(t_c)
+    surface_tension_dyncm = ((1.53988 * (rho_water_gcm3 - rho_gas_gcm3) + 2.08339) /
+            ((t_r /302.881) ** (0.821976 - 0.00183785 * t_r +
+            0.00000134016 * t_r ** 2))) ** 3.6667
+    return uc.dyncm2nm(surface_tension_dyncm)

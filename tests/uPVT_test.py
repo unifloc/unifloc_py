@@ -13,7 +13,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 11196.766954412516,
+        self.assertAlmostEqual(sum, 11196.824338216818,
                                delta=0.0001)
 
     def test_FluidMcCain(self):
@@ -373,6 +373,15 @@ class TestPVT(unittest.TestCase):
         self.assertAlmostEqual(PVT_correlations.unf_thermal_expansion_coefficient_water_IAPWS_1C(t_c),
                                0.00022587,
                                delta=0.0001)
+
+    def test_unf_surface_tension_gw_Sutton_Nm(self):
+        rho_water_kgm3 = 1000
+        rho_gas_kgm3 = 50
+        t_c = 60
+        self.assertAlmostEqual(PVT_correlations.unf_surface_tension_gw_Sutton_Nm(rho_water_kgm3, rho_gas_kgm3, t_c),
+                               0.06256845320633196,
+                               delta=0.0001)
+
 # лучше запустите все тесты в run_all_tests.py
 # но, для тестирования только данного модуля воспользуйтесь следующими функциями
 # calcTestSuite = unittest.TestSuite()

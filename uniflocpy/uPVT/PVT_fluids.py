@@ -80,7 +80,7 @@ class FluidBlackOil:
         self._heatcap_gas_jkgc = 0.0
         self._heatcap_wat_jkgc = 0.0
         self._sigma_oil_gas_Nm = 0.0
-        self._sigma_wat_Nm = 0.0
+        self._sigma_wat_gas_Nm = 0.0
         self._thermal_conduct_oil_wmk = 0.0
         self._thermal_conduct_gas_wmk = 0.0
         self._thermal_conduct_wat_wmk = 0.0
@@ -187,15 +187,18 @@ class FluidBlackOil:
         """ return oil thermal conductivity at working condition"""
         return self._thermal_conduct_oil_wmk
 
+    @property
     def thermal_conduct_gas_wmk(self):
         """ return gas thermal conductivity at working condition"""
         return self._thermal_conduct_gas_wmk
 
+    @property
     def thermal_conduct_wat_wmk(self):
         """ return water thermal conductivity at working condition"""
         return self._thermal_conduct_wat_wmk
 
-    def thermal_expansion_wat_wmk(self):
+    @property
+    def thermal_expansion_wat_1c(self):
         """ return water thermal expansion coefficient at working condition"""
         return self._thermal_expansion_wat_1c
 
@@ -205,9 +208,9 @@ class FluidBlackOil:
         return self._sigma_oil_gas_Nm
 
     @property
-    def sigma_wat_Nm(self):
+    def sigma_wat_gas_Nm(self):
         """ return water surface tension at working condition"""
-        return self._sigma_wat_Nm
+        return self._sigma_wat_gas_Nm
 
     @property
     def rho_gas_sckgm3(self):
@@ -307,6 +310,7 @@ class FluidStanding(FluidBlackOil):  # TODO после проверки свой
 
         # определим свойства системы
         self._sigma_oil_gas_Nm = PVT.unf_surface_tension_go_Baker_Swerdloff_Nm(t_K, self.gamma_oil, p_MPaa)
+        self._sigma_wat_gas_Nm = PVT.unf_surface_tension_gw_Sutton_Nm(self.rho_wat_kgm3, self.rho_gas_kgm3, self.t_c)
         return 1
 
 
