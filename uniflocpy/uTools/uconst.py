@@ -569,3 +569,11 @@ def c2r(value):
     :return: rankie
     """
     return c2f(value) + 459.67
+
+def m3day2m3sec(value):
+    """
+    comverts flow rate
+    :param value: flow rate in m3  / day
+    :return: flow rate in m3  / sec
+    """
+    return value / 86400

@@ -13,7 +13,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 11196.824338216818,
+        self.assertAlmostEqual(sum, 11691.855158519262,
                                delta=0.0001)
 
     def test_FluidMcCain(self):
@@ -24,7 +24,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 2624.679427463553,
+        self.assertAlmostEqual(sum, 2624.0782700132386,
                                delta=0.0001)  # TODO cлишком большая разница со Стендингом, проверить (плотность и др.)
 
 

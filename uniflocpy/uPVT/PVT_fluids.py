@@ -12,7 +12,7 @@ UniflocPy
 import unittest
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uPVT.PVT_correlations as PVT
-
+import math
 
 class FluidBlackOil:
     """
@@ -69,6 +69,7 @@ class FluidBlackOil:
         self._rho_gas_kgm3 = 0.0
         self._rho_wat_kgm3 = 0.0
         self._rs_m3m3 = 0.0
+        self._rsw_m3m3 = 0.0   # TODO проверить - равен GWR?
         self._bo_m3m3 = 0.0
         self._bg_m3m3 = 0.0
         self._bw_m3m3 = 0.0
@@ -129,8 +130,13 @@ class FluidBlackOil:
 
     @property
     def rs_m3m3(self):
-        """ return gas solution ratio at working condition"""
+        """ return gas oil solution ratio at working condition"""
         return self._rs_m3m3
+
+    @property
+    def rsw_m3m3(self):
+        """ return gas water solution ratio at working condition"""
+        return self._rsw_m3m3
 
     @property
     def bo_m3m3(self):
@@ -263,9 +269,9 @@ class FluidStanding(FluidBlackOil):  # TODO после проверки свой
         else:
             self._bo_m3m3 = PVT.unf_fvf_Standing_m3m3_saturated(self._rs_m3m3, self.gamma_gas, self.gamma_oil, t_K)
         # проверим необходимость калибровки значения объемного коэффициента
-        if self.bobcal_m3m3 > 0:
-            b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
-            self._bo_m3m3 = b_fact * self._bo_m3m3
+        #if self.bobcal_m3m3 > 0:  # TODO проверить калибровку, с ней неправильно считает
+        #    b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
+        #    self._bo_m3m3 = b_fact * self._bo_m3m3
         self._rho_oil_kgm3 = PVT.unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, self._rs_m3m3, self._bo_m3m3,
                                                           self.gamma_gas, self.gamma_oil)
         # оценим значение вязкости
@@ -296,13 +302,13 @@ class FluidStanding(FluidBlackOil):  # TODO после проверки свой
         self._thermal_conduct_gas_wmk = PVT.unf_thermal_conductivity_gas_methane_WmK(self.t_c)
 
         # water
-        # TODO НУЖНО ДОБАВИТЬ GWR
+        # TODO НУЖНО проверить GWR
         self._rho_wat_kgm3 = PVT.unf_density_brine_Spivey_kgm3(t_K, p_MPaa, self.s_ppm, self.par_wat)
         self._compr_wat_1bar = uc.compr_1mpa_2_1bar(PVT.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, self.s_ppm,
                                                                                               self._z, self.par_wat))
         self._bw_m3m3 = PVT.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, self.s_ppm)
         self._mu_wat_cP = PVT.unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, self.s_ppm)
-
+        self._rsw_m3m3 = PVT.unf_gwr_brine_Spivey_m3m3(self.s_ppm, self._z)
         # определим термодинамические свойства воды
         self._heatcap_wat_jkgc = PVT.unf_heat_capacity_water_IAPWS_JkgC(self.t_c)
         self._thermal_conduct_wat_wmk = PVT.unf_thermal_conductivity_water_IAPWS_WmC(self.t_c)
@@ -353,9 +359,9 @@ class FluidMcCain(FluidBlackOil):
             self._bo_m3m3 = PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self._rs_m3m3, self._rho_oil_kgm3,
                                                           self.gamma_gas)
         # проверим необходимость калибровки значения объемного коэффициента
-        if self.bobcal_m3m3 > 0:
-            b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
-            self._bo_m3m3 = b_fact * self._bo_m3m3
+        #if self.bobcal_m3m3 > 0:
+        #    b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
+        #    self._bo_m3m3 = b_fact * self._bo_m3m3
         # оценим значение вязкости
         self._mu_deadoil_cP = PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, t_K)
         self._muob_cP = PVT.unf_saturatedoilviscosity_Beggs_cP(self._mu_deadoil_cP, self.rsb_m3m3)
@@ -384,14 +390,78 @@ class FluidMcCain(FluidBlackOil):
 
 class FluidFlow:
     """класс для описания потока флюида"""
-    def __init__(self):
-        self.fl = FluidMcCain()  # по умолчанию задаем какой то флюид
-        self.qliq_m3day = 0      # дебит жидкости
-        self.fw = 0              # обводненность
+    def __init__(self, fluid = FluidStanding()):
+        self.fl = fluid  # по умолчанию задаем какой то флюид
+
+        self.qliq_on_surface_m3day = 100      # дебит жидкости
+        self.fw_on_surface_perc = 20              # обводненность
+        self.d_m = 0.152  # внутренний диаметр трубы
+
+        self.qoil_on_surface_m3day = None
+        self.qwat_on_surface_m3day = None
+        self.qgas_on_surface_m3day = None
+        self.Ap_m2 = None
+
+        self.qoil_m3day = None
+        self.qwat_m3day = None
+        self.qgas_m3day = None
+        self.qliq_m3day = None
+
+        self.vsl_m3sec = None
+        self.vsg_m3sec = None
+        self.vsm_m3sec = None
+
+        self.liquid_content = None
+        self.fw_perc = None
+
+        self.rho_liq_kgm3 = None
+        self.sigma_liq_Nm = None
+        self.mu_liq_cP = None
+
+        self.mun_cP = None
+        self.rhon_kgm3 = None
 
     def calc(self, p_bar, t_c):
         """расчет свойств потока для заданных термобарических условий"""
+
         self.fl.calc(p_bar, t_c)
+
+        self.Ap_m2 = math.pi * self.d_m ** 2 / 4
+
+        self.qoil_on_surface_m3day = self.qliq_on_surface_m3day * (1 - self.fw_on_surface_perc / 100)
+
+        self.qwat_on_surface_m3day = self.qliq_on_surface_m3day * self.fw_on_surface_perc / 100
+
+        self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.rsb_m3m3
+
+        self.qoil_m3day = self.qoil_on_surface_m3day * self.fl.bo_m3m3
+
+        self.qwat_m3day = self.qwat_on_surface_m3day * self.fl.bw_m3m3
+
+        self.qliq_m3day = self.qoil_m3day + self.qwat_m3day
+
+        self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3 -
+                           self.qwat_on_surface_m3day * self.fl.rsw_m3m3) * self.fl.bg_m3m3
+
+        self.vsl_m3sec = uc.m3day2m3sec(self.qliq_m3day) / self.Ap_m2
+
+        self.vsg_m3sec = uc.m3day2m3sec(self.qgas_m3day) / self.Ap_m2
+
+        self.vsm_m3sec = self.vsl_m3sec + self.vsg_m3sec
+
+        self.liquid_content = self.qliq_m3day / (self.qliq_m3day + self.qgas_m3day)
+
+        self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
+
+        self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * ( 1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
+
+        self.sigma_liq_Nm = self.fl.sigma_oil_gas_Nm * (1 - self.fw_perc / 100) + self.fl.sigma_wat_gas_Nm * self.fw_perc / 100
+
+        self.mu_liq_cP = self.fl.mu_oil_cP * (1 - self.fw_perc / 100) + self.fl.mu_wat_cP * self.fw_perc / 100
+
+        self.mun_cP = self.mu_liq_cP * self.liquid_content + self.fl.mu_gas_cP * (1 - self.liquid_content)
+
+        self.rhon_kgm3 = self.rho_liq_kgm3 * self.liquid_content + self.fl.rho_gas_kgm3 * (1 - self.liquid_content)
 
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
