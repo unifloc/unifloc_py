@@ -44,10 +44,9 @@ class TestFriction_Bratland(unittest.TestCase):
 class TestBB(unittest.TestCase):
     def test_Beggs_Brill_calc_grad(self):
         hydr_cor = hydr_cor_Beggs_Brill.Beggs_Brill_cor()
-        pressure_mpa = 11.713
+        pressure_bar = 11.713 * 10
         temperature_c = 82
-        PT_test = hydr_cor_Beggs_Brill.PT(pressure_mpa, temperature_c)
-        self.assertAlmostEqual(hydr_cor.calc_grad(PT_test), 4602.417176719269,
+        self.assertAlmostEqual(hydr_cor.calc_grad(pressure_bar, temperature_c), 4602.417176719269,
                                delta=0.00000001)
 
 

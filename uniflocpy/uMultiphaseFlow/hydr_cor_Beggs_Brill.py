@@ -7,7 +7,6 @@ oleg.kobzarius@gmail.com
 """
 
 import math
-import unittest
 import uniflocpy.uMultiphaseFlow.friction_Bratland as fr  # модуль для расчета коэффициента трения
 import uniflocpy.uTools.uconst as uc
 
@@ -152,14 +151,15 @@ class Beggs_Brill_cor():
         self.friction_grad_part_percent = None
         self.density_grad_part_percent = None
 
-    def calc_grad(self, PT):
+    def calc_grad(self, b_bar, t_c):
         """
-        Функция расчета градиента с использованием исходных данных
-        :param PT: начальные условия в виде экземляра класса PT
-        :return: градиент давления, Па / м
+        Функция для расчета градиента давления по методу Беггз и Брилл
+        :param b_bar: давление, бар
+        :param t_c: температура, С
+        :return: градиент давления, Па /м
         """
-        self.pressure_pa = PT.p_pa
-        self.temperature_c = PT.T_C
+        self.pressure_pa = uc.bar2Pa(b_bar)
+        self.temperature_c = t_c
         if self.pressure_pa <= 0:
             self.result_grad_pam = 0
             return 0
@@ -267,9 +267,4 @@ class Beggs_Brill_cor():
             return self.result_grad_pam
 
 
-class PT():
-    def __init__(self, p_mpa, t_c):
-        self.p_mpa = p_mpa
-        self.T_C = t_c
-        self.p_pa = self.p_mpa * 10 ** 6
 
