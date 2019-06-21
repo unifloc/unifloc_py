@@ -27,6 +27,18 @@ class TestFluid(unittest.TestCase):
         self.assertAlmostEqual(sum, 2624.0782700132386,
                                delta=0.0001)  # TODO cлишком большая разница со Стендингом, проверить (плотность и др.)
 
+    def test_FluidFlow(self):
+        pressure_bar = 100
+        temp_c = 80
+        fluid_flow = PVT_fluids.FluidFlow()
+        fluid_flow.calc(pressure_bar, temp_c)
+        sum = 0
+        for i in fluid_flow.__dict__.items():
+            if type(i[-1]) != type(PVT_fluids.FluidStanding()):
+                sum += i[-1]
+        self.assertAlmostEqual(sum, 17815.067970061937,
+                               delta=0.0001)  #
+
 
 class TestPVT(unittest.TestCase):
     def test_unf_pb_Standing_MPaa(self):

@@ -8,3 +8,4 @@
 * uPVT_test - тестрование пакета uPVT 
 * uTemperature_test - тестирование пакета uTemperature
 * uTools_test - тестирование пакета uTools
+* uWell_test - тестирование пакета uWell

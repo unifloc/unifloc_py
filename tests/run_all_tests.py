@@ -9,11 +9,12 @@ import tests.uMultiphaseFlow_test as uMultiphaseFlow_test
 import tests.uPVT_test as uPVT_test
 import tests.uTemperature_test as uTemperature_test
 import tests.uTools_test as uTools_test
+import tests.uWell_test as uWell_test
 
 
 # объединение в список отдельных тестовых модулей мини-пакетов
 modules = [uMotor_test, uMultiphaseFlow_test, uPVT_test, uTemperature_test,
-           uTools_test]
+           uTools_test, uWell_test]
 
 testLoad = unittest.TestLoader()  # загрузчик из модулей
 calcTestSuite = unittest.TestSuite()  # объединитель тестов
