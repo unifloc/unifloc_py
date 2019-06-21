@@ -14,17 +14,17 @@ class Friction():
     Модуль-класс для расчета коэффициента трения f,
     в зависимости от числа Рейнольдса, абс. шероховатости и диаметра трубы.
     """
-    def __init__(self, number_re, epsilon_m, d_m):
+    def __init__(self):
         """
         Консруктор класса
         :param number_re: безразмерное число Рейнольдса
         :param epsilon_m: абсолюная шероховатость
         :param d_m: внутренний диаметр трубы
         """
-        self.number_re = number_re
-        self.absolute_roughness_m = epsilon_m
-        self.d_m = d_m
-        self.relative_roughness = self.absolute_roughness_m / self.d_m  # относительная шероховатость
+        self.number_re = None
+        self.absolute_roughness_m = None
+        self.d_m = None
+        self.relative_roughness = None  # относительная шероховатость
         self.f = None  # итоговый коэффициент трения
         self.u_s = 1  # подстроечный параметр для сбивки к экспериментальным исследованиям
 
@@ -52,6 +52,8 @@ class Friction():
         self.number_re = number_re
         self.absolute_roughness_m = epsilon_m
         self.d_m = d_m
+        self.relative_roughness = self.absolute_roughness_m / self.d_m
+
         if self.number_re <= 2300:  # Laminar
             self.f = 64 / self.number_re
         if 2300 < self.number_re <= 3100:  # Turbulent

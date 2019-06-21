@@ -409,7 +409,7 @@ class FluidFlow:
 
         self.vsl_msec = None
         self.vsg_msec = None
-        self.vsm_msec = None
+        self.vm_msec = None
 
         self.liquid_content = None
         self.fw_perc = None
@@ -446,7 +446,7 @@ class FluidFlow:
 
         self.vsg_msec = uc.m3day2m3sec(self.qgas_m3day) / self.Ap_m2
 
-        self.vsm_msec = self.vsl_msec + self.vsg_msec
+        self.vm_msec = self.vsl_msec + self.vsg_msec
 
         self.liquid_content = self.qliq_m3day / (self.qliq_m3day + self.qgas_m3day)
 
