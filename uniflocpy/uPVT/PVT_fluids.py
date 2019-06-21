@@ -407,9 +407,9 @@ class FluidFlow:
         self.qgas_m3day = None
         self.qliq_m3day = None
 
-        self.vsl_m3sec = None
-        self.vsg_m3sec = None
-        self.vsm_m3sec = None
+        self.vsl_msec = None
+        self.vsg_msec = None
+        self.vsm_msec = None
 
         self.liquid_content = None
         self.fw_perc = None
@@ -432,22 +432,21 @@ class FluidFlow:
 
         self.qwat_on_surface_m3day = self.qliq_on_surface_m3day * self.fw_on_surface_perc / 100
 
-        self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.rsb_m3m3
+        self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.rsb_m3m3  # TODO учесть газ в воде
 
         self.qoil_m3day = self.qoil_on_surface_m3day * self.fl.bo_m3m3
 
         self.qwat_m3day = self.qwat_on_surface_m3day * self.fl.bw_m3m3
 
         self.qliq_m3day = self.qoil_m3day + self.qwat_m3day
+        # TODO учесть газ в воде
+        self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.bg_m3m3
 
-        self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3 -
-                           self.qwat_on_surface_m3day * self.fl.rsw_m3m3) * self.fl.bg_m3m3
+        self.vsl_msec = uc.m3day2m3sec(self.qliq_m3day) / self.Ap_m2
 
-        self.vsl_m3sec = uc.m3day2m3sec(self.qliq_m3day) / self.Ap_m2
+        self.vsg_msec = uc.m3day2m3sec(self.qgas_m3day) / self.Ap_m2
 
-        self.vsg_m3sec = uc.m3day2m3sec(self.qgas_m3day) / self.Ap_m2
-
-        self.vsm_m3sec = self.vsl_m3sec + self.vsg_m3sec
+        self.vsm_msec = self.vsl_msec + self.vsg_msec
 
         self.liquid_content = self.qliq_m3day / (self.qliq_m3day + self.qgas_m3day)
 
