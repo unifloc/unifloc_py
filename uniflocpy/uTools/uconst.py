@@ -546,6 +546,7 @@ def compr_1bar_2_1mpa(value):
      """
     return value * const.mega / const.bar
 
+
 def btulbmF2kJkgK(value):
     """
     converts heat capacity from FIELD to SI
@@ -553,6 +554,7 @@ def btulbmF2kJkgK(value):
     :return: heat capacity in kJ/kgK equal to kJ/kgC
     """
     return value * 4.186
+
 
 def dyncm2nm(value):
     """
@@ -562,6 +564,7 @@ def dyncm2nm(value):
     """
     return value / 1000
 
+
 def c2r(value):
     """
     coverts celsius to rankie (temperature)
@@ -570,6 +573,7 @@ def c2r(value):
     """
     return c2f(value) + 459.67
 
+
 def m3day2m3sec(value):
     """
     comverts flow rate
@@ -577,3 +581,12 @@ def m3day2m3sec(value):
     :return: flow rate in m3  / sec
     """
     return value / 86400
+
+
+def cP2pasec(value):
+    """
+    converts viscosity
+    :param value: viscosity in cP
+    :return: viscosity in pa * sec
+    """
+    return value / 1000

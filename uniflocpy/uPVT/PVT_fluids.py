@@ -418,8 +418,19 @@ class FluidFlow:
         self.sigma_liq_Nm = None
         self.mu_liq_cP = None
 
+        self.heatcap_liq_jkgc = None  # TODO проверить
+        self.thermal_conduct_liq_wmk = None
+
+        self.heatcapn_jkgc = None
+        self.thermal_conductn_wmk = None
+
+        self.mass_flowraten_kgsec = None
+
         self.mun_cP = None
         self.rhon_kgm3 = None
+
+        self.number_re_n = None
+        self.number_pr_n = None
 
     def calc(self, p_bar, t_c):
         """расчет свойств потока для заданных термобарических условий"""
@@ -452,7 +463,7 @@ class FluidFlow:
 
         self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
 
-        self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * ( 1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
+        self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * (1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
 
         self.sigma_liq_Nm = self.fl.sigma_oil_gas_Nm * (1 - self.fw_perc / 100) + self.fl.sigma_wat_gas_Nm * self.fw_perc / 100
 
@@ -461,6 +472,24 @@ class FluidFlow:
         self.mun_cP = self.mu_liq_cP * self.liquid_content + self.fl.mu_gas_cP * (1 - self.liquid_content)
 
         self.rhon_kgm3 = self.rho_liq_kgm3 * self.liquid_content + self.fl.rho_gas_kgm3 * (1 - self.liquid_content)
+
+        self.heatcap_liq_jkgc = self.fl.heatcap_oil_jkgc * (
+                    1 - self.fw_perc / 100) + self.fl.heatcap_wat_jkgc * self.fw_perc / 100
+
+        self.thermal_conduct_liq_wmk = self.fl.thermal_conduct_oil_wmk * (
+                    1 - self.fw_perc / 100) + self.fl.thermal_conduct_wat_wmk * self.fw_perc / 100
+
+        self.heatcapn_jkgc = self.heatcap_liq_jkgc * self.liquid_content + self.fl.heatcap_gas_jkgc * (1 - self.liquid_content)
+
+        self.thermal_conductn_wmk = self.thermal_conduct_liq_wmk * self.liquid_content +\
+                                    self.fl.thermal_conduct_gas_wmk * (1 - self.liquid_content)
+
+        self.mass_flowraten_kgsec = self.rhon_kgm3 * self.vm_msec * self.Ap_m2
+
+        self.number_re_n = self.rhon_kgm3 * self.vm_msec * self.d_m / uc.cP2pasec(self.mun_cP)
+
+        self.number_pr_n = self.mun_cP * self.heatcapn_jkgc / self.thermal_conductn_wmk
+
 
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
