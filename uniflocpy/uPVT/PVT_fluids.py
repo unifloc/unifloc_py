@@ -397,6 +397,9 @@ class FluidFlow:
         self.fw_on_surface_perc = 20              # обводненность
         self.d_m = 0.152  # внутренний диаметр трубы
 
+        self.p_bar = None
+        self.t_c =None
+
         self.qoil_on_surface_m3day = None
         self.qwat_on_surface_m3day = None
         self.qgas_on_surface_m3day = None
@@ -432,8 +435,52 @@ class FluidFlow:
         self.number_re_n = None
         self.number_pr_n = None
 
+        self.gas_mass_fraction = None
+        self.wat_mass_fraction_from_liquid = None
+
+        self.Joule_Thompson_coef_cpa = None
+
+
+    def calc_Joule_Thompson_coef_cpa(self):  #TODO переделать JT для жидкости (брал для нефти)
+
+        delta_t_c = 0.001
+        t2_c = self.t_c + delta_t_c
+        t1_c = self.t_c - delta_t_c
+
+        self.fl.calc(self.p_bar, t2_c)
+        z2 = self.fl.z
+        rho2_oil_kgm3 = self.fl.rho_oil_kgm3
+        rho2_wat_kgm3 = self.fl.rho_wat_kgm3
+
+        self.fl.calc(self.p_bar, t1_c)
+        z1 = self.fl.z
+        rho1_oil_kgm3 = self.fl.rho_oil_kgm3
+        rho1_wat_kgm3 = self.fl.rho_wat_kgm3
+
+        dzdt_pconst = (z2 - z1) / 2 / delta_t_c
+        drhodt_oil_pconst = (rho2_oil_kgm3 - rho1_oil_kgm3) / 2 / delta_t_c
+        drhodt_wat_pconst = (rho2_wat_kgm3 - rho1_wat_kgm3) / 2 / delta_t_c
+
+        self.fl.calc(self.p_bar, self.t_c)
+
+        oil_volume_expansivity = - 1 / self.fl.rho_oil_kgm3 * drhodt_oil_pconst
+        wat_volume_expansivity = - 1 / self.fl.rho_wat_kgm3 * drhodt_wat_pconst
+
+        gas_JT_coef_heatcap = self.t_c * dzdt_pconst / self.fl.z / self.fl.rho_gas_kgm3
+        oil_JT_coef_heatcap = - (1 - self.t_c * oil_volume_expansivity) / self.fl.rho_oil_kgm3
+        wat_JT_coef_heatcap = - (1 - self.t_c * wat_volume_expansivity) / self.fl.rho_wat_kgm3
+        liq_JT_coef_heatcap = wat_JT_coef_heatcap * self.wat_mass_fraction_from_liquid + \
+            oil_JT_coef_heatcap * (1 - self.wat_mass_fraction_from_liquid)
+        mix_JT_coef_heatcap = gas_JT_coef_heatcap * self.gas_mass_fraction + liq_JT_coef_heatcap * (1 - self.gas_mass_fraction)
+
+        return mix_JT_coef_heatcap / self.heatcapn_jkgc
+
     def calc(self, p_bar, t_c):
         """расчет свойств потока для заданных термобарических условий"""
+
+        self.p_bar = p_bar
+
+        self.t_c = t_c
 
         self.fl.calc(p_bar, t_c)
 
@@ -492,7 +539,19 @@ class FluidFlow:
 
         self.number_pr_n = self.mun_cP * self.heatcapn_jkgc / self.thermal_conductn_wmk
 
+        self.gas_mass_fraction = self.fl.rho_gas_kgm3 * self.vsg_msec * self.Ap_m2 / self.mass_flowraten_kgsec
 
+        self.wat_mass_fraction_from_liquid = self.qwat_m3day * self.fl.rho_wat_kgm3 / \
+                                             (self.qwat_m3day * self.fl.rho_wat_kgm3 +
+                                              self.qoil_m3day * self.fl.rho_oil_kgm3)
+
+        self.Joule_Thompson_coef_cpa = self.calc_Joule_Thompson_coef_cpa()
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
 
+
+fluid_flow = FluidFlow()
+p_bar = 50
+t_c = 50
+fluid_flow.calc(p_bar, t_c)
+print(fluid_flow.Joule_Thompson_coef_cpa)
