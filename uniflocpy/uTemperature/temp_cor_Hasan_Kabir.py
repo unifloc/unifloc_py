@@ -335,7 +335,7 @@ class Hasan_Kabir_cor():
         self.thermal_conduct_cas_wmk = self.thermal_conduct_tube_wmk
         self.thermal_conduct_cem_wmc = 0.779
 
-        self.delta_t_an_c = 3
+        self.delta_t_an_init_c = 3
 
         self.section_casing = None  # if Tube: self.section_casing = False
 
@@ -394,6 +394,8 @@ class Hasan_Kabir_cor():
         self.hf_wm2c = None
         self.han_wm2c = None
 
+        self.delta_t_an_c = None
+
         self.thermal_resistance_conv_flow = None
         self.thermal_resistance_cond_tube = None
         self.thermal_resistance_conv_an = None
@@ -409,6 +411,32 @@ class Hasan_Kabir_cor():
 
         self.grad_t_cm = None
 
+        self.heat_transfer_rate = None
+
+    def calc_annulus(self, delta_t_an_c):
+        self.delta_t_an_c = delta_t_an_c
+        self.number_pr_an = uc.cP2pasec(self.mu_an_cP) * self.heatcap_an_jkgc / self.thermal_conduct_an_wmk
+        self.number_gr_an = (self.r_cas_in_m - self.r_tube_out_m) ** 3 * self.rho_an_kgm3 ** 2 * \
+                            self.heat_expansion_an_1c * uc.g * self.delta_t_an_c / uc.cP2pasec(self.mu_an_cP) ** 2
+
+        self.han_wm2c = (0.049 * (self.number_gr_an * self.number_pr_an) ** (1 / 3) *
+                         self.number_pr_an ** 0.074 * self.thermal_conduct_an_wmk) / \
+                        (self.r_tube_out_m * math.log(self.r_cas_in_m / self.r_tube_out_m))
+        self.han_wm2c = self.han_wm2c * 0.25
+
+        self.thermal_resistance_conv_an = 1 / (self.r_cas_in_m * self.han_wm2c)
+        self.overall_heat_transfer_coef_wm2c = 1 / self.r_tube_out_m * (1 /
+                                                                        (self.thermal_resistance_conv_flow +
+                                                                         self.thermal_resistance_cond_tube +
+                                                                         self.thermal_resistance_conv_an +
+                                                                         self.thermal_resistance_cond_cas +
+                                                                         self.thermal_resistance_cond_cem +
+                                                                         self.thermal_resistance_cond_earth))
+        self.heat_transfer_rate = 2 * uc.pi * self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c * \
+                                  (self.t_c - self.t_earth_init_c)
+
+        self.delta_t_an_c = self.heat_transfer_rate / (2 * uc.pi * self.r_tube_in_m * self.han_wm2c)
+        return  float(self.delta_t_an_c - delta_t_an_c)
 
     def calc_grad_t_cm(self, p_bar, t_c):
         self.p_bar = p_bar
@@ -443,23 +471,10 @@ class Hasan_Kabir_cor():
                                                                          self.thermal_resistance_cond_cem +
                                                                          self.thermal_resistance_cond_earth))
         else:
-            self.number_pr_an = uc.cP2pasec(self.mu_an_cP) * self.heatcap_an_jkgc / self.thermal_conduct_an_wmk
-            self.number_gr_an = (self.r_cas_in_m - self.r_tube_out_m) ** 3 * self.rho_an_kgm3 ** 2 * \
-                                self.heat_expansion_an_1c * uc.g * self.delta_t_an_c / uc.cP2pasec(self.mu_an_cP) ** 2
+            self.result_an_fsolve = fsolve(self.calc_annulus, self.delta_t_an_init_c)
 
-            self.han_wm2c = (0.049 * (self.number_gr_an * self.number_pr_an) ** (1/3) *
-                             self.number_pr_an ** 0.074 * self.thermal_conduct_an_wmk) / \
-                            (self.r_tube_out_m * math.log(self.r_cas_in_m / self.r_tube_out_m))
-            self.han_wm2c = self.han_wm2c * 0.25
 
-            self.thermal_resistance_conv_an = 1 / (self.r_cas_in_m * self.han_wm2c)
-            self.overall_heat_transfer_coef_wm2c = 1 / self.r_tube_out_m * (1 /
-                                                                        (self.thermal_resistance_conv_flow +
-                                                                         self.thermal_resistance_cond_tube +
-                                                                         self.thermal_resistance_conv_an +
-                                                                         self.thermal_resistance_cond_cas +
-                                                                         self.thermal_resistance_cond_cem +
-                                                                         self.thermal_resistance_cond_earth))
+
         self.relaxation_parametr = 2 * uc.pi / self.heatcapn_jkgc / self.mass_flowraten_kgsec * \
                                    (self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c /
                                     (self.thermal_conduct_earth_wmc +
@@ -473,7 +488,7 @@ class Hasan_Kabir_cor():
                           uc.g * math.sin(self.angle_rad) -
                           self.vm_msec * self.grad_v_msecm)
 
-        return self.grad_t_cm
+        return float(self.grad_t_cm)
 
 
 

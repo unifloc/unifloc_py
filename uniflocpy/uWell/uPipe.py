@@ -63,7 +63,7 @@ class Pipe():
 
         self.temp_cor.time_sec = 100 * 24 * 60 * 60
 
-        self.temp_cor.t_earth_init_c = 80
+        self.temp_cor.t_earth_init_c = 45
 
         self.temp_cor.p_bar = self.p_bar
         self.temp_cor.t_c = self.t_c
@@ -100,9 +100,9 @@ class Pipe():
         self.temp_cor.heat_expansion_an_1c = 0.004824
 
         # параметры, входящие в градиент
-        self.temp_cor.Joule_Thompson_coef_cpa = 0
+        self.temp_cor.Joule_Thompson_coef_cpa = self.fluid_flow.Joule_Thompson_coef_cpa
         self.temp_cor.grad_p_pam = self.calc_p_grad_pam(self.p_bar, self.t_c)
-        self.temp_cor.grad_v_msecm = 0
+        self.temp_cor.grad_v_msecm = self.fluid_flow.dvdp_msecpam * self.temp_cor.grad_p_pam
 
 
         self.t_grad_cm = self.temp_cor.calc_grad_t_cm(self.p_bar, self.t_c)

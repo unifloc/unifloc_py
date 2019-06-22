@@ -395,7 +395,7 @@ class FluidFlow:
 
         self.qliq_on_surface_m3day = 100      # дебит жидкости
         self.fw_on_surface_perc = 20              # обводненность
-        self.d_m = 0.152  # внутренний диаметр трубы
+        self.d_m = 0.07 # внутренний диаметр трубы
 
         self.p_bar = None
         self.t_c =None
@@ -439,9 +439,9 @@ class FluidFlow:
         self.wat_mass_fraction_from_liquid = None
 
         self.Joule_Thompson_coef_cpa = None
+        self.dvdp_msecpam = None
 
-
-    def calc_Joule_Thompson_coef_cpa(self):  #TODO переделать JT для жидкости (брал для нефти)
+    def calc_Joule_Thompson_coef_cpa(self):  #TODO проверить данный простой расчет
 
         delta_t_c = 0.001
         t2_c = self.t_c + delta_t_c
@@ -475,13 +475,7 @@ class FluidFlow:
 
         return mix_JT_coef_heatcap / self.heatcapn_jkgc
 
-    def calc(self, p_bar, t_c):
-        """расчет свойств потока для заданных термобарических условий"""
-
-        self.p_bar = p_bar
-
-        self.t_c = t_c
-
+    def calc_velosities(self, p_bar, t_c):
         self.fl.calc(p_bar, t_c)
 
         self.Ap_m2 = math.pi * self.d_m ** 2 / 4
@@ -505,6 +499,28 @@ class FluidFlow:
         self.vsg_msec = uc.m3day2m3sec(self.qgas_m3day) / self.Ap_m2
 
         self.vm_msec = self.vsl_msec + self.vsg_msec
+
+    def calc_dvdp_msecpam(self):
+
+        delta_p_bar = uc.Pa2bar(10)
+        p2_bar = self.p_bar + delta_p_bar
+        p1_bar = self.p_bar - delta_p_bar
+        self.calc_velosities(p2_bar, self.t_c)
+        v2_msec = self.vm_msec
+        self.calc_velosities(p1_bar, self.t_c)
+        v1_msec = self.vm_msec
+
+        self.calc_velosities(self.p_bar, self.t_c)
+        return (v2_msec - v1_msec) / 2 / uc.bar2Pa(delta_p_bar)
+
+    def calc(self, p_bar, t_c):
+        """расчет свойств потока для заданных термобарических условий"""
+
+        self.p_bar = p_bar
+
+        self.t_c = t_c
+
+        self.calc_velosities(self.p_bar, self.t_c)
 
         self.liquid_content = self.qliq_m3day / (self.qliq_m3day + self.qgas_m3day)
 
@@ -546,12 +562,7 @@ class FluidFlow:
                                               self.qoil_m3day * self.fl.rho_oil_kgm3)
 
         self.Joule_Thompson_coef_cpa = self.calc_Joule_Thompson_coef_cpa()
+
+        self.dvdp_msecpam = self.calc_dvdp_msecpam()
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
-
-
-fluid_flow = FluidFlow()
-p_bar = 50
-t_c = 50
-fluid_flow.calc(p_bar, t_c)
-print(fluid_flow.Joule_Thompson_coef_cpa)
