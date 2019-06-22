@@ -109,17 +109,3 @@ class Pipe():
 
         self.t_grad_cm = self.temp_cor.calc_grad_t_cm(self.p_bar, self.t_c)
         return self.t_grad_cm
-
-p_bar, t_c = 50, 50
-
-pipe = Pipe()
-pipe.section_casing = True
-answer = pipe.calc_t_grad_cm(p_bar, t_c)
-print(answer)
-pipe.section_casing = False
-answer = pipe.calc_t_grad_cm(p_bar, t_c)
-print(answer)
-pipe.section_casing = True
-answer = pipe.calc_t_grad_cm(p_bar, t_c)
-print(answer)
-

@@ -395,10 +395,10 @@ class FluidFlow:
 
         self.qliq_on_surface_m3day = 100      # дебит жидкости
         self.fw_on_surface_perc = 20              # обводненность
-        self.d_m = 0.07 # внутренний диаметр трубы
+        self.d_m = 0.152 # внутренний диаметр трубы
 
         self.p_bar = None
-        self.t_c =None
+        self.t_c = None
 
         self.qoil_on_surface_m3day = None
         self.qwat_on_surface_m3day = None

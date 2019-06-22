@@ -36,7 +36,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_flow.__dict__.items():
             if type(i[-1]) != type(PVT_fluids.FluidStanding()):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 17815.067970061937,
+        self.assertAlmostEqual(sum, 52964.45783497338,
                                delta=0.0001)  #
 
 
