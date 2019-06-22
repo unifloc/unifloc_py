@@ -479,7 +479,9 @@ class FluidFlow:
         self.thermal_conduct_liq_wmk = self.fl.thermal_conduct_oil_wmk * (
                     1 - self.fw_perc / 100) + self.fl.thermal_conduct_wat_wmk * self.fw_perc / 100
 
-        self.heatcapn_jkgc = self.heatcap_liq_jkgc * self.liquid_content + self.fl.heatcap_gas_jkgc * (1 - self.liquid_content)
+        self.heatcapn_jkgc = (self.heatcap_liq_jkgc * self.rho_liq_kgm3 * self.liquid_content +
+                             self.fl.heatcap_gas_jkgc * self.fl.rho_gas_kgm3 * (1 - self.liquid_content)) /\
+                             self.rhon_kgm3
 
         self.thermal_conductn_wmk = self.thermal_conduct_liq_wmk * self.liquid_content +\
                                     self.fl.thermal_conduct_gas_wmk * (1 - self.liquid_content)

@@ -590,3 +590,11 @@ def cP2pasec(value):
     :return: viscosity in pa * sec
     """
     return value / 1000
+
+def grad2rad(value):
+    """
+    converts angle
+    :param value: angle in grad
+    :return: angle in rad
+    """
+    return value * pi / 180

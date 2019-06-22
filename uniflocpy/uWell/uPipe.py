@@ -4,6 +4,7 @@
 import uniflocpy.uPVT.PVT_fluids as PVT
 import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_BB
 import uniflocpy.uTemperature.temp_cor_Hasan_Kabir as temp_cor_HK
+import uniflocpy.uTools.uconst as uc
 
 class Pipe():
     """
@@ -58,18 +59,51 @@ class Pipe():
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
 
+        self.temp_cor.section_casing = False  # если True, будет считать ОК
+
+        self.temp_cor.time_sec = 100 * 24 * 60 * 60
+
+        self.temp_cor.t_earth_init_c = 80
+
+        self.temp_cor.p_bar = self.p_bar
+        self.temp_cor.t_c = self.t_c
+
+        # конструкция скважины
+        self.temp_cor.angle_rad = uc.grad2rad(90)
         self.temp_cor.d_m = self.fluid_flow.d_m
 
-        self.temp_cor.liquid_content = self.fluid_flow.liquid_content
+        self.temp_cor.r_tube_in_m = self.temp_cor.d_m / 2
+        self.temp_cor.r_tube_out_m = self.temp_cor.r_tube_in_m + 0.005
+        self.temp_cor.r_cas_in_m = self.temp_cor.r_tube_out_m + 0.03
+        self.temp_cor.r_cas_out_m = self.temp_cor.r_cas_in_m + 0.005
+        self.temp_cor.r_well_m = self.temp_cor.r_cas_out_m + 0.15
 
+        # свойства многофазного потока
+        self.temp_cor.liquid_content = self.fluid_flow.liquid_content
+        self.temp_cor.mass_flowraten_kgsec = self.fluid_flow.mass_flowraten_kgsec
+        self.temp_cor.vm_msec = self.fluid_flow.vm_msec
+
+        self.temp_cor.sigma_liq_Nm = self.temp_cor.sigma_liq_Nm
         self.temp_cor.rhon_kgm3 = self.fluid_flow.rhon_kgm3
         self.temp_cor.mun_cP = self.fluid_flow.mun_cP
         self.temp_cor.heatcapn_jkgc = self.fluid_flow.heatcapn_jkgc
         self.temp_cor.thermal_conductn_wmk = self.fluid_flow.thermal_conductn_wmk
-        self.temp_cor.mass_flowraten_kgsec = self.fluid_flow.mass_flowraten_kgsec
 
         self.temp_cor.number_re_n = self.fluid_flow.number_re_n
         self.temp_cor.number_pr_n = self.fluid_flow.number_pr_n
+
+        # свойства флюида, находящегося в затрубном пространстве  # TODO какое давление? газ или жидкость?
+        self.temp_cor.mu_an_cP = 0.0001 * 1000
+        self.temp_cor.heatcap_an_jkgc = 1004.81
+        self.temp_cor.thermal_conduct_an_wmk = 0.865
+        self.temp_cor.rho_an_kgm3 = 36.92
+        self.temp_cor.heat_expansion_an_1c = 0.004824
+
+        # параметры, входящие в градиент
+        self.temp_cor.Joule_Thompson_coef_cpa = 0
+        self.temp_cor.grad_p_pam = self.calc_p_grad_pam(self.p_bar, self.t_c)
+        self.temp_cor.grad_v_msecm = 0
+
 
         self.t_grad_cm = self.temp_cor.calc_grad_t_cm(self.p_bar, self.t_c)
         return self.t_grad_cm
