@@ -25,6 +25,10 @@ class Pipe():
 
         self.section_casing = False # если True, будет считать ОК
 
+        self.time_sec = 100 * 24 * 60 * 60
+
+        self.t_earth_init_c = 45
+
         self.p_bar = None
         self.t_c = None
 
@@ -63,9 +67,9 @@ class Pipe():
 
         self.temp_cor.section_casing = self.section_casing
 
-        self.temp_cor.time_sec = 100 * 24 * 60 * 60
+        self.temp_cor.time_sec = self.time_sec
 
-        self.temp_cor.t_earth_init_c = 45
+        self.temp_cor.t_earth_init_c = self.t_earth_init_c
 
         self.temp_cor.p_bar = self.p_bar
         self.temp_cor.t_c = self.t_c
