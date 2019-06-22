@@ -23,6 +23,8 @@ class Pipe():
         self.hydr_cor = hydr_cor
         self.temp_cor = temp_cor
 
+        self.section_casing = False # если True, будет считать ОК
+
         self.p_bar = None
         self.t_c = None
 
@@ -59,7 +61,7 @@ class Pipe():
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
 
-        self.temp_cor.section_casing = False  # если True, будет считать ОК
+        self.temp_cor.section_casing = self.section_casing
 
         self.temp_cor.time_sec = 100 * 24 * 60 * 60
 
@@ -111,6 +113,13 @@ class Pipe():
 p_bar, t_c = 50, 50
 
 pipe = Pipe()
+pipe.section_casing = True
+answer = pipe.calc_t_grad_cm(p_bar, t_c)
+print(answer)
+pipe.section_casing = False
+answer = pipe.calc_t_grad_cm(p_bar, t_c)
+print(answer)
+pipe.section_casing = True
 answer = pipe.calc_t_grad_cm(p_bar, t_c)
 print(answer)
 

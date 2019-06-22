@@ -454,9 +454,8 @@ class Hasan_Kabir_cor():
             self.heat_dissipation_to_earth = (0.4063 + 1 / 2 * math.log(self.time_dimensionless)) * \
                                              (1 + 0.6 / self.time_dimensionless)
 
-        self.thermal_resistance_conv_flow = 1 / (self.r_tube_in_m * self.hf_wm2c)
-        self.thermal_resistance_cond_tube = math.log(self.r_tube_out_m / self.r_tube_in_m) / \
-                                            self.thermal_conduct_tube_wmk
+        self.thermal_resistance_conv_flow = 1 / (self.d_m / 2 * self.hf_wm2c)
+
         self.thermal_resistance_cond_cas = math.log(self.r_cas_out_m / self.r_cas_in_m) / \
                                             self.thermal_conduct_cas_wmk
         self.thermal_resistance_cond_cem = math.log(self.r_well_m / self.r_cas_out_m) / \
@@ -471,9 +470,9 @@ class Hasan_Kabir_cor():
                                                                          self.thermal_resistance_cond_cem +
                                                                          self.thermal_resistance_cond_earth))
         else:
+            self.thermal_resistance_cond_tube = math.log(self.r_tube_out_m / self.r_tube_in_m) / \
+                                                self.thermal_conduct_tube_wmk
             self.result_an_fsolve = fsolve(self.calc_annulus, self.delta_t_an_init_c)
-
-
 
         self.relaxation_parametr = 2 * uc.pi / self.heatcapn_jkgc / self.mass_flowraten_kgsec * \
                                    (self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c /
