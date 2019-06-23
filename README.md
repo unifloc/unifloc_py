@@ -1,7 +1,7 @@
 # Unifloc #
 
-## 0.4.0 ##
-## 17.06.2019 ##
+## 0.6.0 ##
+## 24.06.2019 ##
 ### Authors:
 * Rinat Khabibullin
 * Alexey Vodopyan
@@ -16,3 +16,4 @@
 * applications - готовые рабочие приложения
 * sandbox - различные элементы, находящиеся в процессе разработки
 * tests - пакет тестирования uniflocpy и applications
+* docs - файлы документации

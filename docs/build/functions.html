@@ -1,0 +1,1051 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>uPVT &#8212; документация unifloc 0.6.0</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="This is a Title2" href="test.html" />
+    <link rel="prev" title="Welcome to unifloc’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="upvt">
+<h1>uPVT<a class="headerlink" href="#upvt" title="Ссылка на этот заголовок">¶</a></h1>
+<p>Functions will be documented here.</p>
+<div class="section" id="module-uniflocpy.uPVT.PVT_correlations">
+<span id="upvt-pvt-correlations-module"></span><h2>uPVT.PVT_correlations module<a class="headerlink" href="#module-uniflocpy.uPVT.PVT_correlations" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Created on Sat May  5 13:59:06 2018</p>
+<dl class="simple">
+<dt>&#64;author: Rinat Khabibullin</dt><dd><p>Alexey Vodopyan</p>
+</dd>
+</dl>
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_McCain_specificgravity">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_McCain_specificgravity</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">rsb_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gassp</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_McCain_specificgravity" title="Ссылка на это определение">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p_MPaa</strong> – pressure in MPaa</p></li>
+<li><p><strong>rsb_m3m3</strong> – gas-oil ratio at bubble poinr pressure, m3/m3</p></li>
+<li><p><strong>t_K</strong> – temperature in K</p></li>
+<li><p><strong>gamma_oil</strong> – specific oil density(by water)</p></li>
+<li><p><strong>gamma_gassp</strong> – specific gas density(by air) in separator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>reservoir free gas specific gravity</p>
+</dd>
+</dl>
+<p>ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_compressibility_brine_Spivey_1MPa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_compressibility_brine_Spivey_1MPa</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">s_ppm</em>, <em class="sig-param">z=1.0</em>, <em class="sig-param">par=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_compressibility_brine_Spivey_1MPa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Modified Spivey et al. correlation for brine(water) compressibility (2009)</p>
+<p>ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+52–61.
+ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>корреляция позволяет найти сжимаемость соленой воды с частично или полностью растворенным в ней метаном</p>
+<p>return density, kg/m3
+t_K,                            temperature, K
+p_MPaa,                         pressure, MPaa
+s_ppm,                          salinity, ppm
+z=1,                            z-factor
+par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane</p>
+<blockquote>
+<div><p>2 - brine containing partially dissolved methane</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_compressibility_gas_Mattar_1MPa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_compressibility_gas_Mattar_1MPa</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">t_K</em>, <em class="sig-param">ppc_MPa</em>, <em class="sig-param">tpc_K</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_compressibility_gas_Mattar_1MPa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>correlation for gas compressibility
+ref 1 Mattar, L., Brar, G.S., and Aziz, K. 1975. Compressibility of Natural Gases.
+J Can Pet Technol 14 (4): 77. PETSOC-75-04-08</p>
+<p>return for gas compressibility
+p_MPaa,                      pressure, MPaa
+t_K,                         temperature, K
+ppc_MPa                      pseudocritical pressure, MPa
+tpc_K                        pseudocritical temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_compressibility_oil_Mccain_1MPa_greater">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_compressibility_oil_Mccain_1MPa_greater</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">pb_MPa</em>, <em class="sig-param">p_MPa</em>, <em class="sig-param">rsb_m3m3</em>, <em class="sig-param">tres_K</em>, <em class="sig-param">gamma_gassp=0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_compressibility_oil_Mccain_1MPa_greater" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_compressibility_oil_Mccain_1MPa_lower">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_compressibility_oil_Mccain_1MPa_lower</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_compressibility_oil_Mccain_1MPa_lower" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_compressibility_oil_VB_1Mpa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_compressibility_oil_VB_1Mpa</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">gamma_gas=0.6</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_compressibility_oil_VB_1Mpa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>oil compressibility according to Vasquez &amp; Beggs (1980) correlation
+ref1 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
+J Pet Technol 32 (6): 968-970. SPE-6719-PA</p>
+<p>return coefficient of isothermal compressibility co_1MPa,1/MPa
+rs_m3m3,             solution gas-oil ratio, m3m3
+t_K,                 temperature, K
+gamma_oil,           specific oil density (by water)
+p_MPaa,              pressure, MPaa
+gamma_gas=0.6,       specific gas density (by air)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_deadoilviscosity_Beggs_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_deadoilviscosity_Beggs_cP</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_K</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_deadoilviscosity_Beggs_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Correlation for dead oil viscosity
+ref1 Beggs, H.D. and Robinson, J.R. “Estimating the Viscosity of Crude Oil Systems.”
+Journal of Petroleum Technology. Vol. 27, No. 9 (1975)</p>
+<p>return dead oil viscosity,cP
+gamma_oil,           specific oil density (by water)
+t_K,                 temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_density_brine_Spivey_kgm3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_density_brine_Spivey_kgm3</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">s_ppm</em>, <em class="sig-param">par=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_density_brine_Spivey_kgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Modified Spivey et al. correlation for brine(water) density (2009)</p>
+<p>ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+52–61.
+ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>корреляция позволяет найти плотность соленой воды с растворенным в ней метаном</p>
+<p>return density, kg/m3
+t_K,                            temperature, K
+p_MPaa,                         pressure, MPaa
+s_ppm,                          salinity, ppm
+par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_density_oil_Mccain">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_density_oil_Mccain</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa</em>, <em class="sig-param">co_1MPa</em>, <em class="sig-param">rs_m3m3</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gassp=0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_density_oil_Mccain" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil density according Standing, M.B., 1977; Witte, T.W., Jr., 1987; and McCain, W.D., Jr. and Hill, N.C.,
+1995 correlation.
+ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>return oil density,kg/m3
+p_MPaa,              pressure, MPaa
+pb_MPaa,             bubble point pressure, MPaa
+co_1MPa,             coefficient of isothermal compressibility, 1/MPa
+rs_m3m3,             solution gas-oil ratio, m3m3
+gamma_gas,           specific gas density (by air)
+t_K,                 temperature, K
+gamma_oil,           specific oil density (by water)
+gamma_gassp = 0,     specific gas density in separator(by air)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_density_oil_Standing">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_density_oil_Standing</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa</em>, <em class="sig-param">co_1MPa</em>, <em class="sig-param">rs_m3m3</em>, <em class="sig-param">bo_m3m3</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">gamma_oil</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_density_oil_Standing" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil density according Standing correlation.
+ref1 book Brill 2006, Production Optimization Using Nodal Analysis</p>
+<p>return oil density,kg/m3
+p_MPaa,              pressure, MPaa
+pb_MPaa,             bubble point pressure, MPaa
+co_1MPa,             coefficient of isothermal compressibility, 1/MPa
+rs_m3m3,             solution gas-oil ratio, m3m3
+b0_m3m3,             oil formation volume factor, m3m3
+gamma_gas,           specific gas density (by air)
+gamma_oil,           specific oil density (by water)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_below">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_Glaso_m3m3_below</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">p_MPaa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_below" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Glaso correlation(1980) for total formation volume factor below bubble point pressure
+ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
+:param rs_m3m3: gas-oil ratio in m3/m3
+:param t_K: temperature in K
+:param gamma_oil: oil density (by water)
+:param gamma_gas: gas density (by air)
+:param p_MPaa: pressure in MPaa
+:return: total formation volume factor below bubble point pressure in m3/m3</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_saturated">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_Glaso_m3m3_saturated</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_saturated" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Glaso correlation(1980) for formation volume factor at bubble point pressure
+ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
+:param rs_m3m3: gas-oil ratio in m3/m3
+:param t_K: temperature in K
+:param gamma_oil: oil density (by water)
+:param gamma_gas: gas density (by air)
+:return: formation volume factor at bubble point pressure in m3/m3</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_Mccain_m3m3_below">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_Mccain_m3m3_below</code><span class="sig-paren">(</span><em class="sig-param">density_oilsto_kgm3</em>, <em class="sig-param">rs_m3m3</em>, <em class="sig-param">density_oil_kgm3</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_Mccain_m3m3_below" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil Formation Volume Factor according McCain correlation for pressure below bubble point pressure
+ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>return formation volume factor bo,m3m3
+density_oilsto_kgm3,             density of stock-tank oil, kgm3
+rs_m3m3,                         solution gas-oil ratio, m3m3
+density_oil_kgm3,                Oil density at reservoir conditions, kgm3
+gamma_gas,                       specific gas  density(by air)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_Standing_m3m3_saturated">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_Standing_m3m3_saturated</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">t_K</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_Standing_m3m3_saturated" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil Formation Volume Factor according Standing equation at bubble point pressure
+ref1 Volumetric and phase behavior of oil field hydrocarbon systems / M.B. Standing Standing, M. B. 1981</p>
+<p>return formation volume factor at bubble point pressure bo,m3m3
+rs_m3m3,             solution gas-oil ratio, m3m3
+gamma_gas,       specific gas density (by air)
+gamma_oil,      specific oil density (by water)
+t_K,                 temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_VB_m3m3_above">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_VB_m3m3_above</code><span class="sig-paren">(</span><em class="sig-param">bob</em>, <em class="sig-param">cofb_1MPa</em>, <em class="sig-param">pb_MPaa</em>, <em class="sig-param">p_MPaa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_VB_m3m3_above" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil Formation Volume Factor according equation for pressure above bubble point pressure
+ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>! Actually, this correlation is belonged ro Vasquez &amp; Beggs (1980). In some sources is
+noted that this is Standing correlation.
+ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
+J Pet Technol 32 (6): 968-970. SPE-6719-PA</p>
+<p>return formation volume factor bo,m3m3
+bob,           formation volume factor at bubble point pressure, m3m3
+cofb_1MPa,     weighted-average oil compressibility from bubblepoint pressure to a higher pressure of interest,1/MPa
+pb_MPaa,       bubble point pressure, MPa
+p_MPaa,        pressure, MPa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_brine_Spivey_m3m3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_brine_Spivey_m3m3</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">s_ppm</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_brine_Spivey_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Modified Spivey et al. correlation for brine(water) formation volume factor (2009)</p>
+<p>ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+52–61.
+ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>корреляция позволяет найти объемный коэффициент для соленой воды с учетом растворенного метана</p>
+<p>return density, kg/m3
+t_K,                            temperature, K
+p_MPaa,                         pressure, MPaa
+s_ppm,                          salinity, ppm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_gamma_gas_Mccain">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_gamma_gas_Mccain</code><span class="sig-paren">(</span><em class="sig-param">rsp_m3m3</em>, <em class="sig-param">rst_m3m3</em>, <em class="sig-param">gamma_gassp</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">psp_MPaa=0</em>, <em class="sig-param">tsp_K=0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_gamma_gas_Mccain" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Correlation for weighted-average specific gravities of surface gases</p>
+<p>ref1 «Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities»,
+J. VELARDE, W.D. MCCAIN, 2002</p>
+<p>return weighted-average specific gravities of surface gases
+часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
+rsp_m3m3,             separator producing gas-oil ratio, m3m3
+rst_m3m3,             stock-tank producing gas-oil ratio, m3m3
+gamma_gassp,          separator gas specific gravity
+gamma_oil,            specific oil density(by water)
+psp_MPaa = 0,         pressure in separator, MPaa
+tsp_K = 0,            temperature in separator, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_gas_density_kgm3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_gas_density_kgm3</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">z</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_gas_density_kgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Equation for gas density</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_K</strong> – temperature</p></li>
+<li><p><strong>p_MPaa</strong> – pressure</p></li>
+<li><p><strong>gamma_gas</strong> – specific gas density by air</p></li>
+<li><p><strong>z</strong> – z-factor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>gas density</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_gas_fvf_m3m3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_gas_fvf_m3m3</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">z</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_gas_fvf_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Equation for gas FVF</p>
+<p>return formation volume factor for gas bg, m3/m3
+t_K,                            temperature, K
+p_MPaa,                         pressure, MPaa
+z,                              z-factor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_gasviscosity_Lee_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_gasviscosity_Lee_cP</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">z</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_gasviscosity_Lee_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Lee correlation for gas viscosity
+ref 1 Lee, A.L., Gonzalez, M.H., and Eakin, B.E. “The Viscosity of Natural Gases.” Journal
+of Petroleum Technology. Vol. 18 (August 1966) 997–1,000.</p>
+<p>return gas viscosity,cP
+t_K,                         temperature, K
+p_MPaa,                      pressure, MPaa
+z                            z-factor
+gamma_gas                    specific gas density (by air)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_gwr_brine_Spivey_m3m3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_gwr_brine_Spivey_m3m3</code><span class="sig-paren">(</span><em class="sig-param">s_ppm</em>, <em class="sig-param">z</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_gwr_brine_Spivey_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)</p>
+<p>ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
+Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
+5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
+52–61.
+ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>корреляция позволяет найти газосодержание метана в соленой воде</p>
+<p>return GWR, m3/m3
+s_ppm,                          salinity, ppm
+z,                              z-factor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC" title="Ссылка на это определение">¶</a></dt>
+<dd><p>gas heat capacity by Mahmood Moshfeghian for 0.1 to 20 MPa
+t should be noted that the concept of heat capacity is valid only for the single phase region.
+:param p_MPaa: pressure, MPaa
+:param t_K: temperature, K
+:param gamma_gas: specific gas density by air
+:return: gas heat capacity in JkgC = JkgK</p>
+<p>ref1 <a class="reference external" href="https://www.jmcampbell.com/tip-of-the-month/2009/07/">https://www.jmcampbell.com/tip-of-the-month/2009/07/</a>
+variation-of-natural-gas-heat-capacity-with-temperature-pressure-and-relative-density/</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Gambill_JkgC">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_oil_Gambill_JkgC</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Gambill_JkgC" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil heat capacity in SI. Gambill correlation
+:param gamma_oil: specific oil density(by water)
+:param t_c: temperature in C
+:return: heat capacity in SI - JkgC</p>
+<dl class="simple">
+<dt>ref1 Book: Brill J. P., Mukherjee H. K. Multiphase flow in wells. –</dt><dd><p>Society of Petroleum Engineers, 1999. – Т. 17. in Page 122</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Wes_Wright_JkgC">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_oil_Wes_Wright_JkgC</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Wes_Wright_JkgC" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil heat capacity in SI. Wes Wright method
+:param gamma_oil: specific oil density(by water)
+:param t_c: temperature in C
+:return: heat capacity in SI - JkgC</p>
+<p>ref1 <a class="reference external" href="https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8">https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_water_IAPWS_JkgC">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_water_IAPWS_JkgC</code><span class="sig-paren">(</span><em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_water_IAPWS_JkgC" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Теплоемкость дистилированной воды в диапазоне 5 &lt; T &lt; 95 C при 1 бар
+выше диапазона - линейная экстраполяция
+:param t_c: температура в С
+:return: теплоемкость в Дж / кг С</p>
+<p>ref1 <a class="reference external" href="https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/">https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_oil_viscosity_Beggs_VB_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_oil_viscosity_Beggs_VB_cP</code><span class="sig-paren">(</span><em class="sig-param">deadoilviscosity_cP</em>, <em class="sig-param">rs_m3m3</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_oil_viscosity_Beggs_VB_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>function for calculating the viscosity at any pressure</p>
+<p>return oil viscosity,cP
+deadoilviscosity_cP,           dead oil viscosity,cP
+rs_m3m3,                       solution gas-oil ratio, m3m3
+p_MPaa,                        pressure, MPaa
+pb_MPaa,                       bubble point pressure, MPaa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_pb_AlMarhoun_MPaa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pb_AlMarhoun_MPaa</code><span class="sig-paren">(</span><em class="sig-param">rsb_m3m3</em>, <em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">t_K=350</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pb_AlMarhoun_MPaa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>bubble point pressure calculation according to Al-Marhoun (1985) correlation</p>
+<p>Middle-East oil</p>
+<p>ref1 PYT Correlations for Middle East Crude Oils, Muhammad All AI.Marhoun, Journal of Petroleum Technology. May 1988</p>
+<p>return bubble point pressure abs in MPa
+rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
+gamma_oil=0.86, specific gas density (by water)
+gamma_gas=0.6,  specific gas density (by air)
+t_K=350,        temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_pb_Glaso_MPaa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pb_Glaso_MPaa</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pb_Glaso_MPaa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Glaso correlation(1980) for bubble point pressure
+ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
+:param rs_m3m3: gas-oil ratio in m3/m3
+:param t_K: temperature in K
+:param gamma_oil: oil density (by water)
+:param gamma_gas: gas density (by air)
+:return: bubble point pressure im MPa abs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_pb_Standing_MPaa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pb_Standing_MPaa</code><span class="sig-paren">(</span><em class="sig-param">rsb_m3m3</em>, <em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">t_K=350</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pb_Standing_MPaa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>bubble point pressure calculation according to Standing (1947) correlation</p>
+<p>ref1 «A Pressure-Volume-Temperature Correlation for Mixtures of California Oil and Gases»,
+M.B. Standing, Drill. &amp; Prod. Prac., API, 1947.</p>
+<p>ref2  «Стандарт компании Юкос. Физические свойства нефти. Методы расчета.» Афанасьев В.Ю., Хасанов М.М. и др. 2002 г</p>
+<p>return bubble point pressure abs in MPa
+rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
+gamma_oil=0.86, specific gas density (by water)
+gamma_gas=0.6,  specific gas density (by air)
+t_K=350,        temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_pb_Valko_MPaa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pb_Valko_MPaa</code><span class="sig-paren">(</span><em class="sig-param">rsb_m3m3</em>, <em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">t_K=350</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pb_Valko_MPaa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>bubble point pressure calculation according to Valko McCain (2002) correlation</p>
+<p>ref SPE  «Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities»
+W. D. McCain Jr.,P.P. Valko,</p>
+<p>return bubble point pressure abs in MPa
+rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
+gamma_oil=0.86, specific oil density (by water)
+gamma_gas=0.6,  specific gas density (by air)
+t_K=350,        temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_pseudocritical_pressure_MPa">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pseudocritical_pressure_MPa</code><span class="sig-paren">(</span><em class="sig-param">gamma_gas</em>, <em class="sig-param">y_h2s=0.0</em>, <em class="sig-param">y_co2=0.0</em>, <em class="sig-param">y_n2=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pseudocritical_pressure_MPa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>»
+correlation for pseudocritical pressure taking into account the presense of non-hydrocarbon gases
+ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for
+Naturally Occurring Petroleum Gases.” Gas Reservoir Engineering. Reprint Series. Richardson,
+TX: SPE. Vol. 52 (1999) 186–200</p>
+<p>return pseudocritical pressure, MPa
+gamma_gas,           specific gas density (by air)
+tc_h2s_K,            critical temperature for hydrogen sulfide, K
+tc_co2_K,            critical temperature for carbon dioxide, K
+tc_n2_K,             critical temperature for nitrogen, K
+pc_h2s_MPaa,         critical pressure for hydrogen sulfide, MPaa
+pc_co2_MPaa,         critical pressure for carbon dioxide, MPaa
+pc_n2_MPaa,          critical pressure for nitrogen, MPaa
+y_h2s,               mole fraction of the hydrogen sulfide
+y_co2,               mole fraction of the carbon dioxide
+y_n2,                mole fraction of the nitrogen</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_pseudocritical_temperature_K">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pseudocritical_temperature_K</code><span class="sig-paren">(</span><em class="sig-param">gamma_gas</em>, <em class="sig-param">y_h2s=0.0</em>, <em class="sig-param">y_co2=0.0</em>, <em class="sig-param">y_n2=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pseudocritical_temperature_K" title="Ссылка на это определение">¶</a></dt>
+<dd><p>»
+correlation for pseudocritical temperature taking into account the presense of non-hydrocarbon gases
+ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for
+Naturally Occurring Petroleum Gases.” Gas Reservoir Engineering. Reprint Series. Richardson,
+TX: SPE. Vol. 52 (1999) 186–200</p>
+<p>return pseudocritical temperature, K
+gamma_gas,           specific gas density (by air)
+tc_h2s_K,            critical temperature for hydrogen sulfide, K
+tc_co2_K,            critical temperature for carbon dioxide, K
+tc_n2_K,             critical temperature for nitrogen, K
+pc_h2s_MPaa,         critical pressure for hydrogen sulfide, MPaa
+pc_co2_MPaa,         critical pressure for carbon dioxide, MPaa
+pc_n2_MPaa,          critical pressure for nitrogen, MPaa
+y_h2s,               mole fraction of the hydrogen sulfide
+y_co2,               mole fraction of the carbon dioxide
+y_n2,                mole fraction of the nitrogen</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_rs_Standing_m3m3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_rs_Standing_m3m3</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa=0</em>, <em class="sig-param">rsb_m3m3=0</em>, <em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">t_K=350</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_rs_Standing_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Gas-oil ratio calculation inverse of Standing (1947) correlation for bubble point pressure</p>
+<p>ref1 «A Pressure-Volume-Temperature Correlation for Mixtures of California Oil and Gases»,
+M.B. Standing, Drill. &amp; Prod. Prac., API, 1947.</p>
+<p>ref2  «Стандарт компании Юкос. Физические свойства нефти. Методы расчета.» Афанасьев В.Ю., Хасанов М.М. и др. 2002 г
+может считать в случае если нет давления насыщения и газосодержания при давлении насыщения, корреляция не точная
+return gas-oil ratio in m3/m3
+p_MPaa,         pressure, MPa
+gamma_oil=0.86, specific oil density (by water)
+gamma_gas=0.6,  specific gas density (by air)
+t_K=350,        temperature, K
+pb_MPaa=0,      buble point pressure, MPa
+rsb_m3m3=0,     gas-oil ratio at the bubble point pressure, m3/m3</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_rs_Velarde_m3m3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_rs_Velarde_m3m3</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa=10</em>, <em class="sig-param">rsb_m3m3=100</em>, <em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">t_K=350</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_rs_Velarde_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Solution Gas-oil ratio calculation according to Velarde McCain (1999) correlation</p>
+<p>ref1 «Correlation of Black Oil Properties at Pressures Below Bubblepoint Pressure—A New Approach»,
+J. VELARDE, T.A. BLASINGAME Texas A&amp;M University, W.D. MCCAIN, JR. S.A. Holditch &amp; Associates, Inc 1999</p>
+<p>return gas-oil ratio in m3/m3
+p_MPaa,         pressure, MPaa
+gamma_oil=0.86, specific oil density (by water)
+gamma_gas=0.6,  specific gas density (by air)
+t_K=350,        temperature, K
+pb_MPaa=10,     buble point pressure, MPaa
+rsb_m3m3=100,   gas-oil ratio at the bublepoint pressure, m3/m3</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_rsb_Mccain_m3m3">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_rsb_Mccain_m3m3</code><span class="sig-paren">(</span><em class="sig-param">rsp_m3m3</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">psp_MPaa=0</em>, <em class="sig-param">tsp_K=0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_rsb_Mccain_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Solution Gas-oil ratio at bubble point pressure calculation according to McCain (2002) correlation
+taking into account the gas losses at separator and stock tank</p>
+<p>ref1 «Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities»,
+J. VELARDE, W.D. MCCAIN, 2002</p>
+<p>return solution gas-oil ratio at bubble point pressure, rsb in m3/m3
+часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
+rsp_m3m3,             separator producing gas-oil ratio, m3m3
+gamma_oil,            specific oil density(by water)
+psp_MPaa = 0,         pressure in separator, MPaa
+tsp_K = 0,            temperature in separator, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_saturatedoilviscosity_Beggs_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_saturatedoilviscosity_Beggs_cP</code><span class="sig-paren">(</span><em class="sig-param">deadoilviscosity_cP</em>, <em class="sig-param">rs_m3m3</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_saturatedoilviscosity_Beggs_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Correlation for oil viscosity for pressure below bubble point
+ref1 Beggs, H.D. and Robinson, J.R. “Estimating the Viscosity of Crude Oil Systems.”
+Journal of Petroleum Technology. Vol. 27, No. 9 (1975)</p>
+<p>return oil viscosity,cP
+deadoilviscosity_cP,           dead oil viscosity,cP
+rs_m3m3,                       solution gas-oil ratio, m3m3</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_surface_tension_go_Abdul_Majeed_Nm">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_surface_tension_go_Abdul_Majeed_Nm</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">rs_m3m3</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_surface_tension_go_Abdul_Majeed_Nm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Корреляция Абдул-Маджида (2000 г.) для поверхностного натяжения нефти, насыщенной газом
+Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
+:param t_K: температура, градусы Кельвина
+:param gamma_oil: относительная плотность нефти
+:param rs_m3m3: газосодержание, м3 / м3
+:return: поверхностное натяжение на границе нефть-газ, Н / м</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_surface_tension_go_Baker_Swerdloff_Nm">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_surface_tension_go_Baker_Swerdloff_Nm</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">p_MPa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_surface_tension_go_Baker_Swerdloff_Nm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Корреляция Бэйкера и Свердлоффа (1955 г.) для поверхностного натяжения нефти, насыщенной газом
+Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
+:param t_K: температура, градусы Кельвина
+:param gamma_oil: относительная плотность нефти
+:param p_MPa: давление, МПа
+:return: поверхностное натяжения на границе нефть-газ в Н /м</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_surface_tension_gw_Sutton_Nm">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_surface_tension_gw_Sutton_Nm</code><span class="sig-paren">(</span><em class="sig-param">rho_water_kgm3</em>, <em class="sig-param">rho_gas_kgm3</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_surface_tension_gw_Sutton_Nm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Корреляция Саттона для поверхностного натяжения на границе вода-газ
+:param rho_water_kgm3: плотность воды кг / м3
+:param rho_gas_kgm3:  плотность газа кг / м3
+:param t_c: температура в С
+:return: поверхностное натяжение на границе вода-газ, Н / м</p>
+<p>ref 1 Pereira L. et al. Interfacial tension of reservoir fluids: an integrated experimental
+and modelling investigation : дис. – Heriot-Watt University, 2016. page 41</p>
+<p>ref2 Ling K. et al. A new correlation to calculate oil-water interfacial tension
+//SPE Kuwait International Petroleum Conference and Exhibition. – Society of Petroleum Engineers, 2012.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_gas_methane_WmK">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_thermal_conductivity_gas_methane_WmK</code><span class="sig-paren">(</span><em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_gas_methane_WmK" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Данная функкия является линейным приближением табличных значений при 1 бар
+требует корректировки, является временной затычкой, взята от безысходности
+:param t_c: температура в С
+:return: теплопроводность в Вт / м К</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil thermal conductivity Abdul-Seoud and Moharam correlation
+:param gamma_oil: specific oil density(by water)
+:param t_c: temperature in C
+:return: thermal conductivity in SI - wt / m K</p>
+<p>ref1 Tovar L. P. et al. Overview and computational approach for studying the physicochemical characterization
+of high-boiling-point petroleum fractions (350 C+) //
+Oil &amp; Gas Science and Technology–Revue d’IFP Energies nouvelles. – 2012. – Т. 67. – №. 3. – С. 451-477.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_oil_Cragoe_WmK">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_thermal_conductivity_oil_Cragoe_WmK</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_oil_Cragoe_WmK" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil thermal conductivity Cragoe correlation for 273 &lt; T &lt; 423 K
+:param gamma_oil: specific oil density(by water)
+:param t_c: temperature in C
+:return: thermal conductivity in SI - wt / m K</p>
+<p>ref1 Das D. K., Nerella S., Kulkarni D. Thermal properties of petroleum and gas-to-liquid products //
+Petroleum science and technology. – 2007. – Т. 25. – №. 4. – С. 415-425.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_oil_Smith_WmK">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_thermal_conductivity_oil_Smith_WmK</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_oil_Smith_WmK" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Oil thermal conductivity Smith correlation for 273 &lt; T &lt; 423 K
+:param gamma_oil: specific oil density(by water)
+:param t_c: temperature in C
+:return: thermal conductivity in SI - wt / m K</p>
+<p>ref1 Das D. K., Nerella S., Kulkarni D. Thermal properties of petroleum and gas-to-liquid products //
+Petroleum science and technology. – 2007. – Т. 25. – №. 4. – С. 415-425.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_water_IAPWS_WmC">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_thermal_conductivity_water_IAPWS_WmC</code><span class="sig-paren">(</span><em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_thermal_conductivity_water_IAPWS_WmC" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Теплопроводность дистилированной воды в диапазоне 5 &lt; T &lt; 95 C при 1 бар
+выше диапазона - линейная экстраполяция
+:param t_c: температура в С
+:return: теплопроводность в Вт / м С</p>
+<p>ref1 <a class="reference external" href="https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/">https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_thermal_expansion_coefficient_water_IAPWS_1C">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_thermal_expansion_coefficient_water_IAPWS_1C</code><span class="sig-paren">(</span><em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_thermal_expansion_coefficient_water_IAPWS_1C" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Коэффициент термического расширения дистилированной воды в диапазоне 5 &lt; T &lt; 95 C при 1 бар
+выше диапазона - линейная экстраполяция
+:param t_c: температура в С
+:return: Коэффициент термического расширения в 1 / с</p>
+<p>ref1 <a class="reference external" href="https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/">https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_undersaturatedoilviscosity_Petrovsky_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_undersaturatedoilviscosity_Petrovsky_cP</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa</em>, <em class="sig-param">bubblepointviscosity_cP</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_undersaturatedoilviscosity_Petrovsky_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>viscosity correlation for pressure above bubble point
+ref 1 Petrosky, G.E. and Farshad, F.F. “Viscosity Correlations for Gulf of Mexico Crude
+Oils.” Paper SPE 29468. Presented at the SPE Production Operations Symposium,
+Oklahoma City (1995)</p>
+<p>return oil viscosity,cP
+p_MPaa,                      pressure, MPaa
+pb_MPaa,                     bubble point pressure, MPaa
+bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_undersaturatedoilviscosity_VB_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_undersaturatedoilviscosity_VB_cP</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">pb_MPaa</em>, <em class="sig-param">bubblepointviscosity_cP</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_undersaturatedoilviscosity_VB_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>»
+viscosity correlation for pressure above bubble point
+ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
+J Pet Technol 32 (6): 968-970. SPE-6719-PA</p>
+<p>return oil viscosity,cP
+p_MPaa,                      pressure, MPaa
+pb_MPaa,                     bubble point pressure, MPaa
+bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_viscosity_brine_MaoDuan_cP">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_viscosity_brine_MaoDuan_cP</code><span class="sig-paren">(</span><em class="sig-param">t_K</em>, <em class="sig-param">p_MPaa</em>, <em class="sig-param">s_ppm</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_viscosity_brine_MaoDuan_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Mao-Duan correlation for brine(water) viscosity (2009)</p>
+<p>ref 1 Mao, S., and Duan, Z. “The Viscosity of Aqueous Alkali-Chloride Solutions up to
+623 K, 1,000 bar, and High Ionic Strength.” International Journal of Thermophysics.
+Vol. 30 (2009) 1,510–1,523.
+ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011</p>
+<p>корреляция позволяет найти вязкость соленой воды</p>
+<p>return density, kg/m3
+t_K,                            temperature, K
+p_MPaa,                         pressure, MPaa
+s_ppm,                          salinity, ppm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_weightedcompressibility_oil_Mccain_1MPa_greater">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_weightedcompressibility_oil_Mccain_1MPa_greater</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">pb_MPa</em>, <em class="sig-param">p_MPa</em>, <em class="sig-param">rsb_m3m3</em>, <em class="sig-param">tres_K</em>, <em class="sig-param">gamma_gassp=0</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_weightedcompressibility_oil_Mccain_1MPa_greater" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_zfactor_BrillBeggs">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_zfactor_BrillBeggs</code><span class="sig-paren">(</span><em class="sig-param">ppr</em>, <em class="sig-param">tpr</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_zfactor_BrillBeggs" title="Ссылка на это определение">¶</a></dt>
+<dd><p>correlation for z-factor according Beggs &amp; Brill correlation (1977)</p>
+<p>используется для приближения функции дранчука</p>
+<p>Можно использовать при tpr&lt;=2 и ppr&lt;=4
+при tpr &lt;== 1.5 ppr&lt;=10</p>
+<p>return z-factor
+ppr             preudoreduced pressure
+tpr             pseudoreduced temperature</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_zfactor_DAK">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_zfactor_DAK</code><span class="sig-paren">(</span><em class="sig-param">p_MPaa</em>, <em class="sig-param">t_K</em>, <em class="sig-param">ppc_MPa</em>, <em class="sig-param">tpc_K</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_zfactor_DAK" title="Ссылка на это определение">¶</a></dt>
+<dd><p>correlation for z-factor
+ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
+Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.</p>
+<p>range of applicability is (0.2&lt;=ppr&lt;30 and 1.0&lt;tpr&lt;=3.0) and also ppr &lt; 1.0 for 0.7 &lt; tpr &lt; 1.0</p>
+<p>return z-factor
+p_MPaa,                      pressure, MPaa
+t_K,                         temperature, K
+ppc_MPa                      pseudocritical pressure, MPa
+tpc_K                        pseudocritical temperature, K</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uPVT.PVT_correlations.unf_zfactor_DAK_ppr">
+<code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_zfactor_DAK_ppr</code><span class="sig-paren">(</span><em class="sig-param">ppr</em>, <em class="sig-param">tpr</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_zfactor_DAK_ppr" title="Ссылка на это определение">¶</a></dt>
+<dd><p>correlation for z-factor
+ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
+Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.</p>
+<p>range of applicability is (0.2&lt;=ppr&lt;30 and 1.0&lt;tpr&lt;=3.0) and also ppr &lt; 1.0 for 0.7 &lt; tpr &lt; 1.0</p>
+<p>return z-factor
+p_MPaa,                      pressure, MPaa
+t_K,                         temperature, K
+ppc_MPa                      pseudocritical pressure, MPa
+tpc_K                        pseudocritical temperature, K</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-uniflocpy.uPVT.PVT_fluids">
+<span id="upvt-pvt-fluids-module"></span><h2>uPVT.PVT_fluids module<a class="headerlink" href="#module-uniflocpy.uPVT.PVT_fluids" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Created on Mon Sept 04 2017</p>
+<p>&#64;author: rnt</p>
+<p>UniflocPy</p>
+<p>класс для расчета uPVT свойств углеводородных флюидов и воды</p>
+<dl class="class">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uPVT.PVT_fluids.</code><code class="sig-name descname">FluidBlackOil</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">gamma_wat=1.0</em>, <em class="sig-param">rsb_m3m3=200.0</em>, <em class="sig-param">gamma_gassp=0</em>, <em class="sig-param">y_h2s=0</em>, <em class="sig-param">y_co2=0</em>, <em class="sig-param">y_n2=0</em>, <em class="sig-param">s_ppm=0</em>, <em class="sig-param">par_wat=0</em>, <em class="sig-param">pbcal_bar=-1.0</em>, <em class="sig-param">tpb_C=80</em>, <em class="sig-param">bobcal_m3m3=1.2</em>, <em class="sig-param">muobcal_cP=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<p>Описание смеси нефти, газа и воды по модели нелетучей нефти</p>
+<p>Описание флюида - скважинной продукции
+Класс обеспечивает расчет свойств флюида при заданных термобарических условиях
+по одному набору корреляционных зависимостей
+классы потомки могут менять набор корреляционных зависимостей для уточнения расчета</p>
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bg_m3m3">
+<em class="property">property </em><code class="sig-name descname">bg_m3m3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bg_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas formation volume factor at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bo_m3m3">
+<em class="property">property </em><code class="sig-name descname">bo_m3m3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bo_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil formation volume factor at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bw_m3m3">
+<em class="property">property </em><code class="sig-name descname">bw_m3m3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bw_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water formation volume factor at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.calc">
+<code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.calc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>recalculate all parameters according to some pressure and temperature</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.compr_gas_1bar">
+<em class="property">property </em><code class="sig-name descname">compr_gas_1bar</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.compr_gas_1bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas compressibility at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.compr_oil_1bar">
+<em class="property">property </em><code class="sig-name descname">compr_oil_1bar</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.compr_oil_1bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil compressibility at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.compr_wat_1bar">
+<em class="property">property </em><code class="sig-name descname">compr_wat_1bar</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.compr_wat_1bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water compressibility at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.heatcap_gas_jkgc">
+<em class="property">property </em><code class="sig-name descname">heatcap_gas_jkgc</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.heatcap_gas_jkgc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas heat capacity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.heatcap_oil_jkgc">
+<em class="property">property </em><code class="sig-name descname">heatcap_oil_jkgc</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.heatcap_oil_jkgc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil heat capacity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.heatcap_wat_jkgc">
+<em class="property">property </em><code class="sig-name descname">heatcap_wat_jkgc</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.heatcap_wat_jkgc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water heat capacity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.mu_gas_cP">
+<em class="property">property </em><code class="sig-name descname">mu_gas_cP</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.mu_gas_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas viscosity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.mu_oil_cP">
+<em class="property">property </em><code class="sig-name descname">mu_oil_cP</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.mu_oil_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil viscosity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.mu_wat_cP">
+<em class="property">property </em><code class="sig-name descname">mu_wat_cP</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.mu_wat_cP" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water viscosity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.pb_bar">
+<em class="property">property </em><code class="sig-name descname">pb_bar</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.pb_bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return bubble point pressure an bar absolute</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_gas_kgm3">
+<em class="property">property </em><code class="sig-name descname">rho_gas_kgm3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_gas_kgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas density at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_gas_sckgm3">
+<em class="property">property </em><code class="sig-name descname">rho_gas_sckgm3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_gas_sckgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>component density at standard condition, read only</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_oil_kgm3">
+<em class="property">property </em><code class="sig-name descname">rho_oil_kgm3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_oil_kgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil density at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_oil_stkgm3">
+<em class="property">property </em><code class="sig-name descname">rho_oil_stkgm3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_oil_stkgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil density at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_wat_kgm3">
+<em class="property">property </em><code class="sig-name descname">rho_wat_kgm3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rho_wat_kgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water density at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rs_m3m3">
+<em class="property">property </em><code class="sig-name descname">rs_m3m3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rs_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas oil solution ratio at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rsw_m3m3">
+<em class="property">property </em><code class="sig-name descname">rsw_m3m3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.rsw_m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas water solution ratio at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.sigma_oil_gas_Nm">
+<em class="property">property </em><code class="sig-name descname">sigma_oil_gas_Nm</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.sigma_oil_gas_Nm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil surface tension  at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.sigma_wat_gas_Nm">
+<em class="property">property </em><code class="sig-name descname">sigma_wat_gas_Nm</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.sigma_wat_gas_Nm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water surface tension at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_conduct_gas_wmk">
+<em class="property">property </em><code class="sig-name descname">thermal_conduct_gas_wmk</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_conduct_gas_wmk" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas thermal conductivity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_conduct_oil_wmk">
+<em class="property">property </em><code class="sig-name descname">thermal_conduct_oil_wmk</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_conduct_oil_wmk" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return oil thermal conductivity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_conduct_wat_wmk">
+<em class="property">property </em><code class="sig-name descname">thermal_conduct_wat_wmk</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_conduct_wat_wmk" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water thermal conductivity at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_expansion_wat_1c">
+<em class="property">property </em><code class="sig-name descname">thermal_expansion_wat_1c</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.thermal_expansion_wat_1c" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return water thermal expansion coefficient at working condition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.z">
+<em class="property">property </em><code class="sig-name descname">z</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.z" title="Ссылка на это определение">¶</a></dt>
+<dd><p>return gas z factor (compressibility) at working condition</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidFlow">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uPVT.PVT_fluids.</code><code class="sig-name descname">FluidFlow</code><span class="sig-paren">(</span><em class="sig-param">fluid=&lt;uniflocpy.uPVT.PVT_fluids.FluidStanding object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidFlow" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<p>класс для описания потока флюида</p>
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidFlow.calc">
+<code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidFlow.calc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>расчет свойств потока для заданных термобарических условий</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidMcCain">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uPVT.PVT_fluids.</code><code class="sig-name descname">FluidMcCain</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">gamma_wat=1.0</em>, <em class="sig-param">rsb_m3m3=200.0</em>, <em class="sig-param">gamma_gassp=0</em>, <em class="sig-param">y_h2s=0</em>, <em class="sig-param">y_co2=0</em>, <em class="sig-param">y_n2=0</em>, <em class="sig-param">s_ppm=0</em>, <em class="sig-param">par_wat=0</em>, <em class="sig-param">pbcal_bar=-1.0</em>, <em class="sig-param">tpb_C=80</em>, <em class="sig-param">bobcal_m3m3=1.2</em>, <em class="sig-param">muobcal_cP=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidMcCain" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <a class="reference internal" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil" title="uniflocpy.uPVT.PVT_fluids.FluidBlackOil"><code class="xref py py-class docutils literal notranslate"><span class="pre">uniflocpy.uPVT.PVT_fluids.FluidBlackOil</span></code></a></p>
+</div></blockquote>
+<p>класс, реализующий расчет свойств нефти с использованием
+набора корреляций на основе McCain</p>
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidMcCain.calc">
+<code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidMcCain.calc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет свойств нефти на основе набора корреляций McCain</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidStanding">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uPVT.PVT_fluids.</code><code class="sig-name descname">FluidStanding</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">gamma_wat=1.0</em>, <em class="sig-param">rsb_m3m3=200.0</em>, <em class="sig-param">gamma_gassp=0</em>, <em class="sig-param">y_h2s=0</em>, <em class="sig-param">y_co2=0</em>, <em class="sig-param">y_n2=0</em>, <em class="sig-param">s_ppm=0</em>, <em class="sig-param">par_wat=0</em>, <em class="sig-param">pbcal_bar=-1.0</em>, <em class="sig-param">tpb_C=80</em>, <em class="sig-param">bobcal_m3m3=1.2</em>, <em class="sig-param">muobcal_cP=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidStanding" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <a class="reference internal" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil" title="uniflocpy.uPVT.PVT_fluids.FluidBlackOil"><code class="xref py py-class docutils literal notranslate"><span class="pre">uniflocpy.uPVT.PVT_fluids.FluidBlackOil</span></code></a></p>
+</div></blockquote>
+<p>класс, реализующий расчет свойств нефти с использованием
+набора корреляций на основе Standing</p>
+<dl class="method">
+<dt id="uniflocpy.uPVT.PVT_fluids.FluidStanding.calc">
+<code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidStanding.calc" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет свойств нефти на основе набора корреляций Standing</p>
+</dd></dl>
+
+</dd></dl>
+
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">unifloc</a></h1>
+
+
+
+
+
+
+
+
+<h3>Навигация</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">uPVT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uPVT.PVT_correlations">uPVT.PVT_correlations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uPVT.PVT_fluids">uPVT.PVT_fluids module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">This is a Title2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">This is a Title</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="предыдущая глава">Welcome to unifloc’s documentation!</a></li>
+      <li>Next: <a href="test.html" title="следующая глава">This is a Title2</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Khabibullin R.A..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/functions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

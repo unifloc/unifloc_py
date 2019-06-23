@@ -61,3 +61,4 @@ def _def_get_value(coefficient, motor_loading):
     return value
 
 # TODO как сделать unittest тут?
+

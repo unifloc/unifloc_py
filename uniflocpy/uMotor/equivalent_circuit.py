@@ -165,3 +165,4 @@ def motor_data_loading(motor_power__W, nom_power__W, nom_voltage__V, nom_slip,
         frequency__Hz, voltage__V, r_1__Om, r_2__Om, x_k__Om, moments_division)
 
     return M__Nm, cos_fi, efficient, I1__A, slip, P_2__kW
+
