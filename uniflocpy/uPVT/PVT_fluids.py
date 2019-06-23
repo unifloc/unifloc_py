@@ -441,7 +441,7 @@ class FluidFlow:
         self.Joule_Thompson_coef_cpa = None
         self.dvdp_msecpam = None
 
-    def calc_Joule_Thompson_coef_cpa(self):  #TODO проверить данный простой расчет
+    def __calc_Joule_Thompson_coef_cpa__(self):  #TODO проверить данный простой расчет
 
         delta_t_c = 0.001
         t2_c = self.t_c + delta_t_c
@@ -475,7 +475,7 @@ class FluidFlow:
 
         return mix_JT_coef_heatcap / self.heatcapn_jkgc
 
-    def calc_velosities(self, p_bar, t_c):
+    def __calc_velosities__(self, p_bar, t_c):
         self.fl.calc(p_bar, t_c)
 
         self.Ap_m2 = math.pi * self.d_m ** 2 / 4
@@ -500,17 +500,17 @@ class FluidFlow:
 
         self.vm_msec = self.vsl_msec + self.vsg_msec
 
-    def calc_dvdp_msecpam(self):
+    def __calc_dvdp_msecpam__(self):
 
         delta_p_bar = uc.Pa2bar(10)
         p2_bar = self.p_bar + delta_p_bar
         p1_bar = self.p_bar - delta_p_bar
-        self.calc_velosities(p2_bar, self.t_c)
+        self.__calc_velosities__(p2_bar, self.t_c)
         v2_msec = self.vm_msec
-        self.calc_velosities(p1_bar, self.t_c)
+        self.__calc_velosities__(p1_bar, self.t_c)
         v1_msec = self.vm_msec
 
-        self.calc_velosities(self.p_bar, self.t_c)
+        self.__calc_velosities__(self.p_bar, self.t_c)
         return (v2_msec - v1_msec) / 2 / uc.bar2Pa(delta_p_bar)
 
     def calc(self, p_bar, t_c):
@@ -520,7 +520,7 @@ class FluidFlow:
 
         self.t_c = t_c
 
-        self.calc_velosities(self.p_bar, self.t_c)
+        self.__calc_velosities__(self.p_bar, self.t_c)
 
         self.liquid_content = self.qliq_m3day / (self.qliq_m3day + self.qgas_m3day)
 
@@ -561,8 +561,8 @@ class FluidFlow:
                                              (self.qwat_m3day * self.fl.rho_wat_kgm3 +
                                               self.qoil_m3day * self.fl.rho_oil_kgm3)
 
-        self.Joule_Thompson_coef_cpa = self.calc_Joule_Thompson_coef_cpa()
+        self.Joule_Thompson_coef_cpa = self.__calc_Joule_Thompson_coef_cpa__()
 
-        self.dvdp_msecpam = self.calc_dvdp_msecpam()
+        self.dvdp_msecpam = self.__calc_dvdp_msecpam__()
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда
