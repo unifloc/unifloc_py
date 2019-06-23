@@ -479,16 +479,20 @@ class Hasan_Kabir_cor():
             self.result_an_fsolve = fsolve(self.calc_annulus, self.delta_t_an_init_c)
 
         self.relaxation_parametr = 2 * uc.pi / self.heatcapn_jkgc / self.mass_flowraten_kgsec * \
-                                   (self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c /
+                                   (self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c * self.thermal_conduct_earth_wmc/
                                     (self.thermal_conduct_earth_wmc +
-                                     self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c))
+                                     self.r_tube_out_m * self.overall_heat_transfer_coef_wm2c * self.heat_dissipation_to_earth))
+
+        #self.heat_flowrate = - self.relaxation_parametr * self.mass_flowraten_kgsec * \
+        #                     (self.t_c - self.t_earth_init_c)
 
         self.heat_flowrate = - self.relaxation_parametr * self.mass_flowraten_kgsec * \
-                             (self.t_c - self.t_earth_init_c)
+                             self.heatcapn_jkgc * (self.t_c - self.t_earth_init_c)
 
-        self.part_grad_JT = self.Joule_Thompson_coef_cpa * self.grad_p_pam
+        self.part_grad_JT = - self.Joule_Thompson_coef_cpa * self.grad_p_pam
         #self.part_grad_flow = 1 / self.heatcapn_jkgc * self.heat_flowrate / self.mass_flowraten_kgsec
-        self.part_grad_flow = (self.t_c - self.t_earth_init_c) * self.relaxation_parametr
+        #self.part_grad_flow = (self.t_c - self.t_earth_init_c) * self.relaxation_parametr
+        self.part_grad_flow = - 1 / self.heatcapn_jkgc * self.heat_flowrate / self.mass_flowraten_kgsec
         self.part_grad_potential = 1 / self.heatcapn_jkgc * uc.g * math.sin(self.angle_rad)
         self.part_grad_kinetic = 1 / self.heatcapn_jkgc * self.vm_msec * self.grad_v_msecm
 
