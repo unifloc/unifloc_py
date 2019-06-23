@@ -409,6 +409,10 @@ class Hasan_Kabir_cor():
 
         self.heat_flowrate = None
 
+        self.part_grad_JT = None
+        self.part_grad_flow = None
+        self.part_grad_kinetic = None
+        self.part_grad_potential = None
         self.grad_t_cm = None
 
         self.heat_transfer_rate = None
@@ -482,10 +486,17 @@ class Hasan_Kabir_cor():
         self.heat_flowrate = - self.relaxation_parametr * self.mass_flowraten_kgsec * \
                              (self.t_c - self.t_earth_init_c)
 
-        self.grad_t_cm = self.Joule_Thompson_coef_cpa * self.grad_p_pam + 1 / self.heatcapn_jkgc * \
+        self.part_grad_JT = self.Joule_Thompson_coef_cpa * self.grad_p_pam
+        #self.part_grad_flow = 1 / self.heatcapn_jkgc * self.heat_flowrate / self.mass_flowraten_kgsec
+        self.part_grad_flow = (self.t_c - self.t_earth_init_c) * self.relaxation_parametr
+        self.part_grad_potential = 1 / self.heatcapn_jkgc * uc.g * math.sin(self.angle_rad)
+        self.part_grad_kinetic = 1 / self.heatcapn_jkgc * self.vm_msec * self.grad_v_msecm
+
+        """self.grad_t_cm = self.Joule_Thompson_coef_cpa * self.grad_p_pam + 1 / self.heatcapn_jkgc * \
                          (self.heat_flowrate / self.mass_flowraten_kgsec +
                           uc.g * math.sin(self.angle_rad) -
-                          self.vm_msec * self.grad_v_msecm)
+                          self.vm_msec * self.grad_v_msecm)"""
+        self.grad_t_cm = self.part_grad_JT + self.part_grad_flow + self.part_grad_potential + self.part_grad_kinetic
 
         return float(self.grad_t_cm)
 
