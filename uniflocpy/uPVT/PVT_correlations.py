@@ -513,13 +513,15 @@ def unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa)
 
 def unf_pb_Glaso_MPaa(rs_m3m3, t_K, gamma_oil, gamma_gas):
     """
-    Glaso correlation(1980) for bubble point pressure
-    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     :param rs_m3m3: gas-oil ratio in m3/m3
     :param t_K: temperature in K
     :param gamma_oil: oil density (by water)
     :param gamma_gas: gas density (by air)
     :return: bubble point pressure im MPa abs
+
+    Glaso correlation(1980) for bubble point pressure
+
+    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     """
     # TODO также необходимо дополнить код, поправками на неув составляющую в нефти, в статье есть
     api = uc.gamma_oil2api(gamma_oil)
@@ -532,13 +534,15 @@ def unf_pb_Glaso_MPaa(rs_m3m3, t_K, gamma_oil, gamma_gas):
 
 def unf_fvf_Glaso_m3m3_saturated(rs_m3m3, t_K, gamma_oil, gamma_gas):
     """
-    Glaso correlation(1980) for formation volume factor at bubble point pressure
-    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     :param rs_m3m3: gas-oil ratio in m3/m3
     :param t_K: temperature in K
     :param gamma_oil: oil density (by water)
     :param gamma_gas: gas density (by air)
     :return: formation volume factor at bubble point pressure in m3/m3
+
+    Glaso correlation(1980) for formation volume factor at bubble point pressure
+
+    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     """
     t_F = uc.k2f(t_K)
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
@@ -549,14 +553,16 @@ def unf_fvf_Glaso_m3m3_saturated(rs_m3m3, t_K, gamma_oil, gamma_gas):
 
 def unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa):
     """
-    Glaso correlation(1980) for total formation volume factor below bubble point pressure
-    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     :param rs_m3m3: gas-oil ratio in m3/m3
     :param t_K: temperature in K
     :param gamma_oil: oil density (by water)
     :param gamma_gas: gas density (by air)
     :param p_MPaa: pressure in MPaa
     :return: total formation volume factor below bubble point pressure in m3/m3
+
+    Glaso correlation(1980) for total formation volume factor below bubble point pressure
+
+    ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     """
     t_F = uc.k2f(t_K)
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
@@ -590,10 +596,11 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
 
 def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
     """
-    Oil heat capacity in SI. Gambill correlation
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: heat capacity in SI - JkgC
+
+    Oil heat capacity in SI. Gambill correlation
 
     ref1 Book: Brill J. P., Mukherjee H. K. Multiphase flow in wells. –
         Society of Petroleum Engineers, 1999. – Т. 17. in Page 122
@@ -606,10 +613,11 @@ def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
 
 def unf_heat_capacity_oil_Wes_Wright_JkgC(gamma_oil, t_c):
     """
-    Oil heat capacity in SI. Wes Wright method
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: heat capacity in SI - JkgC
+
+    Oil heat capacity in SI. Wes Wright method
 
     ref1 https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8
     """

@@ -12,8 +12,10 @@ Welcome to unifloc's documentation!
 	
    uMotor
    uPVT
-   test
-   example
+   uMultiphaseFlow
+   uTemperature
+   uTools
+   uWell
    
 
 Indices and tables

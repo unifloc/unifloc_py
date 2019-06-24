@@ -15,7 +15,7 @@
     <script type="text/javascript" src="_static/translations.js"></script>
     <link rel="index" title="Алфавитный указатель" href="genindex.html" />
     <link rel="search" title="Поиск" href="search.html" />
-    <link rel="next" title="This is a Title2" href="test.html" />
+    <link rel="next" title="uMultiphaseFlow" href="uMultiphaseFlow.html" />
     <link rel="prev" title="uMotor" href="uMotor.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -186,26 +186,42 @@ gamma_oil,           specific oil density (by water)</p>
 <dl class="function">
 <dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_below">
 <code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_Glaso_m3m3_below</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em>, <em class="sig-param">p_MPaa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_below" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Glaso correlation(1980) for total formation volume factor below bubble point pressure
-ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
-:param rs_m3m3: gas-oil ratio in m3/m3
-:param t_K: temperature in K
-:param gamma_oil: oil density (by water)
-:param gamma_gas: gas density (by air)
-:param p_MPaa: pressure in MPaa
-:return: total formation volume factor below bubble point pressure in m3/m3</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rs_m3m3</strong> – gas-oil ratio in m3/m3</p></li>
+<li><p><strong>t_K</strong> – temperature in K</p></li>
+<li><p><strong>gamma_oil</strong> – oil density (by water)</p></li>
+<li><p><strong>gamma_gas</strong> – gas density (by air)</p></li>
+<li><p><strong>p_MPaa</strong> – pressure in MPaa</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>total formation volume factor below bubble point pressure in m3/m3</p>
+</dd>
+</dl>
+<p>Glaso correlation(1980) for total formation volume factor below bubble point pressure</p>
+<p>ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_saturated">
 <code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_fvf_Glaso_m3m3_saturated</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_fvf_Glaso_m3m3_saturated" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Glaso correlation(1980) for formation volume factor at bubble point pressure
-ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
-:param rs_m3m3: gas-oil ratio in m3/m3
-:param t_K: temperature in K
-:param gamma_oil: oil density (by water)
-:param gamma_gas: gas density (by air)
-:return: formation volume factor at bubble point pressure in m3/m3</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rs_m3m3</strong> – gas-oil ratio in m3/m3</p></li>
+<li><p><strong>t_K</strong> – temperature in K</p></li>
+<li><p><strong>gamma_oil</strong> – oil density (by water)</p></li>
+<li><p><strong>gamma_gas</strong> – gas density (by air)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>formation volume factor at bubble point pressure in m3/m3</p>
+</dd>
+</dl>
+<p>Glaso correlation(1980) for formation volume factor at bubble point pressure</p>
+<p>ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980</p>
 </dd></dl>
 
 <dl class="function">
@@ -355,10 +371,18 @@ variation-of-natural-gas-heat-capacity-with-temperature-pressure-and-relative-de
 <dl class="function">
 <dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Gambill_JkgC">
 <code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_oil_Gambill_JkgC</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Gambill_JkgC" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Oil heat capacity in SI. Gambill correlation
-:param gamma_oil: specific oil density(by water)
-:param t_c: temperature in C
-:return: heat capacity in SI - JkgC</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma_oil</strong> – specific oil density(by water)</p></li>
+<li><p><strong>t_c</strong> – temperature in C</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>heat capacity in SI - JkgC</p>
+</dd>
+</dl>
+<p>Oil heat capacity in SI. Gambill correlation</p>
 <dl class="simple">
 <dt>ref1 Book: Brill J. P., Mukherjee H. K. Multiphase flow in wells. –</dt><dd><p>Society of Petroleum Engineers, 1999. – Т. 17. in Page 122</p>
 </dd>
@@ -368,20 +392,34 @@ variation-of-natural-gas-heat-capacity-with-temperature-pressure-and-relative-de
 <dl class="function">
 <dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Wes_Wright_JkgC">
 <code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_oil_Wes_Wright_JkgC</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_oil_Wes_Wright_JkgC" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Oil heat capacity in SI. Wes Wright method
-:param gamma_oil: specific oil density(by water)
-:param t_c: temperature in C
-:return: heat capacity in SI - JkgC</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma_oil</strong> – specific oil density(by water)</p></li>
+<li><p><strong>t_c</strong> – temperature in C</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>heat capacity in SI - JkgC</p>
+</dd>
+</dl>
+<p>Oil heat capacity in SI. Wes Wright method</p>
 <p>ref1 <a class="reference external" href="https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8">https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8</a></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_water_IAPWS_JkgC">
 <code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_heat_capacity_water_IAPWS_JkgC</code><span class="sig-paren">(</span><em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_heat_capacity_water_IAPWS_JkgC" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Теплоемкость дистилированной воды в диапазоне 5 &lt; T &lt; 95 C при 1 бар
-выше диапазона - линейная экстраполяция
-:param t_c: температура в С
-:return: теплоемкость в Дж / кг С</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>t_c</strong> – температура в С</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>теплоемкость в Дж / кг С</p>
+</dd>
+</dl>
+<p>Теплоемкость дистилированной воды в диапазоне 5 &lt; T &lt; 95 C при 1 бар
+выше диапазона - линейная экстраполяция</p>
 <p>ref1 <a class="reference external" href="https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/">https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/</a></p>
 </dd></dl>
 
@@ -412,13 +450,21 @@ t_K=350,        temperature, K</p>
 <dl class="function">
 <dt id="uniflocpy.uPVT.PVT_correlations.unf_pb_Glaso_MPaa">
 <code class="sig-prename descclassname">uniflocpy.uPVT.PVT_correlations.</code><code class="sig-name descname">unf_pb_Glaso_MPaa</code><span class="sig-paren">(</span><em class="sig-param">rs_m3m3</em>, <em class="sig-param">t_K</em>, <em class="sig-param">gamma_oil</em>, <em class="sig-param">gamma_gas</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_correlations.unf_pb_Glaso_MPaa" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Glaso correlation(1980) for bubble point pressure
-ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
-:param rs_m3m3: gas-oil ratio in m3/m3
-:param t_K: temperature in K
-:param gamma_oil: oil density (by water)
-:param gamma_gas: gas density (by air)
-:return: bubble point pressure im MPa abs</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rs_m3m3</strong> – gas-oil ratio in m3/m3</p></li>
+<li><p><strong>t_K</strong> – temperature in K</p></li>
+<li><p><strong>gamma_oil</strong> – oil density (by water)</p></li>
+<li><p><strong>gamma_gas</strong> – gas density (by air)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>bubble point pressure im MPa abs</p>
+</dd>
+</dl>
+<p>Glaso correlation(1980) for bubble point pressure</p>
+<p>ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980</p>
 </dd></dl>
 
 <dl class="function">
@@ -1034,8 +1080,10 @@ tpc_K                        pseudocritical temperature, K</p>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uPVT.PVT_fluids">uPVT.PVT_fluids module</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="test.html">This is a Title2</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example.html">This is a Title</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uMultiphaseFlow.html">uMultiphaseFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uTemperature.html">uTemperature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uTools.html">uTools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uWell.html">uWell</a></li>
 </ul>
 
 <div class="relations">
@@ -1043,7 +1091,7 @@ tpc_K                        pseudocritical temperature, K</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="uMotor.html" title="предыдущая глава">uMotor</a></li>
-      <li>Next: <a href="test.html" title="следующая глава">This is a Title2</a></li>
+      <li>Next: <a href="uMultiphaseFlow.html" title="следующая глава">uMultiphaseFlow</a></li>
   </ul></li>
 </ul>
 </div>
