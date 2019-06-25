@@ -4,6 +4,8 @@ Created on Sat May  5 13:59:06 2018
 
 @author: Rinat Khabibullin
          Alexey Vodopyan
+
+Модуль содержит корреляции, необходимые для вычисления PVT свойств нефти, газа и воды.
 """
 import numpy as np
 import unittest
@@ -15,19 +17,20 @@ import scipy.optimize as opt
 
 def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
-    bubble point pressure calculation according to Standing (1947) correlation
+        bubble point pressure calculation according to Standing (1947) correlation
+
+    :param rsb_m3m3: solution ration at bubble point, must be given, m3/m3
+    :param gamma_oil: specific oil density (by water)
+    :param gamma_gas: specific gas density (by air)
+    :param t_K: temperature, K
+    :return: bubble point pressure abs in MPa
 
     ref1 "A Pressure-Volume-Temperature Correlation for Mixtures of California Oil and Gases",
     M.B. Standing, Drill. & Prod. Prac., API, 1947.
 
     ref2  "Стандарт компании Юкос. Физические свойства нефти. Методы расчета." Афанасьев В.Ю., Хасанов М.М. и др. 2002 г
-
-    return bubble point pressure abs in MPa
-    rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
-    gamma_oil=0.86, specific gas density (by water)
-    gamma_gas=0.6,  specific gas density (by air)
-    t_K=350,        temperature, K
     """
+
     min_rsb = 1.8
     rsb_old = rsb_m3m3
     if rsb_m3m3 < min_rsb:
@@ -44,16 +47,16 @@ def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
 
 def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
-    bubble point pressure calculation according to Valko McCain (2002) correlation
+        bubble point pressure calculation according to Valko McCain (2002) correlation
+
+    :param rsb_m3m3: solution ration at bubble point, must be given, m3/m3
+    :param gamma_oil: specific oil density (by water)
+    :param gamma_gas: specific gas density (by air)
+    :param t_K: temperature, K
+    :return: bubble point pressure abs in MPa
 
     ref SPE  "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities"
-    W. D. McCain Jr.,P.P. Valko, 
-    
-    return bubble point pressure abs in MPa
-    rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
-    gamma_oil=0.86, specific oil density (by water)
-    gamma_gas=0.6,  specific gas density (by air)
-    t_K=350,        temperature, K
+    W. D. McCain Jr.,P.P. Valko,
     """
 
     min_rsb = 1.8
@@ -87,41 +90,48 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
 
     return pb_MPaa
 
-
+"""
 def unf_pb_AlMarhoun_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
-    """
-    bubble point pressure calculation according to Al-Marhoun (1985) correlation
+    
+    pass
+
+        bubble point pressure calculation according to Al-Marhoun (1985) correlation
 
     Middle-East oil
 
-    ref1 PYT Correlations for Middle East Crude Oils, Muhammad All AI.Marhoun, Journal of Petroleum Technology. May 1988
+    :param rsb_m3m3: solution ration at bubble point, must be given, m3/m3
+    :param gamma_oil: specific oil density (by water)
+    :param gamma_gas: specific gas density (by air)
+    :param t_K: temperature, K
+    :return: bubble point pressure abs in MPa
 
-    return bubble point pressure abs in MPa
-    rsb_m3m3,       solution ration at bubble point, must be given, m3/m3
-    gamma_oil=0.86, specific gas density (by water)
-    gamma_gas=0.6,  specific gas density (by air)
-    t_K=350,        temperature, K
-    """
+        ref1 PYT Correlations for Middle East Crude Oils, Muhammad All AI.Marhoun, Journal of Petroleum Technology. May 1988
+
+    
+
     pass
+"""
 
 
 def unf_rs_Standing_m3m3(p_MPaa, pb_MPaa=0, rsb_m3m3=0, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
-    Gas-oil ratio calculation inverse of Standing (1947) correlation for bubble point pressure
+        Gas-oil ratio calculation inverse of Standing (1947) correlation for bubble point pressure
+
+    :param p_MPaa: pressure, MPa
+    :param pb_MPaa: buble point pressure, MPa
+    :param rsb_m3m3: gas-oil ratio at the bubble point pressure, m3/m3
+    :param gamma_oil: specific oil density (by water)
+    :param gamma_gas: specific gas density (by air)
+    :param t_K: temperature, K
+    :return: gas-oil ratio in m3/m3
 
     ref1 "A Pressure-Volume-Temperature Correlation for Mixtures of California Oil and Gases",
     M.B. Standing, Drill. & Prod. Prac., API, 1947.
 
     ref2  "Стандарт компании Юкос. Физические свойства нефти. Методы расчета." Афанасьев В.Ю., Хасанов М.М. и др. 2002 г
     может считать в случае если нет давления насыщения и газосодержания при давлении насыщения, корреляция не точная
-    return gas-oil ratio in m3/m3
-    p_MPaa,         pressure, MPa
-    gamma_oil=0.86, specific oil density (by water)
-    gamma_gas=0.6,  specific gas density (by air)
-    t_K=350,        temperature, K
-    pb_MPaa=0,      buble point pressure, MPa
-    rsb_m3m3=0,     gas-oil ratio at the bubble point pressure, m3/m3
     """
+
     if pb_MPaa == 0 or rsb_m3m3 == 0:
         # мольная доля газа
         yg = 1.225 + 0.001648 * t_K - 1.769 / gamma_oil
@@ -135,19 +145,21 @@ def unf_rs_Standing_m3m3(p_MPaa, pb_MPaa=0, rsb_m3m3=0, gamma_oil=0.86, gamma_ga
 
 def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     """
-    Solution Gas-oil ratio calculation according to Velarde McCain (1999) correlation
+        Solution Gas-oil ratio calculation according to Velarde McCain (1999) correlation
 
-    ref1 "Correlation of Black Oil Properties at Pressures Below Bubblepoint Pressure—A New Approach",
+    :param p_MPaa: pressure, MPa
+    :param pb_MPaa: buble point pressure, MPa
+    :param rsb_m3m3: gas-oil ratio at the bubble point pressure, m3/m3
+    :param gamma_oil: specific oil density (by water)
+    :param gamma_gas: specific gas density (by air)
+    :param t_K: temperature, K
+    :return: gas-oil ratio in m3/m3
+
+        ref1 "Correlation of Black Oil Properties at Pressures Below Bubblepoint Pressure—A New Approach",
     J. VELARDE, T.A. BLASINGAME Texas A&M University, W.D. MCCAIN, JR. S.A. Holditch & Associates, Inc 1999
 
-    return gas-oil ratio in m3/m3
-    p_MPaa,         pressure, MPaa
-    gamma_oil=0.86, specific oil density (by water)
-    gamma_gas=0.6,  specific gas density (by air)
-    t_K=350,        temperature, K
-    pb_MPaa=10,     buble point pressure, MPaa
-    rsb_m3m3=100,   gas-oil ratio at the bublepoint pressure, m3/m3
     """
+
     api = uc.gamma_oil2api(gamma_oil)
     t_F = uc.k2f(t_K)
     pb_psia = uc.MPa2psi(pb_MPaa)
@@ -187,19 +199,21 @@ def unf_rs_Velarde_m3m3(p_MPaa, pb_MPaa=10, rsb_m3m3=100, gamma_oil=0.86, gamma_
 
 def unf_rsb_Mccain_m3m3(rsp_m3m3, gamma_oil, psp_MPaa=0, tsp_K=0):
     """
-    Solution Gas-oil ratio at bubble point pressure calculation according to McCain (2002) correlation 
+        Solution Gas-oil ratio at bubble point pressure calculation according to McCain (2002) correlation
     taking into account the gas losses at separator and stock tank
-    
+
+    :param rsp_m3m3: separator producing gas-oil ratio, m3m3
+    :param gamma_oil: specific oil density(by water)
+    :param psp_MPaa: pressure in separator, MPaa
+    :param tsp_K: temperature in separator, K
+    :return: solution gas-oil ratio at bubble point pressure, rsb in m3/m3
+
+    часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
+
     ref1 "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities",
     J. VELARDE, W.D. MCCAIN, 2002
-    
-    return solution gas-oil ratio at bubble point pressure, rsb in m3/m3
-    часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
-    rsp_m3m3,             separator producing gas-oil ratio, m3m3
-    gamma_oil,            specific oil density(by water)
-    psp_MPaa = 0,         pressure in separator, MPaa
-    tsp_K = 0,            temperature in separator, K
     """
+
     rsp_scfstb = uc.m3m3_2_scfstb(rsp_m3m3)
     if psp_MPaa > 0 and tsp_K > 0:
         api = uc.gamma_oil2api(gamma_oil)
@@ -221,20 +235,23 @@ def unf_rsb_Mccain_m3m3(rsp_m3m3, gamma_oil, psp_MPaa=0, tsp_K=0):
 
 def unf_gamma_gas_Mccain(rsp_m3m3, rst_m3m3, gamma_gassp, gamma_oil, psp_MPaa=0, tsp_K=0):
     """
-    Correlation for weighted-average specific gravities of surface gases
-    
+        Correlation for weighted-average specific gravities of surface gases
+
+    :param rsp_m3m3: separator producing gas-oil ratio, m3m3
+    :param rst_m3m3: stock-tank producing gas-oil ratio, m3m3
+    :param gamma_gassp:  separator gas specific gravity
+    :param gamma_oil: specific oil density(by water)
+    :param psp_MPaa: pressure in separator, MPaa
+    :param tsp_K: temperature in separator, K
+    :return: weighted-average specific gravities of surface gases
+
+    часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
+
     ref1 "Reservoir oil bubblepoint pressures revisited; solution gas–oil ratios and surface gas specific gravities",
     J. VELARDE, W.D. MCCAIN, 2002
-    
-    return weighted-average specific gravities of surface gases
-    часто условия в сепараторе неизвестны, может считать и без них по приблизительной формуле
-    rsp_m3m3,             separator producing gas-oil ratio, m3m3
-    rst_m3m3,             stock-tank producing gas-oil ratio, m3m3
-    gamma_gassp,          separator gas specific gravity
-    gamma_oil,            specific oil density(by water)
-    psp_MPaa = 0,         pressure in separator, MPaa
-    tsp_K = 0,            temperature in separator, K
+
     """
+
     if psp_MPaa > 0 and rsp_m3m3 > 0 and rst_m3m3 > 0 and gamma_gassp > 0:
         api = uc.gamma_oil2api(gamma_oil)
         psp_psia = uc.Pa2psi(psp_MPaa * 10 ** 6)
@@ -263,16 +280,18 @@ def unf_gamma_gas_Mccain(rsp_m3m3, rst_m3m3, gamma_gassp, gamma_oil, psp_MPaa=0,
 
 
 def unf_fvf_Mccain_m3m3_below(density_oilsto_kgm3, rs_m3m3, density_oil_kgm3, gamma_gas):
-    """  
-    Oil Formation Volume Factor according McCain correlation for pressure below bubble point pressure
-    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
-    
-    return formation volume factor bo,m3m3
-    density_oilsto_kgm3,             density of stock-tank oil, kgm3
-    rs_m3m3,                         solution gas-oil ratio, m3m3
-    density_oil_kgm3,                Oil density at reservoir conditions, kgm3
-    gamma_gas,                       specific gas  density(by air)
     """
+        Oil Formation Volume Factor according McCain correlation for pressure below bubble point pressure
+
+    :param density_oilsto_kgm3: density of stock-tank oil, kgm3
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :param density_oil_kgm3: Oil density at reservoir conditions, kgm3
+    :param gamma_gas: specific gas  density(by air)
+    :return: formation volume factor bo, m3m3
+
+    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+    """
+
     density_oilsto_lbft3 = uc.kgm3_2_lbft3(density_oilsto_kgm3)
     density_oil_lbft3 = uc.kgm3_2_lbft3(density_oil_kgm3)
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
@@ -281,21 +300,25 @@ def unf_fvf_Mccain_m3m3_below(density_oilsto_kgm3, rs_m3m3, density_oil_kgm3, ga
 
 
 def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
-    """  
-    Oil Formation Volume Factor according equation for pressure above bubble point pressure
+    """
+        Oil Formation Volume Factor according equation for pressure above bubble point pressure
+
+    :param bob: formation volume factor at bubble point pressure, m3m3
+    :param cofb_1MPa: weighted-average oil compressibility from bubblepoint pressure to a higher pressure of interest,1/MPa
+    :param pb_MPaa: bubble point pressure, MPa
+    :param p_MPaa: pressure, MPa
+    :return: formation volume factor bo,m3m3
+
     ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
-    
+
     ! Actually, this correlation is belonged ro Vasquez & Beggs (1980). In some sources is
     noted that this is Standing correlation.
+
     ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
     J Pet Technol 32 (6): 968-970. SPE-6719-PA
 
-    return formation volume factor bo,m3m3
-    bob,           formation volume factor at bubble point pressure, m3m3
-    cofb_1MPa,     weighted-average oil compressibility from bubblepoint pressure to a higher pressure of interest,1/MPa
-    pb_MPaa,       bubble point pressure, MPa
-    p_MPaa,        pressure, MPa
     """
+
     if p_MPaa <= pb_MPaa:
         bo = bob
     else:
@@ -304,18 +327,21 @@ def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
 
 
 def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0.6):
-    """  
-    oil compressibility according to Vasquez & Beggs (1980) correlation 
+    """
+        Oil compressibility according to Vasquez & Beggs (1980) correlation
+
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :param t_K: temperature, K
+    :param gamma_oil: specific oil density (by water)
+    :param p_MPaa: pressure, MPaa
+    :param gamma_gas: specific gas density (by air)
+    :return: coefficient of isothermal compressibility co_1MPa, 1/MPa
+
     ref1 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
     J Pet Technol 32 (6): 968-970. SPE-6719-PA
 
-    return coefficient of isothermal compressibility co_1MPa,1/MPa
-    rs_m3m3,             solution gas-oil ratio, m3m3
-    t_K,                 temperature, K
-    gamma_oil,           specific oil density (by water)
-    p_MPaa,              pressure, MPaa
-    gamma_gas=0.6,       specific gas density (by air)
     """
+
     if p_MPaa > 0:
         rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
         t_F = uc.k2f(t_K)
@@ -329,16 +355,18 @@ def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0
 
 
 def unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K):
-    """  
-    Oil Formation Volume Factor according Standing equation at bubble point pressure
-    ref1 Volumetric and phase behavior of oil field hydrocarbon systems / M.B. Standing Standing, M. B. 1981
-
-    return formation volume factor at bubble point pressure bo,m3m3
-    rs_m3m3,             solution gas-oil ratio, m3m3
-    gamma_gas,       specific gas density (by air)
-    gamma_oil,      specific oil density (by water)
-    t_K,                 temperature, K
     """
+        Oil Formation Volume Factor according Standing equation at bubble point pressure
+
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :param gamma_gas: specific gas density (by air)
+    :param gamma_oil: specific oil density (by water)
+    :param t_K: temperature, K
+    :return: formation volume factor at bubble point pressure bo,m3m3
+
+    ref1 Volumetric and phase behavior of oil field hydrocarbon systems / M.B. Standing Standing, M. B. 1981
+    """
+
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     t_F = uc.k2f(t_K)
     bo = 0.972 + 1.47 * 10 ** (-4) * (rs_scfstb * (gamma_gas / gamma_oil) ** 0.5 + 1.25 * t_F) ** 1.175
@@ -346,21 +374,23 @@ def unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K):
 
 
 def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, gamma_oil, gamma_gassp = 0):
-    """  
-    Oil density according Standing, M.B., 1977; Witte, T.W., Jr., 1987; and McCain, W.D., Jr. and Hill, N.C.,
-    1995 correlation.
-    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
-
-    return oil density,kg/m3
-    p_MPaa,              pressure, MPaa
-    pb_MPaa,             bubble point pressure, MPaa
-    co_1MPa,             coefficient of isothermal compressibility, 1/MPa
-    rs_m3m3,             solution gas-oil ratio, m3m3
-    gamma_gas,           specific gas density (by air)
-    t_K,                 temperature, K
-    gamma_oil,           specific oil density (by water)
-    gamma_gassp = 0,     specific gas density in separator(by air)
     """
+        Oil density according Standing, M.B., 1977; Witte, T.W., Jr., 1987; and McCain, W.D., Jr. and Hill, N.C.,
+    1995 correlation.
+
+    :param p_MPaa: pressure, MPaa
+    :param pb_MPaa: bubble point pressure, MPaa
+    :param co_1MPa: coefficient of isothermal compressibility, 1/MPa
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :param gamma_gas: specific gas density (by air)
+    :param t_K: temperature, K
+    :param gamma_oil: specific oil density (by water)
+    :param gamma_gassp: specific gas density in separator(by air)
+    :return: oil density,kg/m3
+
+    ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
+    """
+
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     ro_po = 52.8 - 0.01 * rs_scfstb  # первое приближение
     if gamma_gassp == 0:  # если нет данных о плотности газа в сепараторе
@@ -403,17 +433,18 @@ def unf_density_oil_Mccain(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, gamma_gas, t_K, ga
 
 def unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_gas, gamma_oil):
     """
-    Oil density according Standing correlation.
-    ref1 book Brill 2006, Production Optimization Using Nodal Analysis
+        Oil density according Standing correlation.
 
-    return oil density,kg/m3
-    p_MPaa,              pressure, MPaa
-    pb_MPaa,             bubble point pressure, MPaa
-    co_1MPa,             coefficient of isothermal compressibility, 1/MPa
-    rs_m3m3,             solution gas-oil ratio, m3m3
-    b0_m3m3,             oil formation volume factor, m3m3
-    gamma_gas,           specific gas density (by air)
-    gamma_oil,           specific oil density (by water)
+    :param p_MPaa: pressure, MPaa
+    :param pb_MPaa: bubble point pressure, MPaa
+    :param co_1MPa: coefficient of isothermal compressibility, 1/MPa
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :param bo_m3m3: oil formation volume factor, m3m3
+    :param gamma_gas: specific gas density (by air)
+    :param gamma_oil: specific oil density (by water)
+    :return: oil density,kg/m3
+
+    ref1 book Brill 2006, Production Optimization Using Nodal Analysis
     """
     po = (1000 * gamma_oil + 1.224 * gamma_gas * rs_m3m3) / bo_m3m3
     if p_MPaa > pb_MPaa:
@@ -423,13 +454,15 @@ def unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_g
 
 def unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K):
     """
-    Correlation for dead oil viscosity
+        Correlation for dead oil viscosity
+
+    :param gamma_oil: specific oil density (by water)
+    :param t_K: temperature, K
+    :return: dead oil viscosity,cP
+
     ref1 Beggs, H.D. and Robinson, J.R. “Estimating the Viscosity of Crude Oil Systems.”
     Journal of Petroleum Technology. Vol. 27, No. 9 (1975)
 
-    return dead oil viscosity,cP
-    gamma_oil,           specific oil density (by water)
-    t_K,                 temperature, K
     """
     api = uc.gamma_oil2api(gamma_oil)
     t_F = uc.k2f(t_K)
@@ -440,13 +473,15 @@ def unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K):
 
 def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
     """
-    Correlation for oil viscosity for pressure below bubble point
+        Correlation for oil viscosity for pressure below bubble point
+
+    :param deadoilviscosity_cP: dead oil viscosity,cP
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :return: oil viscosity,cP
+
     ref1 Beggs, H.D. and Robinson, J.R. “Estimating the Viscosity of Crude Oil Systems.”
     Journal of Petroleum Technology. Vol. 27, No. 9 (1975)
 
-    return oil viscosity,cP
-    deadoilviscosity_cP,           dead oil viscosity,cP
-    rs_m3m3,                       solution gas-oil ratio, m3m3
     """
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     a = 10.715 * (rs_scfstb + 100) ** (-0.515)
@@ -456,15 +491,17 @@ def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
 
 
 def unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_cP):
-    """"
-    viscosity correlation for pressure above bubble point
+    """
+        Viscosity correlation for pressure above bubble point
+
+    :param p_MPaa: pressure, MPaa
+    :param pb_MPaa: bubble point pressure, MPaa
+    :param bubblepointviscosity_cP: oil viscosity at bubble point pressure, cP
+    :return: oil viscosity,cP
+
     ref2 Vazquez, M. and Beggs, H.D. 1980. Correlations for Fluid Physical Property Prediction.
     J Pet Technol 32 (6): 968-970. SPE-6719-PA
 
-    return oil viscosity,cP
-    p_MPaa,                      pressure, MPaa
-    pb_MPaa,                     bubble point pressure, MPaa
-    bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP
     """
     p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
     pb_psia = pb_MPaa * 145.03773800721814
@@ -475,15 +512,16 @@ def unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_c
 
 def unf_undersaturatedoilviscosity_Petrovsky_cP(p_MPaa, pb_MPaa, bubblepointviscosity_cP):
     """
-    viscosity correlation for pressure above bubble point
+        Viscosity correlation for pressure above bubble point
+
+    :param p_MPaa: pressure, MPaa
+    :param pb_MPaa: bubble point pressure, MPaa
+    :param bubblepointviscosity_cP: oil viscosity at bubble point pressure, cP
+    :return: oil viscosity,cP
+
     ref 1 Petrosky, G.E. and Farshad, F.F. “Viscosity Correlations for Gulf of Mexico Crude
     Oils.” Paper SPE 29468. Presented at the SPE Production Operations Symposium,
     Oklahoma City (1995)
-
-    return oil viscosity,cP
-    p_MPaa,                      pressure, MPaa
-    pb_MPaa,                     bubble point pressure, MPaa
-    bubblepointviscosity_cP,     oil viscosity at bubble point pressure, cP
     """
     A = -1.0146 + 1.3322 * np.log(bubblepointviscosity_cP) - 0.4876 * np.log(
         bubblepointviscosity_cP) ** 2 - 1.15036 * np.log(bubblepointviscosity_cP) ** 3
@@ -495,13 +533,13 @@ def unf_undersaturatedoilviscosity_Petrovsky_cP(p_MPaa, pb_MPaa, bubblepointvisc
 
 def unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa):
     """
-    function for calculating the viscosity at any pressure
+        Function for calculating the viscosity at any pressure
 
-    return oil viscosity,cP
-    deadoilviscosity_cP,           dead oil viscosity,cP
-    rs_m3m3,                       solution gas-oil ratio, m3m3
-    p_MPaa,                        pressure, MPaa
-    pb_MPaa,                       bubble point pressure, MPaa
+    :param deadoilviscosity_cP: dead oil viscosity,cP
+    :param rs_m3m3: solution gas-oil ratio, m3m3
+    :param p_MPaa: pressure, MPaa
+    :param pb_MPaa: bubble point pressure, MPaa
+    :return: oil viscosity,cP
     """
     saturatedviscosity_cP = unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3)
     if p_MPaa <= pb_MPaa:
@@ -513,16 +551,17 @@ def unf_oil_viscosity_Beggs_VB_cP(deadoilviscosity_cP, rs_m3m3, p_MPaa, pb_MPaa)
 
 def unf_pb_Glaso_MPaa(rs_m3m3, t_K, gamma_oil, gamma_gas):
     """
+        Glaso correlation(1980) for bubble point pressure
+
     :param rs_m3m3: gas-oil ratio in m3/m3
     :param t_K: temperature in K
     :param gamma_oil: oil density (by water)
     :param gamma_gas: gas density (by air)
     :return: bubble point pressure im MPa abs
 
-    Glaso correlation(1980) for bubble point pressure
-
     ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     """
+
     # TODO также необходимо дополнить код, поправками на неув составляющую в нефти, в статье есть
     api = uc.gamma_oil2api(gamma_oil)
     t_F = uc.k2f(t_K)
@@ -534,16 +573,17 @@ def unf_pb_Glaso_MPaa(rs_m3m3, t_K, gamma_oil, gamma_gas):
 
 def unf_fvf_Glaso_m3m3_saturated(rs_m3m3, t_K, gamma_oil, gamma_gas):
     """
+        Glaso correlation(1980) for formation volume factor at bubble point pressure
+
     :param rs_m3m3: gas-oil ratio in m3/m3
     :param t_K: temperature in K
     :param gamma_oil: oil density (by water)
     :param gamma_gas: gas density (by air)
     :return: formation volume factor at bubble point pressure in m3/m3
 
-    Glaso correlation(1980) for formation volume factor at bubble point pressure
-
     ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     """
+
     t_F = uc.k2f(t_K)
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     bob = rs_scfstb * (gamma_gas / gamma_oil) ** 0.526 + 0.968 * t_F
@@ -553,6 +593,8 @@ def unf_fvf_Glaso_m3m3_saturated(rs_m3m3, t_K, gamma_oil, gamma_gas):
 
 def unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa):
     """
+        Glaso correlation(1980) for total formation volume factor below bubble point pressure
+
     :param rs_m3m3: gas-oil ratio in m3/m3
     :param t_K: temperature in K
     :param gamma_oil: oil density (by water)
@@ -560,10 +602,9 @@ def unf_fvf_Glaso_m3m3_below(rs_m3m3, t_K, gamma_oil, gamma_gas, p_MPaa):
     :param p_MPaa: pressure in MPaa
     :return: total formation volume factor below bubble point pressure in m3/m3
 
-    Glaso correlation(1980) for total formation volume factor below bubble point pressure
-
     ref Generalized Pressure-Volume-Temperature Correlations, Glaso, 1980
     """
+
     t_F = uc.k2f(t_K)
     rs_scfstb = uc.m3m3_2_scfstb(rs_m3m3)
     p_psia = uc.Pa2psi(p_MPaa * 10 ** 6)
@@ -584,6 +625,7 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
 
     ref1 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
     """
+
     api = uc.gamma_oil2api(gamma_oil)
     rsb_scfstb = uc.m3m3_2_scfstb(rsb_m3m3)
     p_psia = uc.MPa2psi(p_MPaa)
@@ -596,15 +638,16 @@ def unf_McCain_specificgravity(p_MPaa, rsb_m3m3, t_K, gamma_oil, gamma_gassp):
 
 def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
     """
+        Oil heat capacity in SI. Gambill correlation
+
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: heat capacity in SI - JkgC
 
-    Oil heat capacity in SI. Gambill correlation
-
     ref1 Book: Brill J. P., Mukherjee H. K. Multiphase flow in wells. –
-        Society of Petroleum Engineers, 1999. – Т. 17. in Page 122
+    Society of Petroleum Engineers, 1999. – Т. 17. in Page 122
     """
+
     t_f = uc.c2f(t_c)
     api = uc.gamma_oil2api(gamma_oil)
     heat_capacity_oil_btulbmF = ((0.388 + 0.00045 * t_f) / gamma_oil ** (1/2) )
@@ -613,11 +656,11 @@ def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
 
 def unf_heat_capacity_oil_Wes_Wright_JkgC(gamma_oil, t_c):
     """
+        Oil heat capacity in SI. Wes Wright method
+
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: heat capacity in SI - JkgC
-
-    Oil heat capacity in SI. Wes Wright method
 
     ref1 https://www.petroskills.com/blog/entry/crude-oil-and-changing-temperature#.XQkEnogzaM8
     """
@@ -627,7 +670,8 @@ def unf_heat_capacity_oil_Wes_Wright_JkgC(gamma_oil, t_c):
 
 def unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK(gamma_oil, t_c):
     """
-    Oil thermal conductivity Abdul-Seoud and Moharam correlation
+        Oil thermal conductivity Abdul-Seoud and Moharam correlation
+
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: thermal conductivity in SI - wt / m K
@@ -642,7 +686,8 @@ def unf_thermal_conductivity_oil_Abdul_Seoud_Moharam_WmK(gamma_oil, t_c):
 
 def unf_thermal_conductivity_oil_Smith_WmK(gamma_oil, t_c):
     """
-    Oil thermal conductivity Smith correlation for 273 < T < 423 K
+        Oil thermal conductivity Smith correlation for 273 < T < 423 K
+
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: thermal conductivity in SI - wt / m K
@@ -655,7 +700,8 @@ def unf_thermal_conductivity_oil_Smith_WmK(gamma_oil, t_c):
 
 def unf_thermal_conductivity_oil_Cragoe_WmK(gamma_oil, t_c):
     """
-    Oil thermal conductivity Cragoe correlation for 273 < T < 423 K
+        Oil thermal conductivity Cragoe correlation for 273 < T < 423 K
+
     :param gamma_oil: specific oil density(by water)
     :param t_c: temperature in C
     :return: thermal conductivity in SI - wt / m K
@@ -676,23 +722,26 @@ def unf_thermal_conductivity_oil_Cragoe_WmK(gamma_oil, t_c):
 # uPVT свойства для газа
 
 def unf_pseudocritical_temperature_K(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
-    """"
-    correlation for pseudocritical temperature taking into account the presense of non-hydrocarbon gases
-    ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for 
+    """
+        Correlation for pseudocritical temperature taking into account the presense of non-hydrocarbon gases
+
+    :param gamma_gas: specific gas density (by air)
+    :param y_h2s: mole fraction of the hydrogen sulfide
+    :param y_co2: mole fraction of the carbon dioxide
+    :param y_n2: mole fraction of the nitrogen
+    :return: pseudocritical temperature, K
+
+    ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for
     Naturally Occurring Petroleum Gases.” Gas Reservoir Engineering. Reprint Series. Richardson,
     TX: SPE. Vol. 52 (1999) 186–200
-
-    return pseudocritical temperature, K
-    gamma_gas,           specific gas density (by air)
+    """
+    """
     tc_h2s_K,            critical temperature for hydrogen sulfide, K
     tc_co2_K,            critical temperature for carbon dioxide, K
     tc_n2_K,             critical temperature for nitrogen, K
     pc_h2s_MPaa,         critical pressure for hydrogen sulfide, MPaa
     pc_co2_MPaa,         critical pressure for carbon dioxide, MPaa
     pc_n2_MPaa,          critical pressure for nitrogen, MPaa
-    y_h2s,               mole fraction of the hydrogen sulfide
-    y_co2,               mole fraction of the carbon dioxide
-    y_n2,                mole fraction of the nitrogen
     """
     tc_h2s_R = uc.k2r(373.6)
     tc_co2_R = uc.k2r(304.13)
@@ -713,23 +762,26 @@ def unf_pseudocritical_temperature_K(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
 
 
 def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
-    """"
-    correlation for pseudocritical pressure taking into account the presense of non-hydrocarbon gases
+    """
+        Correlation for pseudocritical pressure taking into account the presense of non-hydrocarbon gases
+
+    :param gamma_gas: specific gas density (by air)
+    :param y_h2s: mole fraction of the hydrogen sulfide
+    :param y_co2: mole fraction of the carbon dioxide
+    :param y_n2: mole fraction of the nitrogen
+    :return: pseudocritical pressure, MPa
+
     ref 1 Piper, L.D., McCain, W.D., Jr., and Corredor, J.H. “Compressibility Factors for
     Naturally Occurring Petroleum Gases.” Gas Reservoir Engineering. Reprint Series. Richardson,
     TX: SPE. Vol. 52 (1999) 186–200
-
-    return pseudocritical pressure, MPa
-    gamma_gas,           specific gas density (by air)
+    """
+    """          
     tc_h2s_K,            critical temperature for hydrogen sulfide, K
     tc_co2_K,            critical temperature for carbon dioxide, K
     tc_n2_K,             critical temperature for nitrogen, K
     pc_h2s_MPaa,         critical pressure for hydrogen sulfide, MPaa
     pc_co2_MPaa,         critical pressure for carbon dioxide, MPaa
-    pc_n2_MPaa,          critical pressure for nitrogen, MPaa
-    y_h2s,               mole fraction of the hydrogen sulfide
-    y_co2,               mole fraction of the carbon dioxide
-    y_n2,                mole fraction of the nitrogen
+    pc_n2_MPaa,          critical pressure for nitrogen, MPaa               
     """
     tc_h2s_R = uc.k2r(373.6)
     tc_co2_R = uc.k2r(304.13)
@@ -751,17 +803,18 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
 
 def unf_zfactor_BrillBeggs(ppr, tpr):
     """
-    correlation for z-factor according Beggs & Brill correlation (1977)
+        Correlation for z-factor according Beggs & Brill correlation (1977)
 
     используется для приближения функции дранчука
 
+    :param ppr: preudoreduced pressure
+    :param tpr: pseudoreduced temperature
+    :return: z-factor
+
     Можно использовать при tpr<=2 и ppr<=4
     при tpr <== 1.5 ppr<=10
-
-    return z-factor
-    ppr             preudoreduced pressure
-    tpr             pseudoreduced temperature
     """
+
     a = 1.39 * (tpr - 0.92) ** 0.5 - 0.36 * tpr - 0.101
     b = (0.62 - 0.23 * tpr) * ppr
     c = (0.066/(tpr - 0.86) - 0.037) * ppr ** 2
@@ -775,18 +828,21 @@ def unf_zfactor_BrillBeggs(ppr, tpr):
 
 def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
-    correlation for z-factor
-    ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
-    Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+        Correlation for z-factor
+
+    :param p_MPaa: pressure, MPaa
+    :param t_K: temperature, K
+    :param ppc_MPa: pseudocritical pressure, MPa
+    :param tpc_K: pseudocritical temperature, K
+    :return: z-factor
 
     range of applicability is (0.2<=ppr<30 and 1.0<tpr<=3.0) and also ppr < 1.0 for 0.7 < tpr < 1.0
 
-    return z-factor
-    p_MPaa,                      pressure, MPaa
-    t_K,                         temperature, K
-    ppc_MPa                      pseudocritical pressure, MPa
-    tpc_K                        pseudocritical temperature, K
+    ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
+    Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+
     """
+
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
     z0 = 1
@@ -806,18 +862,19 @@ def unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K):
 
 def unf_zfactor_DAK_ppr(ppr, tpr):
     """
-    correlation for z-factor
-    ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
-    Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+        Correlation for z-factor
+
+    :param ppr: pseudoreduced pressure
+    :param tpr: pseudoreduced temperature
+    :return: z-factor
 
     range of applicability is (0.2<=ppr<30 and 1.0<tpr<=3.0) and also ppr < 1.0 for 0.7 < tpr < 1.0
 
-    return z-factor
-    p_MPaa,                      pressure, MPaa
-    t_K,                         temperature, K
-    ppc_MPa                      pseudocritical pressure, MPa
-    tpc_K                        pseudocritical temperature, K
+    ref 1 Dranchuk, P.M. and Abou-Kassem, J.H. “Calculation of Z Factors for Natural
+    Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (July–September 1975) 34–36.
+
     """
+
     z0 = 1
     ropr0 = 0.27 * (ppr / (z0 * tpr))
 
@@ -845,16 +902,19 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
 
 def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
     """
-    correlation for gas compressibility
+        Correlation for gas compressibility
+
+    :param p_MPaa: pressure, MPaa
+    :param t_K: temperature, K
+    :param ppc_MPa: pseudocritical pressure, MPa
+    :param tpc_K: pseudocritical temperature, K
+    :return: gas compressibility, 1/MPa
+
     ref 1 Mattar, L., Brar, G.S., and Aziz, K. 1975. Compressibility of Natural Gases.
     J Can Pet Technol 14 (4): 77. PETSOC-75-04-08
 
-    return for gas compressibility
-    p_MPaa,                      pressure, MPaa
-    t_K,                         temperature, K
-    ppc_MPa                      pseudocritical pressure, MPa
-    tpc_K                        pseudocritical temperature, K
     """
+
     ppr = p_MPaa / ppc_MPa
     tpr = t_K / tpc_K
     z0 = 1
@@ -882,16 +942,18 @@ def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
 
 def unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, gamma_gas):
     """
-    Lee correlation for gas viscosity
+        Lee correlation for gas viscosity
+
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param z: z-factor
+    :param gamma_gas: specific gas density (by air)
+    :return: gas viscosity,cP
+
     ref 1 Lee, A.L., Gonzalez, M.H., and Eakin, B.E. “The Viscosity of Natural Gases.” Journal
     of Petroleum Technology. Vol. 18 (August 1966) 997–1,000.
-
-    return gas viscosity,cP
-    t_K,                         temperature, K
-    p_MPaa,                      pressure, MPaa
-    z                            z-factor
-    gamma_gas                    specific gas density (by air)
     """
+
     t_R = uc.k2r(t_K)
     m = 28.966 * gamma_gas  # Molar mass
     a = ((9.379 + 0.01607 * m) * t_R ** 1.5)/(209.2 + 19.26 * m + t_R)
@@ -904,20 +966,21 @@ def unf_gasviscosity_Lee_cP(t_K, p_MPaa, z, gamma_gas):
 
 def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     """
-    Equation for gas FVF
+        Equation for gas FVF
 
-    return formation volume factor for gas bg, m3/m3
-    t_K,                            temperature, K
-    p_MPaa,                         pressure, MPaa
-    z,                              z-factor
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param z: z-factor
+    :return: formation volume factor for gas bg, m3/m3
     """
+
     bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa)
     return bg
 
 
 def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
     """
-    Equation for gas density
+        Equation for gas density from state equation
 
     :param t_K: temperature
     :param p_MPaa: pressure
@@ -932,8 +995,9 @@ def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
 
 def unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas):
     """
-    gas heat capacity by Mahmood Moshfeghian for 0.1 to 20 MPa
-    t should be noted that the concept of heat capacity is valid only for the single phase region.
+        Gas heat capacity by Mahmood Moshfeghian for 0.1 to 20 MPa
+    should be noted that the concept of heat capacity is valid only for the single phase region.
+
     :param p_MPaa: pressure, MPaa
     :param t_K: temperature, K
     :param gamma_gas: specific gas density by air
@@ -954,48 +1018,56 @@ def unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas):
 
 def unf_thermal_conductivity_gas_methane_WmK(t_c): # TODO заменить
     """
-    Данная функкия является линейным приближением табличных значений при 1 бар
-    требует корректировки, является временной затычкой, взята от безысходности
+        Теплопроводность метана
+
     :param t_c: температура в С
     :return: теплопроводность в Вт / м К
+
+    Данная функкия является линейным приближением табличных значений при 1 бар
+    требует корректировки, является временной затычкой, взята от безысходности
     """
     return (42.1 + (42.1 - 33.1)/(80-18)*(t_c - 80))/1000
 # uPVT свойства для сжимаемости нефти(требует немного свойств газа)
 
-
+"""
 def unf_weightedcompressibility_oil_Mccain_1MPa_greater(gamma_oil, gamma_gas, pb_MPa, p_MPa, rsb_m3m3, tres_K, gamma_gassp = 0):
+
     pass
 
 
 def unf_compressibility_oil_Mccain_1MPa_greater(gamma_oil, gamma_gas, pb_MPa, p_MPa, rsb_m3m3, tres_K, gamma_gassp = 0):
+
     pass
 
 
 def unf_compressibility_oil_Mccain_1MPa_lower():
     pass
-
+"""
 
 # uPVT свойства для воды
 
 def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
     """
-    Modified Spivey et al. correlation for brine(water) density (2009)
+        Modified Spivey et al. correlation for brine(water) density (2009)
 
-    ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param s_ppm: salinity, ppm
+    :param par: parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
+    :return: density, kg/m3
+
+        корреляция позволяет найти плотность соленой воды с растворенным в ней метаном
+
+        ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
     Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
     Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
     5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
     52–61.
+
     ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
 
-    корреляция позволяет найти плотность соленой воды с растворенным в ней метаном
-
-    return density, kg/m3
-    t_K,                            temperature, K
-    p_MPaa,                         pressure, MPaa
-    s_ppm,                          salinity, ppm
-    par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
     """
+
     t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
@@ -1072,25 +1144,28 @@ def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
 
 def unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z=1.0, par=1):
     """
-    Modified Spivey et al. correlation for brine(water) compressibility (2009)
+        Modified Spivey et al. correlation for brine(water) compressibility (2009)
+
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param s_ppm: salinity, ppm
+    :param z: z-factor
+    :param par: parameter, 0 - methane-free brine, 1 - brine containing dissolved methane,
+                            2 - brine containing partially dissolved methane
+    :return: compressibility, 1/MPa
+
+    корреляция позволяет найти сжимаемость соленой воды с частично или полностью растворенным в ней метаном
 
     ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
     Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
     Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
     5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
     52–61.
+
     ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
 
-    корреляция позволяет найти сжимаемость соленой воды с частично или полностью растворенным в ней метаном
-
-    return density, kg/m3
-    t_K,                            temperature, K
-    p_MPaa,                         pressure, MPaa
-    s_ppm,                          salinity, ppm
-    z=1,                            z-factor
-    par = 0,                        parameter, 0 - methane-free brine, 1 - brine containing dissolved methane
-                                    2 - brine containing partially dissolved methane
     """
+
     t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
@@ -1181,22 +1256,24 @@ def unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z=1.0, par=1):
 
 def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
     """
-    Modified Spivey et al. correlation for brine(water) formation volume factor (2009)
+        Modified Spivey et al. correlation for brine(water) formation volume factor (2009)
+
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param s_ppm: salinity, ppm
+    :return: formation volume factor, m3/m3
+
+    корреляция позволяет найти объемный коэффициент для соленой воды с учетом растворенного метана
 
     ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
     Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
     Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
     5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
     52–61.
+
     ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
-
-    корреляция позволяет найти объемный коэффициент для соленой воды с учетом растворенного метана
-
-    return density, kg/m3
-    t_K,                            temperature, K
-    p_MPaa,                         pressure, MPaa
-    s_ppm,                          salinity, ppm
     """
+
     t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
@@ -1281,23 +1358,25 @@ def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
 
 
 def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
-
     """
-    Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)
+        Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)
+
+    :param s_ppm: salinity, ppm
+    :param z: z-factor
+    :return: GWR, m3/m3
+
+    корреляция позволяет найти газосодержание метана в соленой воде
 
     ref 1 Spivey, J.P., McCain, W.D., Jr., and North, R. “Estimating Density, Formation
     Volume Factor, Compressibility, Methane Solubility, and Viscosity for Oilfield
     Brines at Temperatures From 0 to 275°C, Pressures to 200 MPa, and Salinities to
     5.7 mole/kg.” Journal of Canadian Petroleum Technology. Vol. 43, No. 7 (July 2004)
     52–61.
+
     ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
 
-    корреляция позволяет найти газосодержание метана в соленой воде
-
-    return GWR, m3/m3
-    s_ppm,                          salinity, ppm
-    z,                              z-factor
     """
+
     s = s_ppm / 1000000
     m = 1000 * s / (58.4428 * (1 - s))
     t_C_sc = 20
@@ -1361,19 +1440,21 @@ def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
 
 def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
     """
-    Mao-Duan correlation for brine(water) viscosity (2009)
+        Mao-Duan correlation for brine(water) viscosity (2009)
+
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param s_ppm: salinity, ppm
+    :return: viscosity, cP
+
+    корреляция позволяет найти вязкость соленой воды
 
     ref 1 Mao, S., and Duan, Z. “The Viscosity of Aqueous Alkali-Chloride Solutions up to
     623 K, 1,000 bar, and High Ionic Strength.” International Journal of Thermophysics.
     Vol. 30 (2009) 1,510–1,523.
+
     ref 2 book Mccain_w_d_spivey_j_p_lenn_c_p_petroleum_reservoir_fluid,third edition, 2011
 
-    корреляция позволяет найти вязкость соленой воды
-
-    return density, kg/m3
-    t_K,                            temperature, K
-    p_MPaa,                         pressure, MPaa
-    s_ppm,                          salinity, ppm
     """
     t_C = uc.k2c(t_K)
     s = s_ppm / 1000000
@@ -1414,11 +1495,11 @@ def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
 
 def unf_heat_capacity_water_IAPWS_JkgC(t_c):  # TODO заменить
     """
+        Теплоемкость дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
+    выше диапазона - линейная экстраполяция
+
     :param t_c: температура в С
     :return: теплоемкость в Дж / кг С
-
-    Теплоемкость дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
-    выше диапазона - линейная экстраполяция
 
     ref1 https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/
     """
@@ -1437,11 +1518,11 @@ def unf_heat_capacity_water_IAPWS_JkgC(t_c):  # TODO заменить
 
 def unf_thermal_conductivity_water_IAPWS_WmC(t_c):  # TODO заменить
     """
+        Теплопроводность дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
+    выше диапазона - линейная экстраполяция
+
     :param t_c: температура в С
     :return: теплопроводность в Вт / м С
-
-    Теплопроводность дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
-    выше диапазона - линейная экстраполяция
 
     ref1 https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/
     """
@@ -1458,11 +1539,11 @@ def unf_thermal_conductivity_water_IAPWS_WmC(t_c):  # TODO заменить
 
 def unf_thermal_expansion_coefficient_water_IAPWS_1C(t_c):  # TODO заменить
     """
+        Коэффициент термического расширения дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
+    выше диапазона - линейная экстраполяция
+
     :param t_c: температура в С
     :return: Коэффициент термического расширения в 1 / с
-
-    Коэффициент термического расширения дистилированной воды в диапазоне 5 < T < 95 C при 1 бар
-    выше диапазона - линейная экстраполяция
 
     ref1 https://syeilendrapramuditya.wordpress.com/2011/08/20/water-thermodynamic-properties/
     """
@@ -1474,14 +1555,14 @@ def unf_thermal_expansion_coefficient_water_IAPWS_1C(t_c):  # TODO замени�
 
 def unf_surface_tension_go_Abdul_Majeed_Nm(t_K, gamma_oil, rs_m3m3):
     """
+        Корреляция Абдул-Маджида (2000 г.) для поверхностного натяжения нефти, насыщенной газом
+
     :param t_K: температура, градусы Кельвина
     :param gamma_oil: относительная плотность нефти
     :param rs_m3m3: газосодержание, м3 / м3
     :return: поверхностное натяжение на границе нефть-газ, Н / м
 
-    Корреляция Абдул-Маджида (2000 г.) для поверхностного натяжения нефти, насыщенной газом
-
-    Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
+        Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
     """
     t_C = uc.k2c(t_K)
     surface_tension_dead_oil_dynes_cm = (1.17013 - 1.694 * 10 ** (-3) * (1.8 * t_C + 32)) * (
@@ -1493,12 +1574,12 @@ def unf_surface_tension_go_Abdul_Majeed_Nm(t_K, gamma_oil, rs_m3m3):
 
 def unf_surface_tension_go_Baker_Swerdloff_Nm(t_K, gamma_oil, p_MPa):
     """
+        Корреляция Бэйкера и Свердлоффа (1955 г.) для поверхностного натяжения нефти, насыщенной газом
+
     :param t_K: температура, градусы Кельвина
     :param gamma_oil: относительная плотность нефти
     :param p_MPa: давление, МПа
     :return: поверхностное натяжения на границе нефть-газ в Н /м
-
-    Корреляция Бэйкера и Свердлоффа (1955 г.) для поверхностного натяжения нефти, насыщенной газом
 
     Источник: Справочник инженера-нефтяника. Том 1. Введение в нефтяной инжиниринг. Газпром Нефть
     """
@@ -1522,12 +1603,12 @@ def unf_surface_tension_go_Baker_Swerdloff_Nm(t_K, gamma_oil, p_MPa):
 
 def unf_surface_tension_gw_Sutton_Nm(rho_water_kgm3, rho_gas_kgm3, t_c):  # TODO поправка на соленость добавить
     """
+        Корреляция Саттона для поверхностного натяжения на границе вода-газ
+
     :param rho_water_kgm3: плотность воды кг / м3
     :param rho_gas_kgm3:  плотность газа кг / м3
     :param t_c: температура в С
     :return: поверхностное натяжение на границе вода-газ, Н / м
-
-    Корреляция Саттона для поверхностного натяжения на границе вода-газ
 
     ref 1 Pereira L. et al. Interfacial tension of reservoir fluids: an integrated experimental
     and modelling investigation : дис. – Heriot-Watt University, 2016. page 41

@@ -59,5 +59,6 @@ class Data():
         return self.lists[number][0]
 
     def print_all_names(self):
+        """print всех параметров их их номеров для получения"""
         for i in range(self.amounts_of_param_in_one_banch):
             print('Номер ' + str(i) + ' для получения параметра ' + self.get_name(i))

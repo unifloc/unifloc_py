@@ -1,9 +1,10 @@
 
 """ГОСТ Р 51777-2001 Кабели для установок погружных электронасосов.
+
  Общие технические условия (с Поправкой) """
 import math
 from scipy.optimize import fsolve
-import unittest
+
 
 # TODO реализовать нормально ГОСТ, отрефакторить, учитывать разные формы кабеля
 # TODO толщины слоев сделать
@@ -62,6 +63,7 @@ class Cable():
 
 
     def __thermal_resistance_cable__(self):
+        """Расчет теплового сопротивления кабеля"""
         result = (1 / 6 / math.pi *(self.sigma_1isolation_Ccm_V * math.log(self.d1_first_isolation_mm / self.d_mm) +
                                    self.sigma_shell_Ccm_V * math.log(self.do_shell_mm / self.d1_first_isolation_mm  ) +
                                    self.sigma_bandage_Ccm_V * math.log(self.db_bandage_mm / self.do_shell_mm)) +
@@ -69,6 +71,7 @@ class Cable():
         return result
 
     def __thermal_resistance_environment__(self):
+        """Расчет теплового сопротивления окружающей среды"""
         # Тепловое сопротивление по Б.2.2.1 в скважинной жидкости нефтяной скважины
         if self.cabel_type == 'Round' and self.environment_type == 'Oil':
             return (1 / 2 / math.pi * 10 * (self.sigma_oil *
@@ -81,22 +84,26 @@ class Cable():
 
 
     def __electricial_resistance_cable_core__(self, R, t, alpha):
+        """Расчет электрического сопротивления жилы кабеля"""
         # электрическое сопротивление токопроводящей жилы, Ом
         result = R * (1 + alpha * (t - 20))
         return result
 
     def __calc_i_a__(self, t, t_env, s_c, s_env, rt):
+        """Расчет длительно допустимого тока"""
         # длительно допустимый ток I, A
         result = ((t - t_env) * 10 ** 5 / 3 / (s_c + s_env) / rt) ** (1 / 2)
         return result
 
     def __t_cabel_c__(self, tf_c, i, rt, s_cable, s_env):
+        """Температура кабеля"""
         result = (i ** 2) * (s_cable + s_env) * rt * 3 / 10 ** 5 + tf_c
         return result
 
     def calc_t_max_cable_c(self, tf_c, i_a):
         """
         Расчет температуры кабеля
+
         :param tf_c: Температура среды, С
         :param i_a: Ток жилы кабеля, А
         :return: температуры кабеля, С
@@ -115,6 +122,7 @@ class Cable():
     def calc_i_max_a(self, t_max_c, t_env_c):
         """
         Расчета максимально допустимой длительной силы тока кабеля
+
         :param t_max_c: температурный индекс кабеля, максимальная температуры нагрева жил кабеля, С
         :param t_env_c: температура среды
         :return: длительно допустимый ток, А

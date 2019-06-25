@@ -1,3 +1,6 @@
+"""
+Модуль для тестирования пакета uMotor
+"""
 import unittest
 import uniflocpy.uMotor.equivalent_circuit as equivalent_circuit
 

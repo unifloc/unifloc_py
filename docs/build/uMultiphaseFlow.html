@@ -37,7 +37,7 @@
 <h1>uMultiphaseFlow<a class="headerlink" href="#umultiphaseflow" title="Ссылка на этот заголовок">¶</a></h1>
 <p>Package calculates hydraulic correlations and connected stuff</p>
 <div class="section" id="module-uniflocpy.uMultiphaseFlow.friction_Bratland">
-<span id="umultiphaseflow-module"></span><h2>uMultiphaseFlow.module<a class="headerlink" href="#module-uniflocpy.uMultiphaseFlow.friction_Bratland" title="Ссылка на этот заголовок">¶</a></h2>
+<span id="umultiphaseflow-friction-bratland"></span><h2>uMultiphaseFlow.friction_Bratland<a class="headerlink" href="#module-uniflocpy.uMultiphaseFlow.friction_Bratland" title="Ссылка на этот заголовок">¶</a></h2>
 <p>Модуль для рассчета коэффициента трения
 по данным книги:
 Bratland O. Pipe flow 1: single-phase flow assurance
@@ -48,26 +48,33 @@ Bratland O. Pipe flow 1: single-phase flow assurance
 <dd><blockquote>
 <div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </div></blockquote>
-<p>Модуль-класс для расчета коэффициента трения f,
+<p>Модуль-класс для расчета коэффициента трения f
 в зависимости от числа Рейнольдса, абс. шероховатости и диаметра трубы.</p>
 <dl class="method">
 <dt id="uniflocpy.uMultiphaseFlow.friction_Bratland.Friction.calc_f">
 <code class="sig-name descname">calc_f</code><span class="sig-paren">(</span><em class="sig-param">number_re</em>, <em class="sig-param">epsilon_m</em>, <em class="sig-param">d_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMultiphaseFlow.friction_Bratland.Friction.calc_f" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Метод для расчета коэффициента трения
-:param number_re: Число Рейнольдса
-:param epsilon_m: Абсолютная шероховатость
-:param d_m: Внутрениний диаметр трубы
-:return: коэффициент трения f</p>
+<dd><p>Метод для расчета коэффициента трения</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_re</strong> – Число Рейнольдса</p></li>
+<li><p><strong>epsilon_m</strong> – Абсолютная шероховатость</p></li>
+<li><p><strong>d_m</strong> – Внутрениний диаметр трубы</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>коэффициент трения f</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="module-uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill">
-<span id="upvt-pvt-fluids-module"></span><h2>uPVT.PVT_fluids module<a class="headerlink" href="#module-uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill" title="Ссылка на этот заголовок">¶</a></h2>
+<span id="hydr-cor-beggs-brill-module"></span><h2>hydr_cor_Beggs_Brill.module<a class="headerlink" href="#module-uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill" title="Ссылка на этот заголовок">¶</a></h2>
 <p>Олег Кобзарь
 01.06.2019
-<a class="reference external" href="mailto:oleg&#46;kobzarius&#37;&#52;&#48;gmail&#46;com">oleg<span>&#46;</span>kobzarius<span>&#64;</span>gmail<span>&#46;</span>com</a>
 Гидравлическая корреляция Беггз и Брилл в исполнении через класс</p>
 <dl class="class">
 <dt id="uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor">
@@ -79,10 +86,18 @@ Bratland O. Pipe flow 1: single-phase flow assurance
 <dl class="method">
 <dt id="uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor.calc_grad">
 <code class="sig-name descname">calc_grad</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor.calc_grad" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Функция для расчета градиента давления по методу Беггз и Брилл
-:param p_bar: давление, бар
-:param t_c: температура, С
-:return: градиент давления, Па /м</p>
+<dd><p>Функция для расчета градиента давления по методу Беггз и Брилл</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p_bar</strong> – давление, бар</p></li>
+<li><p><strong>t_c</strong> – температура, С</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>градиент давления, Па /м</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -114,8 +129,8 @@ Bratland O. Pipe flow 1: single-phase flow assurance
 <li class="toctree-l1"><a class="reference internal" href="uMotor.html">uMotor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="uPVT.html">uPVT</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">uMultiphaseFlow</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uMultiphaseFlow.friction_Bratland">uMultiphaseFlow.module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill">uPVT.PVT_fluids module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uMultiphaseFlow.friction_Bratland">uMultiphaseFlow.friction_Bratland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill">hydr_cor_Beggs_Brill.module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uTemperature.html">uTemperature</a></li>

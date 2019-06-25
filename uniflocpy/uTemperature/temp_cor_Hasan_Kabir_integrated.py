@@ -54,6 +54,7 @@ def __fc_var2__(p_pa, mt_kgs, rp_sm3sm3, gamma_api, gamma_gas, gg_cm):
 def __number_pr__(cp, mu, k):
     """
     Рассчет числа Прандтля
+
     :param cp: Теплоемкость,  Дж / кг / С
     :param mu: Вязкость, Па * с
     :param k: Коэффициент теплопроводности, Ватт / м / С
@@ -65,6 +66,7 @@ def __number_pr__(cp, mu, k):
 def han_var2(mu_an_pas, cp_an_jkgc, k_an_wmc, delta_temp_an_c, rho_an_kgm3, betta_1c, rci_m, rto_m):
     """
     Функция для расчета коэффициента теплоотдачи при есстественной конвекции в затрубном пространстве
+
     :param mu_an_pas: Вязкость флюида в затрубном пространстве, Па * с
     :param cp_an_jkgc: Теплоекость флюида в затрубном пространстве, Дж / кг / С
     :param k_an_wmc: Коэффициент теплопроводности в затрубном пространстве, Ватт / м / С
@@ -92,6 +94,7 @@ def __hf__(ql_m3sec, qg_m3sec, rhol_kgm3, rhog_kgm3,
            cpl_jkgc, cpg_jkgc, rti_m):
     """
     Рассчет коэффициента конвективной теплоотдачи в НКТ
+
     :param ql_m3sec: расход жидкости, м3 / сек
     :param qg_m3sec: расход газа, м3 / сек
     :param rhol_kgm3: плотность жидкости, кг / м3
@@ -124,6 +127,7 @@ def __hf__(ql_m3sec, qg_m3sec, rhol_kgm3, rhog_kgm3,
 def __temp_fluid_c__(rhon, vm, at, cpm, u, rto_m, fc, tei_c, gg_cm, distance_m, tfi_c):
     """
     Расчет температуры флюида в НКТ
+
     :param tfi_c: начальная температура флюида, С
     :param rhon: средняя плотность флюида, кг / м3
     :param vm: средняя скорость флюида без учета скольжения газа, м / с , (vsl+vsg)
@@ -149,6 +153,7 @@ def __uto__(hf, han, tempd, rti_m,
             rwb_m, ke_wmc, kcem_wmc, kt_wmc):
     """
     Общий коэффициент теплопередачи, состоящий из нескольких частей
+
     :param hf: конвективный коэффициет теплоотдачи в НКТ, Ватт / м2 / С
     :param han: конвективный коэффициет теплоотдачи в затрубном пространстве, Ватт / м2 / С
     :param tempd: безразмерная температура или f(t)
@@ -177,6 +182,7 @@ def __temp_diff_an__(tr_c, gg_cm, distance_m,
                      rti_m, han):
     """
     Разница температур в затрубном пространстве
+
     :param tr_c: температура пласта на забое, С
     :param gg_cm: геотермический градиент, С / м
     :param distance_m: расстояние от забоя, м
@@ -268,6 +274,7 @@ class Hasan_Kabir_cor():
     def __temp_diff_an_iter__(self, delta):
         """
         При итерациях вычисляется температура движущегося флюида
+
         :param delta: начальное приближение перепада температур в затрубном пространестве
                     для расчета функцией fsolve
         :return: разница между вычисленным delta и delta, подающемся на вход
@@ -311,6 +318,7 @@ class Hasan_Kabir_cor():
     def calc_t_c_fluid(self, distance_m, p_pa):
         """
         Метод расчета температуры флюида
+
         :param distance_m: расстояние от забоя до точки расчета
         :param p_pa: давление в точке расчета
         :return: температура в точке расчета

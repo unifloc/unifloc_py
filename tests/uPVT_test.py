@@ -1,8 +1,11 @@
+"""
+Модуль для тестирования пакета uPVT
+"""
 import unittest
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import uniflocpy.uPVT.PVT_correlations as PVT_correlations
 
-
+#TODO не хватает теста для одной функции - найти ее
 # Проверка флюидов через условную "хеш" сумму параметров после calc(P,T)
 class TestFluid(unittest.TestCase):
     def test_FluidStanding(self):
@@ -205,6 +208,13 @@ class TestPVT(unittest.TestCase):
         ppc_MPa = 7.477307083789863
         tpc_K = 239.186917147216
         self.assertAlmostEqual(PVT_correlations.unf_zfactor_DAK(p_MPaa, t_K, ppc_MPa, tpc_K), 0.8607752185760458, delta=0.0001)
+
+    def test_unf_zfactor_DAK_ppr(self):
+        ppr = 4
+        tpr = 2
+
+        self.assertAlmostEqual(PVT_correlations.unf_zfactor_DAK_ppr(ppr, tpr), 0.9426402059431057,
+                               delta=0.0001)
 
     def test_unf_gasviscosity_Lee_cP(self):
         t_K = 350

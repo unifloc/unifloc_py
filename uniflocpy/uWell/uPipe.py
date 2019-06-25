@@ -6,6 +6,7 @@ import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_BB
 import uniflocpy.uTemperature.temp_cor_Hasan_Kabir as temp_cor_HK
 import uniflocpy.uTools.uconst as uc
 
+
 class Pipe():
     """
     Расчет параметров течения ГЖС вдоль трубы
@@ -36,6 +37,7 @@ class Pipe():
         self.t_grad_cm = None
 
     def calc_p_grad_pam(self, p_bar, t_c):
+        """расчет градиента давления"""
         self.p_bar = p_bar
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
@@ -61,6 +63,7 @@ class Pipe():
         return  self.p_grad_pam
 
     def calc_t_grad_cm(self, p_bar, t_c):
+        """расчет градиента температуры"""
         self.p_bar = p_bar
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)

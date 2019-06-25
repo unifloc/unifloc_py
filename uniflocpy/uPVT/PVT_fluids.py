@@ -2,14 +2,11 @@
 """
 Created on Mon Sept 04 2017
 
-@author: rnt
-
-UniflocPy
+@author: Khabibullin R.A
 
 класс для расчета uPVT свойств углеводородных флюидов и воды
 
 """
-import unittest
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uPVT.PVT_correlations as PVT
 import math
@@ -28,14 +25,24 @@ class FluidBlackOil:
     def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0,
                  y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5 ):
         """
-        создает флюид с заданными базовыми свойствами
+        Cоздает флюид с заданными базовыми свойствами
 
         калибровочные параметры при необходимости надо задавать отдельно
+
         :param gamma_oil:
         :param gamma_gas:
         :param gamma_wat:
         :param rsb_m3m3:
         :param gamma_gassp:
+        :param y_h2s:
+        :param y_co2:
+        :param y_n2:
+        :param s_ppm:
+        :param par_wat:
+        :param pbcal_bar:
+        :param tpb_C:
+        :param bobcal_m3m3:
+        :param muobcal_cP:
         """
         self.gamma_gas = gamma_gas              # specific gravity of gas (by air), dimensionless
         self.gamma_oil = gamma_oil              # specific gravity of oil
@@ -240,7 +247,15 @@ class FluidStanding(FluidBlackOil):  # TODO после проверки свой
     """
 
     def calc(self, p_bar, t_c):
-        """Расчет свойств нефти на основе набора корреляций Standing"""
+        """
+        Расчет свойств нефти на основе набора корреляций Standing
+
+        расчитанные значения хранятся в соответствующих атрибутах класса
+
+        :param p_bar: давление, бар
+        :param t_c: температура, С
+        :return: 1 - если все свойства успешно были посчитаны
+        """
         super().calc(p_bar, t_c)
         # подготовим внутренние переменные для расчетов
         p_MPaa = uc.bar2MPa(self.p_bar)
@@ -327,7 +342,15 @@ class FluidMcCain(FluidBlackOil):
     """
 
     def calc(self, p_bar, t_c):
-        """Расчет свойств нефти на основе набора корреляций McCain"""
+        """
+        Расчет свойств нефти на основе набора корреляций McCain
+
+        расчитанные значения хранятся в соответствующих атрибутах класса
+
+        :param p_bar: давление, бар
+        :param t_c: температура, С
+        :return: 1 - если все свойства успешно были посчитаны
+        """
         super().calc(p_bar, t_c)
         # подготовим внутренние переменные для расчетов
         p_MPaa = uc.bar2MPa(self.p_bar)
@@ -391,6 +414,11 @@ class FluidMcCain(FluidBlackOil):
 class FluidFlow:
     """класс для описания потока флюида"""
     def __init__(self, fluid = FluidStanding()):
+        """
+        Создает многофазный поток с нефтью определенной модели
+
+        :param fluid: модель флюида Standing или McCain
+        """
         self.fl = fluid  # по умолчанию задаем какой то флюид
 
         self.qliq_on_surface_m3day = 100      # дебит жидкости
@@ -442,7 +470,11 @@ class FluidFlow:
         self.dvdp_msecpam = None
 
     def __calc_Joule_Thompson_coef_cpa__(self):  #TODO проверить данный простой расчет
+        """
+        Рассчет коэффициента Джоуля Томпсона для смеси
 
+        :return: коэффициент Джоуля Томпсона, С/МПА
+        """
         delta_t_c = 0.001
         t2_c = self.t_c + delta_t_c
         t1_c = self.t_c - delta_t_c
@@ -476,6 +508,13 @@ class FluidFlow:
         return mix_JT_coef_heatcap / self.heatcapn_jkgc
 
     def __calc_velosities__(self, p_bar, t_c):
+        """
+        Рассчитаваются дебиты и скорости ГЖС в условиях пласта
+
+        :param p_bar: давление, бар
+        :param t_c: температура, С
+        :return: Nont
+        """
         self.fl.calc(p_bar, t_c)
 
         self.Ap_m2 = math.pi * self.d_m ** 2 / 4
@@ -501,6 +540,12 @@ class FluidFlow:
         self.vm_msec = self.vsl_msec + self.vsg_msec
 
     def __calc_dvdp_msecpam__(self):
+        """
+        Рассчитывается производная скорости смеси (без проскальзывания - vm) по давлению
+
+        Необходимо в дальнейшем для определения градиента скорости смеси
+        :return: dv/dp
+        """
 
         delta_p_bar = uc.Pa2bar(10)
         p2_bar = self.p_bar + delta_p_bar
@@ -514,8 +559,13 @@ class FluidFlow:
         return (v2_msec - v1_msec) / 2 / uc.bar2Pa(delta_p_bar)
 
     def calc(self, p_bar, t_c):
-        """расчет свойств потока для заданных термобарических условий"""
+        """
+            расчет свойств потока для заданных термобарических условий
 
+        :param p_bar: давление, бар
+        :param t_c: температура, С
+        :return: None
+        """
         self.p_bar = p_bar
 
         self.t_c = t_c

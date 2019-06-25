@@ -1,3 +1,6 @@
+"""
+Молуль для тестрования пакета uMultiphaseFlow
+"""
 import unittest
 import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_Beggs_Brill
 import uniflocpy.uMultiphaseFlow.friction_Bratland as friction_Bratland

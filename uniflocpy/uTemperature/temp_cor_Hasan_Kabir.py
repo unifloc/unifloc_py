@@ -5,9 +5,7 @@
 
 import math
 from scipy.optimize import fsolve
-import numpy as np
 import uniflocpy.uTools.uconst as uc
-import unittest
 
 const_g_m2sec = uc.g
 pi = math.pi
@@ -107,6 +105,11 @@ class Hasan_Kabir_cor():
         self.heat_transfer_rate = None
 
     def calc_annulus(self, delta_t_an_c):
+        """
+        Расчет затрубного пространства
+        :param delta_t_an_c: начальное приближения для перепада температур в затрубном пространстве, С
+        :return: разница между начальным приближением и вычисленным результатом - для fsolve
+        """
         self.delta_t_an_c = delta_t_an_c
         self.number_pr_an = uc.cP2pasec(self.mu_an_cP) * self.heatcap_an_jkgc / self.thermal_conduct_an_wmk
         self.number_gr_an = (self.r_cas_in_m - self.r_tube_out_m) ** 3 * self.rho_an_kgm3 ** 2 * \

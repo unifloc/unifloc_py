@@ -5,15 +5,15 @@ uMultiphaseFlow
 Package calculates hydraulic correlations and connected stuff
 
 
-uMultiphaseFlow.module
-----------------------------
+uMultiphaseFlow.friction_Bratland
+------------------------------------
 
 .. automodule:: uniflocpy.uMultiphaseFlow.friction_Bratland
     :members:
     :undoc-members:
     :show-inheritance:
 
-uPVT.PVT_fluids module
+hydr_cor_Beggs_Brill.module
 ----------------------------
 
 .. automodule:: uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill

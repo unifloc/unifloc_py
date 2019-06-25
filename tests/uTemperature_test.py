@@ -1,3 +1,6 @@
+"""
+Модуль для тестрование пакета  uTemperature
+"""
 import unittest
 import uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated as temp_cor_Hasan_Kabir_integrated
 import uniflocpy.uTemperature.temp_cable_NS as temp_cable_NS

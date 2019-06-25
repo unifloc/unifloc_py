@@ -49,7 +49,10 @@
 <dl class="method">
 <dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_annulus">
 <code class="sig-name descname">calc_annulus</code><span class="sig-paren">(</span><em class="sig-param">delta_t_an_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_annulus" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Расчет затрубного пространства
+:param delta_t_an_c: начальное приближения для перепада температур в затрубном пространстве, С
+:return: разница между начальным приближением и вычисленным результатом - для fsolve</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_grad_t_cm">
@@ -72,10 +75,18 @@ TODO требуется создание этой же корреляции в �
 <dl class="method">
 <dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.Hasan_Kabir_cor.calc_t_c_fluid">
 <code class="sig-name descname">calc_t_c_fluid</code><span class="sig-paren">(</span><em class="sig-param">distance_m</em>, <em class="sig-param">p_pa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.Hasan_Kabir_cor.calc_t_c_fluid" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Метод расчета температуры флюида
-:param distance_m: расстояние от забоя до точки расчета
-:param p_pa: давление в точке расчета
-:return: температура в точке расчета</p>
+<dd><p>Метод расчета температуры флюида</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance_m</strong> – расстояние от забоя до точки расчета</p></li>
+<li><p><strong>p_pa</strong> – давление в точке расчета</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>температура в точке расчета</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -83,17 +94,25 @@ TODO требуется создание этой же корреляции в �
 <dl class="function">
 <dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.han_var2">
 <code class="sig-prename descclassname">uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.</code><code class="sig-name descname">han_var2</code><span class="sig-paren">(</span><em class="sig-param">mu_an_pas</em>, <em class="sig-param">cp_an_jkgc</em>, <em class="sig-param">k_an_wmc</em>, <em class="sig-param">delta_temp_an_c</em>, <em class="sig-param">rho_an_kgm3</em>, <em class="sig-param">betta_1c</em>, <em class="sig-param">rci_m</em>, <em class="sig-param">rto_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.han_var2" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Функция для расчета коэффициента теплоотдачи при есстественной конвекции в затрубном пространстве
-:param mu_an_pas: Вязкость флюида в затрубном пространстве, Па * с
-:param cp_an_jkgc: Теплоекость флюида в затрубном пространстве, Дж / кг / С
-:param k_an_wmc: Коэффициент теплопроводности в затрубном пространстве, Ватт / м / С
-:param delta_temp_an_c: Разница температур в затрубном пространстве, С
-:param rho_an_kgm3: Плотность флюида в затрубном пространстве, кг / м3
-:param betta_1c: Коэффициент объемного температурного расширения флюида в з.п., 1 / С
-:param rci_m: Внутренний диаметр обсадной колонны, м
-:param rto_m: Внешний диаметр НКТ
-:return: Коэффициент теплоотдачи, Ватт / м2 / С
-Пример:
+<dd><p>Функция для расчета коэффициента теплоотдачи при есстественной конвекции в затрубном пространстве</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu_an_pas</strong> – Вязкость флюида в затрубном пространстве, Па * с</p></li>
+<li><p><strong>cp_an_jkgc</strong> – Теплоекость флюида в затрубном пространстве, Дж / кг / С</p></li>
+<li><p><strong>k_an_wmc</strong> – Коэффициент теплопроводности в затрубном пространстве, Ватт / м / С</p></li>
+<li><p><strong>delta_temp_an_c</strong> – Разница температур в затрубном пространстве, С</p></li>
+<li><p><strong>rho_an_kgm3</strong> – Плотность флюида в затрубном пространстве, кг / м3</p></li>
+<li><p><strong>betta_1c</strong> – Коэффициент объемного температурного расширения флюида в з.п., 1 / С</p></li>
+<li><p><strong>rci_m</strong> – Внутренний диаметр обсадной колонны, м</p></li>
+<li><p><strong>rto_m</strong> – Внешний диаметр НКТ</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>Коэффициент теплоотдачи, Ватт / м2 / С</p>
+</dd>
+</dl>
+<p>Пример:
 example_han_var2=temp.han_var2(sys_prop.mu_an_pas, sys_prop.cp_an_jkgc,</p>
 <blockquote>
 <div><p>sys_prop.k_an_wmc, sys_prop.delta_temp_an_c,
@@ -105,8 +124,8 @@ sys_prop.rci_m, sys_prop.rto_m)</p>
 </div>
 <div class="section" id="module-uniflocpy.uTemperature.temp_cable_NS">
 <span id="utemperature-temp-cable-ns-module"></span><h2>uTemperature.temp_cable_NS module<a class="headerlink" href="#module-uniflocpy.uTemperature.temp_cable_NS" title="Ссылка на этот заголовок">¶</a></h2>
-<p>ГОСТ Р 51777-2001 Кабели для установок погружных электронасосов.
-Общие технические условия (с Поправкой)</p>
+<p>ГОСТ Р 51777-2001 Кабели для установок погружных электронасосов.</p>
+<p>Общие технические условия (с Поправкой)</p>
 <dl class="class">
 <dt id="uniflocpy.uTemperature.temp_cable_NS.Cable">
 <em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTemperature.temp_cable_NS.</code><code class="sig-name descname">Cable</code><a class="headerlink" href="#uniflocpy.uTemperature.temp_cable_NS.Cable" title="Ссылка на это определение">¶</a></dt>
@@ -116,19 +135,35 @@ sys_prop.rci_m, sys_prop.rto_m)</p>
 <dl class="method">
 <dt id="uniflocpy.uTemperature.temp_cable_NS.Cable.calc_i_max_a">
 <code class="sig-name descname">calc_i_max_a</code><span class="sig-paren">(</span><em class="sig-param">t_max_c</em>, <em class="sig-param">t_env_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cable_NS.Cable.calc_i_max_a" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Расчета максимально допустимой длительной силы тока кабеля
-:param t_max_c: температурный индекс кабеля, максимальная температуры нагрева жил кабеля, С
-:param t_env_c: температура среды
-:return: длительно допустимый ток, А</p>
+<dd><p>Расчета максимально допустимой длительной силы тока кабеля</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_max_c</strong> – температурный индекс кабеля, максимальная температуры нагрева жил кабеля, С</p></li>
+<li><p><strong>t_env_c</strong> – температура среды</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>длительно допустимый ток, А</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="uniflocpy.uTemperature.temp_cable_NS.Cable.calc_t_max_cable_c">
 <code class="sig-name descname">calc_t_max_cable_c</code><span class="sig-paren">(</span><em class="sig-param">tf_c</em>, <em class="sig-param">i_a</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cable_NS.Cable.calc_t_max_cable_c" title="Ссылка на это определение">¶</a></dt>
-<dd><p>Расчет температуры кабеля
-:param tf_c: Температура среды, С
-:param i_a: Ток жилы кабеля, А
-:return: температуры кабеля, С</p>
+<dd><p>Расчет температуры кабеля</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tf_c</strong> – Температура среды, С</p></li>
+<li><p><strong>i_a</strong> – Ток жилы кабеля, А</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>температуры кабеля, С</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

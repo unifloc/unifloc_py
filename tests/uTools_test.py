@@ -1,3 +1,6 @@
+"""
+Модуль для тестирования пакета uTools
+"""
 import unittest
 import uniflocpy.uTools.uconst as uconst
 

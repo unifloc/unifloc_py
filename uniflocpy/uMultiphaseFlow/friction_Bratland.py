@@ -4,19 +4,19 @@
 Bratland O. Pipe flow 1: single-phase flow assurance
 //Fonte: http://www.drbratland.com/download-two-free-books-on-flow-assurance. – 2009.
 """
-import unittest
 import scipy.optimize as sp  # модуль для решения уравения
 import math
 
 
 class Friction():
     """
-    Модуль-класс для расчета коэффициента трения f,
+    Модуль-класс для расчета коэффициента трения f
     в зависимости от числа Рейнольдса, абс. шероховатости и диаметра трубы.
     """
     def __init__(self):
         """
         Консруктор класса
+
         :param number_re: безразмерное число Рейнольдса
         :param epsilon_m: абсолюная шероховатость
         :param d_m: внутренний диаметр трубы
@@ -31,7 +31,9 @@ class Friction():
     def __correlation__(self, f):
         """
         Основная корреляция Ove Bartland для расчета коэффициента трения
+
         При решении уравнения с помощью fsolve результат сохраняется в атрибуте
+
         :param f: коэффициент трения
         :return: разница между расчитанным f и приближенным f для примения fsolve
         """
@@ -44,6 +46,7 @@ class Friction():
     def calc_f(self, number_re, epsilon_m, d_m):
         """
         Метод для расчета коэффициента трения
+
         :param number_re: Число Рейнольдса
         :param epsilon_m: Абсолютная шероховатость
         :param d_m: Внутрениний диаметр трубы
