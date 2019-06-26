@@ -49,7 +49,7 @@ class Data():
             one_parametr.append(one)
         values = []
         for i in one_parametr:
-            values.append(i[-1])
+            values.append(float(i[-1]))
         return values
 
     def get_name(self, number):

@@ -16,7 +16,7 @@ class TestWell(unittest.TestCase):
         t_c = 80
         pipe = Pipe.Pipe()
         pipe.section_casing = False
-        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.0276669369708872,
+        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.01231935587155228,
                                delta=0.0001)
 
     def test_Pipe_calc_t_grad_cm_in_casing(self):
@@ -24,7 +24,7 @@ class TestWell(unittest.TestCase):
         t_c = 80
         pipe = Pipe.Pipe()
         pipe.section_casing = True
-        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.02535709180351646,
+        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.010003890577504207,
                                delta=0.0001)
 
 

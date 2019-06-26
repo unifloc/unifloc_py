@@ -2,7 +2,7 @@
 Кобзарь О.С. Хабибуллин Р.А.
 Температурная корреляция в форме градиента
 """
-
+#TODO разобраться с конструкцией скважины (2 варианта расчета)
 import math
 from scipy.optimize import fsolve
 import uniflocpy.uTools.uconst as uc
@@ -143,12 +143,16 @@ class Hasan_Kabir_cor():
 
         self.time_dimensionless = (self.thermal_conduct_earth_wmc * self.time_sec /
                                   (self.rho_earth_kgm3 * self.cp_earth_jkgc * self.r_well_m ** 2))
-        if self.time_dimensionless <= 1.5:
+        """if self.time_dimensionless <= 1.5:
             self.heat_dissipation_to_earth = 1.1281 * math.sqrt(self.time_dimensionless) * \
                                              (1 - 0.3 * math.sqrt(self.time_dimensionless))
         elif self.time_dimensionless > 1.5:
             self.heat_dissipation_to_earth = (0.4063 + 1 / 2 * math.log(self.time_dimensionless)) * \
-                                             (1 + 0.6 / self.time_dimensionless)
+                                             (1 + 0.6 / self.time_dimensionless)"""
+
+        self.heat_dissipation_to_earth = math.log(math.exp(-0.2 * self.time_dimensionless) +
+                                                  (1.5 - 0.3719 * math.exp(-self.time_dimensionless)) *
+                                                  self.time_dimensionless ** (1/2))
 
         self.thermal_resistance_conv_flow = 1 / (self.d_m / 2 * self.hf_wm2c)
 
@@ -181,12 +185,12 @@ class Hasan_Kabir_cor():
         self.heat_flowrate = - self.relaxation_parametr * self.mass_flowraten_kgsec * \
                              self.heatcapn_jkgc * (self.t_c - self.t_earth_init_c)
 
-        self.part_grad_JT = - self.Joule_Thompson_coef_cpa * self.grad_p_pam
+        self.part_grad_JT = self.Joule_Thompson_coef_cpa * self.grad_p_pam
         #self.part_grad_flow = 1 / self.heatcapn_jkgc * self.heat_flowrate / self.mass_flowraten_kgsec
-        #self.part_grad_flow = (self.t_c - self.t_earth_init_c) * self.relaxation_parametr
-        self.part_grad_flow = - 1 / self.heatcapn_jkgc * self.heat_flowrate / self.mass_flowraten_kgsec
-        self.part_grad_potential = 1 / self.heatcapn_jkgc * uc.g * math.sin(self.angle_rad)
-        self.part_grad_kinetic = 1 / self.heatcapn_jkgc * self.vm_msec * self.grad_v_msecm
+        self.part_grad_flow = (self.t_c - self.t_earth_init_c) * self.relaxation_parametr
+        #self.part_grad_flow = - 1 / self.heatcapn_jkgc * self.heat_flowrate / self.mass_flowraten_kgsec
+        self.part_grad_potential = - 1 / self.heatcapn_jkgc * uc.g * math.sin(self.angle_rad)
+        self.part_grad_kinetic = - 1 / self.heatcapn_jkgc * self.vm_msec * self.grad_v_msecm
 
         """self.grad_t_cm = self.Joule_Thompson_coef_cpa * self.grad_p_pam + 1 / self.heatcapn_jkgc * \
                          (self.heat_flowrate / self.mass_flowraten_kgsec +
