@@ -1,9 +1,10 @@
+"""Модуль для определения режима потока в кольцевом пространстве"""
 import uniflocpy.uTools.uconst as uc
 import math
 import scipy.optimize as sp
 
 class flow_pattern_annulus_Caetano(object):
-    """Класс для определения режимов потока в затрубном пространстве
+    """Класс для определения режимов потока в кольцевом пространстве
     по Caetano (1992)"""
 
     def __init__(self):
@@ -14,7 +15,7 @@ class flow_pattern_annulus_Caetano(object):
         self.d_cas_in_m = 0.155
         self.d_tube_out_m = 0.80
 
-        self.rho_mix_kgm3 = self.rho_liq_kgm3
+        self.rho_mix_kgm3 = 700
         self.mu_mix_pasec = 0.01
 
         self.vs_liq_msec = 0.5
@@ -31,8 +32,7 @@ class flow_pattern_annulus_Caetano(object):
         self.d_hydr_m = None
 
         self.flow_pattern = None
-
-        self.v_slip_m3sec = None
+        self.flow_pattern_name = None
 
         self.const_k = None
 
@@ -72,7 +72,7 @@ class flow_pattern_annulus_Caetano(object):
         # Nicklin (1962)
         self.v_Taylor_bubble_msec = 0.35 * (uc.g * self.d_equi_periphery_m) ** 0.5
         if self.v_Taylor_bubble_msec >= self.v_infinite_z_msec:
-            self.flow_pattern = 0  # bubble flow pattern
+            self.flow_pattern = 0  # bubble flow pattern  # TODO почуму здесь идет определение режима? убрать?
 
         # Bubble to Slug Flow Transition
         if self.concentric_annulus:
@@ -95,9 +95,6 @@ class flow_pattern_annulus_Caetano(object):
         if self.number_Re < 3000:  # laminar flow
             if self.concentric_annulus:
                 self.friction_coeff = self.Fca / self.number_Re
-            #else:
-            #    self.friction_coeff = (1 / self.number_Re * 4 * (1 - self.k_ratio_d) ** 2 * (1 - self.k_ratio_d ** 2) /
-            #                           self.o1o / math.sinh(self.eno) ** 4)
         else:  # turbulent flow
             if self.concentric_annulus:
                 self.friction_coeff = float(sp.fsolve(self.__friction_coefficient_Gunn_Darling, 0.000005))
@@ -116,46 +113,25 @@ class flow_pattern_annulus_Caetano(object):
 
         #  определение режима потока
         if self.d_crit_bubble_m >= self.d_max_bubble_m:
-            self.flow_pattern = 1  # dispersed bubble flow pattern
+            self.flow_pattern = 1
+            self.flow_pattern_name = 'Dispersed bubble flow pattern - дисперсионно-пузырьковый режим'
         else:
-            if self.vs_gas_msec < self.vs_gas_bubble2slug_msec:
-                self.flow_pattern = 0  # bubble flow pattern
+            if self.vs_gas_msec <= self.vs_gas_bubble2slug_msec:
+                self.flow_pattern = 0
+                self.flow_pattern_name = 'Bubble flow pattern - пузырьковый режим'
             else:
-                if self.vs_gas_msec > self.vs_gas_2annular_msec:
-                    self.flow_pattern = 3  # annular flow
+                if self.vs_gas_msec >= self.vs_gas_2annular_msec:
+                    self.flow_pattern = 3
+                    self.flow_pattern_name = 'Annular flow pattern - кольцевой режим'
                 else:
-                    if self.vs_gas_msec < self.vs_gas_dispbubble2slug_msec:
-                        self.flow_pattern = 1  # dispersed bubble flow pattern
+                    if self.vs_gas_msec <= self.vs_gas_dispbubble2slug_msec:
+                        self.flow_pattern = 1
+                        self.flow_pattern_name = 'Dispersed bubble flow pattern - дисперсионно-пузырьковый режим'
                     else:
-                        self.flow_pattern = 3  # slug flow pattern
+                        self.flow_pattern = 3
+                        self.flow_pattern_name = 'Slug flow pattern - Пробковый или эмульсионный режим'
 
-annulus = flow_pattern_annulus_Caetano()
-annulus.calc_pattern()
-
-
-import uniflocpy.uPVT.PVT_fluids as PVT
-
-annular = flow_pattern_annulus_Caetano()
-fluid_flow = PVT.FluidFlow()
-
-p_bar = 40
-t_c = 60
-
-fluid_flow.calc(p_bar, t_c)
-
-annular.surface_tension_gl_Nm = fluid_flow.sigma_liq_Nm
-annular.rho_liq_kgm3 = fluid_flow.rho_liq_kgm3
-annular.rho_gas_kgm3 = fluid_flow.fl.rho_gas_kgm3
-annular.rho_mix_kgm3 = fluid_flow.rhon_kgm3
-annular.mu_mix_pasec = fluid_flow.mun_cP / 10 ** 3
-
-
-
-
-annular.d_cas_in_m = 0.150
-annular.d_tube_out_m = 0.100
-
-annular.vs_gas_msec = fluid_flow.vsg_msec
-annular.vs_liq_msec = fluid_flow.vsl_msec
-
-annular.calc_pattern()
+        if self.flow_pattern == 0 or self.flow_pattern == 1:
+            self.v_infinite_z_msec = 1.53 * self.equation_part
+        else:
+            self.v_infinite_z_msec = 2 ** 0.5 * self.equation_part
