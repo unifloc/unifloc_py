@@ -5,6 +5,7 @@ import unittest
 import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_Beggs_Brill
 import uniflocpy.uMultiphaseFlow.friction_Bratland as friction_Bratland
 import uniflocpy.uWell.uPipe as Pipe
+import uniflocpy.uMultiphaseFlow.flow_pattern_annulus_Caetano as FPA
 
 class TestFriction_Bratland(unittest.TestCase):
     def test_first_part(self):
@@ -51,6 +52,15 @@ class TestBB(unittest.TestCase):
         p_bar = 11.713 * 10
         t_c = 82
         self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 10511.938363972778,
+                               delta=0.00000001)
+
+class TestFlowPattern(unittest.TestCase):
+    def test_FPA(self):
+        annular = FPA.flow_pattern_annulus_Caetano()
+
+        vs_liq_msec = 0.01
+        vs_gas_msec = 0.01
+        self.assertAlmostEqual(annular.calc_pattern(vs_liq_msec, vs_gas_msec), 0,
                                delta=0.00000001)
 
 

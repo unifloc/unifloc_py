@@ -1,10 +1,11 @@
 import uniflocpy.uMultiphaseFlow.flow_pattern_annulus_Caetano as FPA
 import uniflocpy.uTools.uconst as uc
 
+
 class new_correlation_Marquez(object):
     def __init__(self):
         self.vs_liq_z_msec = 10
-        self.v_infinite_z_msec = 5
+        self.v_infinite_z_msec = 8
 
         self.ratio = None
         self.M = None
@@ -20,6 +21,3 @@ class new_correlation_Marquez(object):
         self.natural_sepatarion_d = 1 - (1 - ((1 + self.M) ** 272 + self.ratio ** 272)**(1/272) +
                                          self.ratio)
         return self.natural_sepatarion_d
-
-try_sep = new_correlation_Marquez()
-print(try_sep.calc())

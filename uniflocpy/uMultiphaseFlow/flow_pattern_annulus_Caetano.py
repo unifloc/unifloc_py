@@ -13,7 +13,7 @@ class flow_pattern_annulus_Caetano(object):
         self.rho_gas_kgm3 = 50
 
         self.d_cas_in_m = 0.155
-        self.d_tube_out_m = 0.80
+        self.d_tube_out_m = 0.080
 
         self.rho_mix_kgm3 = 700
         self.mu_mix_pasec = 0.01
@@ -61,18 +61,16 @@ class flow_pattern_annulus_Caetano(object):
         return right_part - left_part
 
 
-    def calc_pattern(self):
+    def __calc_all__(self):
         # Bubble Flow Region Existence
         # Harmanty (1960)
         self.equation_part = (self.surface_tension_gl_Nm *
                                     (self.rho_liq_kgm3 - self.rho_gas_kgm3) * uc.g /
-                                    self.rho_liq_kgm3 ** 2) * 0.25
+                                    self.rho_liq_kgm3 ** 2) ** 0.25
         self.v_infinite_z_msec = 1.53 * self.equation_part
         self.d_equi_periphery_m = self.d_cas_in_m + self.d_tube_out_m
         # Nicklin (1962)
         self.v_Taylor_bubble_msec = 0.35 * (uc.g * self.d_equi_periphery_m) ** 0.5
-        if self.v_Taylor_bubble_msec >= self.v_infinite_z_msec:
-            self.flow_pattern = 0  # bubble flow pattern  # TODO почуму здесь идет определение режима? убрать?
 
         # Bubble to Slug Flow Transition
         if self.concentric_annulus:
@@ -99,7 +97,7 @@ class flow_pattern_annulus_Caetano(object):
             if self.concentric_annulus:
                 self.friction_coeff = float(sp.fsolve(self.__friction_coefficient_Gunn_Darling, 0.000005))
         # Hinze (1955)
-        self.d_max_bubble_m = (self.const_k * (self.surface_tension_gl_Nm / self.rho_liq_kgm3) ** (0.6) *
+        self.d_max_bubble_m = (self.const_k * (self.surface_tension_gl_Nm / self.rho_liq_kgm3) ** 0.6 *
                                (2 * self.vm_msec ** 3 / self.d_hydr_m * self.friction_coeff) ** (-0.4))
 
         self.d_crit_bubble_m = (0.4 * self.surface_tension_gl_Nm / (self.rho_liq_kgm3 -
@@ -109,29 +107,38 @@ class flow_pattern_annulus_Caetano(object):
         self.vs_gas_dispbubble2slug_msec = 1.083 * self.vs_liq_msec + 0.796 * self.equation_part
 
         # Transition to Annular flow
-        self.vs_gas_2annular_msec = 3.1 * self.equation_part
+        self.vs_gas_2annular_msec = 3.1 * (self.surface_tension_gl_Nm *
+                                    (self.rho_liq_kgm3 - self.rho_gas_kgm3) * uc.g /
+                                    self.rho_gas_kgm3 ** 2) ** 0.25
 
         #  определение режима потока
-        if self.d_crit_bubble_m >= self.d_max_bubble_m:
-            self.flow_pattern = 1
-            self.flow_pattern_name = 'Dispersed bubble flow pattern - дисперсионно-пузырьковый режим'
+        if self.vs_gas_msec >= self.vs_gas_2annular_msec:
+            self.flow_pattern = 3
+            self.flow_pattern_name = 'Annular flow pattern - кольцевой режим'
         else:
-            if self.vs_gas_msec <= self.vs_gas_bubble2slug_msec:
-                self.flow_pattern = 0
-                self.flow_pattern_name = 'Bubble flow pattern - пузырьковый режим'
+            if self.d_crit_bubble_m >= self.d_max_bubble_m and self.vs_gas_msec <= self.vs_gas_dispbubble2slug_msec:
+                self.flow_pattern = 1
+                self.flow_pattern_name = 'Dispersed bubble flow pattern - дисперсионно-пузырьковый режим'
             else:
-                if self.vs_gas_msec >= self.vs_gas_2annular_msec:
-                    self.flow_pattern = 3
-                    self.flow_pattern_name = 'Annular flow pattern - кольцевой режим'
+                if self.v_Taylor_bubble_msec >= self.v_infinite_z_msec and self.vs_gas_msec < self.vs_gas_bubble2slug_msec:
+                    self.flow_pattern = 0
+                    self.flow_pattern_name = 'Bubble flow pattern - пузырьковый режим'
                 else:
-                    if self.vs_gas_msec <= self.vs_gas_dispbubble2slug_msec:
-                        self.flow_pattern = 1
-                        self.flow_pattern_name = 'Dispersed bubble flow pattern - дисперсионно-пузырьковый режим'
-                    else:
-                        self.flow_pattern = 3
+                    if self.vs_gas_msec >= self.vs_gas_bubble2slug_msec:
+                        self.flow_pattern = 2
                         self.flow_pattern_name = 'Slug flow pattern - Пробковый или эмульсионный режим'
 
         if self.flow_pattern == 0 or self.flow_pattern == 1:
             self.v_infinite_z_msec = 1.53 * self.equation_part
         else:
             self.v_infinite_z_msec = 2 ** 0.5 * self.equation_part
+
+    def calc_pattern(self, vs_liq_msec, vs_gas_msec):
+        self.vs_gas_msec = vs_gas_msec
+        self.vs_liq_msec = vs_liq_msec
+        self.vm_msec = self.vs_gas_msec + self.vs_liq_msec
+        self.__calc_all__()
+        return self.flow_pattern
+
+
+
