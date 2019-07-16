@@ -423,7 +423,7 @@ class FluidFlow:
 
         self.qliq_on_surface_m3day = 100      # дебит жидкости
         self.fw_on_surface_perc = 20              # обводненность
-        self.d_m = 0.152 # внутренний диаметр трубы
+        self.d_m = 0.152 # внутренний диаметр трубы  #TODO добавить возможность расчета потока в кольцевом пространстве
 
         self.p_bar = None
         self.t_c = None
