@@ -9,17 +9,22 @@ import scipy.interpolate as interpolate
 
 
 # TODO добавить логику для проверки ошибок - "защиту от дурака"
-# TODO добавить построение простой скважины
-
+# TODO проверить методы интерполяции - где уместно линейную, где кубическую?
+# TODO проверить простую модель, добавление точки для горизонтальной скважины
 
 class well_deviation_survey:
     def __init__(self):
         self.deviation_survey_dataframe = None
         self.h_vert_interpolate_func = None
-        self.angle_from_vert_interpolate_func = None
+        self.vert_angle_interpolate_func = None
+        self.curvature_rate_interpolate_func = None
+
+        self.column_h_mes_m = None
+        self.column_curvature_rate_grad10m = None
 
         self.h_mes_m = None
-        self.angle_from_vert_grad = None
+        self.vert_angle_grad = None
+        self.curvature_rate_grad10m = None
 
     def __scip_last_row__(self):
         """
@@ -52,7 +57,7 @@ class well_deviation_survey:
 
     def change_str_to_float(self):
         """
-        Функция меняет в необходимых столбцах str на float64
+        Функция меняет в столбцах str на float64
 
         :return: None
         """
@@ -76,7 +81,7 @@ class well_deviation_survey:
         self.h_vert_interpolate_func = interpolate.interp1d(
             self.deviation_survey_dataframe['Глубина конца интервала, м'],
             self.deviation_survey_dataframe['Вертикальная отметка'], kind='cubic')
-        self.angle_from_vert_interpolate_func = interpolate.interp1d(
+        self.vert_angle_interpolate_func = interpolate.interp1d(
             self.deviation_survey_dataframe['Глубина конца интервала, м'],
             self.deviation_survey_dataframe['Угол, гpад'], kind='cubic')
 
@@ -90,15 +95,57 @@ class well_deviation_survey:
         self.h_mes_m = self.h_vert_interpolate_func(h_mes_m)
         return self.h_mes_m
 
-    def get_angle_from_vert_grad(self, h_mes_m):
+    def get_vert_angle_grad(self, h_mes_m):
         """
         Функция по интерполированным данным возращает угол наклона от вертикали
 
         :param h_mes_m: измеренная глубина вдоль ствола скважины, м
         :return: угол отклонения ствола от вертикали, град
         """
-        self.angle_from_vert_grad = self.angle_from_vert_interpolate_func(h_mes_m)
-        return self.angle_from_vert_grad
+        self.vert_angle_grad = self.vert_angle_interpolate_func(h_mes_m)
+        return self.vert_angle_grad
+
+    def get_curvature_rate_grad10m(self, h_mes_m):
+        self.curvature_rate_grad10m = self.curvature_rate_interpolate_func(h_mes_m)
+        return self.curvature_rate_grad10m
+
+    def calc_curvature(self):
+        h_mes_m = [0]
+        curvature_rate = [0]
+        column_h_mes = self.deviation_survey_dataframe['Глубина конца интервала, м']
+        borehole_lenth_m = column_h_mes.max() - column_h_mes.min()
+        lenth_of_one_part = 10
+        amounts_of_parts = int(
+            borehole_lenth_m / lenth_of_one_part - borehole_lenth_m % lenth_of_one_part / lenth_of_one_part)
+        for i in range(amounts_of_parts):
+            current_h_mes_m = h_mes_m[-1] + lenth_of_one_part
+            current_angle_grad = self.get_vert_angle_grad(current_h_mes_m)
+            last_angle_grad = self.get_vert_angle_grad(h_mes_m[-1])
+            current_curvature_rate = abs(current_angle_grad - last_angle_grad) / lenth_of_one_part
+            h_mes_m.append(current_h_mes_m)
+            curvature_rate.append(current_curvature_rate)
+
+        if h_mes_m[-1] < column_h_mes.max():
+            current_h_mes_m = column_h_mes.max() - lenth_of_one_part
+            current_angle_grad = self.get_vert_angle_grad(current_h_mes_m)
+            last_angle_grad = self.get_vert_angle_grad(column_h_mes.max())
+            current_curvature_rate = abs(current_angle_grad - last_angle_grad) / lenth_of_one_part
+            curvature_rate.append(current_curvature_rate)
+            h_mes_m.append(column_h_mes.max())
+
+        h_mes_m = np.asarray(h_mes_m)
+        curvature_rate = np.asarray(curvature_rate)
+        self.curvature_rate_interpolate_func = interpolate.interp1d(h_mes_m, curvature_rate, kind='cubic')
+        self.deviation_survey_dataframe['Интенсивность кривизны, град/10 м'] = self.curvature_rate_interpolate_func(
+            column_h_mes
+        )
+        self.column_curvature_rate_grad10m = self.deviation_survey_dataframe['Интенсивность кривизны, град/10 м']
+
+    def calc_all(self):
+        self.change_str_to_float()
+        self.interpolate_all()
+        self.calc_curvature()
+        self.column_h_mes_m = self.deviation_survey_dataframe['Глубина конца интервала, м']
 
 
 class simple_well_deviation_survey():
@@ -107,7 +154,7 @@ class simple_well_deviation_survey():
         self.h_conductor_mes_m = 500
         self.h_conductor_vert_m = 500
         self.h_conductor_end_mes_m = 600
-        self.h_conductor_end_vert_m = 590
+        self.h_conductor_end_vert_m = 597
         self.h_pump_mes_m = 1200
         self.h_pump_vert_m = 1000
         self.h_bottomhole_mes_m = 2500
@@ -117,49 +164,55 @@ class simple_well_deviation_survey():
 
         self.h_mes_init_data_for_interpolation_m = None
         self.h_vert_init_data_for_interpolation_m = None
-        
-        self.interpolation_func_linear_h_vert_by_h_mes = None
-        self.interpolation_func_quadratic_h_vert_by_h_mes = None
+
+        self.interpolation_func_slinear_h_vert_by_h_mes = None
+        self.interpolation_func_cubic_h_vert_by_h_mes = None
 
         self.amounts_of_parts = None
 
         self.h_mes_m = None
         self.h_vert_m = None
-        self.angle_from_vert_grad = None
+        self.vert_angle_grad = None
         self.x_displacement_m = None
         self.y_displacement_m = None
-        self.rate_of_curvature_grad10m = None
-        self.borehole_extension = None
+        self.curvature_rate_grad10m = None
+        self.borehole_extension_m = None
+
+        self.interpolation_x_displacement_by_h_mes = None
+        self.interpolation_vert_angle_by_h_mes = None
+        self.interpolation_h_vert_by_h_mes = None
+        self.interpolation_borehole_extension_by_h_mes = None
+        self.interpolation_curvature_rate_by_h_mes = None
 
     def calc_all(self):
-        self.h_mes_init_data_for_interpolation_m = [0, self.h_conductor_mes_m, self.h_conductor_end_mes_m,
-                                                    self.h_pump_mes_m, self.h_bottomhole_mes_m]
-        self.h_vert_init_data_for_interpolation_m = [0, self.h_conductor_vert_m, self.h_conductor_end_vert_m,
-                                                     self.h_pump_vert_m, self.h_bottomhole_vert_m]
+        self.h_mes_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_mes_m, self.h_conductor_end_mes_m,
+                                                    self.h_pump_mes_m, self.h_bottomhole_mes_m])
+        self.h_vert_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_vert_m, self.h_conductor_end_vert_m,
+                                                     self.h_pump_vert_m, self.h_bottomhole_vert_m])
 
-        self.interpolation_func_linear_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
-                                                                              self.h_vert_init_data_for_interpolation_m,
-                                                                              kind = 'slinear')
-        self.interpolation_func_quadratic_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
-                                                                                 self.h_vert_init_data_for_interpolation_m,
-                                                                                 kind='cubic')
+        self.interpolation_func_slinear_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
+                                                                               self.h_vert_init_data_for_interpolation_m,
+                                                                               kind='slinear')
+        self.interpolation_func_cubic_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
+                                                                             self.h_vert_init_data_for_interpolation_m,
+                                                                             kind='cubic')
 
         self.amounts_of_parts = int(self.h_bottomhole_mes_m / self.lenth_of_one_part)
 
         h_mes_m = [0]
         h_vert_m = [0]
-        angle_from_vert_grad = [90]
+        vert_angle_grad = [90]
         x_displacement_m = [0]
-        rate_of_curvature_grad10m = [0]
+        curvature_rate_grad10m = [0]
         borehole_extension = [0]
 
         for i in range(self.amounts_of_parts):
             current_h_mes_m = h_mes_m[-1] + self.lenth_of_one_part
 
-            if current_h_mes_m <= self.h_conductor_mes_m:
-                current_h_vert_m = float(self.interpolation_func_linear_h_vert_by_h_mes(current_h_mes_m))
+            if current_h_mes_m < self.h_conductor_mes_m:
+                current_h_vert_m = float(self.interpolation_func_slinear_h_vert_by_h_mes(current_h_mes_m))
             else:
-                current_h_vert_m = float(self.interpolation_func_quadratic_h_vert_by_h_mes(current_h_mes_m))
+                current_h_vert_m = float(self.interpolation_func_cubic_h_vert_by_h_mes(current_h_mes_m))
 
             current_borehole_extension = current_h_mes_m - current_h_vert_m
 
@@ -174,23 +227,60 @@ class simple_well_deviation_survey():
 
             cos_phi_vert_angle = delta_x_displacement_m / self.lenth_of_one_part
 
-            current_angle_from_vert_grad = np.degrees(np.arccos(float(cos_phi_vert_angle)))
+            current_vert_angle_grad = np.degrees(np.arccos(float(cos_phi_vert_angle)))
 
-            current_rate_of_curvature_grad10m = (angle_from_vert_grad[
-                                                     -1] - current_angle_from_vert_grad) / self.lenth_of_one_part
+            current_curvature_rate_grad10m = (vert_angle_grad[
+                                                     -1] - current_vert_angle_grad) / self.lenth_of_one_part
 
             h_mes_m.append(current_h_mes_m)
             h_vert_m.append(current_h_vert_m)
             borehole_extension.append(current_borehole_extension)
             x_displacement_m.append(current_x_displacement_m)
-            angle_from_vert_grad.append(current_angle_from_vert_grad)
-            rate_of_curvature_grad10m.append(current_rate_of_curvature_grad10m)
+            vert_angle_grad.append(current_vert_angle_grad)
+            curvature_rate_grad10m.append(current_curvature_rate_grad10m)
 
         self.h_mes_m = np.asarray(h_mes_m)
         self.h_vert_m = np.asarray(h_vert_m)
-        self.angle_from_vert_grad = np.asarray(angle_from_vert_grad)
+        self.vert_angle_grad = np.asarray(vert_angle_grad)
         self.x_displacement_m = np.asarray(x_displacement_m)
         self.y_displacement_m = np.asarray(x_displacement_m) * 0
-        self.rate_of_curvature_grad10m = np.asarray(rate_of_curvature_grad10m)
-        self.borehole_extension = np.asarray(borehole_extension)
+        self.curvature_rate_grad10m = np.asarray(curvature_rate_grad10m)
+        self.borehole_extension_m = np.asarray(borehole_extension)
+
+        self.interpolation_x_displacement_by_h_mes = interpolate.interp1d(self.h_mes_m,
+                                                                          self.x_displacement_m,
+                                                                          kind='cubic')
+
+        self.interpolation_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_m,
+                                                                  self.h_vert_m,
+                                                                  kind='cubic')
+
+        self.interpolation_vert_angle_by_h_mes = interpolate.interp1d(self.h_mes_m,
+                                                                      self.vert_angle_grad,
+                                                                      kind='cubic')
+
+        self.interpolation_borehole_extension_by_h_mes = interpolate.interp1d(self.h_mes_m,
+                                                                              self.borehole_extension_m,
+                                                                              kind='cubic')
+
+        self.interpolation_curvature_rate_by_h_mes = interpolate.interp1d(self.h_mes_m,
+                                                                          self.curvature_rate_grad10m,
+                                                                          kind='cubic')
+
+    def get_x_displacement_m(self, h_mes_m):
+        return self.interpolation_x_displacement_by_h_mes(h_mes_m)
+
+    def get_h_vert_m(self, h_mes_m):
+        return self.interpolation_h_vert_by_h_mes(h_mes_m)
+
+    def get_vert_angle_grad(self, h_mes_m):
+        return self.interpolation_vert_angle_by_h_mes(h_mes_m)
+
+    def get_borehole_extension_m(self, h_mes_m):
+        return self.interpolation_func_cubic_h_vert_by_h_mes(h_mes_m)
+
+    def get_curvature_rate_grad10m(self, h_mes_m):
+        return self.interpolation_curvature_rate_by_h_mes(h_mes_m)
+
+
 
