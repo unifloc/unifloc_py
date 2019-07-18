@@ -4,7 +4,7 @@ uTemperature
 
 Package calculates temperature phenomena in the well
 
-uTemperature.temp_cor_Hasan_Kabir module
+uTemperature.temp_cor_Hasan_Kabir
 ----------------------------------------------
 
 .. automodule:: uniflocpy.uTemperature.temp_cor_Hasan_Kabir
@@ -12,7 +12,7 @@ uTemperature.temp_cor_Hasan_Kabir module
     :undoc-members:
     :show-inheritance:
 
-uTemperature.temp_cor_Hasan_Kabir_integrated module
+uTemperature.temp_cor_Hasan_Kabir_integrated
 -----------------------------------------------------------
 
 .. automodule:: uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated 
@@ -21,7 +21,7 @@ uTemperature.temp_cor_Hasan_Kabir_integrated module
     :show-inheritance:
 
 
-uTemperature.temp_cable_NS module
+uTemperature.temp_cable_NS
 ------------------------------------------------------
 
 .. automodule:: uniflocpy.uTemperature.temp_cable_NS 

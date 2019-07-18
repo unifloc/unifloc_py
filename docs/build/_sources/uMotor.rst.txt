@@ -4,7 +4,7 @@ uMotor
 
 Package calculates electical submersible engine
 
-uMotor.equivalent_circuit module
+uMotor.equivalent_circuit
 ----------------------------------
 
 .. automodule:: uniflocpy.uMotor.equivalent_circuit 
@@ -12,7 +12,7 @@ uMotor.equivalent_circuit module
     :undoc-members:
     :show-inheritance:
 
-uMotor.MotorBase module
+uMotor.MotorBase
 ----------------------------
 
 .. automodule:: uniflocpy.uMotor.MotorBase

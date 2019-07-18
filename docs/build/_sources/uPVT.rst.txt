@@ -5,7 +5,7 @@ uPVT
 Package calculates PVT propetries of fluids and properties of fluid flow
 
 
-uPVT.PVT_correlations module
+uPVT.PVT_correlations
 ----------------------------
 
 .. automodule:: uniflocpy.uPVT.PVT_correlations
@@ -13,7 +13,7 @@ uPVT.PVT_correlations module
     :undoc-members:
     :show-inheritance:
 
-uPVT.PVT_fluids module
+uPVT.PVT_fluids
 ----------------------------
 
 .. automodule:: uniflocpy.uPVT.PVT_fluids

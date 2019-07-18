@@ -36,7 +36,7 @@
 <h1>uWell<a class="headerlink" href="#uwell" title="Ссылка на этот заголовок">¶</a></h1>
 <p>The package forms the elements of the wells of the other modules</p>
 <div class="section" id="module-uniflocpy.uWell.uPipe">
-<span id="uwell-upipe-module"></span><h2>uWell.uPipe module<a class="headerlink" href="#module-uniflocpy.uWell.uPipe" title="Ссылка на этот заголовок">¶</a></h2>
+<span id="uwell-upipe"></span><h2>uWell.uPipe<a class="headerlink" href="#module-uniflocpy.uWell.uPipe" title="Ссылка на этот заголовок">¶</a></h2>
 <p>Класс-интерфейс для расчета потока через трубу,
 объединяет расчеты: PVT, многофазный поток, гидравлический и
 температурный расчет</p>
@@ -61,8 +61,210 @@
 
 </dd></dl>
 
-<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
-<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
+</div>
+<div class="section" id="module-uniflocpy.uWell.deviation_survey">
+<span id="uwell-deviation-survey"></span><h2>uWell.deviation_survey<a class="headerlink" href="#module-uniflocpy.uWell.deviation_survey" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Модуль работы над инклинометрией скважины</p>
+<p>Кобзарь О.С. 18.07.2019 г.</p>
+<dl class="class">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uWell.deviation_survey.</code><code class="sig-name descname">simple_well_deviation_survey</code><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<p>Класс для задания простого профиля скважины по точкам</p>
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.calc_all">
+<code class="sig-name descname">calc_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.calc_all" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция с помощью интерполяции по нескольким точкам строит профиль скважины.</p>
+<p>Исходными данными являются: точки абсолютной глубины и глубины вдоль ствола скважина кондуктора, приема
+оборудования, забоя.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_borehole_extension_m">
+<code class="sig-name descname">get_borehole_extension_m</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_borehole_extension_m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по результатам выполненной ранее интерполяции возвращает величину удлинения ствола скважины,
+т.е. разницу между измеренной глубиной и абсолютной</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>удлинение ствола скважины, м</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_curvature_rate_grad10m">
+<code class="sig-name descname">get_curvature_rate_grad10m</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_curvature_rate_grad10m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по результатам выполненной ранее интерполяции возвращает величину скорости набора кривизны</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>скорость набора кривизны, град / 10 м</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_h_vert_m">
+<code class="sig-name descname">get_h_vert_m</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_h_vert_m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по результатам выполненной ранее интерполяции возвращает абсолютную глубину</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>абсолютная вертикальная глубина, м</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_vert_angle_grad">
+<code class="sig-name descname">get_vert_angle_grad</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_vert_angle_grad" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по результатам выполненной ранее интерполяции возвращает угол наклона от вертикали</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>угол наклона от вертикали, м</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_x_displacement_m">
+<code class="sig-name descname">get_x_displacement_m</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey.get_x_displacement_m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по результатам выполненной ранее интерполяции возвращает горизонтально смещение от устья</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>горизонтальное смещение от устья, м</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uWell.deviation_survey.</code><code class="sig-name descname">well_deviation_survey</code><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<p>Класс для задания профиля ствола скважины по инклинометрии, которая загружается из файла excel</p>
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.calc_all">
+<code class="sig-name descname">calc_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.calc_all" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция выполняет необходимые все необходимые расчеты, после которой класс может быть использован по назначению</p>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.calc_curvature">
+<code class="sig-name descname">calc_curvature</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.calc_curvature" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция рассчитывает скорость набора кривизны (изменение угла на 10 м)
+Результатом являются:</p>
+<blockquote>
+<div><p>дополнительный столбец в DataFrame с рассчитаными значениями</p>
+<p>отдельный массив с рассчитанными значениями</p>
+<p>интерполяционная функция для нахождения скорости набора кривизны от глубины вдоль ствола скважины</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.change_str_to_float">
+<code class="sig-name descname">change_str_to_float</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.change_str_to_float" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция меняет в столбцах str на float64</p>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.get_curvature_rate_grad10m">
+<code class="sig-name descname">get_curvature_rate_grad10m</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.get_curvature_rate_grad10m" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.get_h_vert_m">
+<code class="sig-name descname">get_h_vert_m</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.get_h_vert_m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по интерполированным данным возвращает абсолютную вертикальную отметку в точке по измеренной глубине</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>абсолютная (вертикальная) глубина, м</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.get_vert_angle_grad">
+<code class="sig-name descname">get_vert_angle_grad</code><span class="sig-paren">(</span><em class="sig-param">h_mes_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.get_vert_angle_grad" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция по интерполированным данным возращает угол наклона от вертикали</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>h_mes_m</strong> – измеренная глубина вдоль ствола скважины, м</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>угол отклонения ствола от вертикали, град</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.interpolate_all">
+<code class="sig-name descname">interpolate_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.interpolate_all" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Интерполяция вертикальной отметки и угла по измеренной глубине</p>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uWell.deviation_survey.well_deviation_survey.load_deviation_survey">
+<code class="sig-name descname">load_deviation_survey</code><span class="sig-paren">(</span><em class="sig-param">path_to_file_str</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.well_deviation_survey.load_deviation_survey" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Загрузка данных из Excel и удаление последней строки</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>path_to_file_str</strong> – путь к файлу, str</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -91,7 +293,8 @@
 <li class="toctree-l1"><a class="reference internal" href="uTemperature.html">uTemperature</a></li>
 <li class="toctree-l1"><a class="reference internal" href="uTools.html">uTools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">uWell</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uWell.uPipe">uWell.uPipe module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uWell.uPipe">uWell.uPipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uWell.deviation_survey">uWell.deviation_survey</a></li>
 </ul>
 </li>
 </ul>

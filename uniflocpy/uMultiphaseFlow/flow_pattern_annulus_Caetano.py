@@ -134,6 +134,17 @@ class flow_pattern_annulus_Caetano(object):
             self.v_infinite_z_msec = 2 ** 0.5 * self.equation_part
 
     def calc_pattern(self, vs_liq_msec, vs_gas_msec):
+        """
+        Расчет режима потока по приведенной скорости жидкости и газа
+
+        :param vs_liq_msec: приведенная скорость жидкости, м/сек
+        :param vs_gas_msec: приведенная скорость газа, м/сек
+        :return: номер режима потока, где
+        :0: Bubble flow pattern - пузырьковый режим
+        :1: Dispersed bubble flow pattern - дисперсионно-пузырьковый режим
+        :2: Slug flow pattern - Пробковый или эмульсионный режим
+        :3: Annular flow pattern - кольцевой режим
+        """
         self.vs_gas_msec = vs_gas_msec
         self.vs_liq_msec = vs_liq_msec
         self.vm_msec = self.vs_gas_msec + self.vs_liq_msec

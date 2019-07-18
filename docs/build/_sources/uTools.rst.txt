@@ -5,7 +5,7 @@ uTools
 Package containts tools for other modules
 
 
-uTools.data_workflow module
+uTools.data_workflow
 ----------------------------
 
 .. automodule:: uniflocpy.uTools.data_workflow

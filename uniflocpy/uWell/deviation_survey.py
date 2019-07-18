@@ -1,6 +1,7 @@
 """
 Модуль работы над инклинометрией скважины
-Кобзарь О.С. 2019 г.
+
+Кобзарь О.С. 18.07.2019 г.
 """
 
 import pandas as pd
@@ -11,8 +12,12 @@ import scipy.interpolate as interpolate
 # TODO добавить логику для проверки ошибок - "защиту от дурака"
 # TODO проверить методы интерполяции - где уместно линейную, где кубическую?
 # TODO проверить простую модель, добавление точки для горизонтальной скважины
+# TODO переделать циклы for на numpy
 
 class well_deviation_survey:
+    """
+    Класс для задания профиля ствола скважины по инклинометрии, которая загружается из файла excel
+    """
     def __init__(self):
         self.deviation_survey_dataframe = None
         self.h_vert_interpolate_func = None
@@ -110,6 +115,18 @@ class well_deviation_survey:
         return self.curvature_rate_grad10m
 
     def calc_curvature(self):
+        """
+        Функция рассчитывает скорость набора кривизны (изменение угла на 10 м)
+        Результатом являются:
+
+            дополнительный столбец в DataFrame с рассчитаными значениями
+
+            отдельный массив с рассчитанными значениями
+
+            интерполяционная функция для нахождения скорости набора кривизны от глубины вдоль ствола скважины
+
+        :return: None
+        """
         h_mes_m = [0]
         curvature_rate = [0]
         column_h_mes = self.deviation_survey_dataframe['Глубина конца интервала, м']
@@ -142,6 +159,11 @@ class well_deviation_survey:
         self.column_curvature_rate_grad10m = self.deviation_survey_dataframe['Интенсивность кривизны, град/10 м']
 
     def calc_all(self):
+        """
+        Функция выполняет необходимые все необходимые расчеты, после которой класс может быть использован по назначению
+
+        :return: None
+        """
         self.change_str_to_float()
         self.interpolate_all()
         self.calc_curvature()
@@ -149,7 +171,9 @@ class well_deviation_survey:
 
 
 class simple_well_deviation_survey():
-
+    """
+    Класс для задания простого профиля скважины по точкам
+    """
     def __init__(self):
         self.h_conductor_mes_m = 500
         self.h_conductor_vert_m = 500
@@ -185,10 +209,18 @@ class simple_well_deviation_survey():
         self.interpolation_curvature_rate_by_h_mes = None
 
     def calc_all(self):
+        """
+        Функция с помощью интерполяции по нескольким точкам строит профиль скважины.
+
+        Исходными данными являются: точки абсолютной глубины и глубины вдоль ствола скважина кондуктора, приема
+        оборудования, забоя.
+
+        :return: None
+        """
         self.h_mes_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_mes_m, self.h_conductor_end_mes_m,
-                                                    self.h_pump_mes_m, self.h_bottomhole_mes_m])
+                                                               self.h_pump_mes_m, self.h_bottomhole_mes_m])
         self.h_vert_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_vert_m, self.h_conductor_end_vert_m,
-                                                     self.h_pump_vert_m, self.h_bottomhole_vert_m])
+                                                               self.h_pump_vert_m, self.h_bottomhole_vert_m])
 
         self.interpolation_func_slinear_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
                                                                                self.h_vert_init_data_for_interpolation_m,
@@ -268,18 +300,49 @@ class simple_well_deviation_survey():
                                                                           kind='cubic')
 
     def get_x_displacement_m(self, h_mes_m):
+        """
+        Функция по результатам выполненной ранее интерполяции возвращает горизонтально смещение от устья
+
+        :param h_mes_m: измеренная глубина вдоль ствола скважины, м
+        :return: горизонтальное смещение от устья, м
+        """
         return self.interpolation_x_displacement_by_h_mes(h_mes_m)
 
     def get_h_vert_m(self, h_mes_m):
+        """
+        Функция по результатам выполненной ранее интерполяции возвращает абсолютную глубину
+
+        :param h_mes_m: измеренная глубина вдоль ствола скважины, м
+        :return: абсолютная вертикальная глубина, м
+        """
         return self.interpolation_h_vert_by_h_mes(h_mes_m)
 
     def get_vert_angle_grad(self, h_mes_m):
+        """
+        Функция по результатам выполненной ранее интерполяции возвращает угол наклона от вертикали
+
+        :param h_mes_m: измеренная глубина вдоль ствола скважины, м
+        :return: угол наклона от вертикали, м
+        """
         return self.interpolation_vert_angle_by_h_mes(h_mes_m)
 
     def get_borehole_extension_m(self, h_mes_m):
-        return self.interpolation_func_cubic_h_vert_by_h_mes(h_mes_m)
+        """
+        Функция по результатам выполненной ранее интерполяции возвращает величину удлинения ствола скважины,
+        т.е. разницу между измеренной глубиной и абсолютной
+
+        :param h_mes_m: измеренная глубина вдоль ствола скважины, м
+        :return: удлинение ствола скважины, м
+        """
+        return self.interpolation_borehole_extension_by_h_mes(h_mes_m)
 
     def get_curvature_rate_grad10m(self, h_mes_m):
+        """
+        Функция по результатам выполненной ранее интерполяции возвращает величину скорости набора кривизны
+
+        :param h_mes_m: измеренная глубина вдоль ствола скважины, м
+        :return: скорость набора кривизны, град / 10 м
+        """
         return self.interpolation_curvature_rate_by_h_mes(h_mes_m)
 
 
