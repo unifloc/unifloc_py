@@ -1162,6 +1162,28 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 Класс обеспечивает расчет свойств флюида при заданных термобарических условиях
 по одному набору корреляционных зависимостей
 классы потомки могут менять набор корреляционных зависимостей для уточнения расчета</p>
+<p>Cоздает флюид с заданными базовыми свойствами</p>
+<p>калибровочные параметры при необходимости надо задавать отдельно</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma_oil</strong> – </p></li>
+<li><p><strong>gamma_gas</strong> – </p></li>
+<li><p><strong>gamma_wat</strong> – </p></li>
+<li><p><strong>rsb_m3m3</strong> – </p></li>
+<li><p><strong>gamma_gassp</strong> – </p></li>
+<li><p><strong>y_h2s</strong> – </p></li>
+<li><p><strong>y_co2</strong> – </p></li>
+<li><p><strong>y_n2</strong> – </p></li>
+<li><p><strong>s_ppm</strong> – </p></li>
+<li><p><strong>par_wat</strong> – </p></li>
+<li><p><strong>pbcal_bar</strong> – </p></li>
+<li><p><strong>tpb_C</strong> – </p></li>
+<li><p><strong>bobcal_m3m3</strong> – </p></li>
+<li><p><strong>muobcal_cP</strong> – </p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bg_m3m3">
 <em class="property">property </em><code class="sig-name descname">bg_m3m3</code><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidBlackOil.bg_m3m3" title="Ссылка на это определение">¶</a></dt>
@@ -1339,6 +1361,12 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 <div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </div></blockquote>
 <p>класс для описания потока флюида</p>
+<p>Создает многофазный поток с нефтью определенной модели</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>fluid</strong> – модель флюида Standing или McCain</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="uniflocpy.uPVT.PVT_fluids.FluidFlow.calc">
 <code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidFlow.calc" title="Ссылка на это определение">¶</a></dt>
@@ -1368,6 +1396,28 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 </div></blockquote>
 <p>класс, реализующий расчет свойств нефти с использованием
 набора корреляций на основе McCain</p>
+<p>Cоздает флюид с заданными базовыми свойствами</p>
+<p>калибровочные параметры при необходимости надо задавать отдельно</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma_oil</strong> – </p></li>
+<li><p><strong>gamma_gas</strong> – </p></li>
+<li><p><strong>gamma_wat</strong> – </p></li>
+<li><p><strong>rsb_m3m3</strong> – </p></li>
+<li><p><strong>gamma_gassp</strong> – </p></li>
+<li><p><strong>y_h2s</strong> – </p></li>
+<li><p><strong>y_co2</strong> – </p></li>
+<li><p><strong>y_n2</strong> – </p></li>
+<li><p><strong>s_ppm</strong> – </p></li>
+<li><p><strong>par_wat</strong> – </p></li>
+<li><p><strong>pbcal_bar</strong> – </p></li>
+<li><p><strong>tpb_C</strong> – </p></li>
+<li><p><strong>bobcal_m3m3</strong> – </p></li>
+<li><p><strong>muobcal_cP</strong> – </p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="uniflocpy.uPVT.PVT_fluids.FluidMcCain.calc">
 <code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidMcCain.calc" title="Ссылка на это определение">¶</a></dt>
@@ -1396,6 +1446,28 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 </div></blockquote>
 <p>класс, реализующий расчет свойств нефти с использованием
 набора корреляций на основе Standing</p>
+<p>Cоздает флюид с заданными базовыми свойствами</p>
+<p>калибровочные параметры при необходимости надо задавать отдельно</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma_oil</strong> – </p></li>
+<li><p><strong>gamma_gas</strong> – </p></li>
+<li><p><strong>gamma_wat</strong> – </p></li>
+<li><p><strong>rsb_m3m3</strong> – </p></li>
+<li><p><strong>gamma_gassp</strong> – </p></li>
+<li><p><strong>y_h2s</strong> – </p></li>
+<li><p><strong>y_co2</strong> – </p></li>
+<li><p><strong>y_n2</strong> – </p></li>
+<li><p><strong>s_ppm</strong> – </p></li>
+<li><p><strong>par_wat</strong> – </p></li>
+<li><p><strong>pbcal_bar</strong> – </p></li>
+<li><p><strong>tpb_C</strong> – </p></li>
+<li><p><strong>bobcal_m3m3</strong> – </p></li>
+<li><p><strong>muobcal_cP</strong> – </p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="uniflocpy.uPVT.PVT_fluids.FluidStanding.calc">
 <code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.PVT_fluids.FluidStanding.calc" title="Ссылка на это определение">¶</a></dt>

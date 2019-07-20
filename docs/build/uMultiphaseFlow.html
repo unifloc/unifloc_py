@@ -50,6 +50,16 @@ Bratland O. Pipe flow 1: single-phase flow assurance
 </div></blockquote>
 <p>Модуль-класс для расчета коэффициента трения f
 в зависимости от числа Рейнольдса, абс. шероховатости и диаметра трубы.</p>
+<p>Консруктор класса</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_re</strong> – безразмерное число Рейнольдса</p></li>
+<li><p><strong>epsilon_m</strong> – абсолюная шероховатость</p></li>
+<li><p><strong>d_m</strong> – внутренний диаметр трубы</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="uniflocpy.uMultiphaseFlow.friction_Bratland.Friction.calc_f">
 <code class="sig-name descname">calc_f</code><span class="sig-paren">(</span><em class="sig-param">number_re</em>, <em class="sig-param">epsilon_m</em>, <em class="sig-param">d_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMultiphaseFlow.friction_Bratland.Friction.calc_f" title="Ссылка на это определение">¶</a></dt>
@@ -83,6 +93,15 @@ Bratland O. Pipe flow 1: single-phase flow assurance
 <div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </div></blockquote>
 <p>Класс для хранения данных и расчета градиента давления по методу Беггз и Брилл</p>
+<p>Инизиализация гидравлической корреляции</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epsilon_friction_m</strong> – шероховатость трубы, м</p></li>
+<li><p><strong>angle_grad</strong> – угол наклона трубы от горизонтали, град</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor.calc_grad">
 <code class="sig-name descname">calc_grad</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor.calc_grad" title="Ссылка на это определение">¶</a></dt>

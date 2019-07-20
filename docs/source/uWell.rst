@@ -22,3 +22,13 @@ uWell.deviation_survey
     :show-inheritance:
 
 
+uWell.Self_flow_well
+------------------------------
+
+.. automodule:: uniflocpy.uWell.Self_flow_well
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+

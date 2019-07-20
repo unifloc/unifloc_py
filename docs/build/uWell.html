@@ -47,6 +47,10 @@
 <div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </div></blockquote>
 <p>Расчет параметров течения ГЖС вдоль трубы</p>
+<p>Инизицализация подъемника газожидкостной смеси
+:param fluid: модель флюида, класс
+:param hydr_cor: гидравлическая корреляция, класс
+:param temp_cor: температурная корреляция, класс</p>
 <dl class="method">
 <dt id="uniflocpy.uWell.uPipe.Pipe.calc_p_grad_pam">
 <code class="sig-name descname">calc_p_grad_pam</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.uPipe.Pipe.calc_p_grad_pam" title="Ссылка на это определение">¶</a></dt>
@@ -65,7 +69,7 @@
 <div class="section" id="module-uniflocpy.uWell.deviation_survey">
 <span id="uwell-deviation-survey"></span><h2>uWell.deviation_survey<a class="headerlink" href="#module-uniflocpy.uWell.deviation_survey" title="Ссылка на этот заголовок">¶</a></h2>
 <p>Модуль работы над инклинометрией скважины</p>
-<p>Кобзарь О.С. 18.07.2019 г.</p>
+<p>Кобзарь О.С. Хабибуллин Р.А. 18.07.2019 г.</p>
 <dl class="class">
 <dt id="uniflocpy.uWell.deviation_survey.simple_well_deviation_survey">
 <em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uWell.deviation_survey.</code><code class="sig-name descname">simple_well_deviation_survey</code><a class="headerlink" href="#uniflocpy.uWell.deviation_survey.simple_well_deviation_survey" title="Ссылка на это определение">¶</a></dt>
@@ -266,6 +270,60 @@
 </dd></dl>
 
 </div>
+<div class="section" id="module-uniflocpy.uWell.Self_flow_well">
+<span id="uwell-self-flow-well"></span><h2>uWell.Self_flow_well<a class="headerlink" href="#module-uniflocpy.uWell.Self_flow_well" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Модуль-интерфейс описания работы фонтанирующей скважины</p>
+<p>Кобзарь О.С. Хабибуллин Р.А. 20.07.2019 г</p>
+<dl class="class">
+<dt id="uniflocpy.uWell.Self_flow_well.self_flow_well">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uWell.Self_flow_well.</code><code class="sig-name descname">self_flow_well</code><span class="sig-paren">(</span><em class="sig-param">h_conductor_mes_m=500</em>, <em class="sig-param">h_conductor_vert_m=500</em>, <em class="sig-param">h_intake_mes_m=1000</em>, <em class="sig-param">h_intake_vert_m=1000</em>, <em class="sig-param">h_bottomhole_mes_m=1500</em>, <em class="sig-param">h_bottomhole_vert_m=1500</em>, <em class="sig-param">qliq_on_surface_m3day=100</em>, <em class="sig-param">fw_perc=10</em>, <em class="sig-param">d_casing_inner_m=0.062</em>, <em class="sig-param">d_tube_inner_m=0.12</em>, <em class="sig-param">p_bottomhole_bar=200</em>, <em class="sig-param">t_bottomhole_c=92</em>, <em class="sig-param">p_wellhead_bar=20</em>, <em class="sig-param">t_wellhead_c=20</em>, <em class="sig-param">t_earth_init_on_surface_c=3</em>, <em class="sig-param">t_earth_init_in_reservoir_c=90</em>, <em class="sig-param">geothermal_grad_cm=0.03</em>, <em class="sig-param">well_work_time_sec=5184000</em>, <em class="sig-param">step_lenth_in_calc_along_wellbore_m=10</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.Self_flow_well.self_flow_well" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<p>При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
+вместе с граничными условиями. Кроме параметров, которые предлагается задать при
+иницаилизации, можно изменить и другие, входящие в состав модели, путем обращения к необходимым
+модулям. На что стоит обрать внимание: некоторые параметры выставлены по умолчанию и изменение
+всех интересующих параметров необходимо выполнить до процесса расчета.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h_conductor_mes_m</strong> – измеренная глубина конца кондуктора, м</p></li>
+<li><p><strong>h_conductor_vert_m</strong> – вертикальная глубина конца кондуктора, м</p></li>
+<li><p><strong>h_intake_mes_m</strong> – измеренная глубина конца колонны НКТ (спука НКТ), м</p></li>
+<li><p><strong>h_intake_vert_m</strong> – вертикальная глубина конца колонны НКТ (спуска НКТ), м</p></li>
+<li><p><strong>h_bottomhole_mes_m</strong> – измеренная глубина забоя, м</p></li>
+<li><p><strong>h_bottomhole_vert_m</strong> – вертикальная глубина забоя, м</p></li>
+<li><p><strong>qliq_on_surface_m3day</strong> – дебит жидкости на поверхности, м3/сутки</p></li>
+<li><p><strong>fw_perc</strong> – обводненность продукции на поверхности, %</p></li>
+<li><p><strong>d_casing_inner_m</strong> – внутренний диаметр обсадной колонны, м</p></li>
+<li><p><strong>d_tube_inner_m</strong> – внутренни диаметр НКТ</p></li>
+<li><p><strong>p_bottomhole_bar</strong> – давление на забое, бар</p></li>
+<li><p><strong>t_bottomhole_c</strong> – температура на забое, С</p></li>
+<li><p><strong>p_wellhead_bar</strong> – давление на устье, бар</p></li>
+<li><p><strong>t_wellhead_c</strong> – температура на устье, С</p></li>
+<li><p><strong>t_earth_init_on_surface_c</strong> – начальная температура земли на поверхности (нейтрального слоя), С</p></li>
+<li><p><strong>t_earth_init_in_reservoir_c</strong> – начальная температура пласта, С</p></li>
+<li><p><strong>geothermal_grad_cm</strong> – геотермический градиент, С/м</p></li>
+<li><p><strong>well_work_time_sec</strong> – время работы скважины, сек</p></li>
+<li><p><strong>step_lenth_in_calc_along_wellbore_m</strong> – длина шага вдоль ствола скважины в расчете, м</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="uniflocpy.uWell.Self_flow_well.self_flow_well.calc_all_from_down_to_up">
+<code class="sig-name descname">calc_all_from_down_to_up</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uWell.Self_flow_well.self_flow_well.calc_all_from_down_to_up" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет фонтанирующей скважины методом снизу-вверх</p>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -295,6 +353,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">uWell</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uWell.uPipe">uWell.uPipe</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uWell.deviation_survey">uWell.deviation_survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uWell.Self_flow_well">uWell.Self_flow_well</a></li>
 </ul>
 </li>
 </ul>
