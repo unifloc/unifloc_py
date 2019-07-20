@@ -222,7 +222,7 @@ class simple_well_deviation_survey():
 
         self.interpolation_func_slinear_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
                                                                                self.h_vert_init_data_for_interpolation_m,
-                                                                               kind='slinear')
+                                                                               kind='linear')
         self.interpolation_func_cubic_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
                                                                              self.h_vert_init_data_for_interpolation_m,
                                                                              kind='cubic')
@@ -239,9 +239,8 @@ class simple_well_deviation_survey():
         for i in range(self.amounts_of_parts):
             current_h_mes_m = h_mes_m[-1] + self.lenth_of_one_part
 
-            if current_h_mes_m < self.h_conductor_mes_m:
-                current_h_vert_m = float(self.interpolation_func_slinear_h_vert_by_h_mes(current_h_mes_m))
-            else:
+            current_h_vert_m = float(self.interpolation_func_slinear_h_vert_by_h_mes(current_h_mes_m))
+            if current_h_vert_m < current_h_mes_m:
                 current_h_vert_m = float(self.interpolation_func_cubic_h_vert_by_h_mes(current_h_mes_m))
 
             current_borehole_extension = current_h_mes_m - current_h_vert_m
