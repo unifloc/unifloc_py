@@ -4,11 +4,10 @@
 Кобзарь О.С. Хабибуллин Р.А. 20.07.2019 г
 """
 
-#TODO добавить учет угла наклона скважины при расчете
-#TODO добавить возможноть извлечения всех доступных данных через единственный self.data
-#TODO добавить расчет методом снизу вверх
-#TODO добавить возможность добавления нескольких колонн НКТ и ОК
-#TODO добавить конструкцию трубы - толщины, диаметры внешние и внутренние
+# TODO добавить возможноть извлечения всех доступных данных через единственный self.data
+# TODO добавить расчет методом снизу вверх
+# TODO добавить возможность добавления нескольких колонн НКТ и ОК
+# TODO добавить конструкцию трубы - толщины, диаметры внешние и внутренние
 
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uTools.data_workflow as data_workflow
@@ -178,11 +177,3 @@ class self_flow_well():
             self.__calc_pipe__(self.tube_pipe)
         self.__calc_pipe__(self.tube_pipe, option_last_calc_boolean=True)
 
-
-
-#simple_well = self_flow_well()
-#print("kek")
-#simple_well.well_work_time_sec = 24 * 60 * 60
-#simple_well.calc_all_from_down_to_up()
-#print(simple_well.t_calculated_c)
-#simple_well.data.get_values(28)

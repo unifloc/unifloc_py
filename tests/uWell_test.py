@@ -5,7 +5,9 @@ import unittest
 import uniflocpy.uWell.uPipe as Pipe
 import uniflocpy.uWell.deviation_survey as dev_surv
 import sys
+import uniflocpy.uWell.Self_flow_well as self_flow_well_module
 sys.path.append('../')
+
 
 class TestWell(unittest.TestCase):
     def test_Pipe_calc_p_grad_pam(self):
@@ -29,6 +31,14 @@ class TestWell(unittest.TestCase):
         pipe.section_casing = True
         self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.017798062343446185,
                                delta=0.0001)
+# TODO температура последний рассчитанный параметр, но может быть поменять на сумму для более точной проверки?
+
+
+class TestSelfFlowWell(unittest.TestCase):
+    def test_calc_all_from_down_to_up(self):
+        self_flow_well_object = self_flow_well_module.self_flow_well()
+        self_flow_well_object.calc_all_from_down_to_up()
+        self.assertAlmostEquals(self_flow_well_object.t_calculated_c, 75.98485926724206, delta=0.00000001)
 
 
 class TestDeviationSurvey(unittest.TestCase):
@@ -44,6 +54,7 @@ class TestDeviationSurvey(unittest.TestCase):
         sum = vert_angle_grad + h_vert_m + curvature_rate_grad10m
         self.assertAlmostEqual(sum, 1826.6854610931557,
                                delta=0.0000001)
+
     def test_simple_well_deviation_survey(self):
         swds = dev_surv.simple_well_deviation_survey()
         swds.calc_all()
