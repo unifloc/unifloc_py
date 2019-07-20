@@ -20,22 +20,22 @@ class self_flow_well():
     def __init__(self, h_conductor_mes_m=500, h_conductor_vert_m=500,
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
-                 qliq_on_surface_m3day = 100, fw_perc = 10,
-                 d_casing_inner_m = 0.062, d_tube_inner_m = 0.120,
-                 p_bottomhole_bar = 200, t_bottomhole_c = 92,
+                 qliq_on_surface_m3day=100, fw_perc=10,
+                 d_casing_inner_m=0.062, d_tube_inner_m=0.120,
+                 p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
                  t_earth_init_on_surface_c=3, t_earth_init_in_reservoir_c=90, geothermal_grad_cm=0.03,
                  well_work_time_sec=60 * 24 * 60 * 60, step_lenth_in_calc_along_wellbore_m=10):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
         вместе с граничными условиями. Кроме параметров, которые предлагается задать при
-        иницаилизации, можно изменить и другие, входящие в состав модели, путем обращения к необходимым
+        инициализации, можно изменить и другие, входящие в состав модели, путем обращения к необходимым
         модулям. На что стоит обрать внимание: некоторые параметры выставлены по умолчанию и изменение
         всех интересующих параметров необходимо выполнить до процесса расчета.
 
         :param h_conductor_mes_m: измеренная глубина конца кондуктора, м
         :param h_conductor_vert_m: вертикальная глубина конца кондуктора, м
-        :param h_intake_mes_m: измеренная глубина конца колонны НКТ (спука НКТ), м
+        :param h_intake_mes_m: измеренная глубина конца колонны НКТ (спуска НКТ), м
         :param h_intake_vert_m: вертикальная глубина конца колонны НКТ (спуска НКТ), м
         :param h_bottomhole_mes_m: измеренная глубина забоя, м
         :param h_bottomhole_vert_m: вертикальная глубина забоя, м
@@ -114,12 +114,13 @@ class self_flow_well():
         pipe_object.time_sec = self.well_work_time_sec
         pipe_object.fluid_flow.d_m = d_inner_pipe_m
 
-    def __calc_pipe__(self, pipe_object):
+    def __calc_pipe__(self, pipe_object, option_last_calc_boolean = False):
         """
-        Один цикл полного расчета трубы - НКТ или ОК - с их сохранением в атрибуты класс и
-        в инструмент data_workflow - self.data
+        Расчет трубы (НКТ или ОК) в текущей точке всех параметров, сохранение их в атрибуты класса и в хранилище
+        data_workflow - self.data, а после вычисление параметров в следующей точке.
 
         :param pipe_object: экзмепляр класс Pipe - НКТ или ОК
+        :param option_last_calc_boolean: опция последнего расчета - не вычисляются параметры в следующей точке
         :return: None
         """
         pipe_object.t_earth_init_c = self.t_calculated_earth_init
@@ -128,17 +129,18 @@ class self_flow_well():
                                                                                  self.t_calculated_c))
         self.t_grad_calculated_cm = pipe_object.calc_t_grad_cm(self.p_calculated_bar, self.t_calculated_c)
 
-        self.step_lenth_calculated_along_vert_m = np.abs(self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
-                                                                                        self.step_lenth_in_calc_along_wellbore_m) -
-                                                         self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
 
-        self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m
-        self.t_calculated_c -= self.t_grad_calculated_cm * self.step_lenth_in_calc_along_wellbore_m
-        self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m
-        self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
-
-        self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m
         self.data.get_data(self)
+        if not option_last_calc_boolean:
+            self.step_lenth_calculated_along_vert_m = np.abs(self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
+                                                                                            self.step_lenth_in_calc_along_wellbore_m) -
+                                                             self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
+            self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m
+            self.t_calculated_c -= self.t_grad_calculated_cm * self.step_lenth_in_calc_along_wellbore_m
+            self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m
+            self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
+            self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m
+
 
     def calc_all_from_down_to_up(self):
         """
@@ -165,15 +167,15 @@ class self_flow_well():
                                                    self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
 
         self.data.clear_data()
-        self.data.get_data(self)
 
         self.__transfer_data_to_pipe__(self.casing_pipe, True, self.d_casing_inner_m)
         while self.h_calculated_mes_m >= self.h_intake_mes_m:
             self.__calc_pipe__(self.casing_pipe)
 
         self.__transfer_data_to_pipe__(self.tube_pipe, False, self.d_tube_inner_m)
-        while self.h_calculated_mes_m < self.h_intake_mes_m and self.h_calculated_mes_m > self.step_lenth_in_calc_along_wellbore_m:
+        while self.h_calculated_mes_m < self.h_intake_mes_m and self.h_calculated_mes_m >= self.step_lenth_in_calc_along_wellbore_m:
             self.__calc_pipe__(self.tube_pipe)
+        self.__calc_pipe__(self.tube_pipe, option_last_calc_boolean=True)
 
 
 
@@ -181,4 +183,5 @@ class self_flow_well():
 #print("kek")
 #simple_well.well_work_time_sec = 24 * 60 * 60
 #simple_well.calc_all_from_down_to_up()
-#print(simple_well.p_calculated_bar)
+#print(simple_well.t_calculated_c)
+#simple_well.data.get_values(28)
