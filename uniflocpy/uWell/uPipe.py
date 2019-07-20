@@ -30,6 +30,8 @@ class Pipe():
 
         self.t_earth_init_c = 45
 
+        self.angle_to_horizontal_grad = 90
+
         self.p_bar = None
         self.t_c = None
 
@@ -42,6 +44,8 @@ class Pipe():
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
 
+        self.hydr_cor.angle_grad = self.angle_to_horizontal_grad
+        self.hydr_cor.angle_rad = uc.grad2rad(self.angle_to_horizontal_grad)
         self.hydr_cor.d_m = self.fluid_flow.d_m
 
         self.hydr_cor.vsl_msec = self.fluid_flow.vsl_msec
@@ -68,6 +72,7 @@ class Pipe():
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
 
+        self.temp_cor.angle_rad = uc.grad2rad(self.angle_to_horizontal_grad)
         self.temp_cor.section_casing = self.section_casing
 
         self.temp_cor.time_sec = self.time_sec

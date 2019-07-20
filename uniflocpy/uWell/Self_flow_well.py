@@ -124,6 +124,7 @@ class self_flow_well():
         :return: None
         """
         pipe_object.t_earth_init_c = self.t_calculated_earth_init
+        pipe_object.angle_to_horizontal_grad = self.well_profile.get_angle_to_horizontal_grad(self.h_calculated_mes_m)
 
         self.p_grad_calculated_barm = uc.Pa2bar(pipe_object.calc_p_grad_pam(self.p_calculated_bar,
                                                                                  self.t_calculated_c))
