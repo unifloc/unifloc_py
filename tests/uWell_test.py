@@ -54,5 +54,5 @@ class TestDeviationSurvey(unittest.TestCase):
         h_vert_m = swds.get_h_vert_m(h_mes_m)
         x_displacement_m = swds.get_x_displacement_m(h_mes_m)
         sum = curvature_rate_grad10m + vert_angle_grad + borehole_extension_m + h_vert_m + x_displacement_m
-        self.assertAlmostEqual(sum, 3131.965243588372,
+        self.assertAlmostEqual(sum, 2429.763334309198,
                                delta=0.0000001)

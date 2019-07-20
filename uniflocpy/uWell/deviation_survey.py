@@ -11,7 +11,7 @@ import scipy.interpolate as interpolate
 
 # TODO добавить логику для проверки ошибок - "защиту от дурака"
 # TODO проверить методы интерполяции - где уместно линейную, где кубическую?
-# TODO проверить простую модель, добавление точки для горизонтальной скважины
+# TODO проверить простую модель, добавить возможность добавление точек для создания профиля любой сложности
 # TODO переделать циклы for на numpy
 
 class well_deviation_survey:
@@ -177,8 +177,6 @@ class simple_well_deviation_survey():
     def __init__(self):
         self.h_conductor_mes_m = 500
         self.h_conductor_vert_m = 500
-        self.h_conductor_end_mes_m = 600
-        self.h_conductor_end_vert_m = 597
         self.h_pump_mes_m = 1200
         self.h_pump_vert_m = 1000
         self.h_bottomhole_mes_m = 2500
@@ -217,9 +215,9 @@ class simple_well_deviation_survey():
 
         :return: None
         """
-        self.h_mes_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_mes_m, self.h_conductor_end_mes_m,
+        self.h_mes_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_mes_m,
                                                                self.h_pump_mes_m, self.h_bottomhole_mes_m])
-        self.h_vert_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_vert_m, self.h_conductor_end_vert_m,
+        self.h_vert_init_data_for_interpolation_m = np.asarray([0, self.h_conductor_vert_m,
                                                                self.h_pump_vert_m, self.h_bottomhole_vert_m])
 
         self.interpolation_func_slinear_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
