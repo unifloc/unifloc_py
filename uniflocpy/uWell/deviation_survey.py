@@ -194,14 +194,14 @@ class simple_well_deviation_survey():
 
         self.h_mes_m = None
         self.h_vert_m = None
-        self.vert_angle_grad = None
+        self.angle_to_horizontal_grad = None
         self.x_displacement_m = None
         self.y_displacement_m = None
         self.curvature_rate_grad10m = None
         self.borehole_extension_m = None
 
         self.interpolation_x_displacement_by_h_mes = None
-        self.interpolation_vert_angle_by_h_mes = None
+        self.interpolation_angle_to_horizontal_by_h_mes = None
         self.interpolation_h_vert_by_h_mes = None
         self.interpolation_borehole_extension_by_h_mes = None
         self.interpolation_curvature_rate_by_h_mes = None
@@ -231,7 +231,7 @@ class simple_well_deviation_survey():
 
         h_mes_m = [0]
         h_vert_m = [0]
-        vert_angle_grad = [90]
+        angle_to_horizontal_grad = [90]
         x_displacement_m = [0]
         curvature_rate_grad10m = [0]
         borehole_extension = [0]
@@ -254,23 +254,23 @@ class simple_well_deviation_survey():
 
             current_x_displacement_m = x_displacement_m[-1] + delta_x_displacement_m
 
-            cos_phi_vert_angle = delta_x_displacement_m / self.lenth_of_one_part
+            cos_phi_angle_to_horizontal = delta_x_displacement_m / self.lenth_of_one_part
 
-            current_vert_angle_grad = np.degrees(np.arccos(float(cos_phi_vert_angle)))
+            current_angle_to_horizontal = np.degrees(np.arccos(float(cos_phi_angle_to_horizontal)))
 
-            current_curvature_rate_grad10m = (vert_angle_grad[
-                                                     -1] - current_vert_angle_grad) / self.lenth_of_one_part
+            current_curvature_rate_grad10m = (angle_to_horizontal_grad[
+                                                     -1] - current_angle_to_horizontal) / self.lenth_of_one_part
 
             h_mes_m.append(current_h_mes_m)
             h_vert_m.append(current_h_vert_m)
             borehole_extension.append(current_borehole_extension)
             x_displacement_m.append(current_x_displacement_m)
-            vert_angle_grad.append(current_vert_angle_grad)
+            angle_to_horizontal_grad.append(current_angle_to_horizontal)
             curvature_rate_grad10m.append(current_curvature_rate_grad10m)
 
         self.h_mes_m = np.asarray(h_mes_m)
         self.h_vert_m = np.asarray(h_vert_m)
-        self.vert_angle_grad = np.asarray(vert_angle_grad)
+        self.angle_to_horizontal_grad = np.asarray(angle_to_horizontal_grad)
         self.x_displacement_m = np.asarray(x_displacement_m)
         self.y_displacement_m = np.asarray(x_displacement_m) * 0
         self.curvature_rate_grad10m = np.asarray(curvature_rate_grad10m)
@@ -284,9 +284,9 @@ class simple_well_deviation_survey():
                                                                   self.h_vert_m,
                                                                   kind='cubic')
 
-        self.interpolation_vert_angle_by_h_mes = interpolate.interp1d(self.h_mes_m,
-                                                                      self.vert_angle_grad,
-                                                                      kind='cubic')
+        self.interpolation_angle_to_horizontal_by_h_mes = interpolate.interp1d(self.h_mes_m,
+                                                                               self.angle_to_horizontal_grad,
+                                                                               kind='cubic')
 
         self.interpolation_borehole_extension_by_h_mes = interpolate.interp1d(self.h_mes_m,
                                                                               self.borehole_extension_m,
@@ -314,14 +314,14 @@ class simple_well_deviation_survey():
         """
         return self.interpolation_h_vert_by_h_mes(h_mes_m)
 
-    def get_vert_angle_grad(self, h_mes_m):
+    def get_angle_to_horizontal_grad(self, h_mes_m):
         """
-        Функция по результатам выполненной ранее интерполяции возвращает угол наклона от вертикали
+        Функция по результатам выполненной ранее интерполяции возвращает угол наклона от горизонтали
 
         :param h_mes_m: измеренная глубина вдоль ствола скважины, м
-        :return: угол наклона от вертикали, м
+        :return: угол наклона от горизонтали, м
         """
-        return self.interpolation_vert_angle_by_h_mes(h_mes_m)
+        return self.interpolation_angle_to_horizontal_by_h_mes(h_mes_m)
 
     def get_borehole_extension_m(self, h_mes_m):
         """
@@ -344,3 +344,5 @@ class simple_well_deviation_survey():
 
 
 
+check = simple_well_deviation_survey()
+check.calc_all()

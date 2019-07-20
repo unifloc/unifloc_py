@@ -49,7 +49,7 @@ class TestDeviationSurvey(unittest.TestCase):
         swds.calc_all()
         h_mes_m = 1587.566
         curvature_rate_grad10m = swds.get_curvature_rate_grad10m(h_mes_m)
-        vert_angle_grad = swds.get_vert_angle_grad(h_mes_m)
+        vert_angle_grad = swds.get_angle_to_horizontal_grad(h_mes_m)
         borehole_extension_m = swds.get_borehole_extension_m(h_mes_m)
         h_vert_m = swds.get_h_vert_m(h_mes_m)
         x_displacement_m = swds.get_x_displacement_m(h_mes_m)
