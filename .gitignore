@@ -7,3 +7,4 @@ __pycache__/
 /test/.idea
 /test/.vscode
 .pytest_cache/
+/sandbox/uTools/kobzar1.csv
