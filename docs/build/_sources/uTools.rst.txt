@@ -22,6 +22,15 @@ uTools.uconst
     :undoc-members:
     :show-inheritance:
 
+uTools.data_editor
+----------------------------
+
+.. automodule:: uniflocpy.uTools.data_editor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 `hyperlink <https://www.youtube.com/watch?v=dQw4w9WgXcQ>`_
 
 

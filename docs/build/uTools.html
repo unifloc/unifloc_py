@@ -567,6 +567,137 @@ value(s) will be converted. Supported scales are atm („atm“,
 :return: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-uniflocpy.uTools.data_editor">
+<span id="utools-data-editor"></span><h2>uTools.data_editor<a class="headerlink" href="#module-uniflocpy.uTools.data_editor" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Модуль для первичной загрузки и редактирования данных со станции управления, сохранения данных в новый файл
+.csv, в котором параметры будут разнесены по столбцам и отсортированы по времени</p>
+<p>Кобзарь О.С. Хабибуллин Р.А. 29.07.2019</p>
+<dl class="class">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTools.data_editor.</code><code class="sig-name descname">Editor_initial_cs_data</code><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.create_edited_df">
+<code class="sig-name descname">create_edited_df</code><span class="sig-paren">(</span><em class="sig-param">prepared_data</em>, <em class="sig-param">parametrs_list_for_prepared_data</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.create_edited_df" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Итоговая обработка данных после предварительной обработки</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prepared_data</strong> – подготовленные данные</p></li>
+<li><p><strong>parametrs_list_for_prepared_data</strong> – список параметров в подготовленных данных</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>готовый DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.extract_df_one_parametr_and_edit">
+<code class="sig-name descname">extract_df_one_parametr_and_edit</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">list_of_params</em>, <em class="sig-param">number_of_param_in_list</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.extract_df_one_parametr_and_edit" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Извлечение из общих данных DataFrame c единственным параметром по его номеру в списке параметров</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – DataFrame</p></li>
+<li><p><strong>list_of_params</strong> – список параметров в данном DataFrame</p></li>
+<li><p><strong>number_of_param_in_list</strong> – номер параметра в списке</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>сформированный DataFrame с единственный параметром</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_information">
+<code class="sig-name descname">get_information</code><span class="sig-paren">(</span><em class="sig-param">cs_data=-1</em>, <em class="sig-param">parametrs_list=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_information" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение информации через print о данных</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cs_data</strong> – DataFrame данных со СУ</p></li>
+<li><p><strong>parametrs_list</strong> – лист имен уникальных параметров в cs_data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>порядковый номер параметра в списке и количество записей в cs_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_parametrs_list">
+<code class="sig-name descname">get_parametrs_list</code><span class="sig-paren">(</span><em class="sig-param">cs_data=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_parametrs_list" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Определение уникальных параметров</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>cs_data</strong> – DataFrame данных со СУ</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>список уникальных параметров</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.initial_editing">
+<code class="sig-name descname">initial_editing</code><span class="sig-paren">(</span><em class="sig-param">str_to_delete</em>, <em class="sig-param">data=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.initial_editing" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Первоначальная обработка данных: удаление лишнего столбца, приведение индекса ко времени,
+изменение столбца с названием параметров</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str_to_delete</strong> – строка для удаления в столбце</p></li>
+<li><p><strong>data</strong> – DataFrame данных со СУ</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>измененный DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.load_csv">
+<code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param">csv_file_name_str</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.load_csv" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Стандартная загрузка через Pandas с учетом особенностей файла со СУ - нет заголовков и разделитель ;
+если при загрузке выявляется ошибка, необходимо загрузить csv стандартным методом pandas, а после
+присвоить атрибуту self.init_pandas_df текущего класса загруженный DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>csv_file_name_str</strong> – имя файлика в директории, data.csv</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.save_edited_df">
+<code class="sig-name descname">save_edited_df</code><span class="sig-paren">(</span><em class="sig-param">edited_df</em>, <em class="sig-param">csv_name_str</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.save_edited_df" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Сохранение итогового отредактированного DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edited_df</strong> – итоговый отредактированный DataFrame</p></li>
+<li><p><strong>csv_name_str</strong> – имя файлика в директории, data.csv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
 <p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
 </div>
@@ -598,6 +729,7 @@ value(s) will be converted. Supported scales are atm („atm“,
 <li class="toctree-l1 current"><a class="current reference internal" href="#">uTools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.data_workflow">uTools.data_workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.uconst">uTools.uconst</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.data_editor">uTools.data_editor</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uWell.html">uWell</a></li>
