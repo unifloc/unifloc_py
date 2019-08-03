@@ -146,6 +146,7 @@ t_step_days = 30.33
 S_wat_connate_d = 0.25
 
 fluid = PVT.FluidStanding()
+fluid.pbcal_bar = 200
 fluid.calc(p_res_init_bar, t_res_init_c)
 
 
