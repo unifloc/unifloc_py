@@ -96,7 +96,6 @@ class MatBalance():
         """
 
         self.p_reservoir_bar = float(p_reservoir_bar)
-        p_reservoir_bar_float = float(self.p_reservoir_bar)
         self.fluid.calc(self.p_reservoir_bar, self.t_reservoir_init_c)
         self.b_oil_m3m3 = self.fluid.bo_m3m3
         self.b_wat_m3m3 = self.fluid.bw_m3m3
@@ -106,7 +105,7 @@ class MatBalance():
         self.p_drop_bar = np.abs(self.p_reservoir_bar - self.p_reservoir_init_bar)
 
         self.left_part_oil_m3 = self.N_cum_oil_recovery_m3 * self.b_oil_m3m3
-        self.left_part_free_gas_m3 = self.N_cum_oil_recovery_m3 * (self.rp_m3m3  - self.rs_m3m3) * self.b_gas_m3m3
+        self.left_part_free_gas_m3 = self.N_cum_oil_recovery_m3 * (self.rp_m3m3 - self.rs_m3m3) * self.b_gas_m3m3
         self.left_side_underground_withdrawal_m3 = self.left_part_oil_m3 + self.left_part_free_gas_m3
 
         self.right_part_oil_expansion_m3 = self.STOIIP_by_VOL_m3 * ((self.b_oil_m3m3 - self.b_oil_init_m3m3) +
