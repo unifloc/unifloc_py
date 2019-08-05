@@ -120,6 +120,14 @@ class MatBalance():
         return self.material_balance_m3
 
     def calc_depletion_above_and_below_pb(self, N_cum_oil_recovery_m3):
+        """
+        Функция для расчета пластового давления нефтяной залежи на режиме истощения при
+        проявлении упругих сил нефти и скелета выше давления насыщения, упругих сил нефти, скелета,
+        выделившегося газа ниже давления насыщения. 
+
+        :param N_cum_oil_recovery_m3: Накопленная добыча нефти в поверхностных условиях, м3
+        :return: None
+        """
 
         self.N_cum_oil_recovery_m3 = N_cum_oil_recovery_m3
 
@@ -129,48 +137,6 @@ class MatBalance():
         self.b_gas_init_m3m3 = self.fluid.bg_m3m3
         self.rs_init_m3m3 = self.fluid.rs_m3m3
 
-        #p_0_reservoir_bar = self.p_reservoir_init_bar - 248
         p_0_reservoir_bar = 1.1
         self.p_reservoir_bar = fsolve(self.__material_balance_for_fsolve__, p_0_reservoir_bar)
 
-
-p_res_init_bar = 250
-t_res_init_c = 80
-r_drainage_m = 250
-porosity_d = 0.25
-q_oil_surf_m3day = 50
-h_eff_res_m = 8
-c_system_1bar = 7.5 * 10 ** (-5)
-t_end_year = 1
-t_step_days = 30.33
-S_wat_connate_d = 0.25
-
-fluid = PVT.FluidStanding()
-fluid.pbcal_bar = 100
-fluid.rsb_m3m3 = 100
-fluid.calc(p_res_init_bar, t_res_init_c)
-
-
-STOIIP_by_VOL_m3 = uc.pi * r_drainage_m ** 2 * h_eff_res_m * porosity_d * (1 - S_wat_connate_d) / fluid.bo_m3m3
-
-N_cum_oil_recovery_m3 = q_oil_surf_m3day * t_step_days * 15
-
-MB = MatBalance()
-
-MB.fluid = fluid
-MB.rp_m3m3 = MB.fluid.rs_m3m3
-MB.STOIIP_by_VOL_m3 = STOIIP_by_VOL_m3
-c_wat_1bar = 4.35 * 10 ** (-5)
-c_res_1bar = 7.25 * 10 ** (-5)
-
-MB.c_wat_1bar = c_wat_1bar
-MB.c_res_1bar = c_res_1bar
-
-MB.t_reservoir_init_c = t_res_init_c
-MB.p_reservoir_init_bar = p_res_init_bar
-MB.S_wat_connate_d = S_wat_connate_d
-
-MB.calc_depletion_above_and_below_pb(N_cum_oil_recovery_m3)
-print(MB.fluid.pb_bar)
-print(MB.material_balance_m3)
-print(MB.__dict__)
