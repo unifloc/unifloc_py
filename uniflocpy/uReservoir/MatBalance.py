@@ -102,7 +102,7 @@ class MatBalance():
         self.b_gas_m3m3 = self.fluid.bg_m3m3
         self.rs_m3m3 = self.fluid.rs_m3m3
 
-        self.p_drop_bar = np.abs(self.p_reservoir_bar - self.p_reservoir_init_bar)
+        self.p_drop_bar = self.p_reservoir_init_bar - self.p_reservoir_bar
 
         self.left_part_oil_m3 = self.N_cum_oil_recovery_m3 * self.b_oil_m3m3
         self.left_part_free_gas_m3 = self.N_cum_oil_recovery_m3 * (self.rp_m3m3 - self.rs_m3m3) * self.b_gas_m3m3
@@ -129,7 +129,8 @@ class MatBalance():
         self.b_gas_init_m3m3 = self.fluid.bg_m3m3
         self.rs_init_m3m3 = self.fluid.rs_m3m3
 
-        p_0_reservoir_bar = self.p_reservoir_init_bar - 10.0
+        #p_0_reservoir_bar = self.p_reservoir_init_bar - 248
+        p_0_reservoir_bar = 1.1
         self.p_reservoir_bar = fsolve(self.__material_balance_for_fsolve__, p_0_reservoir_bar)
 
 
@@ -145,13 +146,14 @@ t_step_days = 30.33
 S_wat_connate_d = 0.25
 
 fluid = PVT.FluidStanding()
-fluid.pbcal_bar = 200
+fluid.pbcal_bar = 100
+fluid.rsb_m3m3 = 100
 fluid.calc(p_res_init_bar, t_res_init_c)
 
 
 STOIIP_by_VOL_m3 = uc.pi * r_drainage_m ** 2 * h_eff_res_m * porosity_d * (1 - S_wat_connate_d) / fluid.bo_m3m3
 
-N_cum_oil_recovery_m3 = q_oil_surf_m3day * t_step_days
+N_cum_oil_recovery_m3 = q_oil_surf_m3day * t_step_days * 15
 
 MB = MatBalance()
 
