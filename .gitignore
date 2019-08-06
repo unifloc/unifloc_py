@@ -13,3 +13,6 @@ __pycache__/
 /sandbox/uTools/edited_kobzar2.csv
 /sandbox/uTools/resampled_small_data.csv
 /sandbox/uTools/small_part_to_analyze.csv
+/sandbox/uTools/resampled_small_data_by_3h.csv
+/sandbox/uTools/resampled_small_data_by_3h_last.csv
+/sandbox/uTools/resampled_small_data_by_3h_mean.csv
