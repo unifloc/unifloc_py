@@ -6,6 +6,7 @@
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import numpy as np
+import matplotlib.pyplot as plt
 
 const_convert_m3day_gpm = 0.183452813362193
 class ESP_polynom():
@@ -27,7 +28,21 @@ class ESP_polynom():
                         self.coef5 * arg ** 5
         return self.result
 
-
+class ESP_structure():
+    def __init__(self, ID_ESP=737,
+                 stage_number=324,
+                 power_ESP_nom_kwt=60,
+                 freq_hz=50,
+                 freq_nom_hz=50,
+                 q_max_ESP_nom_m3day=300,
+                 q_ESP_nom_m3day=250):
+        self.ID_ESP = ID_ESP
+        self.stage_number = stage_number
+        self.power_ESP_nom_kwt = power_ESP_nom_kwt
+        self.freq_hz = freq_hz
+        self.freq_nom_hz = freq_nom_hz
+        self.q_max_ESP_nom_m3day = q_max_ESP_nom_m3day
+        self.q_ESP_nom_m3day = q_ESP_nom_m3day
 
 class ESP():
 
@@ -38,6 +53,8 @@ class ESP():
         self.freq_nom_hz = ESP_structure.freq_nom_hz
         self.q_max_ESP_nom_m3day = ESP_structure.q_max_ESP_nom_m3day
         self.q_ESP_nom_m3day = ESP_structure.q_ESP_nom_m3day
+
+        self.polynom_ESP = None
 
         self.stage_height_m = 0.05
         self.ESP_lenth = None
@@ -125,7 +142,9 @@ class ESP():
             self.stage_head_m = 0
         if self.option_correct_viscosity:
             self.check = self.correct_viscosity_by_petroleum_institute(q_mix_degr_m3day, self.mu_mix_cSt)
-
+        b = self.freq_hz / self.freq_nom_hz
+        self.ESP_head_calculated_m = b ** (-2) * stage_number_in_calc * self.polynom_ESP.calc(b * q_mix_degr_m3day)
+        return self.ESP_head_calculated_m
 
 
 
@@ -167,7 +186,38 @@ class ESP():
 
 
 
+ESP_polynom_obj = ESP_polynom()
+
+ESP_polynom_obj.coef0 = 6.73238871864004
+ESP_polynom_obj.coef1 = -1.15209366895305E-02
+ESP_polynom_obj.coef2 = 4.45392114072489E-04
+ESP_polynom_obj.coef3 = -4.97923165135159E-06
+ESP_polynom_obj.coef4 = 1.4546401075876E-08
+ESP_polynom_obj.coef5 = -1.19688044019184E-11
+ESP_data = ESP_structure()
+
+ESP_obj = ESP(ESP_data)
+ESP_obj.polynom_ESP = ESP_polynom_obj
+p_bar = 30
+t_c = 30
+
+ESP_obj.fluid.calc(p_bar, t_c)
+ESP_obj.mu_mix_cP = ESP_obj.fluid.mu_oil_cP
+ESP_obj.rho_mix_kgm3 = ESP_obj.fluid.rho_oil_kgm3
+q_mix_degr_m3day = 100
+stage_number_in_calc = 324
+mu_mix_cP = 1
+head_m = ESP_obj.get_ESP_head_m(q_mix_degr_m3day, stage_number_in_calc, mu_mix_cP)
+print(head_m)
+head_m_list = []
+q_m3day_list = []
+
+for q_m3day in range(1, 230):
+    head_m = ESP_obj.get_ESP_head_m(q_m3day, stage_number_in_calc, mu_mix_cP)
+    head_m_list.append(head_m)
+    q_m3day_list.append(q_m3day)
+    print(head_m)
 
 
-
-
+plt.plot(q_m3day_list,head_m_list)
+plt.show()
