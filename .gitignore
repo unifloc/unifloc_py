@@ -16,3 +16,4 @@ __pycache__/
 /sandbox/uTools/resampled_small_data_by_3h.csv
 /sandbox/uTools/resampled_small_data_by_3h_last.csv
 /sandbox/uTools/resampled_small_data_by_3h_mean.csv
+/sandbox/uTools/resample_small_data_without_zeros_3h_mean.csv
