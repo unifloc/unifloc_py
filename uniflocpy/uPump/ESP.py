@@ -8,6 +8,9 @@ import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+# TODO отдельный метод/класс для проверки исходных данных
+
 const_convert_m3day_gpm = 0.183452813362193
 class ESP_polynom():
     def __init__(self):
@@ -55,6 +58,8 @@ class ESP():
         self.q_ESP_nom_m3day = ESP_structure.q_ESP_nom_m3day
 
         self.polynom_ESP = None
+        self.polynom_ESP_efficency = None
+        self.ESP_polynom_power = None
 
         self.stage_height_m = 0.05
         self.ESP_lenth = None
@@ -146,7 +151,16 @@ class ESP():
         self.ESP_head_calculated_m = b ** (-2) * stage_number_in_calc * self.polynom_ESP.calc(b * q_mix_degr_m3day)
         return self.ESP_head_calculated_m
 
+    def get_ESP_efficiency_d(self, q_m3day, mu_cP):
+        self.mu_mix_cSt = mu_cP / (self.rho_mix_kgm3 / 1000)
+        b = self.freq_hz / self.freq_nom_hz
+        self.ESP_efficiency_calculated_d = self.polynom_ESP_efficency.calc(b * q_m3day)
+        return self.ESP_efficiency_calculated_d
 
+    def get_ESP_power_Wt(self, q_m3day, stage_number_in_calc, mu_cP):
+        b = self.freq_hz / self.freq_nom_hz
+        self.power_ESP_calculated_Wt = 1000 * b ** (-3) * stage_number_in_calc * self.ESP_polynom_power.calc(b * q_m3day)
+        return self.power_ESP_calculated_Wt
 
 
 
@@ -186,18 +200,34 @@ class ESP():
 
 
 
-ESP_polynom_obj = ESP_polynom()
+ESP_polynom_head_obj = ESP_polynom()
+ESP_polynom_head_obj.coef0 = 6.73238871864004
+ESP_polynom_head_obj.coef1 = -1.15209366895305E-02
+ESP_polynom_head_obj.coef2 = 4.45392114072489E-04
+ESP_polynom_head_obj.coef3 = -4.97923165135159E-06
+ESP_polynom_head_obj.coef4 = 1.4546401075876E-08
+ESP_polynom_head_obj.coef5 = -1.19688044019184E-11
 
-ESP_polynom_obj.coef0 = 6.73238871864004
-ESP_polynom_obj.coef1 = -1.15209366895305E-02
-ESP_polynom_obj.coef2 = 4.45392114072489E-04
-ESP_polynom_obj.coef3 = -4.97923165135159E-06
-ESP_polynom_obj.coef4 = 1.4546401075876E-08
-ESP_polynom_obj.coef5 = -1.19688044019184E-11
 ESP_data = ESP_structure()
 
+ESP_polynom_efficency_obj = ESP_polynom()
+ESP_polynom_efficency_obj.coef0 = 4.1990495766025E-03
+ESP_polynom_efficency_obj.coef1 = 5.99377724541058E-03
+ESP_polynom_efficency_obj.coef2 = 1.6897242340386E-05
+ESP_polynom_efficency_obj.coef3 = -2.73132096997276E-07
+ESP_polynom_efficency_obj.coef4 = 9.14180916880957E-11
+ESP_polynom_efficency_obj.coef5 = 1.24234461289717E-12
+
+ESP_polynom_power_obj = ESP_polynom()
+ESP_polynom_power_obj.coef0 = 0.106170031712193
+ESP_polynom_power_obj.coef1 = 2.74596766297403E-04
+ESP_polynom_power_obj.coef2 = 3.45749447827218E-06
+ESP_polynom_power_obj.coef3 = -5.9698533809646E-08
+ESP_polynom_power_obj.coef4 = 4.02396243631364E-10
+ESP_polynom_power_obj.coef5 = -9.16011251716958E-13
+
 ESP_obj = ESP(ESP_data)
-ESP_obj.polynom_ESP = ESP_polynom_obj
+ESP_obj.polynom_ESP = ESP_polynom_head_obj
 p_bar = 30
 t_c = 30
 
@@ -211,13 +241,30 @@ head_m = ESP_obj.get_ESP_head_m(q_mix_degr_m3day, stage_number_in_calc, mu_mix_c
 print(head_m)
 head_m_list = []
 q_m3day_list = []
+efficiency_d_list = []
+power_wt_list = []
+
+
+ESP_obj.polynom_ESP_efficency = ESP_polynom_efficency_obj
+ESP_obj.ESP_polynom_power = ESP_polynom_power_obj
 
 for q_m3day in range(1, 230):
     head_m = ESP_obj.get_ESP_head_m(q_m3day, stage_number_in_calc, mu_mix_cP)
+    efficiency_d = ESP_obj.get_ESP_efficiency_d(q_m3day, mu_mix_cP)
+    power_wt = ESP_obj.get_ESP_power_Wt(q_m3day, stage_number_in_calc, mu_mix_cP)
+    efficiency_d_list.append(efficiency_d)
     head_m_list.append(head_m)
     q_m3day_list.append(q_m3day)
+    power_wt_list.append(power_wt)
     print(head_m)
+    print(efficiency_d)
+    print(power_wt)
+
 
 
 plt.plot(q_m3day_list,head_m_list)
+plt.show()
+plt.plot(q_m3day_list,efficiency_d_list)
+plt.show()
+plt.plot(q_m3day_list,power_wt_list)
 plt.show()
