@@ -7,7 +7,16 @@ import uniflocpy.uTools.uconst as uc
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import numpy as np
 import matplotlib.pyplot as plt
+import uniflocpy.uTools.data_workflow as data_workflow
+import pandas as pd
 
+
+import plotly.graph_objs as go
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot
+from plotly import tools
+
+import scipy.interpolate as interpolate
+import matplotlib.pyplot as plt
 
 # TODO отдельный метод/класс для проверки исходных данных
 
@@ -57,6 +66,8 @@ class ESP():
         self.q_max_ESP_nom_m3day = ESP_structure.q_max_ESP_nom_m3day
         self.q_ESP_nom_m3day = ESP_structure.q_ESP_nom_m3day
 
+        self.esp_calculated_data = data_workflow.Data()
+
         self.polynom_ESP = None
         self.polynom_ESP_efficency = None
         self.ESP_polynom_power = None
@@ -64,7 +75,7 @@ class ESP():
         self.stage_height_m = 0.05
         self.ESP_lenth = None
 
-        self.k_sep_total_d = 0.7
+        self.k_sep_total_d = 0.9
 
         self.fluid_flow = MultiPhaseFlow
         self.fluid = fluid
@@ -77,16 +88,18 @@ class ESP():
 
         self.p_intake_bar = None
         self.t_intake_bar = None
-        self.power_fluid_stage_kwt = None
-        self.power_fluid_total_kwt = None
-        self.power_ESP_stage_kwt = None
-        self.power_ESP_total_kwt = None
+        self.power_fluid_stage_wt = None
+        self.power_fluid_total_wt = None
+        self.power_ESP_stage_wt = None
+        self.power_ESP_total_wt = None
         self.dt_stage_c = None
         self.dt_total_c = None
         self.dp_stage_bar = None
         self.dp_total_bar = None
         self.p_bar = None
         self.t_c = None
+        self.ESP_efficiency_total_d = None
+        self.ESP_efficiency_stage_d = None
 
         self.gas_fraction_d = None
         self.q_mix_m3day = None
@@ -171,24 +184,23 @@ class ESP():
         self.p_bar = p_bar
         self.t_c = t_c
 
-        self.power_fluid_stage_kwt = 0
-        self.power_fluid_total_kwt = 0
-        self.power_ESP_stage_kwt = 0
-        self.power_ESP_total_kwt = 0
+        self.power_fluid_stage_wt = 0
+        self.power_fluid_total_wt = 0
+        self.power_ESP_stage_wt = 0
+        self.power_ESP_total_wt = 0
         self.dt_stage_c = 0
         self.dt_total_c = 0
         self.dp_stage_bar = 0
         self.dp_total_bar = 0
         self.stage_head_m = 0
         self.ESP_head_total_m = 0
-
-
+        self.esp_calculated_data.clear_data()
         for i in range(self.stage_number):
             self.fluid.calc(self.p_bar, self.t_c)
             self.fluid_flow.calc(self.p_bar, self.t_c)
 
             self.gas_fraction_d = (self.fluid_flow.qgas_m3day * (1 - self.k_sep_total_d) /
-                                   self.fluid_flow.qliq_m3day + self.fluid_flow.qgas_m3day * (1 - self.k_sep_total_d))
+                                   (self.fluid_flow.qliq_m3day + self.fluid_flow.qgas_m3day * (1 - self.k_sep_total_d)))
 
             self.q_mix_m3day = self.fluid_flow.qliq_m3day + self.fluid_flow.qgas_m3day * (1 - self.k_sep_total_d)
             self.q_mix_degr_m3day = self.q_mix_m3day * (1 + self.k_rate_degradation_d)
@@ -197,6 +209,34 @@ class ESP():
             self.rho_mix_kgm3 = self.fluid_flow.rho_liq_kgm3 * (1 - self.gas_fraction_d) + \
                                 self.fluid_flow.fl.rho_gas_kgm3 * self.gas_fraction_d
             self.stage_head_m = self.get_ESP_head_m(self.q_mix_degr_m3day, self.stage_number_in_calc, self.mu_mix_cP)
+            self.ESP_head_total_m += self.stage_head_m
+            self.dp_stage_bar = uc.Pa2bar(self.stage_head_m * self.rho_mix_kgm3 * uc.g)
+            self.dp_total_bar += self.dp_stage_bar
+
+            self.power_fluid_stage_wt = uc.m3day2m3sec(self.q_mix_degr_m3day) * uc.bar2Pa(self.dp_stage_bar)
+            self.power_fluid_total_wt += self.power_fluid_stage_wt
+
+            self.power_ESP_stage_wt = self.get_ESP_power_Wt(self.q_mix_degr_m3day,
+                                                            self.stage_number_in_calc,
+                                                            self.mu_mix_cP)
+            self.power_ESP_total_wt += self.power_ESP_stage_wt
+
+            if self.power_ESP_total_wt > 0:
+                self.ESP_efficiency_total_d = self.power_fluid_total_wt / self.power_ESP_total_wt
+            if self.power_ESP_stage_wt > 0:
+                self.ESP_efficiency_stage_d = self.power_fluid_stage_wt / self.power_ESP_stage_wt
+
+            if self.ESP_efficiency_stage_d > 0:
+                self.dt_stage_c = (uc.g * self.stage_head_m / self.fluid_flow.heatcapn_jkgc *
+                                  (1 - self.ESP_efficiency_stage_d) / self.ESP_efficiency_stage_d)
+
+            self.dt_total_c += self.dt_stage_c
+
+            self.esp_calculated_data.get_data(self)
+
+            self.p_bar += self.dp_stage_bar
+            self.t_c += self.dt_stage_c
+
 
 
 
@@ -261,6 +301,10 @@ for q_m3day in range(1, 230):
     print(power_wt)
 
 
+ESP_obj.q_mix_m3day = 100
+ESP_obj.calc(p_bar, t_c)
+print(ESP_obj.__dict__)
+
 
 plt.plot(q_m3day_list,head_m_list)
 plt.show()
@@ -268,3 +312,47 @@ plt.plot(q_m3day_list,efficiency_d_list)
 plt.show()
 plt.plot(q_m3day_list,power_wt_list)
 plt.show()
+
+ESP_obj.esp_calculated_data.print_all_names()
+
+
+def trace(data_x, data_y, namexy):
+    tracep = go.Scattergl(
+        x=data_x,
+        y=data_y,
+        name=namexy,
+        mode='lines'
+    )
+    return tracep
+
+
+def plot_func():
+    layout = dict(title='Расчет параметров насоса по ступеням')
+
+    fig = dict(data=data, layout=layout)
+
+    plot(fig, filename='basic-scatter-ESP.html')
+    #plot()
+
+
+def create_traces_list_by_num(data_x_values, data_y, num_y_list):
+    trace_list = []
+    for i in num_y_list:
+        namexy = data_y.get_name(i)
+        this_trace = trace(data_x_values, data_y.get_values(i), namexy)
+        trace_list.append(this_trace)
+    return trace_list
+
+
+def connect_traces(traces1, trace2):
+    connected_traces = []
+    for i in traces1:
+        connected_traces.append(i)
+    for j in trace2:
+        connected_traces.append(j)
+    return connected_traces
+
+numbers_ESP_list = list(range(19, 46))
+data_trace_ESP = create_traces_list_by_num(np.asarray(range(ESP_obj.stage_number)), ESP_obj.esp_calculated_data,  numbers_ESP_list)
+data = data_trace_ESP
+plot_func()
