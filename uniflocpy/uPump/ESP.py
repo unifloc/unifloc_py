@@ -9,7 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import uniflocpy.uTools.data_workflow as data_workflow
 import pandas as pd
+import time
 
+start = time.time()
+print("hello")
+end = time.time()
+print(end - start)
 
 import plotly.graph_objs as go
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot
@@ -68,6 +73,8 @@ class ESP():
 
         self.esp_calculated_data = data_workflow.Data()
 
+        self.save_calculated_data = True
+
         self.polynom_ESP = None
         self.polynom_ESP_efficency = None
         self.ESP_polynom_power = None
@@ -80,7 +87,7 @@ class ESP():
         self.fluid_flow = MultiPhaseFlow
         self.fluid = fluid
 
-        self.option_correct_viscosity = True
+        self.option_correct_viscosity = False
 
         self.k_rate_degradation_d = 0
         self.k_pressure_degradation_d = 0
@@ -111,7 +118,7 @@ class ESP():
         self.mu_mix_cSt = None
         self.q_max_ESP_m3day = None
 
-        self.check = None
+        self.check = -1
 
     def correct_viscosity_by_petroleum_institute(self, q_m3day, mu_cSt):
         if mu_cSt < 5:
@@ -232,7 +239,8 @@ class ESP():
 
             self.dt_total_c += self.dt_stage_c
 
-            self.esp_calculated_data.get_data(self)
+            if self.save_calculated_data:
+                self.esp_calculated_data.get_data(self)
 
             self.p_bar += self.dp_stage_bar
             self.t_c += self.dt_stage_c
@@ -268,9 +276,11 @@ ESP_polynom_power_obj.coef5 = -9.16011251716958E-13
 
 ESP_obj = ESP(ESP_data)
 ESP_obj.polynom_ESP = ESP_polynom_head_obj
+ESP_obj.polynom_ESP_efficency = ESP_polynom_efficency_obj
+ESP_obj.ESP_polynom_power = ESP_polynom_power_obj
 p_bar = 30
 t_c = 30
-
+"""
 ESP_obj.fluid.calc(p_bar, t_c)
 ESP_obj.mu_mix_cP = ESP_obj.fluid.mu_oil_cP
 ESP_obj.rho_mix_kgm3 = ESP_obj.fluid.rho_oil_kgm3
@@ -285,8 +295,7 @@ efficiency_d_list = []
 power_wt_list = []
 
 
-ESP_obj.polynom_ESP_efficency = ESP_polynom_efficency_obj
-ESP_obj.ESP_polynom_power = ESP_polynom_power_obj
+
 
 for q_m3day in range(1, 230):
     head_m = ESP_obj.get_ESP_head_m(q_m3day, stage_number_in_calc, mu_mix_cP)
@@ -301,9 +310,7 @@ for q_m3day in range(1, 230):
     print(power_wt)
 
 
-ESP_obj.q_mix_m3day = 100
-ESP_obj.calc(p_bar, t_c)
-print(ESP_obj.__dict__)
+
 
 
 plt.plot(q_m3day_list,head_m_list)
@@ -312,7 +319,10 @@ plt.plot(q_m3day_list,efficiency_d_list)
 plt.show()
 plt.plot(q_m3day_list,power_wt_list)
 plt.show()
-
+"""
+ESP_obj.q_mix_m3day = 100
+ESP_obj.calc(p_bar, t_c)
+print(ESP_obj.__dict__)
 ESP_obj.esp_calculated_data.print_all_names()
 
 
@@ -326,12 +336,12 @@ def trace(data_x, data_y, namexy):
     return tracep
 
 
-def plot_func():
-    layout = dict(title='Расчет параметров насоса по ступеням')
+def plot_func(plot_title_str, filename_str):
+    layout = dict(title=plot_title_str)
 
     fig = dict(data=data, layout=layout)
 
-    plot(fig, filename='basic-scatter-ESP.html')
+    plot(fig, filename=filename_str)
     #plot()
 
 
@@ -352,7 +362,37 @@ def connect_traces(traces1, trace2):
         connected_traces.append(j)
     return connected_traces
 
-numbers_ESP_list = list(range(19, 46))
+numbers_ESP_list = list(range(19, 45))
 data_trace_ESP = create_traces_list_by_num(np.asarray(range(ESP_obj.stage_number)), ESP_obj.esp_calculated_data,  numbers_ESP_list)
 data = data_trace_ESP
-plot_func()
+plot_func("Расчет насоса по ступеням", "Расчет насоса по ступеням.html")
+
+data_ESP_perfomance = data_workflow.Data()
+data_ESP_perfomance.clear_data()
+
+start = time.time()
+
+
+
+
+for q_m3day in range(1, 230, 10):
+    start_in_loop = time.time()
+    p_bar = 30
+    t_c = 30
+    ESP_obj.fluid_flow.fw_on_surface_perc = 0
+    ESP_obj.save_calculated_data = False
+    ESP_obj.fluid_flow.qliq_on_surface_m3day = q_m3day
+    ESP_obj.calc(p_bar, t_c)
+    data_ESP_perfomance.get_data(ESP_obj)
+    end_in_loop = time.time()
+    print("Рассчитан ЭЦН для q_m3day=" + str(q_m3day))
+    print("Время расчета для одного значения расхода = " + str(end_in_loop - start_in_loop))
+end = time.time()
+print("Полный расчет характеристики")
+print(end - start)
+data_ESP_perfomance.print_all_names()
+
+numbers_ESP_perfomance_list = list(range(19, 45))
+data_trace_ESP = create_traces_list_by_num(np.asarray(range(1, 230, 10)), data_ESP_perfomance,  numbers_ESP_perfomance_list)
+data = data_trace_ESP
+plot_func("Расчет ЭЦН на разных режимах работы", "Расчет ЭЦН на разных режимах работы.html")
