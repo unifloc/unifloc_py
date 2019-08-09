@@ -71,13 +71,15 @@ class ESP():
         self.q_max_ESP_nom_m3day = ESP_structure.q_max_ESP_nom_m3day
         self.q_ESP_nom_m3day = ESP_structure.q_ESP_nom_m3day
 
-        self.esp_calculated_data = data_workflow.Data()
+        self.esp_calc_data = data_workflow.Data()
+        self.fluid_flow_calc_data = data_workflow.Data()
+        self.fluid_calc_data = data_workflow.Data()
 
         self.save_calculated_data = True
 
-        self.polynom_ESP = None
-        self.polynom_ESP_efficency = None
-        self.ESP_polynom_power = None
+        self.polynom_esp_head_wt = None
+        self.polynom_esp_efficiency_d = None
+        self.polynom_esp_power_wt = None
 
         self.stage_height_m = 0.05
         self.ESP_lenth = None
@@ -168,18 +170,18 @@ class ESP():
         if self.option_correct_viscosity:
             self.check = self.correct_viscosity_by_petroleum_institute(q_mix_degr_m3day, self.mu_mix_cSt)
         b = self.freq_hz / self.freq_nom_hz
-        self.ESP_head_calculated_m = b ** (-2) * stage_number_in_calc * self.polynom_ESP.calc(b * q_mix_degr_m3day)
+        self.ESP_head_calculated_m = b ** (-2) * stage_number_in_calc * self.polynom_esp_head_wt.calc(b * q_mix_degr_m3day)
         return self.ESP_head_calculated_m
 
     def get_ESP_efficiency_d(self, q_m3day, mu_cP):
         self.mu_mix_cSt = mu_cP / (self.rho_mix_kgm3 / 1000)
         b = self.freq_hz / self.freq_nom_hz
-        self.ESP_efficiency_calculated_d = self.polynom_ESP_efficency.calc(b * q_m3day)
+        self.ESP_efficiency_calculated_d = self.polynom_esp_efficiency_d.calc(b * q_m3day)
         return self.ESP_efficiency_calculated_d
 
     def get_ESP_power_Wt(self, q_m3day, stage_number_in_calc, mu_cP):
         b = self.freq_hz / self.freq_nom_hz
-        self.power_ESP_calculated_Wt = 1000 * b ** (-3) * stage_number_in_calc * self.ESP_polynom_power.calc(b * q_m3day)
+        self.power_ESP_calculated_Wt = 1000 * b ** (-3) * stage_number_in_calc * self.polynom_esp_power_wt.calc(b * q_m3day)
         return self.power_ESP_calculated_Wt
 
 
@@ -201,7 +203,11 @@ class ESP():
         self.dp_total_bar = 0
         self.stage_head_m = 0
         self.ESP_head_total_m = 0
-        self.esp_calculated_data.clear_data()
+
+        self.esp_calc_data.clear_data()
+        self.fluid_flow_calc_data.clear_data()
+        self.fluid_calc_data.clear_data()
+
         for i in range(self.stage_number):
             self.fluid.calc(self.p_bar, self.t_c)
             self.fluid_flow.calc(self.p_bar, self.t_c)
@@ -240,92 +246,14 @@ class ESP():
             self.dt_total_c += self.dt_stage_c
 
             if self.save_calculated_data:
-                self.esp_calculated_data.get_data(self)
+                self.esp_calc_data.save_data_from_class_to_storage(self)
+                self.fluid_flow_calc_data.save_data_from_class_to_storage(self.fluid_flow)
+                self.fluid_calc_data.save_data_from_class_to_storage(self.fluid)
 
             self.p_bar += self.dp_stage_bar
             self.t_c += self.dt_stage_c
 
-
-
-
-ESP_polynom_head_obj = ESP_polynom()
-ESP_polynom_head_obj.coef0 = 6.73238871864004
-ESP_polynom_head_obj.coef1 = -1.15209366895305E-02
-ESP_polynom_head_obj.coef2 = 4.45392114072489E-04
-ESP_polynom_head_obj.coef3 = -4.97923165135159E-06
-ESP_polynom_head_obj.coef4 = 1.4546401075876E-08
-ESP_polynom_head_obj.coef5 = -1.19688044019184E-11
-
-ESP_data = ESP_structure()
-
-ESP_polynom_efficency_obj = ESP_polynom()
-ESP_polynom_efficency_obj.coef0 = 4.1990495766025E-03
-ESP_polynom_efficency_obj.coef1 = 5.99377724541058E-03
-ESP_polynom_efficency_obj.coef2 = 1.6897242340386E-05
-ESP_polynom_efficency_obj.coef3 = -2.73132096997276E-07
-ESP_polynom_efficency_obj.coef4 = 9.14180916880957E-11
-ESP_polynom_efficency_obj.coef5 = 1.24234461289717E-12
-
-ESP_polynom_power_obj = ESP_polynom()
-ESP_polynom_power_obj.coef0 = 0.106170031712193
-ESP_polynom_power_obj.coef1 = 2.74596766297403E-04
-ESP_polynom_power_obj.coef2 = 3.45749447827218E-06
-ESP_polynom_power_obj.coef3 = -5.9698533809646E-08
-ESP_polynom_power_obj.coef4 = 4.02396243631364E-10
-ESP_polynom_power_obj.coef5 = -9.16011251716958E-13
-
-ESP_obj = ESP(ESP_data)
-ESP_obj.polynom_ESP = ESP_polynom_head_obj
-ESP_obj.polynom_ESP_efficency = ESP_polynom_efficency_obj
-ESP_obj.ESP_polynom_power = ESP_polynom_power_obj
-p_bar = 30
-t_c = 30
-"""
-ESP_obj.fluid.calc(p_bar, t_c)
-ESP_obj.mu_mix_cP = ESP_obj.fluid.mu_oil_cP
-ESP_obj.rho_mix_kgm3 = ESP_obj.fluid.rho_oil_kgm3
-q_mix_degr_m3day = 100
-stage_number_in_calc = 324
-mu_mix_cP = 1
-head_m = ESP_obj.get_ESP_head_m(q_mix_degr_m3day, stage_number_in_calc, mu_mix_cP)
-print(head_m)
-head_m_list = []
-q_m3day_list = []
-efficiency_d_list = []
-power_wt_list = []
-
-
-
-
-for q_m3day in range(1, 230):
-    head_m = ESP_obj.get_ESP_head_m(q_m3day, stage_number_in_calc, mu_mix_cP)
-    efficiency_d = ESP_obj.get_ESP_efficiency_d(q_m3day, mu_mix_cP)
-    power_wt = ESP_obj.get_ESP_power_Wt(q_m3day, stage_number_in_calc, mu_mix_cP)
-    efficiency_d_list.append(efficiency_d)
-    head_m_list.append(head_m)
-    q_m3day_list.append(q_m3day)
-    power_wt_list.append(power_wt)
-    print(head_m)
-    print(efficiency_d)
-    print(power_wt)
-
-
-
-
-
-plt.plot(q_m3day_list,head_m_list)
-plt.show()
-plt.plot(q_m3day_list,efficiency_d_list)
-plt.show()
-plt.plot(q_m3day_list,power_wt_list)
-plt.show()
-"""
-ESP_obj.q_mix_m3day = 100
-ESP_obj.calc(p_bar, t_c)
-print(ESP_obj.__dict__)
-ESP_obj.esp_calculated_data.print_all_names()
-
-
+# TODO функции для построения графиков вынести в модуль plot_workflow
 def trace(data_x, data_y, namexy):
     tracep = go.Scattergl(
         x=data_x,
@@ -348,8 +276,8 @@ def plot_func(plot_title_str, filename_str):
 def create_traces_list_by_num(data_x_values, data_y, num_y_list):
     trace_list = []
     for i in num_y_list:
-        namexy = data_y.get_name(i)
-        this_trace = trace(data_x_values, data_y.get_values(i), namexy)
+        namexy = data_y.get_saved_parameter_name_by_number(i)
+        this_trace = trace(data_x_values, data_y.get_saved_values_by_number(i), namexy)
         trace_list.append(this_trace)
     return trace_list
 
@@ -362,37 +290,107 @@ def connect_traces(traces1, trace2):
         connected_traces.append(j)
     return connected_traces
 
-numbers_ESP_list = list(range(19, 45))
-data_trace_ESP = create_traces_list_by_num(np.asarray(range(ESP_obj.stage_number)), ESP_obj.esp_calculated_data,  numbers_ESP_list)
+
+ESP_polynom_head_obj = ESP_polynom()
+ESP_polynom_head_obj.coef0 = 6.73238871864004
+ESP_polynom_head_obj.coef1 = -1.15209366895305E-02
+ESP_polynom_head_obj.coef2 = 4.45392114072489E-04
+ESP_polynom_head_obj.coef3 = -4.97923165135159E-06
+ESP_polynom_head_obj.coef4 = 1.4546401075876E-08
+ESP_polynom_head_obj.coef5 = -1.19688044019184E-11
+
+ESP_polynom_efficency_obj = ESP_polynom()
+ESP_polynom_efficency_obj.coef0 = 4.1990495766025E-03
+ESP_polynom_efficency_obj.coef1 = 5.99377724541058E-03
+ESP_polynom_efficency_obj.coef2 = 1.6897242340386E-05
+ESP_polynom_efficency_obj.coef3 = -2.73132096997276E-07
+ESP_polynom_efficency_obj.coef4 = 9.14180916880957E-11
+ESP_polynom_efficency_obj.coef5 = 1.24234461289717E-12
+
+ESP_polynom_power_obj = ESP_polynom()
+ESP_polynom_power_obj.coef0 = 0.106170031712193
+ESP_polynom_power_obj.coef1 = 2.74596766297403E-04
+ESP_polynom_power_obj.coef2 = 3.45749447827218E-06
+ESP_polynom_power_obj.coef3 = -5.9698533809646E-08
+ESP_polynom_power_obj.coef4 = 4.02396243631364E-10
+ESP_polynom_power_obj.coef5 = -9.16011251716958E-13
+
+ESP_data = ESP_structure()
+ESP_obj = ESP(ESP_data)
+ESP_obj.polynom_esp_head_wt = ESP_polynom_head_obj
+ESP_obj.polynom_esp_efficiency_d = ESP_polynom_efficency_obj
+ESP_obj.polynom_esp_power_wt = ESP_polynom_power_obj
+
+p_bar = 30
+t_c = 30
+
+ESP_obj.q_mix_m3day = 100
+ESP_obj.fluid_flow.fw_on_surface_perc = 0
+ESP_obj.calc(p_bar, t_c)
+"""
+ESP_obj.esp_calc_data.print_all_names_of_saved_parameters()
+ESP_obj.fluid_calc_data.print_all_names_of_saved_parameters()
+ESP_obj.fluid_flow_calc_data.print_all_names_of_saved_parameters()
+
+parameter_numbers_ESP_list = list(range(19, 45))
+data_trace_ESP = create_traces_list_by_num(np.asarray(range(ESP_obj.stage_number)), ESP_obj.esp_calc_data, parameter_numbers_ESP_list)
 data = data_trace_ESP
-plot_func("Расчет насоса по ступеням", "Расчет насоса по ступеням.html")
+plot_func("Расчет насоса по ступеням - esp_calc_data", "Расчет насоса по ступеням - esp_calc_data.html")
+
+parameter_numbers_fluid_flow_list =  list(range(6, 30))
+data_trace_fluid_flow = create_traces_list_by_num(np.asarray(range(ESP_obj.stage_number)), ESP_obj.fluid_flow_calc_data, parameter_numbers_fluid_flow_list)
+data = data_trace_fluid_flow
+plot_func("Расчет насоса по ступеням - fluid_flow_calc_data", "Расчет насоса по ступеням - fluid_flow_calc_data.html")
+
+
+parameter_numbers_fluid_list = list(range(0, 43))
+data_trace_fluid = create_traces_list_by_num(np.asarray(range(ESP_obj.stage_number)), ESP_obj.fluid_calc_data, parameter_numbers_fluid_list)
+data = data_trace_fluid
+plot_func("Расчет насоса по ступеням - fluid_calc_data", "Расчет насоса по ступеням - fluid_calc_data.html")
+
+"""
 
 data_ESP_perfomance = data_workflow.Data()
+data_fluid_perfomance = data_workflow.Data()
+data_fluid_flow_perfomance = data_workflow.Data()
+
 data_ESP_perfomance.clear_data()
+data_fluid_perfomance.clear_data()
+data_fluid_flow_perfomance.clear_data()
 
 start = time.time()
 
-
-
-
-for q_m3day in range(1, 230, 10):
+for q_m3day in range(110, 230, 10):
     start_in_loop = time.time()
-    p_bar = 30
-    t_c = 30
-    ESP_obj.fluid_flow.fw_on_surface_perc = 0
+
+    ESP_obj.fluid_flow.fw_on_surface_perc = 100
     ESP_obj.save_calculated_data = False
     ESP_obj.fluid_flow.qliq_on_surface_m3day = q_m3day
     ESP_obj.calc(p_bar, t_c)
-    data_ESP_perfomance.get_data(ESP_obj)
+    data_ESP_perfomance.save_data_from_class_to_storage(ESP_obj)
+    data_fluid_perfomance.save_data_from_class_to_storage(ESP_obj.fluid)
+    data_fluid_flow_perfomance.save_data_from_class_to_storage(ESP_obj.fluid_flow)
+
+
     end_in_loop = time.time()
     print("Рассчитан ЭЦН для q_m3day=" + str(q_m3day))
     print("Время расчета для одного значения расхода = " + str(end_in_loop - start_in_loop))
+
 end = time.time()
 print("Полный расчет характеристики")
 print(end - start)
-data_ESP_perfomance.print_all_names()
 
 numbers_ESP_perfomance_list = list(range(19, 45))
 data_trace_ESP = create_traces_list_by_num(np.asarray(range(1, 230, 10)), data_ESP_perfomance,  numbers_ESP_perfomance_list)
 data = data_trace_ESP
-plot_func("Расчет ЭЦН на разных режимах работы", "Расчет ЭЦН на разных режимах работы.html")
+plot_func("Расчет ЭЦН на разных режимах работы - ESP", "Расчет ЭЦН на разных режимах работы - ESP.html")
+
+numbers_fluid_perfomance_list = list(range(0, 43))
+data_trace_fluid = create_traces_list_by_num(np.asarray(range(1, 230, 10)), data_fluid_perfomance,  numbers_fluid_perfomance_list)
+data = data_trace_fluid
+plot_func("Расчет ЭЦН на разных режимах работы - fluid", "Расчет ЭЦН на разных режимах работы - fluid.html")
+
+numbers_fluid_flow_perfomance_list = list(range(6, 30))
+data_trace_fluid_flow = create_traces_list_by_num(np.asarray(range(1, 230, 10)), data_fluid_flow_perfomance,  numbers_fluid_flow_perfomance_list)
+data = data_trace_fluid_flow
+plot_func("Расчет ЭЦН на разных режимах работы - fluid_flow", "Расчет ЭЦН на разных режимах работы - fluid_flow.html")

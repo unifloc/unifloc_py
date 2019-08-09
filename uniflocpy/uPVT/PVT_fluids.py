@@ -512,7 +512,7 @@ class FluidFlow:
 
         return mix_JT_coef_heatcap / self.heatcapn_jkgc
 
-    def __calc_velosities__(self, p_bar, t_c):
+    def __calc_velosities__(self, p_bar, t_c):  # TODO учесть сепарацию для расчета многофазного потока (дебит газа)
         """
         Рассчитаваются дебиты и скорости ГЖС в условиях пласта
 
