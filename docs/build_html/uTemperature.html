@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>uTemperature &#8212; документация unifloc 0.6.0</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="uTools" href="uTools.html" />
+    <link rel="prev" title="uMultiphaseFlow" href="uMultiphaseFlow.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="utemperature">
+<h1>uTemperature<a class="headerlink" href="#utemperature" title="Ссылка на этот заголовок">¶</a></h1>
+<p>Package calculates temperature phenomena in the well</p>
+<div class="section" id="module-uniflocpy.uTemperature.temp_cor_Hasan_Kabir">
+<span id="utemperature-temp-cor-hasan-kabir"></span><h2>uTemperature.temp_cor_Hasan_Kabir<a class="headerlink" href="#module-uniflocpy.uTemperature.temp_cor_Hasan_Kabir" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Кобзарь О.С. Хабибуллин Р.А.
+Температурная корреляция в форме градиента</p>
+<dl class="class">
+<dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTemperature.temp_cor_Hasan_Kabir.</code><code class="sig-name descname">Hasan_Kabir_cor</code><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<dl class="method">
+<dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_annulus">
+<code class="sig-name descname">calc_annulus</code><span class="sig-paren">(</span><em class="sig-param">delta_t_an_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_annulus" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет затрубного пространства
+:param delta_t_an_c: начальное приближения для перепада температур в затрубном пространстве, С
+:return: разница между начальным приближением и вычисленным результатом - для fsolve</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_grad_t_cm">
+<code class="sig-name descname">calc_grad_t_cm</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor.calc_grad_t_cm" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated">
+<span id="utemperature-temp-cor-hasan-kabir-integrated"></span><h2>uTemperature.temp_cor_Hasan_Kabir_integrated<a class="headerlink" href="#module-uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Температурная корреляция в проинтегрированном виде
+TODO требуется создание этой же корреляции в форме градиента</p>
+<dl class="class">
+<dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.Hasan_Kabir_cor">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.</code><code class="sig-name descname">Hasan_Kabir_cor</code><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.Hasan_Kabir_cor" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<dl class="method">
+<dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.Hasan_Kabir_cor.calc_t_c_fluid">
+<code class="sig-name descname">calc_t_c_fluid</code><span class="sig-paren">(</span><em class="sig-param">distance_m</em>, <em class="sig-param">p_pa</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.Hasan_Kabir_cor.calc_t_c_fluid" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод расчета температуры флюида</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance_m</strong> – расстояние от забоя до точки расчета</p></li>
+<li><p><strong>p_pa</strong> – давление в точке расчета</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>температура в точке расчета</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.han_var2">
+<code class="sig-prename descclassname">uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.</code><code class="sig-name descname">han_var2</code><span class="sig-paren">(</span><em class="sig-param">mu_an_pas</em>, <em class="sig-param">cp_an_jkgc</em>, <em class="sig-param">k_an_wmc</em>, <em class="sig-param">delta_temp_an_c</em>, <em class="sig-param">rho_an_kgm3</em>, <em class="sig-param">betta_1c</em>, <em class="sig-param">rci_m</em>, <em class="sig-param">rto_m</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated.han_var2" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция для расчета коэффициента теплоотдачи при есстественной конвекции в затрубном пространстве</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu_an_pas</strong> – Вязкость флюида в затрубном пространстве, Па * с</p></li>
+<li><p><strong>cp_an_jkgc</strong> – Теплоекость флюида в затрубном пространстве, Дж / кг / С</p></li>
+<li><p><strong>k_an_wmc</strong> – Коэффициент теплопроводности в затрубном пространстве, Ватт / м / С</p></li>
+<li><p><strong>delta_temp_an_c</strong> – Разница температур в затрубном пространстве, С</p></li>
+<li><p><strong>rho_an_kgm3</strong> – Плотность флюида в затрубном пространстве, кг / м3</p></li>
+<li><p><strong>betta_1c</strong> – Коэффициент объемного температурного расширения флюида в з.п., 1 / С</p></li>
+<li><p><strong>rci_m</strong> – Внутренний диаметр обсадной колонны, м</p></li>
+<li><p><strong>rto_m</strong> – Внешний диаметр НКТ</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>Коэффициент теплоотдачи, Ватт / м2 / С</p>
+</dd>
+</dl>
+<p>Пример:
+example_han_var2=temp.han_var2(sys_prop.mu_an_pas, sys_prop.cp_an_jkgc,</p>
+<blockquote>
+<div><p>sys_prop.k_an_wmc, sys_prop.delta_temp_an_c,
+sys_prop.rho_an_km3, sys_prop.betta_1c,
+sys_prop.rci_m, sys_prop.rto_m)</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-uniflocpy.uTemperature.temp_cable_NS">
+<span id="utemperature-temp-cable-ns"></span><h2>uTemperature.temp_cable_NS<a class="headerlink" href="#module-uniflocpy.uTemperature.temp_cable_NS" title="Ссылка на этот заголовок">¶</a></h2>
+<p>ГОСТ Р 51777-2001 Кабели для установок погружных электронасосов.</p>
+<p>Общие технические условия (с Поправкой)</p>
+<dl class="class">
+<dt id="uniflocpy.uTemperature.temp_cable_NS.Cable">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTemperature.temp_cable_NS.</code><code class="sig-name descname">Cable</code><a class="headerlink" href="#uniflocpy.uTemperature.temp_cable_NS.Cable" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<dl class="method">
+<dt id="uniflocpy.uTemperature.temp_cable_NS.Cable.calc_i_max_a">
+<code class="sig-name descname">calc_i_max_a</code><span class="sig-paren">(</span><em class="sig-param">t_max_c</em>, <em class="sig-param">t_env_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cable_NS.Cable.calc_i_max_a" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчета максимально допустимой длительной силы тока кабеля</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_max_c</strong> – температурный индекс кабеля, максимальная температуры нагрева жил кабеля, С</p></li>
+<li><p><strong>t_env_c</strong> – температура среды</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>длительно допустимый ток, А</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTemperature.temp_cable_NS.Cable.calc_t_max_cable_c">
+<code class="sig-name descname">calc_t_max_cable_c</code><span class="sig-paren">(</span><em class="sig-param">tf_c</em>, <em class="sig-param">i_a</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTemperature.temp_cable_NS.Cable.calc_t_max_cable_c" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет температуры кабеля</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tf_c</strong> – Температура среды, С</p></li>
+<li><p><strong>i_a</strong> – Ток жилы кабеля, А</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>температуры кабеля, С</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">unifloc</a></h1>
+
+
+
+
+
+
+
+
+<h3>Навигация</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="uMotor.html">uMotor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uPVT.html">uPVT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uMultiphaseFlow.html">uMultiphaseFlow</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">uTemperature</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTemperature.temp_cor_Hasan_Kabir">uTemperature.temp_cor_Hasan_Kabir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTemperature.temp_cor_Hasan_Kabir_integrated">uTemperature.temp_cor_Hasan_Kabir_integrated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTemperature.temp_cable_NS">uTemperature.temp_cable_NS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="uTools.html">uTools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uWell.html">uWell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uReservoir.html">uReservoir</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="uMultiphaseFlow.html" title="предыдущая глава">uMultiphaseFlow</a></li>
+      <li>Next: <a href="uTools.html" title="следующая глава">uTools</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Khabibullin R.A..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/uTemperature.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

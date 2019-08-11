@@ -7,3 +7,13 @@ __pycache__/
 /test/.idea
 /test/.vscode
 .pytest_cache/
+/sandbox/uTools/kobzar1.csv
+/sandbox/uTools/edited_kobzar1.csv
+/sandbox/uTools/check2.xlsx
+/sandbox/uTools/edited_kobzar2.csv
+/sandbox/uTools/resampled_small_data.csv
+/sandbox/uTools/small_part_to_analyze.csv
+/sandbox/uTools/resampled_small_data_by_3h.csv
+/sandbox/uTools/resampled_small_data_by_3h_last.csv
+/sandbox/uTools/resampled_small_data_by_3h_mean.csv
+/sandbox/uTools/resample_small_data_without_zeros_3h_mean.csv

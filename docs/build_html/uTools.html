@@ -1,0 +1,844 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>uTools &#8212; документация unifloc 0.6.0</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="uWell" href="uWell.html" />
+    <link rel="prev" title="uTemperature" href="uTemperature.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="utools">
+<h1>uTools<a class="headerlink" href="#utools" title="Ссылка на этот заголовок">¶</a></h1>
+<p>Package containts tools for other modules</p>
+<div class="section" id="module-uniflocpy.uTools.data_workflow">
+<span id="utools-data-workflow"></span><h2>uTools.data_workflow<a class="headerlink" href="#module-uniflocpy.uTools.data_workflow" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Кобзарь О.С. Водопьян А.О. Хабибуллин Р.А. 09.08.2019</p>
+<p>Модуль-интерфейс-инструмент для извлечения данных из расчетных классов</p>
+<dl class="class">
+<dt id="uniflocpy.uTools.data_workflow.Data">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTools.data_workflow.</code><code class="sig-name descname">Data</code><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.clear_data">
+<code class="sig-name descname">clear_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.clear_data" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Очистка данных</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.get_data">
+<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param">method_or_correlation</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.get_data" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение атрибутов (всех данных) из расчетного класса</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.get_name">
+<code class="sig-name descname">get_name</code><span class="sig-paren">(</span><em class="sig-param">number</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.get_name" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Старый метод: использовать get_saved_parameter_name_by_number</p>
+<p>Получение названия параметра по его номеру</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.get_saved_parameter_name_by_number">
+<code class="sig-name descname">get_saved_parameter_name_by_number</code><span class="sig-paren">(</span><em class="sig-param">parameter_number</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.get_saved_parameter_name_by_number" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение имени (ключа) параметра по его номеру(индексу)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>parameter_number</strong> – номер параметра(атрибута), int</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>имя параметра (ключа), str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.get_saved_values_by_number">
+<code class="sig-name descname">get_saved_values_by_number</code><span class="sig-paren">(</span><em class="sig-param">parameter_number</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.get_saved_values_by_number" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение списка значений только для одного параметра.
+Спискок значений формируется из словарей, сохраненных при расчете</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>parameter_number</strong> – номер параметра(атрибута), int</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>список значений параметра, list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.get_values">
+<code class="sig-name descname">get_values</code><span class="sig-paren">(</span><em class="sig-param">number</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.get_values" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Старый метод: использовать save_data_from_class_to_storage</p>
+<p>Получение массива определенного параметра по его номеру</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.print_all_names">
+<code class="sig-name descname">print_all_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.print_all_names" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Старый метод: использовать print_all_names_of_saved_parameters</p>
+<p>print всех параметров их их номеров для получения</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.print_all_names_of_saved_parameters">
+<code class="sig-name descname">print_all_names_of_saved_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.print_all_names_of_saved_parameters" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение названий атрибутов и соответствующих им номеров (индексов) для обращения</p>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>print номеров всех атрибутов(сохраненных параметров)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_workflow.Data.save_data_from_class_to_storage">
+<code class="sig-name descname">save_data_from_class_to_storage</code><span class="sig-paren">(</span><em class="sig-param">class_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_workflow.Data.save_data_from_class_to_storage" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение всех атрибутов расчетного класса в форме словаря. Словари хранятся в списке.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>class_obj</strong> – расчетный класс</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uniflocpy.uTools.uconst">
+<span id="utools-uconst"></span><h2>uTools.uconst<a class="headerlink" href="#module-uniflocpy.uTools.uconst" title="Ссылка на этот заголовок">¶</a></h2>
+<p>описание констант и методов конвертации единиц измерения для унифлока</p>
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.MPa2bar">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">MPa2bar</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.MPa2bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in MPa to bar
+:param value: pressure value in Pa
+:return: pressure value in bar</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.MPa2psi">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">MPa2psi</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.MPa2psi" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in psi to MPa
+:param value: pressure value in psi
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.Pa2at">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">Pa2at</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.Pa2at" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in Pa (Pascal) to at (technical atmosphere)
+:param value: pressure value in Pa
+:return: pressure value in at (technical atmosphere)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.Pa2atm">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">Pa2atm</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.Pa2atm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in Pa to atm (standard atmosphere)
+:param value: pressure value in Pa
+:return: pressure value in atm (standard atmosphere)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.Pa2bar">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">Pa2bar</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.Pa2bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in Pa to bar
+:param value: pressure value in Pa
+:return: pressure value in bar</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.Pa2psi">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">Pa2psi</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.Pa2psi" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in psi to Pa
+:param value: pressure value in psi
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.api2gamma_oil">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">api2gamma_oil</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.api2gamma_oil" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts density in API(American Petroleum Institute gravity) to gamma_oil (oil relative density by water)
+:param value: density in API(American Petroleum Institute gravity)
+:return: oil relative density by water</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.at2Pa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">at2Pa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.at2Pa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in at (technical atmosphere) to Pa
+:param value: pressure value in atm
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.atm2Pa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">atm2Pa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.atm2Pa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in atm (standard atmosphere) to Pa
+:param value: pressure value in atm
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.atm2bar">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">atm2bar</code><span class="sig-paren">(</span><em class="sig-param">value=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.atm2bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in atm(standard atmosphere) to bar
+:param value: pressure value in atm(standard atmosphere)
+:return: pressure value in bar</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.bar2MPa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">bar2MPa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.bar2MPa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in bar to Pa
+:param value: pressure value in bar
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.bar2Pa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">bar2Pa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.bar2Pa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in bar to Pa
+:param value: pressure value in bar
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.bar2atm">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">bar2atm</code><span class="sig-paren">(</span><em class="sig-param">value=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.bar2atm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in bar to atm(standard atmosphere)
+:param value: pressure value in bar
+:return: pressure value in atm(standard atmosphere)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.bar2psi">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">bar2psi</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.bar2psi" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in bar to psi
+:param value: pressure value in bar
+:return: pressure value in psi</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.bbl2m3">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">bbl2m3</code><span class="sig-paren">(</span><em class="sig-param">value=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.bbl2m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts rate in m3(cubic metres) to bbl(barrels)
+:param value: rate in m3(cubic metres)
+:return: rate in bbl(barrels)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.btulbmF2kJkgK">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">btulbmF2kJkgK</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.btulbmF2kJkgK" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts heat capacity from FIELD to SI
+:param value: heat capacity in Btu/lbm F
+:return: heat capacity in kJ/kgK equal to kJ/kgC</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.c2f">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">c2f</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.c2f" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in C(degrees Celsius) to F(degrees Fahrenheit)
+:param value: temperature in C(degrees Celsius)
+:return: temperature in F(degrees Fahrenheit)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.c2k">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">c2k</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.c2k" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in C(degrees Celsius) to K(Kelvins)
+:param value: temperature in C(degrees Celsius)
+:return: temperature in K(Kelvins)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.c2r">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">c2r</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.c2r" title="Ссылка на это определение">¶</a></dt>
+<dd><p>coverts celsius to rankie (temperature)
+:param value: celsius
+:return: rankie</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.cP2pasec">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">cP2pasec</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.cP2pasec" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts viscosity
+:param value: viscosity in cP
+:return: viscosity in pa * sec</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.compr_1bar_2_1mpa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">compr_1bar_2_1mpa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.compr_1bar_2_1mpa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts compressibility in 1/bar to 1/mpa
+:param value: compressibility in 1/bar
+:return: compressibility in 1/mpa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.compr_1bar_2_1pa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">compr_1bar_2_1pa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.compr_1bar_2_1pa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts compressibility in 1/bar to 1/pa
+:param value: compressibility in 1/bar
+:return: compressibility in 1/pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.compr_1mpa_2_1bar">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">compr_1mpa_2_1bar</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.compr_1mpa_2_1bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts compressibility in 1/mpa to 1/bar
+:param value: compressibility in 1/mpa
+:return: compressibility in 1/bar</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.compr_1pa_2_1bar">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">compr_1pa_2_1bar</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.compr_1pa_2_1bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts compressibility in 1/pa to 1/bar
+:param value: compressibility in 1/pa
+:return: compressibility in 1/bar</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.compr_1pa_2_1psi">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">compr_1pa_2_1psi</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.compr_1pa_2_1psi" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts compressibility in 1/pa to 1/psi
+:param value: compressibility in 1/pa
+:return: compressibility in 1/psi</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.compr_1psi_2_1pa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">compr_1psi_2_1pa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.compr_1psi_2_1pa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts compressibility in 1/psi to 1/pa
+:param value: compressibility in 1/psi
+:return: compressibility in 1/pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.convert_GOR">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">convert_GOR</code><span class="sig-paren">(</span><em class="sig-param">val</em>, <em class="sig-param">old_scale</em>, <em class="sig-param">new_scale</em>, <em class="sig-param">gamma_oil=0.86</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.convert_GOR" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.convert_density">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">convert_density</code><span class="sig-paren">(</span><em class="sig-param">val</em>, <em class="sig-param">old_scale</em>, <em class="sig-param">new_scale</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.convert_density" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.convert_length">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">convert_length</code><span class="sig-paren">(</span><em class="sig-param">val</em>, <em class="sig-param">old_scale</em>, <em class="sig-param">new_scale</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.convert_length" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.convert_pressure">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">convert_pressure</code><span class="sig-paren">(</span><em class="sig-param">val</em>, <em class="sig-param">old_scale</em>, <em class="sig-param">new_scale</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.convert_pressure" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Convert from a pressure scale to another one among psi, bar,
+atm scales.</p>
+<p>based on scipy.constants.convert_temperature
+:Параметры: * <strong>val</strong> (<em>array_like</em>) – Value(s) of the pressure(s) to be converted expressed in the</p>
+<blockquote>
+<div><blockquote>
+<div><p>original scale.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>old_scale</strong> (<em>str</em>) – Specifies as a string the original scale from which the pressure
+value(s) will be converted. Supported scales are atm („atm“,
+„Atm“, „C“ or „c“), psi („psi“), bar („bar“) and Pa
+(„Pa“).</p></li>
+<li><p><strong>new_scale</strong> (<em>str</em>) – Specifies as a string the new scale to which the temperature
+value(s) will be converted. Supported scales are atm („atm“,
+„Atm“, „C“ or „c“), psi („psi“), bar („bar“) and Pa
+(„Pa“).</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p><strong>res</strong> – Value(s) of the converted pressure(s) expressed in the new scale.</p>
+</dd>
+<dt class="field-even">Тип результата</dt>
+<dd class="field-even"><p>float or array of floats</p>
+</dd>
+</dl>
+<p class="rubric">Заметки</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Добавлено в версии 0.1.</span></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.convert_rate">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">convert_rate</code><span class="sig-paren">(</span><em class="sig-param">val</em>, <em class="sig-param">old_scale</em>, <em class="sig-param">new_scale</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.convert_rate" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.dyncm2nm">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">dyncm2nm</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.dyncm2nm" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts surface tension
+:param value: surface tension in dyn / cm
+:return: surface tension in N / m</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.f2c">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">f2c</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.f2c" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in F(degrees Fahrenheit) to C(degrees Celsius)
+:param value: temperature in F(degrees Fahrenheit)
+:return: temperature in C(degrees Celsius)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.f2k">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">f2k</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.f2k" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in F(degrees Fahrenheit) to K(Kelvins)
+:param value: temperature in F(degrees Fahrenheit)
+:return: temperature in K(Kelvins)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.f2r">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">f2r</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.f2r" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in F(degrees Fahrenheit) to R(degrees Rankine)
+:param value: temperature in F(degrees Fahrenheit)
+:return: temperature in R(degrees Rankine)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.ft2m">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">ft2m</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.ft2m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts length in ft(feet) to m(meters)
+:param value: length in ft(feet)
+:return: length in m(meters)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.gamma_oil2api">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">gamma_oil2api</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.gamma_oil2api" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts density in API(American Petroleum Institute gravity) to gamma_oil (oil relative density by water)
+:param value: oil relative density by water
+:return: density in API(American Petroleum Institute gravity)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.grad2rad">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">grad2rad</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.grad2rad" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts angle
+:param value: angle in grad
+:return: angle in rad</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.in2m">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">in2m</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.in2m" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts length in in(inches) to m(meters)
+:param value: length in in(inches)
+:return: length in m(meters)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.k2c">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">k2c</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.k2c" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in K(Kelvins) to C(degrees Celsius)
+:param value: temperature in K(Kelvins)
+:return: temperature in C(degrees Celsius)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.k2f">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">k2f</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.k2f" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in F(degrees Fahrenheit) to K(Kelvins)
+:param value: temperature in F(degrees Fahrenheit)
+:return: temperature in K(Kelvins)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.k2r">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">k2r</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.k2r" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in K(Kelvins) to R(degrees Rankine)
+:param value: temperature in K(Kelvins)
+:return: temperature in R(degrees Rankine)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.kgm3_2_lbft3">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">kgm3_2_lbft3</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.kgm3_2_lbft3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts density in kg/m3(kilogrammes/cubic meter) to lb/ft3(pounds/cubic feet)
+:param value: density in kgm3(kilogrammes/cubic meter)
+:return: density in lb/ft3(pounds/cubic feet)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.lbft3_2_kgm3">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">lbft3_2_kgm3</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.lbft3_2_kgm3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts density in lb/ft3(pounds/cubic feet) to kgm3(kilogrammes/cubic meter)
+:param value: density in lb/ft3(pounds/cubic feet)
+:return: density in kgm3(kilogrammes/cubic meter)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m2ft">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m2ft</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m2ft" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts length in m(meters) to ft(feet)
+:param value: length in m(meters)
+:return: length in ft(feet)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m2in">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m2in</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m2in" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts length in m(meters) to in(inches)
+:param value: length in m(meters)
+:return: length in in(inches)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m3_2_bbl">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m3_2_bbl</code><span class="sig-paren">(</span><em class="sig-param">value=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m3_2_bbl" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts rate in m3(cubic metres) to bbl(barrels)
+:param value: rate in m3(cubic metres)
+:return: rate in bbl(barrels)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m3day2m3sec">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m3day2m3sec</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m3day2m3sec" title="Ссылка на это определение">¶</a></dt>
+<dd><p>comverts flow rate
+:param value: flow rate in m3  / day
+:return: flow rate in m3  / sec</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m3m3_2_m3t">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m3m3_2_m3t</code><span class="sig-paren">(</span><em class="sig-param">value</em>, <em class="sig-param">gamma=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m3m3_2_m3t" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts Gas-Oil Ratio in m3/m3(cubic metres/cubic meter) to m3/t(cubic metres/ton)
+:param value: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter);</p>
+<blockquote>
+<div><p>gamma=1: oil density(by air)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>Gas-Oil Ratio in m3/t(cubic metres/ton)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m3m3_2_scfstb">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m3m3_2_scfstb</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m3m3_2_scfstb" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts Gas-Oil Ratio in m3/m3(cubic metres/cubic meter) to scf/stb(standard cubic feet/standard barrel)
+:param value: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)
+:return: Gas-Oil Ratio in scf/stb(standard cubic feet/standard barrel)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.m3t2m3m3">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">m3t2m3m3</code><span class="sig-paren">(</span><em class="sig-param">value</em>, <em class="sig-param">gamma=1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.m3t2m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts Gas-Oil Ratio in m3/t(cubic metres/ton) to m3/m3(cubic metres/cubic meter)
+:param value: Gas-Oil Ratio in m3/t(cubic metres/ton);</p>
+<blockquote>
+<div><p>gamma=1: oil density(by air)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Результат</dt>
+<dd class="field-odd"><p>Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.psi2Pa">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">psi2Pa</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.psi2Pa" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in psi to Pa
+:param value: pressure value in psi
+:return: pressure value in Pa</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.psi2bar">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">psi2bar</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.psi2bar" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts pressure in psi to bar
+:param value: pressure value in psi
+:return: pressure value in bar</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.r2c">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">r2c</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.r2c" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in R(degrees Rankine) to C(degrees Celsius)
+:param value: temperature in C(degrees Celsius)
+:return: temperature in R(degrees Rankine)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.r2f">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">r2f</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.r2f" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in R(degrees Rankine) to F(degrees Fahrenheit)
+:param value: temperature in R(degrees Rankine)
+:return: temperature in F(degrees Fahrenheit)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.r2k">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">r2k</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.r2k" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts temperature in R(degrees Rankine) to K(Kelvins)
+:param value: temperature in R(degrees Rankine)
+:return: temperature in K(Kelvins)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.uconst.scfstb2m3m3">
+<code class="sig-prename descclassname">uniflocpy.uTools.uconst.</code><code class="sig-name descname">scfstb2m3m3</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.uconst.scfstb2m3m3" title="Ссылка на это определение">¶</a></dt>
+<dd><p>converts Gas-Oil Ratio in scf/stb(standard cubic feet/standard barrel) to m3/m3(cubic metres/cubic meter)
+:param value: Gas-Oil Ratio in scf/stb(standard cubic feet/standard barrel)
+:return: Gas-Oil Ratio in m3/m3(cubic metres/cubic meter)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-uniflocpy.uTools.data_editor">
+<span id="utools-data-editor"></span><h2>uTools.data_editor<a class="headerlink" href="#module-uniflocpy.uTools.data_editor" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Модуль для первичной загрузки и редактирования данных со станции управления, сохранения данных в новый файл
+.csv, в котором параметры будут разнесены по столбцам и отсортированы по времени</p>
+<p>Кобзарь О.С. Хабибуллин Р.А. 29.07.2019</p>
+<dl class="class">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uTools.data_editor.</code><code class="sig-name descname">Editor_initial_cs_data</code><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.create_edited_df">
+<code class="sig-name descname">create_edited_df</code><span class="sig-paren">(</span><em class="sig-param">prepared_data</em>, <em class="sig-param">parametrs_list_for_prepared_data</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.create_edited_df" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Итоговая обработка данных после предварительной обработки</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prepared_data</strong> – подготовленные данные</p></li>
+<li><p><strong>parametrs_list_for_prepared_data</strong> – список параметров в подготовленных данных</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>готовый DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.extract_df_one_parametr_and_edit">
+<code class="sig-name descname">extract_df_one_parametr_and_edit</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">list_of_params</em>, <em class="sig-param">number_of_param_in_list</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.extract_df_one_parametr_and_edit" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Извлечение из общих данных DataFrame c единственным параметром по его номеру в списке параметров</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – DataFrame</p></li>
+<li><p><strong>list_of_params</strong> – список параметров в данном DataFrame</p></li>
+<li><p><strong>number_of_param_in_list</strong> – номер параметра в списке</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>сформированный DataFrame с единственный параметром</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_information">
+<code class="sig-name descname">get_information</code><span class="sig-paren">(</span><em class="sig-param">cs_data=-1</em>, <em class="sig-param">parametrs_list=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_information" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Получение информации через print о данных</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cs_data</strong> – DataFrame данных со СУ</p></li>
+<li><p><strong>parametrs_list</strong> – лист имен уникальных параметров в cs_data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>порядковый номер параметра в списке и количество записей в cs_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_parametrs_list">
+<code class="sig-name descname">get_parametrs_list</code><span class="sig-paren">(</span><em class="sig-param">cs_data=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.get_parametrs_list" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Определение уникальных параметров</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>cs_data</strong> – DataFrame данных со СУ</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>список уникальных параметров</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.initial_editing">
+<code class="sig-name descname">initial_editing</code><span class="sig-paren">(</span><em class="sig-param">str_to_delete</em>, <em class="sig-param">data=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.initial_editing" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Первоначальная обработка данных: удаление лишнего столбца, приведение индекса ко времени,
+изменение столбца с названием параметров</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str_to_delete</strong> – строка для удаления в столбце</p></li>
+<li><p><strong>data</strong> – DataFrame данных со СУ</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>измененный DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.load_csv">
+<code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param">csv_file_name_str</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.load_csv" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Стандартная загрузка через Pandas с учетом особенностей файла со СУ - нет заголовков и разделитель ;
+если при загрузке выявляется ошибка, необходимо загрузить csv стандартным методом pandas, а после
+присвоить атрибуту self.init_pandas_df текущего класса загруженный DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><p><strong>csv_file_name_str</strong> – имя файлика в директории, data.csv</p>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uTools.data_editor.Editor_initial_cs_data.save_edited_df">
+<code class="sig-name descname">save_edited_df</code><span class="sig-paren">(</span><em class="sig-param">edited_df</em>, <em class="sig-param">csv_name_str</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.data_editor.Editor_initial_cs_data.save_edited_df" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Сохранение итогового отредактированного DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edited_df</strong> – итоговый отредактированный DataFrame</p></li>
+<li><p><strong>csv_name_str</strong> – имя файлика в директории, data.csv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">unifloc</a></h1>
+
+
+
+
+
+
+
+
+<h3>Навигация</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="uMotor.html">uMotor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uPVT.html">uPVT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uMultiphaseFlow.html">uMultiphaseFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uTemperature.html">uTemperature</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">uTools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.data_workflow">uTools.data_workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.uconst">uTools.uconst</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.data_editor">uTools.data_editor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="uWell.html">uWell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uReservoir.html">uReservoir</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="uTemperature.html" title="предыдущая глава">uTemperature</a></li>
+      <li>Next: <a href="uWell.html" title="следующая глава">uWell</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Khabibullin R.A..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/uTools.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

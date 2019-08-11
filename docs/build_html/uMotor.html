@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>uMotor &#8212; документация unifloc 0.6.0</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="next" title="uPVT" href="uPVT.html" />
+    <link rel="prev" title="Welcome to unifloc’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="umotor">
+<h1>uMotor<a class="headerlink" href="#umotor" title="Ссылка на этот заголовок">¶</a></h1>
+<p>Package calculates electical submersible engine</p>
+<div class="section" id="module-uniflocpy.uMotor.equivalent_circuit">
+<span id="umotor-equivalent-circuit"></span><h2>uMotor.equivalent_circuit<a class="headerlink" href="#module-uniflocpy.uMotor.equivalent_circuit" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="function">
+<dt id="uniflocpy.uMotor.equivalent_circuit.calc_g_circuit">
+<code class="sig-prename descclassname">uniflocpy.uMotor.equivalent_circuit.</code><code class="sig-name descname">calc_g_circuit</code><span class="sig-paren">(</span><em class="sig-param">slip</em>, <em class="sig-param">nom_power__W</em>, <em class="sig-param">nom_voltage__V</em>, <em class="sig-param">nom_slip</em>, <em class="sig-param">nom_efficient</em>, <em class="sig-param">nom_cos</em>, <em class="sig-param">frequency__Hz</em>, <em class="sig-param">voltage__V</em>, <em class="sig-param">r_1__Om</em>, <em class="sig-param">r_2__Om</em>, <em class="sig-param">x_k__Om</em>, <em class="sig-param">moments_division=1.05</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMotor.equivalent_circuit.calc_g_circuit" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет механической характеристики ассинхроного двигателя</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slip</strong> – скольжение</p></li>
+<li><p><strong>nom_power__W</strong> – номинальная мощность АД</p></li>
+<li><p><strong>nom_voltage__V</strong> – номинальное напряжение АД</p></li>
+<li><p><strong>nom_slip</strong> – номинальное скольжение АД</p></li>
+<li><p><strong>nom_efficient</strong> – номинальный КПД АД</p></li>
+<li><p><strong>nom_cos</strong> – номинальный коэффициент мощности АД</p></li>
+<li><p><strong>frequency__Hz</strong> – рабочая частота вращения</p></li>
+<li><p><strong>voltage__V</strong> – рабочее напряжение</p></li>
+<li><p><strong>r_1__Om</strong> – активное сопротивление статора</p></li>
+<li><p><strong>r_2__Om</strong> – активное сопротивление ротора приведенное к статору</p></li>
+<li><p><strong>x_k__Om</strong> – индуктивное сопротивление обмоток на режиме ХХ</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:return:M__Nm - момент вращения ротора</dt><dd><p>cos_fi - коэффициент мощности
+efficient - КПД АД
+I1__A - потребляемый ток
+P_2__kW - развиваемая мощность статора</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uMotor.equivalent_circuit.calc_idle">
+<code class="sig-prename descclassname">uniflocpy.uMotor.equivalent_circuit.</code><code class="sig-name descname">calc_idle</code><span class="sig-paren">(</span><em class="sig-param">nom_voltage__V</em>, <em class="sig-param">nom_slip</em>, <em class="sig-param">nom_efficient</em>, <em class="sig-param">nom_cos</em>, <em class="sig-param">r_1__Om</em>, <em class="sig-param">r_2__Om</em>, <em class="sig-param">x_k__Om</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMotor.equivalent_circuit.calc_idle" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет режима холостого хода при номинальном напряжении</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nom_voltage__V</strong> – номинальное напряджение АД</p></li>
+<li><p><strong>nom_slip</strong> – номинальное скольжение АД</p></li>
+<li><p><strong>nom_efficient</strong> – номинальный КПД АД</p></li>
+<li><p><strong>nom_cos</strong> – номинальный коэффициент мощ</p></li>
+<li><p><strong>r_1__Om</strong> – активное сопротивление статора</p></li>
+<li><p><strong>r_2__Om</strong> – активное сопротивление ротора приведенное к статору</p></li>
+<li><p><strong>x_k__Om</strong> – индуктивное сопротивление обмоток на режиме ХХ</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>no_load_current: ток ХХ
+cos_fi_x: коэффициент мощности при ХХ</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uMotor.equivalent_circuit.calc_resistances">
+<code class="sig-prename descclassname">uniflocpy.uMotor.equivalent_circuit.</code><code class="sig-name descname">calc_resistances</code><span class="sig-paren">(</span><em class="sig-param">nom_power__W</em>, <em class="sig-param">nom_voltage__V</em>, <em class="sig-param">nom_slip</em>, <em class="sig-param">nom_efficient</em>, <em class="sig-param">motor_lamda</em>, <em class="sig-param">alfa_0=0.61</em>, <em class="sig-param">moments_division=1.05</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMotor.equivalent_circuit.calc_resistances" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет сопротивлений Г-образной схемы замещения</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nom_power__W</strong> – номинальная мощность АД</p></li>
+<li><p><strong>nom_voltage__V</strong> – номинальное напряджение АД</p></li>
+<li><p><strong>nom_slip</strong> – номинальное скольжение АД</p></li>
+<li><p><strong>nom_efficient</strong> – номинальный КПД АД</p></li>
+<li><p><strong>motor_lamda</strong> – отношение максимального момента к номинальному</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p><a href="#id1"><span class="problematic" id="id2">r_2_</span></a>: активное сопротивление обмотки ротора приведенное к ротору
+r_1: активное сопротивление обмотки статора
+x_k: индуктивное сопротивление обмоток при неподвижном роторе</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uMotor.equivalent_circuit.motor_data_loading">
+<code class="sig-prename descclassname">uniflocpy.uMotor.equivalent_circuit.</code><code class="sig-name descname">motor_data_loading</code><span class="sig-paren">(</span><em class="sig-param">motor_power__W</em>, <em class="sig-param">nom_power__W</em>, <em class="sig-param">nom_voltage__V</em>, <em class="sig-param">nom_slip</em>, <em class="sig-param">nom_efficient</em>, <em class="sig-param">nom_cos</em>, <em class="sig-param">frequency__Hz</em>, <em class="sig-param">voltage__V</em>, <em class="sig-param">r_1__Om</em>, <em class="sig-param">r_2__Om</em>, <em class="sig-param">x_k__Om</em>, <em class="sig-param">moments_division=1.05</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMotor.equivalent_circuit.motor_data_loading" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Расчет характеристик ПЭД в зависимости от загрузки</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>motor_power__W</strong> – рабочая мощность ПЭД</p></li>
+<li><p><strong>nom_power__W</strong> – номинальная мощность АД</p></li>
+<li><p><strong>nom_voltage__V</strong> – номинальное напряжение АД</p></li>
+<li><p><strong>nom_slip</strong> – номинальное скольжение АД</p></li>
+<li><p><strong>nom_efficient</strong> – номинальный КПД АД</p></li>
+<li><p><strong>nom_cos</strong> – номинальный коэффициент мощности АД</p></li>
+<li><p><strong>frequency__Hz</strong> – рабочая частота вращения</p></li>
+<li><p><strong>voltage__V</strong> – рабочее напряжение</p></li>
+<li><p><strong>r_1__Om</strong> – активное сопротивление статора</p></li>
+<li><p><strong>r_2__Om</strong> – активное сопротивление ротора приведенное к статору</p></li>
+<li><p><strong>x_k__Om</strong> – индуктивное сопротивление обмоток на режиме ХХ</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:return:M__Nm - момент вращения ротора</dt><dd><p>cos_fi - коэффициент мощности
+efficient - КПД АД
+I1__A - потребляемый ток
+slip - скольжение АД</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-uniflocpy.uMotor.MotorBase">
+<span id="umotor-motorbase"></span><h2>uMotor.MotorBase<a class="headerlink" href="#module-uniflocpy.uMotor.MotorBase" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="class">
+<dt id="uniflocpy.uMotor.MotorBase.MotorBase">
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uMotor.MotorBase.</code><code class="sig-name descname">MotorBase</code><span class="sig-paren">(</span><em class="sig-param">company: str</em>, <em class="sig-param">frequency_nom: int</em>, <em class="sig-param">d__mm: int</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uMotor.MotorBase.MotorBase" title="Ссылка на это определение">¶</a></dt>
+<dd><blockquote>
+<div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</div></blockquote>
+<p>Класс общающийся с базой данных ПЭД. Забирает коэффициенты
+отцифрованных кривых</p>
+<dl class="method">
+<dt id="uniflocpy.uMotor.MotorBase.MotorBase.cos_coefficient">
+<em class="property">property </em><code class="sig-name descname">cos_coefficient</code><a class="headerlink" href="#uniflocpy.uMotor.MotorBase.MotorBase.cos_coefficient" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uMotor.MotorBase.MotorBase.current_coefficient">
+<em class="property">property </em><code class="sig-name descname">current_coefficient</code><a class="headerlink" href="#uniflocpy.uMotor.MotorBase.MotorBase.current_coefficient" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uMotor.MotorBase.MotorBase.efficient_coefficient">
+<em class="property">property </em><code class="sig-name descname">efficient_coefficient</code><a class="headerlink" href="#uniflocpy.uMotor.MotorBase.MotorBase.efficient_coefficient" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uniflocpy.uMotor.MotorBase.MotorBase.frequency_coefficient">
+<em class="property">property </em><code class="sig-name descname">frequency_coefficient</code><a class="headerlink" href="#uniflocpy.uMotor.MotorBase.MotorBase.frequency_coefficient" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">unifloc</a></h1>
+
+
+
+
+
+
+
+
+<h3>Навигация</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">uMotor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uMotor.equivalent_circuit">uMotor.equivalent_circuit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uMotor.MotorBase">uMotor.MotorBase</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="uPVT.html">uPVT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uMultiphaseFlow.html">uMultiphaseFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uTemperature.html">uTemperature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uTools.html">uTools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uWell.html">uWell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uReservoir.html">uReservoir</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="предыдущая глава">Welcome to unifloc’s documentation!</a></li>
+      <li>Next: <a href="uPVT.html" title="следующая глава">uPVT</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Khabibullin R.A..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/uMotor.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
