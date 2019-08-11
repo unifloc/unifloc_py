@@ -28,7 +28,7 @@ class FluidBlackOil:
     _pb_cal: float
 
     def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0,
-                 y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5 ):
+                 y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=0, muobcal_cP=0.5 ):
         """
         Cоздает флюид с заданными базовыми свойствами
 
@@ -387,9 +387,9 @@ class FluidMcCain(FluidBlackOil):
             self._bo_m3m3 = PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self._rs_m3m3, self._rho_oil_kgm3,
                                                           self.gamma_gas)
         # проверим необходимость калибровки значения объемного коэффициента
-        #if self.bobcal_m3m3 > 0:
-        #    b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
-        #    self._bo_m3m3 = b_fact * self._bo_m3m3
+        if self.bobcal_m3m3 > 0:
+            b_fact = (self.bobcal_m3m3 - 1) / (self._bob_m3m3 - 1)
+            self._bo_m3m3 = b_fact * self._bo_m3m3
         # оценим значение вязкости
         self._mu_deadoil_cP = PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, t_K)
         self._muob_cP = PVT.unf_saturatedoilviscosity_Beggs_cP(self._mu_deadoil_cP, self.rsb_m3m3)
