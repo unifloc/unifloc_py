@@ -360,10 +360,10 @@ data_fluid_flow_perfomance.clear_data()
 
 start = time.time()
 
-for q_m3day in range(1, 230, 10):
+for q_m3day in range(1, 240, 10):
     start_in_loop = time.time()
 
-    ESP_obj.fluid_flow.fw_on_surface_perc = 100
+    ESP_obj.fluid_flow.fw_on_surface_perc = 0
     ESP_obj.save_calculated_data = False
     ESP_obj.fluid_flow.qliq_on_surface_m3day = q_m3day
     ESP_obj.calc(p_bar, t_c)

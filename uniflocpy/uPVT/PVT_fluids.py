@@ -34,36 +34,36 @@ class FluidBlackOil:
 
         калибровочные параметры при необходимости надо задавать отдельно
 
-        :param gamma_oil:
-        :param gamma_gas:
-        :param gamma_wat:
-        :param rsb_m3m3:
-        :param gamma_gassp:
-        :param y_h2s:
-        :param y_co2:
-        :param y_n2:
-        :param s_ppm:
-        :param par_wat:
-        :param pbcal_bar:
-        :param tpb_C:
-        :param bobcal_m3m3:
-        :param muobcal_cP:
+        :param gamma_oil: specific gravity of oil
+        :param gamma_gas: specific gravity of gas (by air), dimensionless
+        :param gamma_wat: specific gravity of water
+        :param rsb_m3m3: solution gas ratio at bubble point
+        :param gamma_gassp: specific gas density in separator(by air)
+        :param y_h2s: mole fraction of the hydrogen sulfide
+        :param y_co2: mole fraction of the carbon dioxide
+        :param y_n2: mole fraction of the nitrogen
+        :param s_ppm: water salinity
+        :param par_wat: 0 = pure water, 1 = brine , 2 = brine with dissolved methane
+        :param pbcal_bar: давление насыщения, калибровочный параметр
+        :param tpb_C: температура при давлении насыщения, калибровочный параметр
+        :param bobcal_m3m3: объемный коэффициент при давлении насыщения, калибровочный параметр
+        :param muobcal_cP: вязкость при давлении насыщения, калибровочный параметр
         """
-        self.gamma_gas = gamma_gas              # specific gravity of gas (by air), dimensionless
-        self.gamma_oil = gamma_oil              # specific gravity of oil
-        self.gamma_wat = gamma_wat              # specific gravity of water
-        self.rsb_m3m3 = rsb_m3m3                # solution gas ratio at bubble point
-        self.gamma_gassp = gamma_gassp          # specific gas density in separator(by air)
-        self.y_h2s = y_h2s                      # mole fraction of the hydrogen sulfide
-        self.y_co2 = y_co2                      # mole fraction of the carbon dioxide
-        self.y_n2 = y_n2                        # mole fraction of the nitrogen
-        self.s_ppm = s_ppm                      # water salinity
-        self.par_wat = par_wat                  # 0 = pure water, 1 = brine , 2 = brine with dissolved methane
+        self.gamma_gas = gamma_gas
+        self.gamma_oil = gamma_oil
+        self.gamma_wat = gamma_wat
+        self.rsb_m3m3 = rsb_m3m3
+        self.gamma_gassp = gamma_gassp
+        self.y_h2s = y_h2s
+        self.y_co2 = y_co2
+        self.y_n2 = y_n2
+        self.s_ppm = s_ppm
+        self.par_wat = par_wat
         # термобарические условия
         self.p_bar = uc.psc_bar                 # thermobaric conditions for all parameters
         self.t_c = uc.tsc_c                     # can be set up by calc method
         # калибровочные параметры
-        self.pbcal_bar = pbcal_bar            # давление насыщения, калибровочный параметр
+        self.pbcal_bar = pbcal_bar
         self.tpb_C = tpb_C
         self.bobcal_m3m3 = bobcal_m3m3
         self.muobcal_cP = muobcal_cP
@@ -76,7 +76,7 @@ class FluidBlackOil:
         self._mu_oil_cP = 0.0        # TODO хорошо бы везде сделать единообразные индексы для нефти или o или oil
         self._mu_gas_cP = 0.0
         self._mu_wat_cP = 0.0
-        self._mu_deadoil_cP = 0.0    # dead oil
+        self._mu_dead_oil_cP = 0.0
         self._rho_oil_kgm3 = 0.0
         self._rho_gas_kgm3 = 0.0
         self._rho_wat_kgm3 = 0.0
@@ -289,15 +289,15 @@ class FluidStanding(FluidBlackOil):  # TODO после проверки свой
         else:
             self._bo_m3m3 = PVT.unf_fvf_Standing_m3m3_saturated(self._rs_m3m3, self.gamma_gas, self.gamma_oil, t_K)
         # проверим необходимость калибровки значения объемного коэффициента
-        #if self.bobcal_m3m3 > 0:  # TODO проверить калибровку, с ней неправильно считает
-        #    b_fact = (self._bob_m3m3 - 1) / (self.bobcal_m3m3 - 1)
-        #    self._bo_m3m3 = b_fact * self._bo_m3m3
+        if self.bobcal_m3m3 > 0:
+            b_fact = (self.bobcal_m3m3 - 1) / (self._bob_m3m3 - 1)
+            self._bo_m3m3 = b_fact * self._bo_m3m3
         self._rho_oil_kgm3 = PVT.unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, self._rs_m3m3, self._bo_m3m3,
                                                           self.gamma_gas, self.gamma_oil)
         # оценим значение вязкости
-        self._mu_deadoil_cP = PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, t_K)
-        self._muob_cP = PVT.unf_saturatedoilviscosity_Beggs_cP(self._mu_deadoil_cP, self.rsb_m3m3)
-        self._mu_oil_cP = PVT.unf_oil_viscosity_Beggs_VB_cP(self._mu_deadoil_cP, self._rs_m3m3, p_MPaa, pb_MPaa)
+        self._mu_dead_oil_cP = PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, t_K)
+        self._muob_cP = PVT.unf_saturatedoilviscosity_Beggs_cP(self._mu_dead_oil_cP, self.rsb_m3m3)
+        self._mu_oil_cP = PVT.unf_oil_viscosity_Beggs_VB_cP(self._mu_dead_oil_cP, self._rs_m3m3, p_MPaa, pb_MPaa)
         if self.muobcal_cP > 0:
             mu_fact = self.muobcal_cP / self._muob_cP
             self._mu_oil_cP = mu_fact * self._mu_oil_cP
