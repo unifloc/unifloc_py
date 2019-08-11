@@ -56,7 +56,7 @@ class MatBalance():
 
         self.material_balance_m3 = None
 
-    def calc_depletion_above_pb(self, p_reservoir_bar): # TODO придумать формульный конструктор
+    def calc_depletion_above_pb(self, p_reservoir_bar):  # TODO придумать формульный конструктор для общего уравнения
         """
         Функция рассчитывает КИН при истощении выше давления насыщения и добыче чистой нефти
         Функция служит учебным примером.

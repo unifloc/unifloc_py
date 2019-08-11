@@ -12,9 +12,9 @@ import uniflocpy.uPVT.PVT_correlations as PVT
 
 class BlackOil_option():
     """
-    Класс-пресет для настройки расчета моделей BlackOil. Данная структура хранит выбор методов для каждого параметры,
-    которые будут в расчете. При этом выбор корреляций и методов не влияет на поток данных
-    при расчете. Также новые корреляции могут легко быть добавлены в модель BlackOil при расширении функций-контейнеров,
+    Класс-пресет для настройки расчета моделей BlackOil. Данная структура хранит выбор методов, которые будут в расчете,
+    для каждого параметра. При этом выбор корреляций и методов не влияет на поток данных при расчете.
+    Также новые корреляции могут легко быть добавлены в модель BlackOil при расширении функций-контейнеров,
     через которые идет обращение к исходным функциям в PVT_correlations.
 
     По умолчанию настройка соответствует модели Стендинга
@@ -60,10 +60,10 @@ class BlackOil_option():
 
 class Fluid:
     def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassp=0, y_h2s=0, y_co2=0,
-                 y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=1.2, muobcal_cP=0.5,
+                 y_n2=0, s_ppm=0, par_wat=0, pbcal_bar=-1., tpb_C=80, bobcal_m3m3=0, muobcal_cP=0.5,
                  option = BlackOil_option()):
         """
-        Cоздает флюид с заданными базовыми свойствами и определенным набором методик/корреляци для расчета
+        Cоздает флюид с заданными базовыми свойствами и определенным набором методик/корреляций для расчета
 
         калибровочные параметры при необходимости надо задавать отдельно
 
@@ -367,21 +367,4 @@ class Fluid:
         # some system properties
         self._sigma_oil_gas_Nm = self.calc_sigma_oil_gas_Nm(self.option.sigma_oil_gas_cor_number)
         self._sigma_wat_gas_Nm = self.calc_sigma_wat_gas_Nm(self.option.sigma_wat_gas_cor_number)
-
-black_oil_model = Fluid()
-black_oil_model.pbcal_bar = 200
-black_oil_model.muobcal_cP = 20
-black_oil_model.bobcal_m3m3 = 1.2
-black_oil_model.calc(30,30)
-import uniflocpy.uPVT.PVT_fluids as PVT_fluid
-old_model = PVT_fluid.FluidStanding()
-old_model.pbcal_bar = 200
-old_model.muobcal_cP = 20
-black_oil_model.bobcal_m3m3 = 1.2
-old_model.calc(30,30)
-
-print(black_oil_model.__dict__)
-print(old_model.__dict__)
-print("lol")
-
 
