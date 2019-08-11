@@ -4,6 +4,7 @@
 import unittest
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import uniflocpy.uPVT.PVT_correlations as PVT_correlations
+import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 
 #TODO не хватает теста для одной функции - найти ее
 # Проверка флюидов через условную "хеш" сумму параметров после calc(P,T)
@@ -16,7 +17,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 11691.855158519262,
+        self.assertAlmostEqual(sum, 11690.655158519261,
                                delta=0.0001)
 
     def test_FluidMcCain(self):
@@ -27,7 +28,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 2624.0782700132386,
+        self.assertAlmostEqual(sum, 2622.8782700132388,
                                delta=0.0001)  # TODO cлишком большая разница со Стендингом, проверить (плотность и др.)
 
     def test_FluidFlow(self):
@@ -40,7 +41,27 @@ class TestFluid(unittest.TestCase):
             if type(i[-1]) != type(PVT_fluids.FluidStanding()):
                 sum += i[-1]
         self.assertAlmostEqual(sum, 52964.45783497338,
-                               delta=0.0001)  #
+                               delta=0.0001)
+
+    def test_BlackOil_model(self):
+        pressure_bar = 100
+        temp_c = 80
+        fluid_flow = BlackOil_model.Fluid()
+        fluid_flow.calc(pressure_bar, temp_c)
+        sum = 0
+        for i in fluid_flow.__dict__.items():
+            if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
+                sum += i[-1]
+        self.assertAlmostEqual(sum, 13144.511219057467,
+                               delta=0.0001)
+
+    def test_BlackOil_option(self):
+        option = BlackOil_model.BlackOil_option()
+        sum = 0
+        for i in option.__dict__.items():
+            sum += i[-1]
+        self.assertAlmostEqual(sum, 0,
+                               delta=0.0001)
 
 
 class TestPVT(unittest.TestCase):
