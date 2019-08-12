@@ -57,6 +57,8 @@ class BlackOil_option():
         self.sigma_oil_gas_cor_number = 0
         self.sigma_wat_gas_cor_number = 0
 
+#  TODO передавать свойства нефти через структуру
+
 
 class Fluid:
     def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassep=0, y_h2s=0, y_co2=0,

@@ -6,26 +6,18 @@
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import numpy as np
-import matplotlib.pyplot as plt
 import uniflocpy.uTools.data_workflow as data_workflow
 import pandas as pd
 import time
-
-start = time.time()
-print("hello")
-end = time.time()
-print(end - start)
-
 import plotly.graph_objs as go
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot
-from plotly import tools
 
-import scipy.interpolate as interpolate
-import matplotlib.pyplot as plt
 
 # TODO отдельный метод/класс для проверки исходных данных
 
 const_convert_m3day_gpm = 0.183452813362193
+
+
 class ESP_polynom():
     def __init__(self):
         self.coef0 = None
@@ -36,6 +28,7 @@ class ESP_polynom():
         self.coef5 = None
         self.arg = None
         self.result = None
+
     def calc(self, arg):
         self.result = self.coef0 + \
                         self.coef1 * arg + \
@@ -44,6 +37,7 @@ class ESP_polynom():
                         self.coef4 * arg ** 4 + \
                         self.coef5 * arg ** 5
         return self.result
+
 
 class ESP_structure():
     def __init__(self, ID_ESP=737,
@@ -60,6 +54,7 @@ class ESP_structure():
         self.freq_nom_hz = freq_nom_hz
         self.q_max_ESP_nom_m3day = q_max_ESP_nom_m3day
         self.q_ESP_nom_m3day = q_ESP_nom_m3day
+
 
 class ESP():
 
@@ -153,10 +148,6 @@ class ESP():
 
             return
 
-
-
-
-
     def get_ESP_head_m(self, q_mix_degr_m3day, stage_number_in_calc, mu_mix_cP):
         if q_mix_degr_m3day < 0:
             print("Ошибка. Расчет характеристики насоса с отрицательным дебитом. Напор установлен нулю.")
@@ -183,8 +174,6 @@ class ESP():
         b = self.freq_hz / self.freq_nom_hz
         self.power_ESP_calculated_Wt = 1000 * b ** (-3) * stage_number_in_calc * self.polynom_esp_power_wt.calc(b * q_m3day)
         return self.power_ESP_calculated_Wt
-
-
 
     def calc(self, p_bar, t_c):
         self.p_intake_bar = p_bar
@@ -254,6 +243,7 @@ class ESP():
             self.t_c += self.dt_stage_c
 
 # TODO функции для построения графиков вынести в модуль plot_workflow
+
 def trace(data_x, data_y, namexy):
     tracep = go.Scattergl(
         x=data_x,
@@ -323,11 +313,11 @@ ESP_obj.polynom_esp_power_wt = ESP_polynom_power_obj
 
 p_bar = 30
 t_c = 30
-
+"""
 ESP_obj.q_mix_m3day = 100
 ESP_obj.fluid_flow.fw_on_surface_perc = 0
 ESP_obj.calc(p_bar, t_c)
-"""
+
 ESP_obj.esp_calc_data.print_all_names_of_saved_parameters()
 ESP_obj.fluid_calc_data.print_all_names_of_saved_parameters()
 ESP_obj.fluid_flow_calc_data.print_all_names_of_saved_parameters()
@@ -363,6 +353,10 @@ start = time.time()
 for q_m3day in range(1, 240, 10):
     start_in_loop = time.time()
 
+    ESP_obj.fluid.bobcal_m3m3 = 0
+    ESP_obj.fluid.muobcal_cP = 0
+    ESP_obj.fluid_flow.fl.bobcal_m3m3 = 0
+    ESP_obj.fluid_flow.fl.muobcal_cP= 0
     ESP_obj.fluid_flow.fw_on_surface_perc = 0
     ESP_obj.save_calculated_data = False
     ESP_obj.fluid_flow.qliq_on_surface_m3day = q_m3day
@@ -370,7 +364,6 @@ for q_m3day in range(1, 240, 10):
     data_ESP_perfomance.save_data_from_class_to_storage(ESP_obj)
     data_fluid_perfomance.save_data_from_class_to_storage(ESP_obj.fluid)
     data_fluid_flow_perfomance.save_data_from_class_to_storage(ESP_obj.fluid_flow)
-
 
     end_in_loop = time.time()
     print("Рассчитан ЭЦН для q_m3day=" + str(q_m3day))
