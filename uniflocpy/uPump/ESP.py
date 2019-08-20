@@ -357,7 +357,7 @@ for q_m3day in range(1, 240, 10):
     ESP_obj.fluid.muobcal_cP = 0
     ESP_obj.fluid_flow.fl.bobcal_m3m3 = 0
     ESP_obj.fluid_flow.fl.muobcal_cP= 0
-    ESP_obj.fluid_flow.fw_on_surface_perc = 0
+    ESP_obj.fluid_flow.fw_on_surface_perc = 100
     ESP_obj.save_calculated_data = False
     ESP_obj.fluid_flow.qliq_on_surface_m3day = q_m3day
     ESP_obj.calc(p_bar, t_c)
