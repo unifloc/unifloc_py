@@ -4,7 +4,9 @@
 Модуль для построения графиков через plotly
 
 """
-
+# TODO сделать через классы
+# TODO добавить оси и форматирование
+# TODO сделать аналогично для dash и matplotlib
 import pandas as pd
 import numpy as np
 import sys

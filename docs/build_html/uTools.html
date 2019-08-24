@@ -756,6 +756,100 @@ value(s) will be converted. Supported scales are atm („atm“,
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-uniflocpy.uTools.plotly_workflow">
+<span id="utools-plotly-workflow"></span><h2>uTools.plotly_workflow<a class="headerlink" href="#module-uniflocpy.uTools.plotly_workflow" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Кобзарь О.С. Хабибуллин Р.А.</p>
+<p>Модуль для построения графиков через plotly</p>
+<dl class="function">
+<dt id="uniflocpy.uTools.plotly_workflow.connect_traces">
+<code class="sig-prename descclassname">uniflocpy.uTools.plotly_workflow.</code><code class="sig-name descname">connect_traces</code><span class="sig-paren">(</span><em class="sig-param">traces1</em>, <em class="sig-param">trace2</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.plotly_workflow.connect_traces" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Создание единого списка trace из двух. Удобно при построении графиков из разных DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traces1</strong> – первый список с trace</p></li>
+<li><p><strong>trace2</strong> – второй список с trace</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>объединенный вариант</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.plotly_workflow.create_plotly_trace">
+<code class="sig-prename descclassname">uniflocpy.uTools.plotly_workflow.</code><code class="sig-name descname">create_plotly_trace</code><span class="sig-paren">(</span><em class="sig-param">data_x</em>, <em class="sig-param">data_y</em>, <em class="sig-param">namexy</em>, <em class="sig-param">chosen_mode='lines'</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.plotly_workflow.create_plotly_trace" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Создание одного trace по данным</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_x</strong> – данные для оси x</p></li>
+<li><p><strong>data_y</strong> – данные для оси y</p></li>
+<li><p><strong>namexy</strong> – название для trace</p></li>
+<li><p><strong>chosen_mode</strong> – настройка отображения „lines“, „markers“</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>один trace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.plotly_workflow.create_traces_list_for_all_columms">
+<code class="sig-prename descclassname">uniflocpy.uTools.plotly_workflow.</code><code class="sig-name descname">create_traces_list_for_all_columms</code><span class="sig-paren">(</span><em class="sig-param">data_frame</em>, <em class="sig-param">chosen_mode='lines'</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.plotly_workflow.create_traces_list_for_all_columms" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_frame</strong> – подготовленный Pandas DataFrame с названиями колонок и обработанным индексом</p></li>
+<li><p><strong>chosen_mode</strong> – выбор отображения „lines“, „markers“ и т.п.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>trace_list для data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.plotly_workflow.plot_func">
+<code class="sig-prename descclassname">uniflocpy.uTools.plotly_workflow.</code><code class="sig-name descname">plot_func</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">plot_title_str</em>, <em class="sig-param">filename_str</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.plotly_workflow.plot_func" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Итоговая функция для построения графиков</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – созданный список из trace</p></li>
+<li><p><strong>plot_title_str</strong> – название графика</p></li>
+<li><p><strong>filename_str</strong> – названия html файлика</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="uniflocpy.uTools.plotly_workflow.plot_subplots">
+<code class="sig-prename descclassname">uniflocpy.uTools.plotly_workflow.</code><code class="sig-name descname">plot_subplots</code><span class="sig-paren">(</span><em class="sig-param">data_traces</em>, <em class="sig-param">filename_str</em>, <em class="sig-param">two_equal_subplots=False</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uTools.plotly_workflow.plot_subplots" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Построение нескольких графиков</p>
+<dl class="field-list simple">
+<dt class="field-odd">Параметры</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_traces</strong> – подготовленный список trace</p></li>
+<li><p><strong>filename_str</strong> – имя файла .html</p></li>
+<li><p><strong>two_equal_subplots</strong> – если True график будет разделен на 2 одинаковых друг по другом, если False - все в колонку</p></li>
+</ul>
+</dd>
+<dt class="field-even">Результат</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">hyperlink</a></p>
 <p><a class="reference external" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Sphinx</a></p>
 </div>
@@ -788,6 +882,7 @@ value(s) will be converted. Supported scales are atm („atm“,
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.data_workflow">uTools.data_workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.uconst">uTools.uconst</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.data_editor">uTools.data_editor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-uniflocpy.uTools.plotly_workflow">uTools.plotly_workflow</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uWell.html">uWell</a></li>
