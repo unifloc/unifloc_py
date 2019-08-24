@@ -30,6 +30,14 @@ uTools.data_editor
     :undoc-members:
     :show-inheritance:
 
+uTools.plotly_workflow
+----------------------------
+
+.. automodule:: uniflocpy.uTools.plotly_workflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 `hyperlink <https://www.youtube.com/watch?v=dQw4w9WgXcQ>`_
 

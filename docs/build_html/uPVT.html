@@ -1508,7 +1508,7 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 
 <dl class="class">
 <dt id="uniflocpy.uPVT.BlackOil_model.Fluid">
-<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uPVT.BlackOil_model.</code><code class="sig-name descname">Fluid</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">gamma_wat=1.0</em>, <em class="sig-param">rsb_m3m3=200.0</em>, <em class="sig-param">gamma_gassp=0</em>, <em class="sig-param">y_h2s=0</em>, <em class="sig-param">y_co2=0</em>, <em class="sig-param">y_n2=0</em>, <em class="sig-param">s_ppm=0</em>, <em class="sig-param">par_wat=0</em>, <em class="sig-param">pbcal_bar=-1.0</em>, <em class="sig-param">tpb_C=80</em>, <em class="sig-param">bobcal_m3m3=0</em>, <em class="sig-param">muobcal_cP=0.5</em>, <em class="sig-param">option=&lt;uniflocpy.uPVT.BlackOil_model.BlackOil_option object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid" title="Ссылка на это определение">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">uniflocpy.uPVT.BlackOil_model.</code><code class="sig-name descname">Fluid</code><span class="sig-paren">(</span><em class="sig-param">gamma_oil=0.86</em>, <em class="sig-param">gamma_gas=0.6</em>, <em class="sig-param">gamma_wat=1.0</em>, <em class="sig-param">rsb_m3m3=200.0</em>, <em class="sig-param">gamma_gassep=0</em>, <em class="sig-param">y_h2s=0</em>, <em class="sig-param">y_co2=0</em>, <em class="sig-param">y_n2=0</em>, <em class="sig-param">s_ppm=0</em>, <em class="sig-param">par_wat=0</em>, <em class="sig-param">pb_cal_bar=-1.0</em>, <em class="sig-param">tpb_c=80</em>, <em class="sig-param">b_oil_b_cal_m3m3=0</em>, <em class="sig-param">mu_oil_b_cal_cp=0.5</em>, <em class="sig-param">option=&lt;uniflocpy.uPVT.BlackOil_model.BlackOil_option object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid" title="Ссылка на это определение">¶</a></dt>
 <dd><blockquote>
 <div><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </div></blockquote>
@@ -1521,16 +1521,16 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 <li><p><strong>gamma_gas</strong> – specific gravity of gas (by air), dimensionless</p></li>
 <li><p><strong>gamma_wat</strong> – specific gravity of water</p></li>
 <li><p><strong>rsb_m3m3</strong> – solution gas ratio at bubble point</p></li>
-<li><p><strong>gamma_gassp</strong> – specific gas density in separator(by air)</p></li>
+<li><p><strong>gamma_gassep</strong> – specific gas density in separator(by air)</p></li>
 <li><p><strong>y_h2s</strong> – mole fraction of the hydrogen sulfide</p></li>
 <li><p><strong>y_co2</strong> – mole fraction of the carbon dioxide</p></li>
 <li><p><strong>y_n2</strong> – mole fraction of the nitrogen</p></li>
 <li><p><strong>s_ppm</strong> – water salinity</p></li>
 <li><p><strong>par_wat</strong> – 0 = pure water, 1 = brine , 2 = brine with dissolved methane</p></li>
-<li><p><strong>pbcal_bar</strong> – давление насыщения, калибровочный параметр</p></li>
-<li><p><strong>tpb_C</strong> – температура при давлении насыщения, калибровочный параметр</p></li>
-<li><p><strong>bobcal_m3m3</strong> – объемный коэффициент при давлении насыщения, калибровочный параметр</p></li>
-<li><p><strong>muobcal_cP</strong> – вязкость при давлении насыщения, калибровочный параметр</p></li>
+<li><p><strong>pb_cal_bar</strong> – давление насыщения, калибровочный параметр</p></li>
+<li><p><strong>tpb_c</strong> – температура при давлении насыщения, калибровочный параметр</p></li>
+<li><p><strong>b_oil_b_cal_m3m3</strong> – объемный коэффициент при давлении насыщения, калибровочный параметр</p></li>
+<li><p><strong>mu_oil_b_cal_cp</strong> – вязкость при давлении насыщения, калибровочный параметр</p></li>
 <li><p><strong>option</strong> – настройка расчета для выбора методик/корреляций, по умолчанию Стендинга</p></li>
 </ul>
 </dd>
@@ -1538,161 +1538,6 @@ Gases Using Equations of State.” Journal of Canadian Petroleum Technology. (Ju
 <dl class="method">
 <dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc">
 <code class="sig-name descname">calc</code><span class="sig-paren">(</span><em class="sig-param">p_bar</em>, <em class="sig-param">t_c</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_gas_m3m3">
-<code class="sig-name descname">calc_b_gas_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_gas_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_oil_above_pb_m3m3">
-<code class="sig-name descname">calc_b_oil_above_pb_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_oil_above_pb_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_oil_below_pb_m3m3">
-<code class="sig-name descname">calc_b_oil_below_pb_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_oil_below_pb_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_oil_in_pb_m3m3">
-<code class="sig-name descname">calc_b_oil_in_pb_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_oil_in_pb_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_wat_m3m3">
-<code class="sig-name descname">calc_b_wat_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_b_wat_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_compr_gas_1bar">
-<code class="sig-name descname">calc_compr_gas_1bar</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_compr_gas_1bar" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_compr_oil_1mpa">
-<code class="sig-name descname">calc_compr_oil_1mpa</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_compr_oil_1mpa" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_compr_wat_1bar">
-<code class="sig-name descname">calc_compr_wat_1bar</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_compr_wat_1bar" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_heatcap_gas_jkgc">
-<code class="sig-name descname">calc_heatcap_gas_jkgc</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_heatcap_gas_jkgc" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_heatcap_oil_jkgc">
-<code class="sig-name descname">calc_heatcap_oil_jkgc</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_heatcap_oil_jkgc" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_heatcap_wat_jkgc">
-<code class="sig-name descname">calc_heatcap_wat_jkgc</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_heatcap_wat_jkgc" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_dead_oil_cp">
-<code class="sig-name descname">calc_mu_dead_oil_cp</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_dead_oil_cp" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_gas_cp">
-<code class="sig-name descname">calc_mu_gas_cp</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_gas_cp" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_oil_any_p_cp">
-<code class="sig-name descname">calc_mu_oil_any_p_cp</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_oil_any_p_cp" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_oil_in_pb_cp">
-<code class="sig-name descname">calc_mu_oil_in_pb_cp</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_oil_in_pb_cp" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_wat_cp">
-<code class="sig-name descname">calc_mu_wat_cp</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_mu_wat_cp" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_pb_MPaa">
-<code class="sig-name descname">calc_pb_MPaa</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_pb_MPaa" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_pseudocritical_pressure_mpa">
-<code class="sig-name descname">calc_pseudocritical_pressure_mpa</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_pseudocritical_pressure_mpa" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_pseudocritical_temperature_k">
-<code class="sig-name descname">calc_pseudocritical_temperature_k</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_pseudocritical_temperature_k" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_rho_gas_kgm3">
-<code class="sig-name descname">calc_rho_gas_kgm3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_rho_gas_kgm3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_rho_oil_kgm3">
-<code class="sig-name descname">calc_rho_oil_kgm3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_rho_oil_kgm3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_rho_wat_kgm3">
-<code class="sig-name descname">calc_rho_wat_kgm3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_rho_wat_kgm3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_rs_m3m3">
-<code class="sig-name descname">calc_rs_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_rs_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_rs_wat_m3m3">
-<code class="sig-name descname">calc_rs_wat_m3m3</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_rs_wat_m3m3" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_sigma_oil_gas_Nm">
-<code class="sig-name descname">calc_sigma_oil_gas_Nm</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_sigma_oil_gas_Nm" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_sigma_wat_gas_Nm">
-<code class="sig-name descname">calc_sigma_wat_gas_Nm</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_sigma_wat_gas_Nm" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_conduct_gas_wmk">
-<code class="sig-name descname">calc_thermal_conduct_gas_wmk</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_conduct_gas_wmk" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_conduct_oil_wmk">
-<code class="sig-name descname">calc_thermal_conduct_oil_wmk</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_conduct_oil_wmk" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_conduct_wat_wmk">
-<code class="sig-name descname">calc_thermal_conduct_wat_wmk</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_conduct_wat_wmk" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_expansion_wat_1c">
-<code class="sig-name descname">calc_thermal_expansion_wat_1c</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_thermal_expansion_wat_1c" title="Ссылка на это определение">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="uniflocpy.uPVT.BlackOil_model.Fluid.calc_zfactor">
-<code class="sig-name descname">calc_zfactor</code><span class="sig-paren">(</span><em class="sig-param">number_cor</em><span class="sig-paren">)</span><a class="headerlink" href="#uniflocpy.uPVT.BlackOil_model.Fluid.calc_zfactor" title="Ссылка на это определение">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
