@@ -4,9 +4,7 @@
 Модуль для построения графиков через plotly
 
 """
-# TODO сделать через классы
-# TODO добавить оси и форматирование
-# TODO сделать аналогично для dash и matplotlib
+
 import pandas as pd
 import numpy as np
 import sys
@@ -20,7 +18,7 @@ from plotly import tools
 from datetime import date
 
 
-def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
+def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', low_memory = True):
     """
     Создание одного trace по данным
 
@@ -30,12 +28,20 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
     :param chosen_mode: настройка отображения 'lines', 'markers'
     :return: один trace
     """
-    one_trace = go.Scattergl(
-        x=data_x,
-        y=data_y,
-        name=namexy,
-        mode=chosen_mode
-    )
+    if low_memory == True:
+        one_trace = go.Scattergl(
+			x=data_x,
+			y=data_y,
+			name=namexy,
+			mode=chosen_mode
+		)
+    else:
+        one_trace = go.Scatter(
+            x=data_x,
+            y=data_y,
+            name=namexy,
+            mode=chosen_mode
+        )
     return one_trace
 
 
@@ -90,7 +96,7 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
     return trace_list"""
 
 
-def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
+def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', low_memory = False):
     """
     Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.
 
@@ -102,7 +108,8 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
     columns_name_list = data_frame.columns
     for i in columns_name_list:
         column_name = i
-        this_trace = create_plotly_trace(data_frame.index, data_frame[column_name], column_name, chosen_mode)
+        this_series = data_frame[column_name].dropna()
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, low_memory)
         trace_list.append(this_trace)
     return trace_list
 
