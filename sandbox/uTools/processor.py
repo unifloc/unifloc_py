@@ -28,18 +28,36 @@ import xlwings as xw
 sys.path.append("../")
 import datetime
 import time
+import os
 
-calc_mark_str = "601_big_run_1"
-input_data_filename_str = '601_input_data'
+well_name = '507'
+dir_name_with_input_data = 'second_edit'
+time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')
+calc_mark_str = "1"
 calc_option = True
 debug_mode = True
 vfm_calc_option = False
 restore_q_liq_only = False
-start_time_of_interval = datetime.datetime(2017, 2, 1)
-end_time_of_interval = datetime.datetime(2020, 2, 10)
 amount_iters_before_restart = 25
 sleep_time_sec = 25
 p_buf_value_in_error_coeff = 0.5
+
+if vfm_calc_option == False:
+    input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
+    dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'adaptation_' + time_mark
+    try:
+
+        os.mkdir(dir_to_save_calculated_data)
+    except:
+        pass
+else:
+    input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_restore_input'
+    dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'restore' + time_mark
+    try:
+
+        os.mkdir(dir_to_save_calculated_data)
+    except:
+        pass
 
 class all_ESP_data():
     def __init__(self):
@@ -178,9 +196,8 @@ def mass_calculation(this_state, debug_print = False, restore_flow=False, restor
 
 if calc_option == True:
     prepared_data = pd.read_csv(input_data_filename_str + ".csv")
-    prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
-    prepared_data = prepared_data[(prepared_data.index >= start_time_of_interval) & (prepared_data.index <= end_time_of_interval)]
-    del prepared_data["Unnamed: 0"]
+    prepared_data.index = pd.to_datetime(prepared_data["Время"])
+    del prepared_data["Время"]
 
     result_list = []
     result_dataframe = {'d':[2]}
@@ -233,20 +250,20 @@ if calc_option == True:
             print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
         new_dict['ГФ (модель, вход)'] = [this_state.rp_m3m3]
         new_dict['Значение функции ошибки'] = [this_state.error_in_step]
-        new_dict['Time'] = [prepared_data.index[i]]
+        new_dict['Время'] = [prepared_data.index[i]]
         new_dataframe = pd.DataFrame(new_dict)
-        new_dataframe.index = new_dataframe['Time']
+        new_dataframe.index = new_dataframe['Время']
         result_dataframe = result_dataframe.append(new_dataframe, sort=False)
         if vfm_calc_option == True:
-            result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_restore_current.csv")
+            result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + calc_mark_str + "_restore_current.csv")
         else:
-            result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_adaptation_current.csv")
+            result_dataframe.to_csv(dir_to_save_calculated_data + '\\'  + calc_mark_str + "_adaptation_current.csv")
 
     end_time = time.time()
     print("Затрачено всего: " + str(end_time - start_time))
     if vfm_calc_option == True:
-        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_restore_finished.csv")
+        result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + calc_mark_str + "_restore_finished.csv")
     else:
-        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_adaptation_finished.csv")
+        result_dataframe.to_csv(dir_to_save_calculated_data  + '\\'+ calc_mark_str + "_adaptation_finished.csv")
 close_f = UniflocVBA.book.macro('close_book_by_macro')
 close_f()
