@@ -31,13 +31,13 @@ import time
 import os
 
 well_name = '507'
-dir_name_with_input_data = 'second_edit'
+dir_name_with_input_data = 'restore_input_2019_11_03_17_23_04'
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')
 calc_mark_str = "1"
 calc_option = True
 debug_mode = True
-vfm_calc_option = False
-restore_q_liq_only = False
+vfm_calc_option = True
+restore_q_liq_only = True
 amount_iters_before_restart = 25
 sleep_time_sec = 25
 p_buf_value_in_error_coeff = 0.5
@@ -52,7 +52,7 @@ if vfm_calc_option == False:
         pass
 else:
     input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_restore_input'
-    dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'restore' + time_mark
+    dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'restore_' + time_mark
     try:
 
         os.mkdir(dir_to_save_calculated_data)
@@ -103,7 +103,7 @@ class all_ESP_data():
         self.cos_phi_data_d = None
         self.u_motor_data_v = None
         self.active_power_cs_data_kwt = None
-        self.qliq_m3day = None
+        self.qliq_m3day = 100 # initial guess
         self.watercut_perc = None
         self.p_buf_data_atm = None
         self.c_calibr_head_d = 0.5  # initial guess
@@ -186,7 +186,7 @@ def mass_calculation(this_state, debug_print = False, restore_flow=False, restor
                           bounds=[[0, 5], [0, 5]])
     else:
         if restore_q_liq_only == True:
-            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100], bounds=[[3, 700]])
+            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[3, 700]])
         else:
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
     print(result)
@@ -217,8 +217,6 @@ if calc_option == True:
         print("Расчет для времени:")
         print(prepared_data.index[i])
         print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]))
-
-        this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
         this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
         this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
         this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
@@ -233,10 +231,10 @@ if calc_option == True:
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
         if vfm_calc_option == True:
-            this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
-            this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
-            #this_state.c_calibr_head_d = prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"].mean()
-            #this_state.c_calibr_power_d = prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"].mean()
+            this_state.c_calibr_head_d = row_in_prepared_data["К. калибровки по напору - множитель (Модель) (Подготовленные)"]
+            this_state.c_calibr_power_d = row_in_prepared_data["К. калибровки по мощности - множитель (Модель) (Подготовленные)"]
+        else:
+            this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
 
         this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
         this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
@@ -255,15 +253,11 @@ if calc_option == True:
         new_dataframe.index = new_dataframe['Время']
         result_dataframe = result_dataframe.append(new_dataframe, sort=False)
         if vfm_calc_option == True:
-            result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + calc_mark_str + "_restore_current.csv")
+            result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + well_name + "_restore_" + calc_mark_str + ".csv")
         else:
-            result_dataframe.to_csv(dir_to_save_calculated_data + '\\'  + calc_mark_str + "_adaptation_current.csv")
+            result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + well_name + "_adapt_" + calc_mark_str + ".csv")
 
     end_time = time.time()
     print("Затрачено всего: " + str(end_time - start_time))
-    if vfm_calc_option == True:
-        result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + calc_mark_str + "_restore_finished.csv")
-    else:
-        result_dataframe.to_csv(dir_to_save_calculated_data  + '\\'+ calc_mark_str + "_adaptation_finished.csv")
 close_f = UniflocVBA.book.macro('close_book_by_macro')
 close_f()
