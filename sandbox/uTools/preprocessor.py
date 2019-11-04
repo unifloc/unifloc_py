@@ -48,6 +48,8 @@ columns_name_dict = {"Pline_atma": "P лин., атм",
                      "ESP.cable_power_W": "Мощность, передаваемая кабелю",
                      "ESP.power_CS_teor_calc_W": "Мощность, передаваемая СУ"}
 
+
+
 def mark_df_columns(df, mark):
     for i in df.columns:
         df = df.rename(columns={i: i + ' (' + mark + ')' })

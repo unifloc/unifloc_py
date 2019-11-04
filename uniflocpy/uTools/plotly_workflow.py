@@ -33,7 +33,8 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', low_memory 
 			x=data_x,
 			y=data_y,
 			name=namexy,
-			mode=chosen_mode
+			mode=chosen_mode,
+            hovertemplate = namexy + "<br>Значение: %{y:.3f}<extra></extra>"
 		)
     else:
         one_trace = go.Scatter(
@@ -128,3 +129,24 @@ def connect_traces(traces1, trace2):
     for j in trace2:
         connected_traces.append(j)
     return connected_traces
+
+
+def create_report_html(df, all_banches, filename):
+    subplot_amount = len(all_banches)
+    subplot_titles = []
+    for z in all_banches:
+        subplot_titles.append(list(z.keys())[0])
+    fig = make_subplots(
+        rows=subplot_amount, cols=1, shared_xaxes=True,
+        vertical_spacing=0.01,
+        subplot_titles=subplot_titles
+    )
+    for i in range(subplot_amount):
+        this_df = df[all_banches[i][subplot_titles[i]]]
+        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', low_memory=True)
+        for j in this_banch_trace:
+            fig.add_trace(j, row=i + 1, col=1)
+
+    fig.layout.hovermode = 'x'
+    fig.layout.height = 450 * subplot_amount
+    plot(fig, filename=filename)

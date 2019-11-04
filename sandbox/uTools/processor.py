@@ -31,13 +31,13 @@ import time
 import os
 
 well_name = '507'
-dir_name_with_input_data = 'restore_input_2019_11_03_17_23_04'
+dir_name_with_input_data = 'adapt_input_2019_11_03_17_23_04'
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')
 calc_mark_str = "1"
 calc_option = True
 debug_mode = True
-vfm_calc_option = True
-restore_q_liq_only = True
+vfm_calc_option = False
+restore_q_liq_only = False
 amount_iters_before_restart = 25
 sleep_time_sec = 25
 p_buf_value_in_error_coeff = 0.5
@@ -246,7 +246,7 @@ if calc_option == True:
         for j in range(len(this_result[1])):
             new_dict[this_result[1][j]] = [this_result[0][j]]
             print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
-        new_dict['ГФ (модель, вход)'] = [this_state.rp_m3m3]
+        new_dict['ГФ'] = [this_state.rp_m3m3]
         new_dict['Значение функции ошибки'] = [this_state.error_in_step]
         new_dict['Время'] = [prepared_data.index[i]]
         new_dataframe = pd.DataFrame(new_dict)
