@@ -32,8 +32,8 @@ import os
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 def calc(options):
     UniflocVBA = python_api.API(current_path + options[0])
-    well_name = '507'
-    dir_name_with_input_data = 'restore_input_2019_11_05_21_21_03'
+    well_name = '569'
+    dir_name_with_input_data = 'restore_input_2019_11_06_18_36_42'
 
     calc_mark_str = options[2]
     calc_option = True
@@ -63,20 +63,20 @@ def calc(options):
 
     class all_ESP_data():
         def __init__(self):
-            self.ESP_rate_nom = 320
+            self.ESP_rate_nom = 500
             self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
-            self.ESP_head_nom = 1200
+            self.ESP_head_nom = 1000
             self.dcas_mm = 160
-            self.h_tube_m = 833
+            self.h_tube_m = 827
             self.d_tube_mm = 76
             self.p_cas_data_atm = -1  # нет расчета затрубного пространства - он долгий и немножко бесполезный
 
             self.eff_motor_d = 0.89
-            self.i_motor_nom_a = 50
-            self.power_motor_nom_kwt = 125
-            self.h_perf_m = 834  # ТР
-            self.h_pump_m = 833  # ТР
-            self.udl_m = 87  # ТР
+            self.i_motor_nom_a = 59.5
+            self.power_motor_nom_kwt = 160
+            self.h_perf_m = 828  # ТР
+            self.h_pump_m = 827  # ТР
+            self.udl_m = 94  # ТР
 
             self.c_calibr_rate_d = 1
 
