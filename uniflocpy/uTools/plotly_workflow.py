@@ -18,7 +18,7 @@ from plotly import tools
 from datetime import date
 
 
-def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', low_memory = True):
+def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True):
     """
     Создание одного trace по данным
 
@@ -28,20 +28,21 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', low_memory 
     :param chosen_mode: настройка отображения 'lines', 'markers'
     :return: один trace
     """
-    if low_memory == True:
+    if use_gl == True:
         one_trace = go.Scattergl(
 			x=data_x,
 			y=data_y,
 			name=namexy,
 			mode=chosen_mode,
-            hovertemplate = namexy + "<br>Значение: %{y:.3f}<extra></extra>"
+            hovertemplate = namexy + ": %{y:.3f}<extra></extra>"
 		)
     else:
         one_trace = go.Scatter(
             x=data_x,
             y=data_y,
             name=namexy,
-            mode=chosen_mode
+            mode=chosen_mode,
+            hovertemplate=namexy + ": %{y:.3f}<extra></extra>"
         )
     return one_trace
 
@@ -97,7 +98,7 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
     return trace_list"""
 
 
-def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', low_memory = False):
+def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl = False):
     """
     Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.
 
@@ -110,7 +111,7 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', low_memo
     for i in columns_name_list:
         column_name = i
         this_series = data_frame[column_name].dropna()
-        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, low_memory)
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, use_gl)
         trace_list.append(this_trace)
     return trace_list
 
@@ -143,7 +144,7 @@ def create_report_html(df, all_banches, filename):
     )
     for i in range(subplot_amount):
         this_df = df[all_banches[i][subplot_titles[i]]]
-        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', low_memory=True)
+        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', use_gl=True)
         for j in this_banch_trace:
             fig.add_trace(j, row=i + 1, col=1)
 
