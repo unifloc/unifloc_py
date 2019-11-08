@@ -114,3 +114,21 @@ def load_calculated_data_from_csv(full_file_name):
                                                      calculated_data['P прием ЭЦН, атм']
     calculated_data = mark_df_columns(calculated_data, 'Модель')
     return calculated_data
+
+def make_gaps_and_interpolate(df):
+    try_check = df.copy()
+    try_check['Время'] = try_check.index
+    lenth = len(try_check['Время'])
+    try_check.index = range(lenth)
+    try_check = try_check[(try_check.index) % 2 == 0]
+    try_check = try_check.interpolate()
+
+    empty = pd.DataFrame({'empty': list(range(lenth))})
+    result = empty.join(try_check, how = 'outer')
+    result.index = df.index
+    result = result.interpolate()
+    result['Время'] = result.index
+    result.index = result['Время']
+    del result['empty']
+    del result['Время']
+    return result
