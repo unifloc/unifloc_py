@@ -30,12 +30,33 @@ import datetime
 import time
 import os
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
-def calc(options):
-    UniflocVBA = python_api.API(current_path + options[0])
-    well_name = '569'
-    dir_name_with_input_data = 'restore_input_2019_11_06_18_36_42'
 
-    calc_mark_str = options[2]
+
+class Calc_options():
+    def __init__(self, well_name='569',
+                 dir_name_with_input_data='restore_input_2019_11_06_18_36_42',
+                 multiprocessing=True,
+                 addin_name="UniflocVBA_7.xlam",
+                 number_of_thread=1,
+                 amount_of_threads=2,
+
+                 ESP_rate_nom=500):
+        self.well_name = well_name
+        self.dir_name_with_input_data = dir_name_with_input_data
+        self.multiprocessing = multiprocessing
+        self.addin_name = addin_name
+        self.number_of_thread = number_of_thread
+        self.amount_of_threads = amount_of_threads
+
+        self.ESP_rate_nom = ESP_rate_nom
+
+
+def calc(options = Calc_options()):
+    UniflocVBA = python_api.API(current_path + options.addin_name)
+    well_name = options.well_name
+    dir_name_with_input_data = options.dir_name_with_input_data
+
+    calc_mark_str = str(options.number_of_thread)
     calc_option = True
     debug_mode = True
     vfm_calc_option = True
@@ -48,7 +69,6 @@ def calc(options):
         input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
         dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'adaptation_' + time_mark
         try:
-
             os.mkdir(dir_to_save_calculated_data)
         except:
             pass
@@ -56,10 +76,17 @@ def calc(options):
         input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_restore_input'
         dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'restore_' + time_mark
         try:
-
             os.mkdir(dir_to_save_calculated_data)
         except:
             pass
+
+    if options.multiprocessing:
+        dir_to_save_calculated_data += '\\' + 'multiprocessing'
+        try:
+            os.mkdir(dir_to_save_calculated_data)
+        except:
+            pass
+
 
     class all_ESP_data():
         def __init__(self):
@@ -74,8 +101,8 @@ def calc(options):
             self.eff_motor_d = 0.89
             self.i_motor_nom_a = 59.5
             self.power_motor_nom_kwt = 160
-            self.h_perf_m = 828  # ТР
-            self.h_pump_m = 827  # ТР
+            self.h_pump_m = self.h_tube_m  # ТР
+            self.h_perf_m = self.h_tube_m + 1  # ТР
             self.udl_m = 94  # ТР
 
             self.c_calibr_rate_d = 1
@@ -195,13 +222,20 @@ def calc(options):
         true_result = this_state.result
         return true_result
 
-
     if calc_option == True:
         prepared_data = pd.read_csv(input_data_filename_str + ".csv")
-        if options[1] == True:
-            prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / 2)]
+
+        if options.number_of_thread == options.amount_of_threads == 1:
+            pass
+        elif options.number_of_thread == options.amount_of_threads:
+            prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
+        elif options.number_of_thread == 1:
+            prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads)]
         else:
-            prepared_data = prepared_data.iloc[int(len(prepared_data.index) / 2)::]
+            first_index = int(len(prepared_data.index) / options.amount_of_threads * (options.number_of_thread - 1))
+            second_index = first_index + int(len(prepared_data.index) / options.amount_of_threads)
+            prepared_data = prepared_data.iloc[first_index: second_index]
+
         prepared_data.index = pd.to_datetime(prepared_data["Время"])
         del prepared_data["Время"]
 
@@ -217,7 +251,7 @@ def calc(options):
                 print('Перезапуск Excel и VBA')
                 UniflocVBA.book.close()
                 time.sleep(sleep_time_sec)
-                UniflocVBA.book = xw.Book(current_path + options[0])
+                UniflocVBA.book = xw.Book(current_path + options.addin_name)
             start_in_loop_time = time.time()
             row_in_prepared_data = prepared_data.iloc[i]
             print("Расчет для времени:")
@@ -271,10 +305,14 @@ def calc(options):
 
 from multiprocessing import Pool
 
-options1 =["UniflocVBA_7.xlam",  False, '1']
-options2 =["UniflocVBA_7_1.xlam",  True, '2']
+amount_of_threads = 4
+
+first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, amount_of_threads = amount_of_threads)
+second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads = amount_of_threads)
+third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads = amount_of_threads)
+fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads = amount_of_threads)
 
 if __name__ == '__main__':
-    with Pool(2) as p:
+    with Pool(amount_of_threads) as p:
         p.map(calc,
-              [options1, options2])
+              [first_thread, second_thread, third_thread, fourth_thread])
