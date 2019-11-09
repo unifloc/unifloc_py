@@ -103,10 +103,13 @@ def load_calculated_data_from_csv(full_file_name):
     calculated_data = pd.read_csv(full_file_name)
     del calculated_data['Unnamed: 0']
     del calculated_data['Unnamed: 42']
-    del calculated_data['d']
+    try:
+        del calculated_data['d']
+        calculated_data = calculated_data.iloc[1:]
+    except:
+        pass
     calculated_data.index = pd.to_datetime(calculated_data['Время'])
     del calculated_data['Время']
-    calculated_data = calculated_data.iloc[1:]
     calculated_data = rename_columns_by_dict(calculated_data)
     calculated_data['Произведение калибровок H и N'] = calculated_data['К. калибровки по напору - множитель'] * \
                                                        calculated_data['К. калибровки по мощности - множитель']
@@ -115,12 +118,15 @@ def load_calculated_data_from_csv(full_file_name):
     calculated_data = mark_df_columns(calculated_data, 'Модель')
     return calculated_data
 
-def make_gaps_and_interpolate(df):
+def make_gaps_and_interpolate(df, reverse = False):
     try_check = df.copy()
     try_check['Время'] = try_check.index
     lenth = len(try_check['Время'])
     try_check.index = range(lenth)
-    try_check = try_check[(try_check.index) % 2 == 0]
+    if reverse == True:
+        try_check = try_check[(try_check.index) % 2 != 0]
+    else:
+        try_check = try_check[(try_check.index) % 2 == 0]
     try_check = try_check.interpolate()
 
     empty = pd.DataFrame({'empty': list(range(lenth))})

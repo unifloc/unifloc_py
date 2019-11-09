@@ -34,12 +34,12 @@ time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
 class Calc_options():
     def __init__(self, well_name='569',
-                 dir_name_with_input_data='restore_input_2019_11_06_18_36_42',
+                 dir_name_with_input_data='restore_input_2019_11_09_18_46_35',
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  number_of_thread=1,
-                 amount_of_threads=2,
-
+                 amount_of_threads=4,
+                 use_pwh_in_loss=True,
                  ESP_rate_nom=500):
         self.well_name = well_name
         self.dir_name_with_input_data = dir_name_with_input_data
@@ -47,11 +47,12 @@ class Calc_options():
         self.addin_name = addin_name
         self.number_of_thread = number_of_thread
         self.amount_of_threads = amount_of_threads
+        self.use_pwh_in_loss = use_pwh_in_loss
 
         self.ESP_rate_nom = ESP_rate_nom
 
 
-def calc(options = Calc_options()):
+def calc(options=Calc_options()):
     UniflocVBA = python_api.API(current_path + options.addin_name)
     well_name = options.well_name
     dir_name_with_input_data = options.dir_name_with_input_data
@@ -63,7 +64,7 @@ def calc(options = Calc_options()):
     restore_q_liq_only = True
     amount_iters_before_restart = 100
     sleep_time_sec = 25
-    p_buf_value_in_error_coeff = 0.5
+    p_buf_value_in_error_coeff = 0.2
 
     if vfm_calc_option == False:
         input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
@@ -135,13 +136,15 @@ def calc(options = Calc_options()):
             self.qliq_m3day = 100 # initial guess
             self.watercut_perc = None
             self.p_buf_data_atm = None
-            self.c_calibr_head_d = 0.5  # initial guess
-            self.c_calibr_power_d = 0.5  # initial guess
+            self.c_calibr_head_d = 1  # initial guess
+            self.c_calibr_power_d = 1  # initial guess
 
             self.result = None
             self.error_in_step = None
             self.p_buf_data_max_atm = None
             self.active_power_cs_data_max_kwt = None
+            self.p_wellhead_data_max_atm = None
+            self.qliq_max_m3day = None
 
 
     def mass_calculation(this_state, debug_print = False, restore_flow=False, restore_q_liq_only = True):
@@ -198,24 +201,34 @@ def calc(options = Calc_options()):
                                                         this_state.c_calibr_rate_d)
 
             this_state.result = result
+            p_line_calc_atm = result[0][0]
             p_buf_calc_atm = result[0][2]
             power_CS_calc_W = result[0][16]
-            result_for_folve = p_buf_value_in_error_coeff * \
-                               ((p_buf_calc_atm - this_state.p_buf_data_atm) / this_state.p_buf_data_max_atm) ** 2 + \
-                               (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
-                                this_state.active_power_cs_data_max_kwt) ** 2
+            if options.use_pwh_in_loss == True:
+                result_for_folve = p_buf_value_in_error_coeff * \
+                                   ((p_line_calc_atm - this_state.p_wellhead_data_atm) / this_state.p_wellhead_data_max_atm) ** 2 + \
+                                   (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                                    this_state.active_power_cs_data_max_kwt) ** 2
+            else:
+                result_for_folve = p_buf_value_in_error_coeff * \
+                                   ((p_buf_calc_atm - this_state.p_buf_data_atm) / this_state.p_buf_data_max_atm) ** 2 + \
+                                   (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                                    this_state.active_power_cs_data_max_kwt) ** 2
+
             if debug_print:
-                print("power_CS_calc_W = " + str(power_CS_calc_W))
-                print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
+                print("Линейное давление в модели = " + str(p_line_calc_atm))
+                print("Мощность в модели = " + str(power_CS_calc_W))
+                print("Абсолютная ошибка по мощности = " + str(power_CS_calc_W - this_state.active_power_cs_data_kwt))
+                print("Абсолютная ошибка по давлению = " + str(p_line_calc_atm - this_state.p_wellhead_data_atm))
                 print("ошибка на текущем шаге = " + str(result_for_folve))
             this_state.error_in_step = result_for_folve
             return result_for_folve
         if restore_flow == False:
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d],
-                              bounds=[[0, 5], [0, 5]])
+                              bounds=[[0.45, 5], [0.45, 5]])
         else:
             if restore_q_liq_only == True:
-                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[3, 350]])
+                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[3, this_state.qliq_max_m3day * 1.2]])
             else:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
         print(result)
@@ -260,7 +273,8 @@ def calc(options = Calc_options()):
             this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
             this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
             this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
-            this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
+            #this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
+            this_state.p_wellhead_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10
             this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
             this_state.p_intake_data_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
             this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
@@ -279,6 +293,8 @@ def calc(options = Calc_options()):
 
             this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
             this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
+            this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
+            this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
             this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only)
             result_list.append(this_result)
             end_in_loop_time = time.time()
