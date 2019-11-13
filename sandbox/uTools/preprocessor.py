@@ -1,4 +1,4 @@
-"""
+﻿"""
 Кобзарь О.С. Хабибуллин Р.А.
 
 Модуль для обработки данных скважин, оснащенных УЭЦН (со СУ и шахматки)
@@ -129,6 +129,9 @@ def make_gaps_and_interpolate(df, reverse = False):
         try_check = try_check[(try_check.index) % 2 == 0]
     try_check = try_check.interpolate()
 
+
+
+
     empty = pd.DataFrame({'empty': list(range(lenth))})
     result = empty.join(try_check, how = 'outer')
     result.index = df.index
@@ -138,3 +141,28 @@ def make_gaps_and_interpolate(df, reverse = False):
     del result['empty']
     del result['Время']
     return result
+
+def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_type): 
+    edited_data_cs = pd.read_csv(cs_data_filename, parse_dates = True, index_col = 'Время')
+    edited_data_cs = edited_data_cs.resample(time_to_resamle).mean()
+    edited_data_cs['Выходная частота ПЧ'] = edited_data_cs['Выходная частота ПЧ'].fillna(method='ffill')
+    edited_data_cs['Температура на приеме насоса (пласт. жидкость)']  = \
+            edited_data_cs['Температура на приеме насоса (пласт. жидкость)'].fillna(method='ffill')
+    if created_input_data_type == 0:
+        edited_data_cs = edited_data_cs.dropna(subset =['Объемный дебит жидкости'])
+    edited_data_cs = edited_data_cs.fillna(method='ffill')
+    edited_data_cs['ГФ'] = edited_data_cs['Объемный дебит газа'] / edited_data_cs['Объемный дебит нефти']
+    edited_data_cs = mark_df_columns(edited_data_cs, 'СУ')
+    return edited_data_cs
+
+def load_and_edit_chess_data(chess_data_filename, time_to_resamle):
+    chess_data = pd.read_excel(chess_data_filename)
+    chess_data.index = pd.to_datetime(chess_data['Дата'], dayfirst = True, format = "%d.%m.%Y", infer_datetime_format=True)
+    del chess_data['Дата']
+    chess_data.index.name = 'Время'
+    chess_data = chess_data[chess_data.columns[5:]]
+    chess_data = chess_data.resample(time_to_resamle).last()
+    chess_data = chess_data.fillna(method='ffill')
+    chess_data = mark_df_columns(chess_data, 'Ш')
+    return chess_data
+
