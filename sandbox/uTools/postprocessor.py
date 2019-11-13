@@ -10,6 +10,13 @@ def relative_error_perc(y1, y2):
 
 
 def calc_mertics(y_fact, y_pred, mark_str):
+    """
+    Расчет метрик успешности работы
+    :param y_fact:
+    :param y_pred:
+    :param mark_str:
+    :return:
+    """
     answer = mark_str + '\n'
     r2_score = metrics.r2_score(y_fact, y_pred)
     mean_absolute_error = metrics.mean_absolute_error(y_fact, y_pred)

@@ -89,17 +89,35 @@ def create_edited_df(df):
     return result
 
 def cut_df(df, left_boundary, right_boundary):
+    """
+    Вырезка из DataFrame временного интервала
+    :param df:
+    :param left_boundary:
+    :param right_boundary:
+    :return:
+    """
     for start, end in zip(left_boundary, right_boundary):
         df = df[(df.index >= start) & (df.index <= end)]
     return df
 
 def rename_columns_by_dict(df, dict = columns_name_dict):
+    """
+    Специальное изменение названий столбцов по словарю
+    :param df:
+    :param dict:
+    :return:
+    """
     for i in df.columns:
         if i in dict.keys():
             df = df.rename(columns={i: dict[i] })
     return df
 
 def load_calculated_data_from_csv(full_file_name):
+    """
+    Загрузка результатов расчета модели (адаптации или восстановления) и первичная обработка
+    :param full_file_name:
+    :return:
+    """
     calculated_data = pd.read_csv(full_file_name)
     del calculated_data['Unnamed: 0']
     del calculated_data['Unnamed: 42']
@@ -119,6 +137,12 @@ def load_calculated_data_from_csv(full_file_name):
     return calculated_data
 
 def make_gaps_and_interpolate(df, reverse = False):
+    """
+    Выкалывание точек и линейная интерполяция. (Восстановление дебитов путем интерполяции)
+    :param df:
+    :param reverse:
+    :return:
+    """
     try_check = df.copy()
     try_check['Время'] = try_check.index
     lenth = len(try_check['Время'])
@@ -128,10 +152,6 @@ def make_gaps_and_interpolate(df, reverse = False):
     else:
         try_check = try_check[(try_check.index) % 2 == 0]
     try_check = try_check.interpolate()
-
-
-
-
     empty = pd.DataFrame({'empty': list(range(lenth))})
     result = empty.join(try_check, how = 'outer')
     result.index = df.index
@@ -142,7 +162,14 @@ def make_gaps_and_interpolate(df, reverse = False):
     del result['Время']
     return result
 
-def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_type): 
+def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_type):
+    """
+    Загрузка и обработка данных со СУ (не сырых, предварительно обработанных)
+    :param cs_data_filename:
+    :param time_to_resamle:
+    :param created_input_data_type:
+    :return:
+    """
     edited_data_cs = pd.read_csv(cs_data_filename, parse_dates = True, index_col = 'Время')
     edited_data_cs = edited_data_cs.resample(time_to_resamle).mean()
     edited_data_cs['Выходная частота ПЧ'] = edited_data_cs['Выходная частота ПЧ'].fillna(method='ffill')
@@ -156,6 +183,12 @@ def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_
     return edited_data_cs
 
 def load_and_edit_chess_data(chess_data_filename, time_to_resamle):
+    """
+    Загрузка и обработка данных с шахматки
+    :param chess_data_filename:
+    :param time_to_resamle:
+    :return:
+    """
     chess_data = pd.read_excel(chess_data_filename)
     chess_data.index = pd.to_datetime(chess_data['Дата'], dayfirst = True, format = "%d.%m.%Y", infer_datetime_format=True)
     del chess_data['Дата']

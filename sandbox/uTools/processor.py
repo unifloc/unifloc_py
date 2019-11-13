@@ -31,10 +31,10 @@ from multiprocessing import Pool
 
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # временная метка для сохранения без перезаписи
 
-
+# TODO сделать чтение техрежима
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
     def __init__(self, well_name='569',
-                 dir_name_with_input_data='adapt_input_2019_11_13_20_19_57',
+                 dir_name_with_input_data='restore_input_2019_11_13_23_22_37',
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  number_of_thread=1,
@@ -73,15 +73,15 @@ def calc(options=Calc_options()):
     dir_name_with_input_data = options.dir_name_with_input_data
 
     calc_mark_str = str(options.number_of_thread)
-    calc_option = True
+    calc_option = True # флаг расчета, если  False, не будет делать ничего
     debug_mode = True
-    vfm_calc_option = False
-    restore_q_liq_only = False
-    amount_iters_before_restart = 100
-    sleep_time_sec = 25  # после 25 итерации (временных) могут возникать ошибки
+    vfm_calc_option = True  # True - для адаптации, False - для восстановления
+    restore_q_liq_only = True  # True - для адаптации, False - для восстановления
+    amount_iters_before_restart = 100 # после 25 итерации (временных) могут возникать ошибки
+    sleep_time_sec = 25
     p_buf_value_in_error_coeff = 0.2
 
-    if vfm_calc_option == False:
+    if vfm_calc_option == False:  # создание директорий для результатов расчета
         input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
         dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'adaptation_' + time_mark
         try:
@@ -95,7 +95,6 @@ def calc(options=Calc_options()):
             os.mkdir(dir_to_save_calculated_data)
         except:
             pass
-
     if options.multiprocessing:
         dir_to_save_calculated_data += '\\' + 'multiprocessing'
         try:
@@ -103,8 +102,7 @@ def calc(options=Calc_options()):
         except:
             pass
 
-
-    class all_ESP_data():
+    class all_ESP_data(): # класс, в котором хранятся данные
         def __init__(self):
             self.ESP_rate_nom = 500
             self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
@@ -161,10 +159,23 @@ def calc(options=Calc_options()):
             self.p_wellhead_data_max_atm = None
             self.qliq_max_m3day = None
 
-
     def mass_calculation(this_state, debug_print = False, restore_flow=False, restore_q_liq_only = True):
+        """
+        Функция для массового расчета - модель скважины UniflocVBA + оптимизатор scipy
+        :param this_state: структура со всеми необходимыми данными модели
+        :param debug_print: флаг для вывода разных параметров для контроля состояния
+        :param restore_flow: флаг для восстановления дебитов, False - адаптация
+        :param restore_q_liq_only: флаг для метода восстновления дебитов
+        :return: результат оптимизационной задачи - параметры скважины - для определенного набора данных
+        """
         def calc_well_plin_pwf_atma_for_fsolve(minimaze_parameters):
-            if restore_flow == False: # TODO изменить коэффициенты для восстановления дебита
+            """
+            Фунция один раз рассчитывает модель скважины в UniflocVBA.
+            Передается в оптимизатор scipy.minimaze
+            :param minimaze_parameters: список подбираемых параметров - калибровки или расходы фаз
+            :return: значение функции ошибки
+            """
+            if restore_flow == False: # определение и сохранение подбираемых параметров
                 this_state.c_calibr_power_d = minimaze_parameters[1]
                 this_state.c_calibr_head_d = minimaze_parameters[0]
                 this_state.c_calibr_rate_d = this_state.c_calibr_rate_d
@@ -182,6 +193,7 @@ def calc(options=Calc_options()):
                     if debug_print:
                         print('qliq_m3day = ' + str(this_state.qliq_m3day))
                         print('watercut_perc = ' + str(this_state.watercut_perc))
+            # последовательный запуск функций UniflocVBA для расчета модели
             PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
                                                        this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
                                                        this_state.pb_atm, this_state.tres_c,
@@ -215,11 +227,11 @@ def calc(options=Calc_options()):
                                                         this_state.ksep_d, this_state.c_calibr_head_d, this_state.c_calibr_power_d,
                                                         this_state.c_calibr_rate_d)
 
-            this_state.result = result
+            this_state.result = result # сохранение результата в форме списка в структуру для последующего извлечения
             p_line_calc_atm = result[0][0]
             p_buf_calc_atm = result[0][2]
             power_CS_calc_W = result[0][16]
-            if options.use_pwh_in_loss == True:
+            if options.use_pwh_in_loss == True: # функция ошибки
                 result_for_folve = p_buf_value_in_error_coeff * \
                                    ((p_line_calc_atm - this_state.p_wellhead_data_atm) / this_state.p_wellhead_data_max_atm) ** 2 + \
                                    (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
@@ -238,7 +250,8 @@ def calc(options=Calc_options()):
                 print("ошибка на текущем шаге = " + str(result_for_folve))
             this_state.error_in_step = result_for_folve
             return result_for_folve
-        if restore_flow == False:
+
+        if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d],
                               bounds=[[0.45, 5], [0.45, 5]])
         else:
@@ -247,13 +260,13 @@ def calc(options=Calc_options()):
             else:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
         print(result)
-        true_result = this_state.result
+        true_result = this_state.result # сохранение результатов расчета оптимизированной модели
         return true_result
 
-    if calc_option == True:
-        prepared_data = pd.read_csv(input_data_filename_str + ".csv")
+    if calc_option == True: # основной цикл расчета начинается здесь
+        prepared_data = pd.read_csv(input_data_filename_str + ".csv") # чтение входных данных
 
-        if options.number_of_thread == options.amount_of_threads == 1:
+        if options.number_of_thread == options.amount_of_threads == 1: # определение задействования многопоточности
             pass
         elif options.number_of_thread == options.amount_of_threads:
             prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
@@ -272,10 +285,10 @@ def calc(options=Calc_options()):
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
         this_state = all_ESP_data()
-        for i in range(prepared_data.shape[0]):
+        for i in range(prepared_data.shape[0]):  # начало итерации по строкам - наборам данных для определенного времени
         #for i in range(3):
             check = i % amount_iters_before_restart
-            if check == 0 and i != 0:
+            if check == 0 and i != 0: # защита против подвисаний экселя - не работает в многопотоке
                 print('Перезапуск Excel и VBA')
                 UniflocVBA.book.close()
                 time.sleep(sleep_time_sec)
@@ -285,7 +298,8 @@ def calc(options=Calc_options()):
             print("Расчет для времени:")
             print(prepared_data.index[i])
             print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]))
-            this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
+
+            this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
             this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
             this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
             #this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
@@ -305,16 +319,17 @@ def calc(options=Calc_options()):
                 this_state.c_calibr_power_d = row_in_prepared_data["К. калибровки по мощности - множитель (Модель) (Подготовленные)"]
             else:
                 this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
-
             this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
             this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
             this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
             this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
-            this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only)
-            result_list.append(this_result)
+
+            this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only) # расчет
+
             end_in_loop_time = time.time()
             print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
-            new_dict = {}
+            new_dict = {} # преобразование и сохранение результатов
+            result_list.append(this_result)
             for j in range(len(this_result[1])):
                 new_dict[this_result[1][j]] = [this_result[0][j]]
                 print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
@@ -334,14 +349,14 @@ def calc(options=Calc_options()):
     close_f = UniflocVBA.book.macro('close_book_by_macro')
     close_f()
 
-
+# настройка многопоточности
 amount_of_threads = 4
 
 first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, amount_of_threads = amount_of_threads)
 second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads = amount_of_threads)
 third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads = amount_of_threads)
 fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads = amount_of_threads)
-
+# основной метод запуска расчетов через многопоток
 if __name__ == '__main__':
     with Pool(amount_of_threads) as p:
         p.map(calc,

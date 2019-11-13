@@ -133,6 +133,13 @@ def connect_traces(traces1, trace2):
 
 
 def create_report_html(df, all_banches, filename):
+    """
+    Создание шаблонизированного и удобного набора графиков
+    :param df:
+    :param all_banches:
+    :param filename:
+    :return:
+    """
     subplot_amount = len(all_banches)
     subplot_titles = []
     for z in all_banches:
