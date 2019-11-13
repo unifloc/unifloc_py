@@ -14,33 +14,44 @@
 import sys
 import os
 sys.path.append('../')
-sys.path.append('C:\\Users\\olegk\\Documents\\')
 current_path = os.getcwd()
+path_to_sys = current_path.replace(r'unifloc\sandbox\uTools', '')
+sys.path.append(path_to_sys)  # добавляем путь в sys, чтобы нашелся проект unifloc_vba
 current_path = current_path.replace(r'unifloc\sandbox\uTools', r'unifloc_vba\\')
 print(current_path)
-
 import unifloc_vba.description_generated.python_api as python_api
 from scipy.optimize import minimize
 import pandas as pd
-
-import sys
 import xlwings as xw
 sys.path.append("../")
 import datetime
 import time
-import os
-time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
+from multiprocessing import Pool
 
 
-class Calc_options():
+time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # временная метка для сохранения без перезаписи
+
+
+class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
     def __init__(self, well_name='569',
-                 dir_name_with_input_data='restore_input_2019_11_09_18_46_35',
+                 dir_name_with_input_data='adapt_input_2019_11_13_20_19_57',
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  number_of_thread=1,
                  amount_of_threads=4,
                  use_pwh_in_loss=True,
-                 ESP_rate_nom=500):
+                 ESP_rate_nom=500):  #TODO добавлять насосы в UniflocVBA
+        """
+        класс для сбора всех настроек, необходимых для расчета
+        :param well_name: имя скважины
+        :param dir_name_with_input_data: название директории с входными данными (adaptation_input или restore_input)
+        :param multiprocessing: флаг для расчета в многопотоке(предварительно нужно размножить unifloc_vba.xlam
+        :param addin_name: название надстройки
+        :param number_of_thread: порядковый номер этого потока
+        :param amount_of_threads: общее число потоков
+        :param use_pwh_in_loss: флаг использования линейного давления в функции ошибки
+        :param ESP_rate_nom: номинальный дебит ЭЦН
+        """
         self.well_name = well_name
         self.dir_name_with_input_data = dir_name_with_input_data
         self.multiprocessing = multiprocessing
@@ -48,11 +59,15 @@ class Calc_options():
         self.number_of_thread = number_of_thread
         self.amount_of_threads = amount_of_threads
         self.use_pwh_in_loss = use_pwh_in_loss
-
         self.ESP_rate_nom = ESP_rate_nom
 
 
 def calc(options=Calc_options()):
+    """
+    Основная расчетная функция, в которой есть все
+    :param options: структура со всеми надстройками, данными, параметрами
+    :return: None
+    """
     UniflocVBA = python_api.API(current_path + options.addin_name)
     well_name = options.well_name
     dir_name_with_input_data = options.dir_name_with_input_data
@@ -60,10 +75,10 @@ def calc(options=Calc_options()):
     calc_mark_str = str(options.number_of_thread)
     calc_option = True
     debug_mode = True
-    vfm_calc_option = True
-    restore_q_liq_only = True
+    vfm_calc_option = False
+    restore_q_liq_only = False
     amount_iters_before_restart = 100
-    sleep_time_sec = 25
+    sleep_time_sec = 25  # после 25 итерации (временных) могут возникать ошибки
     p_buf_value_in_error_coeff = 0.2
 
     if vfm_calc_option == False:
@@ -319,7 +334,6 @@ def calc(options=Calc_options()):
     close_f = UniflocVBA.book.macro('close_book_by_macro')
     close_f()
 
-from multiprocessing import Pool
 
 amount_of_threads = 4
 
@@ -332,3 +346,5 @@ if __name__ == '__main__':
     with Pool(amount_of_threads) as p:
         p.map(calc,
               [first_thread, second_thread, third_thread, fourth_thread])
+
+#TODO добавить расчет для одного ядра
