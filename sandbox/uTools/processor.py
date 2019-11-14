@@ -34,7 +34,7 @@ time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # врем�
 
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
     def __init__(self, well_name='569',
-                 dir_name_with_input_data='restore_input_2019_11_13_23_22_37',
+                 dir_name_with_input_data='restore_input_2019_11_14_17_38_59',
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  tr_name="Техрежим, , февраль 2019.xls",
@@ -47,7 +47,7 @@ class Calc_options():  #TODO сделать класс-структуру со �
                  restore_q_liq_only=True,
                  amount_iters_before_restart=100,
                  sleep_time_sec=25,
-                 hydr_part_weight_in_error_coeff=0.2):  #TODO добавлять насосы в UniflocVBA
+                 hydr_part_weight_in_error_coeff=0.5):  #TODO добавлять насосы в UniflocVBA
         """
         класс для сбора всех настроек, необходимых для расчета
         :param well_name: имя скважины
@@ -93,13 +93,13 @@ def calc(options=Calc_options()):
     dir_name_with_input_data = options.dir_name_with_input_data
 
     calc_mark_str = str(options.number_of_thread)
-    calc_option = True # флаг расчета, если  False, не будет делать ничего
-    debug_mode = True
-    vfm_calc_option = True  # True - для адаптации, False - для восстановления
-    restore_q_liq_only = True  # True - для адаптации, False - для восстановления
-    amount_iters_before_restart = 100  # после 25 итерации (временных) могут возникать ошибки
-    sleep_time_sec = 25
-    hydr_part_weight_in_error_coeff = 0.5
+    calc_option = options.calc_option # флаг расчета, если  False, не будет делать ничего
+    debug_mode = options.debug_mode
+    vfm_calc_option = options.vfm_calc_option  # True - для адаптации, False - для восстановления
+    restore_q_liq_only = options.restore_q_liq_only  # True - для адаптации, False - для восстановления
+    amount_iters_before_restart = options.amount_iters_before_restart  # после 25 итерации (временных) могут возникать ошибки
+    sleep_time_sec = options.sleep_time_sec
+    hydr_part_weight_in_error_coeff = options.hydr_part_weight_in_error_coeff
 
     tr_file_full_path = os.getcwd() + '\\data\\tr\\' + options.tr_name
     tr_data = prep.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
