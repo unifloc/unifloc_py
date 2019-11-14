@@ -60,6 +60,7 @@ def mark_df_columns(df, mark):
         df = df.rename(columns={i: i + ' (' + mark + ')' })
     return df
 
+
 def initial_editing(df, wellname):
     if len(df.columns)==4:
         del df[0]
@@ -73,11 +74,13 @@ def initial_editing(df, wellname):
     del df['Время']
     return df
 
+
 def extract_df_one_parametr_and_edit(df, list_of_params, number_of_param_in_list):
     extracted_df_one_param = df[df[0] == list_of_params[number_of_param_in_list]]
     extracted_df_one_param = extracted_df_one_param.rename(columns = {2: extracted_df_one_param[0][0]})
     del extracted_df_one_param[0]
     return extracted_df_one_param
+
 
 def create_edited_df(df):
     parametrs_list = df[0].unique()
@@ -112,6 +115,7 @@ def rename_columns_by_dict(df, dict = columns_name_dict):
             df = df.rename(columns={i: dict[i] })
     return df
 
+
 def load_calculated_data_from_csv(full_file_name):
     """
     Загрузка результатов расчета модели (адаптации или восстановления) и первичная обработка
@@ -135,6 +139,7 @@ def load_calculated_data_from_csv(full_file_name):
                                                      calculated_data['P прием ЭЦН, атм']
     calculated_data = mark_df_columns(calculated_data, 'Модель')
     return calculated_data
+
 
 def make_gaps_and_interpolate(df, reverse = False):
     """
@@ -162,6 +167,7 @@ def make_gaps_and_interpolate(df, reverse = False):
     del result['Время']
     return result
 
+
 def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_type):
     """
     Загрузка и обработка данных со СУ (не сырых, предварительно обработанных)
@@ -182,6 +188,7 @@ def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_
     edited_data_cs = mark_df_columns(edited_data_cs, 'СУ')
     return edited_data_cs
 
+
 def load_and_edit_chess_data(chess_data_filename, time_to_resamle):
     """
     Загрузка и обработка данных с шахматки
@@ -199,3 +206,46 @@ def load_and_edit_chess_data(chess_data_filename, time_to_resamle):
     chess_data = mark_df_columns(chess_data, 'Ш')
     return chess_data
 
+
+def extract_power_from_motor_name(name_str):
+    name_str = name_str.upper()
+    name_str = name_str.replace('9.8.4ЭДБТ ', '')
+    name_str = name_str.replace(' ', '')
+    name_str = name_str.replace('ПЭДНС', '')
+    name_str = name_str.replace('9ЭДБТК', '')
+    name_str = name_str.replace('ПЭДC', '')
+    name_str = name_str.replace('ПЭДН', '')
+    name_str = name_str.replace('9.8.4ЭДБТ', '')
+    name_str = name_str.replace('ПВЭДН', '')
+    name_str = name_str.replace('9ЭДБСТ', '')
+    name_str = name_str.replace('9ЭДБТ', '')
+    name_str = name_str.replace('ЭДБТ', '')
+    name_str = name_str.replace('ПЭД', '')
+    if name_str[0] == '-':
+        name_str = name_str[1:]
+    if name_str[3] == '-':
+        name_str = name_str[0:3]
+    elif name_str[2] == '-':
+        name_str = name_str[0:2]
+    return float(name_str)
+
+
+class tr_data():
+    def __init__(self, row):
+        self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
+        self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
+        self.esp_nom_rate_m3day = row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
+        self.esp_nom_head_m = row[('Номинальный напор', 'Unnamed: 17_level_1', 'Unnamed: 17_level_2', 'м')].values[0]
+        self.h_pump_m = row[('Н сп', 'Unnamed: 20_level_1', 'Unnamed: 20_level_2', 'м')].values[0]
+        self.esp_name_str = row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
+        self.udl_m = row[('Удл (Нсп)', 'Unnamed: 161_level_1', 'Unnamed: 161_level_2', 'м')].values[0]
+        self.i_motor_nom_a = row[('ПЭД', 'Unnamed: 131_level_1', 'I ном', 'А')].values[0]
+        self.motor_name_str = row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0]
+        self.power_motor_nom_kwt = extract_power_from_motor_name(row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0])
+
+
+def read_tr_and_get_data(tr_file_full_path, well_name):
+    tr = pd.read_excel(tr_file_full_path, skiprows = 6, header = [0,1,2,3]) #при ошибке файл нужно открыть и сохранить повторно без изменений
+    this_well_row = tr[tr[('№\nскв', 'Unnamed: 4_level_1', 'Unnamed: 4_level_2', 'Unnamed: 4_level_3')] == well_name]
+    tr_class = tr_data(this_well_row)
+    return tr_class

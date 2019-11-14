@@ -27,20 +27,27 @@ sys.path.append("../")
 import datetime
 import time
 from multiprocessing import Pool
+import sandbox.uTools.preprocessor as prep
 
 
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # временная метка для сохранения без перезаписи
 
-# TODO сделать чтение техрежима
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
     def __init__(self, well_name='569',
                  dir_name_with_input_data='restore_input_2019_11_13_23_22_37',
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
+                 tr_name="Техрежим, , февраль 2019.xls",
                  number_of_thread=1,
                  amount_of_threads=4,
                  use_pwh_in_loss=True,
-                 ESP_rate_nom=500):  #TODO добавлять насосы в UniflocVBA
+                 calc_option=True,
+                 debug_mode=True,
+                 vfm_calc_option=True,
+                 restore_q_liq_only=True,
+                 amount_iters_before_restart=100,
+                 sleep_time_sec=25,
+                 hydr_part_weight_in_error_coeff=0.2):  #TODO добавлять насосы в UniflocVBA
         """
         класс для сбора всех настроек, необходимых для расчета
         :param well_name: имя скважины
@@ -50,7 +57,13 @@ class Calc_options():  #TODO сделать класс-структуру со �
         :param number_of_thread: порядковый номер этого потока
         :param amount_of_threads: общее число потоков
         :param use_pwh_in_loss: флаг использования линейного давления в функции ошибки
-        :param ESP_rate_nom: номинальный дебит ЭЦН
+        :param calc_option: флаг расчета, если True - начала итераций по строкам в df
+        :param debug_mode: флаг отладки, если True - онлайн вывод значений функции ошибки и других важных параметров
+        :param vfm_calc_option: флаг метода расчета, если True - восстановление, если - False - адаптация
+        :param restore_q_liq_only: флаг метода восстановления, если True - только дебита жидкости
+        :param amount_iters_before_restart: количество итераций перед перезапуском экселя
+        :param sleep_time_sec: время отдыха после закрытия экселя
+        :param hydr_part_weight_in_error_coeff: гиперпараметр на гидравлическую часть в функции ошибки
         """
         self.well_name = well_name
         self.dir_name_with_input_data = dir_name_with_input_data
@@ -59,7 +72,14 @@ class Calc_options():  #TODO сделать класс-структуру со �
         self.number_of_thread = number_of_thread
         self.amount_of_threads = amount_of_threads
         self.use_pwh_in_loss = use_pwh_in_loss
-        self.ESP_rate_nom = ESP_rate_nom
+        self.tr_name = tr_name
+        self.calc_option = calc_option
+        self.debug_mode = debug_mode
+        self.vfm_calc_option = vfm_calc_option
+        self.restore_q_liq_only = restore_q_liq_only
+        self.amount_iters_before_restart = amount_iters_before_restart
+        self.sleep_time_sec = sleep_time_sec
+        self.hydr_part_weight_in_error_coeff = hydr_part_weight_in_error_coeff
 
 
 def calc(options=Calc_options()):
@@ -77,9 +97,12 @@ def calc(options=Calc_options()):
     debug_mode = True
     vfm_calc_option = True  # True - для адаптации, False - для восстановления
     restore_q_liq_only = True  # True - для адаптации, False - для восстановления
-    amount_iters_before_restart = 100 # после 25 итерации (временных) могут возникать ошибки
+    amount_iters_before_restart = 100  # после 25 итерации (временных) могут возникать ошибки
     sleep_time_sec = 25
-    p_buf_value_in_error_coeff = 0.2
+    hydr_part_weight_in_error_coeff = 0.5
+
+    tr_file_full_path = os.getcwd() + '\\data\\tr\\' + options.tr_name
+    tr_data = prep.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
 
     if vfm_calc_option == False:  # создание директорий для результатов расчета
         input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
@@ -104,20 +127,20 @@ def calc(options=Calc_options()):
 
     class all_ESP_data(): # класс, в котором хранятся данные
         def __init__(self):
-            self.ESP_rate_nom = 500
+            self.ESP_rate_nom = tr_data.esp_nom_rate_m3day
             self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
-            self.ESP_head_nom = 1000
-            self.dcas_mm = 160
-            self.h_tube_m = 827
-            self.d_tube_mm = 76
+            self.ESP_head_nom = tr_data.esp_nom_head_m
+            self.dcas_mm = tr_data.d_cas_mm
+            self.h_pump_m = tr_data.h_pump_m
+            self.d_tube_mm = tr_data.d_tube_mm
             self.p_cas_data_atm = -1  # нет расчета затрубного пространства - он долгий и немножко бесполезный
 
             self.eff_motor_d = 0.89
-            self.i_motor_nom_a = 59.5
-            self.power_motor_nom_kwt = 160
-            self.h_pump_m = self.h_tube_m  # ТР
-            self.h_perf_m = self.h_tube_m + 1  # ТР
-            self.udl_m = 94  # ТР
+            self.i_motor_nom_a = tr_data.i_motor_nom_a
+            self.power_motor_nom_kwt = tr_data.power_motor_nom_kwt
+            self.h_tube_m = self.h_pump_m  # ТР
+            self.h_perf_m = self.h_pump_m + 1  # ТР
+            self.udl_m = tr_data.udl_m  # ТР
 
             self.c_calibr_rate_d = 1
 
@@ -232,14 +255,14 @@ def calc(options=Calc_options()):
             p_buf_calc_atm = result[0][2]
             power_CS_calc_W = result[0][16]
             if options.use_pwh_in_loss == True: # функция ошибки
-                result_for_folve = p_buf_value_in_error_coeff * \
+                result_for_folve = hydr_part_weight_in_error_coeff * \
                                    ((p_line_calc_atm - this_state.p_wellhead_data_atm) / this_state.p_wellhead_data_max_atm) ** 2 + \
-                                   (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                                   (1 - hydr_part_weight_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
                                     this_state.active_power_cs_data_max_kwt) ** 2
             else:
-                result_for_folve = p_buf_value_in_error_coeff * \
+                result_for_folve = hydr_part_weight_in_error_coeff * \
                                    ((p_buf_calc_atm - this_state.p_buf_data_atm) / this_state.p_buf_data_max_atm) ** 2 + \
-                                   (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                                   (1 - hydr_part_weight_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
                                     this_state.active_power_cs_data_max_kwt) ** 2
 
             if debug_print:
