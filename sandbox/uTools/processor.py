@@ -33,18 +33,18 @@ import sandbox.uTools.preprocessor as prep
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # временная метка для сохранения без перезаписи
 
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
-    def __init__(self, well_name='569',
-                 dir_name_with_input_data='restore_input_2019_11_14_17_38_59',
+    def __init__(self, well_name='1354',  # менять тут для адаптации/восстановления
+                 dir_name_with_input_data='restore_input_2019_11_15_14_00_06',  # менять тут для адаптации/восстановления
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  tr_name="Техрежим, , февраль 2019.xls",
                  number_of_thread=1,
                  amount_of_threads=4,
-                 use_pwh_in_loss=True,
+                 use_pwh_in_loss=False,
                  calc_option=True,
                  debug_mode=True,
-                 vfm_calc_option=True,
-                 restore_q_liq_only=True,
+                 vfm_calc_option=True,  # менять тут для адаптации/восстановления
+                 restore_q_liq_only=True,  # менять тут для адаптации/восстановления
                  amount_iters_before_restart=100,
                  sleep_time_sec=25,
                  hydr_part_weight_in_error_coeff=0.5):  #TODO добавлять насосы в UniflocVBA
@@ -291,7 +291,7 @@ def calc(options=Calc_options()):
 
         if options.number_of_thread == options.amount_of_threads == 1: # определение задействования многопоточности
             pass
-        elif options.number_of_thread == options.amount_of_threads:
+        elif options.number_of_thread == options.amount_of_threads: # TODO переделать разбивку данных - есть пропуски
             prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
         elif options.number_of_thread == 1:
             prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads)]
@@ -375,10 +375,10 @@ def calc(options=Calc_options()):
 # настройка многопоточности
 amount_of_threads = 4
 
-first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, amount_of_threads = amount_of_threads)
-second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads = amount_of_threads)
-third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads = amount_of_threads)
-fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads = amount_of_threads)
+first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, amount_of_threads=amount_of_threads)
+second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads=amount_of_threads)
+third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads=amount_of_threads)
+fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads=amount_of_threads)
 # основной метод запуска расчетов через многопоток
 if __name__ == '__main__':
     with Pool(amount_of_threads) as p:
