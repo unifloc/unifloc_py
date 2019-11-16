@@ -33,8 +33,8 @@ import sandbox.uTools.preprocessor as prep
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # временная метка для сохранения без перезаписи
 
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
-    def __init__(self, well_name='1354',  # менять тут для адаптации/восстановления
-                 dir_name_with_input_data='restore_input_2019_11_15_14_00_06',  # менять тут для адаптации/восстановления
+    def __init__(self, well_name='252',  # менять тут для адаптации/восстановления
+                 dir_name_with_input_data='restore_input_2019_11_16_17_36_10',  # менять тут для адаптации/восстановления
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  tr_name="Техрежим, , февраль 2019.xls",
@@ -42,7 +42,7 @@ class Calc_options():  #TODO сделать класс-структуру со �
                  amount_of_threads=4,
                  use_pwh_in_loss=False,
                  calc_option=True,
-                 debug_mode=True,
+                 debug_mode=False,
                  vfm_calc_option=True,  # менять тут для адаптации/восстановления
                  restore_q_liq_only=True,  # менять тут для адаптации/восстановления
                  amount_iters_before_restart=100,
@@ -320,7 +320,8 @@ def calc(options=Calc_options()):
             row_in_prepared_data = prepared_data.iloc[i]
             print("Расчет для времени:")
             print(prepared_data.index[i])
-            print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]))
+            print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]) +
+                  ' в потоке №' + str(options.number_of_thread))
 
             this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
             this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
