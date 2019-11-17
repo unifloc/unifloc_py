@@ -189,7 +189,7 @@ def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_
     return edited_data_cs
 
 
-def load_and_edit_chess_data(chess_data_filename, time_to_resamle):
+def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_changing = False):
     """
     Загрузка и обработка данных с шахматки
     :param chess_data_filename:
@@ -201,10 +201,13 @@ def load_and_edit_chess_data(chess_data_filename, time_to_resamle):
     del chess_data['Дата']
     chess_data.index.name = 'Время'
     chess_data = chess_data[chess_data.columns[5:]]
-    chess_data = chess_data.resample(time_to_resamle).last()
-    chess_data = chess_data.fillna(method='ffill')
-    chess_data = mark_df_columns(chess_data, 'Ш')
-    return chess_data
+    if without_changing == True:
+        return chess_data
+    else:
+        chess_data = chess_data.resample(time_to_resamle).last()
+        chess_data = chess_data.fillna(method='ffill')
+        chess_data = mark_df_columns(chess_data, 'Ш')
+        return chess_data
 
 
 def extract_power_from_motor_name(name_str):
