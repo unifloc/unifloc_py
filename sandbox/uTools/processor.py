@@ -27,10 +27,10 @@ sys.path.append("../")
 import datetime
 import time
 from multiprocessing import Pool
-import sandbox.uTools.preprocessor as prep
+import unifloc.sandbox.uTools.preprocessor as prep
 
 
-time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M_%S')  # временная метка для сохранения без перезаписи
+time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
 
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
     def __init__(self, well_name='252',  # менять тут для адаптации/восстановления
@@ -172,8 +172,8 @@ def calc(options=Calc_options()):
             self.qliq_m3day = 100 # initial guess
             self.watercut_perc = None
             self.p_buf_data_atm = None
-            self.c_calibr_head_d = 1  # initial guess
-            self.c_calibr_power_d = 1  # initial guess
+            self.c_calibr_head_d = 0.7  # initial guess
+            self.c_calibr_power_d = 1.2  # initial guess
 
             self.result = None
             self.error_in_step = None
@@ -380,10 +380,15 @@ first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, 
 second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads=amount_of_threads)
 third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads=amount_of_threads)
 fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads=amount_of_threads)
-# основной метод запуска расчетов через многопоток
-if __name__ == '__main__':
-    with Pool(amount_of_threads) as p:
-        p.map(calc,
-              [first_thread, second_thread, third_thread, fourth_thread])
 
 #TODO добавить расчет для одного ядра
+
+def run_calculation(thread_option_list):
+    if __name__ == '__main__':
+        with Pool(amount_of_threads) as p:
+            p.map(calc,
+                  thread_option_list)
+
+thread_option_list =  [first_thread, second_thread, third_thread, fourth_thread]
+run_calculation(thread_option_list)
+
