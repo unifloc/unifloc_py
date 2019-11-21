@@ -81,6 +81,99 @@ class Calc_options():  #TODO сделать класс-структуру со �
         self.sleep_time_sec = sleep_time_sec
         self.hydr_part_weight_in_error_coeff = hydr_part_weight_in_error_coeff
 
+def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option):
+    """
+    заполнение класса-состояния скважины с ЭЦН текущим набором входных данных (для данного момента времени)
+    :param this_state: состояние скважины со всеми параметрами
+    :param row_in_prepared_data: набора данных - строка входного DataFrame
+    :param vfm_calc_option: флаг восстановления дебитов - если False - адаптация
+    :return: заполненное состояние this_state
+    """
+    this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
+    this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
+    this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
+    # this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
+    this_state.p_wellhead_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10
+    this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
+    this_state.p_intake_data_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
+    this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
+    this_state.p_wf_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
+    this_state.d_choke_mm = row_in_prepared_data['Dшт (Ш)']
+    this_state.ESP_freq = row_in_prepared_data['F вращ ТМ (Ш)']
+    # this_state.ESP_freq = row_in_prepared_data['Выходная частота ПЧ (СУ)']
+    this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
+    this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
+    this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
+    if vfm_calc_option == True:
+        this_state.c_calibr_head_d = row_in_prepared_data[
+            "К. калибровки по напору - множитель (Модель) (Подготовленные)"]
+        this_state.c_calibr_power_d = row_in_prepared_data[
+            "К. калибровки по мощности - множитель (Модель) (Подготовленные)"]
+    else:
+        this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
+    return this_state
+
+class all_ESP_data(): # класс, в котором хранятся данные
+    def __init__(self, UniflocVBA, tr_data):
+        """
+        класс для хранение и доступа ко всем данным скважины - входным, выходным
+        :param UniflocVBA: текущая надстройка UniflocVBA API
+        :param tr_data: данные техрежима
+        """
+        self.ESP_rate_nom = tr_data.esp_nom_rate_m3day
+        self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
+        self.ESP_head_nom = tr_data.esp_nom_head_m
+        self.dcas_mm = tr_data.d_cas_mm
+        self.h_pump_m = tr_data.h_pump_m
+        self.d_tube_mm = tr_data.d_tube_mm
+        self.p_cas_data_atm = -1  # нет расчета затрубного пространства - он долгий и немножко бесполезный
+
+        self.eff_motor_d = 0.89
+        self.i_motor_nom_a = tr_data.i_motor_nom_a
+        self.power_motor_nom_kwt = tr_data.power_motor_nom_kwt
+        self.h_tube_m = self.h_pump_m  # ТР
+        self.h_perf_m = self.h_pump_m + 1  # ТР
+        self.udl_m = tr_data.udl_m  # ТР
+
+        self.c_calibr_rate_d = 1
+
+        self.ksep_d = 0.7  # ТР
+        self.KsepGS_fr = 0.7  # ТР
+        self.hydr_corr = 1  # 0 - BB, 1 - Ansari
+        self.gamma_oil = 0.945
+        self.gamma_gas = 0.9
+        self.gamma_wat = 1.011
+        self.rsb_m3m3 = 29.25
+        self.tres_c = 16
+        self.pb_atm = 40
+        self.bob_m3m3 = 1.045
+        self.muob_cp = 100
+        self.rp_m3m3 = 30
+
+        self.psep_atm = None
+        self.tsep_c = None
+
+        self.d_choke_mm = None
+        self.ESP_freq = None
+        self.p_intake_data_atm = None
+        self.p_wellhead_data_atm = None
+        self.p_buf_data_atm = None
+        self.p_wf_atm = None
+        self.cos_phi_data_d = None
+        self.u_motor_data_v = None
+        self.active_power_cs_data_kwt = None
+        self.qliq_m3day = 100 # initial guess
+        self.watercut_perc = None
+        self.p_buf_data_atm = None
+        self.c_calibr_head_d = 0.7  # initial guess
+        self.c_calibr_power_d = 1.2  # initial guess
+
+        self.result = None
+        self.error_in_step = None
+        self.p_buf_data_max_atm = None
+        self.active_power_cs_data_max_kwt = None
+        self.p_wellhead_data_max_atm = None
+        self.qliq_max_m3day = None
 
 def calc(options=Calc_options()):
     """
@@ -125,62 +218,7 @@ def calc(options=Calc_options()):
         except:
             pass
 
-    class all_ESP_data(): # класс, в котором хранятся данные
-        def __init__(self):
-            self.ESP_rate_nom = tr_data.esp_nom_rate_m3day
-            self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
-            self.ESP_head_nom = tr_data.esp_nom_head_m
-            self.dcas_mm = tr_data.d_cas_mm
-            self.h_pump_m = tr_data.h_pump_m
-            self.d_tube_mm = tr_data.d_tube_mm
-            self.p_cas_data_atm = -1  # нет расчета затрубного пространства - он долгий и немножко бесполезный
 
-            self.eff_motor_d = 0.89
-            self.i_motor_nom_a = tr_data.i_motor_nom_a
-            self.power_motor_nom_kwt = tr_data.power_motor_nom_kwt
-            self.h_tube_m = self.h_pump_m  # ТР
-            self.h_perf_m = self.h_pump_m + 1  # ТР
-            self.udl_m = tr_data.udl_m  # ТР
-
-            self.c_calibr_rate_d = 1
-
-            self.ksep_d = 0.7  # ТР
-            self.KsepGS_fr = 0.7  # ТР
-            self.hydr_corr = 1  # 0 - BB, 1 - Ansari
-            self.gamma_oil = 0.945
-            self.gamma_gas = 0.9
-            self.gamma_wat = 1.011
-            self.rsb_m3m3 = 29.25
-            self.tres_c = 16
-            self.pb_atm = 40
-            self.bob_m3m3 = 1.045
-            self.muob_cp = 100
-            self.rp_m3m3 = 30
-
-            self.psep_atm = None
-            self.tsep_c = None
-
-            self.d_choke_mm = None
-            self.ESP_freq = None
-            self.p_intake_data_atm = None
-            self.p_wellhead_data_atm = None
-            self.p_buf_data_atm = None
-            self.p_wf_atm = None
-            self.cos_phi_data_d = None
-            self.u_motor_data_v = None
-            self.active_power_cs_data_kwt = None
-            self.qliq_m3day = 100 # initial guess
-            self.watercut_perc = None
-            self.p_buf_data_atm = None
-            self.c_calibr_head_d = 0.7  # initial guess
-            self.c_calibr_power_d = 1.2  # initial guess
-
-            self.result = None
-            self.error_in_step = None
-            self.p_buf_data_max_atm = None
-            self.active_power_cs_data_max_kwt = None
-            self.p_wellhead_data_max_atm = None
-            self.qliq_max_m3day = None
 
     def mass_calculation(this_state, debug_print = False, restore_flow=False, restore_q_liq_only = True):
         """
@@ -307,7 +345,7 @@ def calc(options=Calc_options()):
         result_dataframe = {'d':[2]}
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
-        this_state = all_ESP_data()
+        this_state = all_ESP_data(UniflocVBA, tr_data)
         for i in range(prepared_data.shape[0]):  # начало итерации по строкам - наборам данных для определенного времени
         #for i in range(3):
             check = i % amount_iters_before_restart
@@ -323,32 +361,14 @@ def calc(options=Calc_options()):
             print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]) +
                   ' в потоке №' + str(options.number_of_thread))
 
-            this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
-            this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
-            this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
-            #this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
-            this_state.p_wellhead_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10
-            this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
-            this_state.p_intake_data_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-            this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-            this_state.p_wf_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-            this_state.d_choke_mm = row_in_prepared_data['Dшт (Ш)']
-            this_state.ESP_freq = row_in_prepared_data['F вращ ТМ (Ш)']
-            #this_state.ESP_freq = row_in_prepared_data['Выходная частота ПЧ (СУ)']
-            this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
-            this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
-            this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
-            if vfm_calc_option == True:
-                this_state.c_calibr_head_d = row_in_prepared_data["К. калибровки по напору - множитель (Модель) (Подготовленные)"]
-                this_state.c_calibr_power_d = row_in_prepared_data["К. калибровки по мощности - множитель (Модель) (Подготовленные)"]
-            else:
-                this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
+            this_state = transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option)
+
             this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
             this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
             this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
             this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
 
-            this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only) # расчет
+            this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only)  # расчет
 
             end_in_loop_time = time.time()
             print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
