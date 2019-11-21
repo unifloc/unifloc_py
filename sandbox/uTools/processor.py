@@ -384,6 +384,11 @@ fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=
 #TODO добавить расчет для одного ядра
 
 def run_calculation(thread_option_list):
+    """
+    Функция запускает многоточный расчет при прямом запуске из модуля, при импорте в app.ipynb не работает
+    :param thread_option_list: спиской настроек для каждого потока
+    :return:
+    """
     if __name__ == '__main__':
         with Pool(amount_of_threads) as p:
             p.map(calc,
