@@ -175,6 +175,48 @@ class all_ESP_data(): # класс, в котором хранятся данн�
         self.p_wellhead_data_max_atm = None
         self.qliq_max_m3day = None
 
+def straight_calc(UniflocVBA, this_state):
+    """
+    Функция длля прямого расчета скважины от приема ЭЦН
+    :param UniflocVBA: API для вызова функций
+    :param this_state: класс-состояние со всеми параметрами скважины
+    :return: result - результат расчета в форме списка
+    """
+    PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
+                                               this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
+                                               this_state.pb_atm, this_state.tres_c,
+                                               this_state.bob_m3m3, this_state.muob_cp,
+                                               ksep_fr=this_state.ksep_d, pksep_atma=this_state.psep_atm,
+                                               tksep_C=this_state.tsep_c)
+    Wellstr = UniflocVBA.calc_well_encode_string(this_state.h_perf_m,
+                                                 this_state.h_pump_m,
+                                                 this_state.udl_m,
+                                                 this_state.dcas_mm,
+                                                 this_state.d_tube_mm,
+                                                 this_state.d_choke_mm,
+                                                 tbh_C=this_state.tsep_c)
+    ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id,
+                                               this_state.ESP_head_nom,
+                                               this_state.ESP_freq,
+                                               this_state.u_motor_data_v,
+                                               this_state.power_motor_nom_kwt,
+                                               this_state.tsep_c,
+                                               t_dis_C=-1,
+                                               KsepGS_fr=this_state.KsepGS_fr,
+                                               ESP_Hmes_m=this_state.h_tube_m,
+                                               c_calibr_head=this_state.c_calibr_head_d,
+                                               c_calibr_rate=this_state.c_calibr_rate_d,
+                                               c_calibr_power=this_state.c_calibr_power_d,
+                                               cos_phi=this_state.cos_phi_data_d)
+    result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
+                                                this_state.p_wf_atm,
+                                                this_state.p_cas_data_atm, Wellstr,
+                                                PVTstr, ESPstr, this_state.hydr_corr,
+                                                this_state.ksep_d, this_state.c_calibr_head_d,
+                                                this_state.c_calibr_power_d,
+                                                this_state.c_calibr_rate_d)  # TODO сделать прямой расчет
+    return result
+
 def calc(options=Calc_options()):
     """
     Основная расчетная функция, в которой есть все
@@ -254,41 +296,10 @@ def calc(options=Calc_options()):
                     if debug_print:
                         print('qliq_m3day = ' + str(this_state.qliq_m3day))
                         print('watercut_perc = ' + str(this_state.watercut_perc))
-            # последовательный запуск функций UniflocVBA для расчета модели
-            PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
-                                                       this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
-                                                       this_state.pb_atm, this_state.tres_c,
-                                                       this_state.bob_m3m3, this_state.muob_cp,
-                                                       ksep_fr=this_state.ksep_d, pksep_atma=this_state.psep_atm,
-                                                       tksep_C=this_state.tsep_c)
-            Wellstr = UniflocVBA.calc_well_encode_string(this_state.h_perf_m,
-                                                         this_state.h_pump_m,
-                                                         this_state.udl_m,
-                                                         this_state.dcas_mm,
-                                                         this_state.d_tube_mm,
-                                                         this_state.d_choke_mm,
-                                                         tbh_C=this_state.tsep_c)
-            ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id,
-                                                       this_state.ESP_head_nom,
-                                                       this_state.ESP_freq,
-                                                       this_state.u_motor_data_v,
-                                                       this_state.power_motor_nom_kwt,
-                                                       this_state.tsep_c,
-                                                       t_dis_C = -1,
-                                                       KsepGS_fr=this_state.KsepGS_fr,
-                                                       ESP_Hmes_m=this_state.h_tube_m,
-                                                       c_calibr_head=this_state.c_calibr_head_d,
-                                                       c_calibr_rate=this_state.c_calibr_rate_d,
-                                                       c_calibr_power=this_state.c_calibr_power_d,
-                                                       cos_phi=this_state.cos_phi_data_d)
-            result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
-                                                        this_state.p_wf_atm,
-                                                        this_state.p_cas_data_atm, Wellstr,
-                                                        PVTstr, ESPstr, this_state.hydr_corr,
-                                                        this_state.ksep_d, this_state.c_calibr_head_d, this_state.c_calibr_power_d,
-                                                        this_state.c_calibr_rate_d)
 
-            this_state.result = result # сохранение результата в форме списка в структуру для последующего извлечения
+            result = straight_calc(UniflocVBA, this_state)  # прямой расчет
+
+            this_state.result = result  # сохранение результата в форме списка в структуру для последующего извлечения
             p_line_calc_atm = result[0][0]
             p_buf_calc_atm = result[0][2]
             power_CS_calc_W = result[0][16]
@@ -305,9 +316,8 @@ def calc(options=Calc_options()):
 
             if debug_print:
                 print("Линейное давление в модели = " + str(p_line_calc_atm))
+                print("Буферное давление в модели = " + str(p_buf_calc_atm))
                 print("Мощность в модели = " + str(power_CS_calc_W))
-                print("Абсолютная ошибка по мощности = " + str(power_CS_calc_W - this_state.active_power_cs_data_kwt))
-                print("Абсолютная ошибка по давлению = " + str(p_line_calc_atm - this_state.p_wellhead_data_atm))
                 print("ошибка на текущем шаге = " + str(result_for_folve))
             this_state.error_in_step = result_for_folve
             return result_for_folve
