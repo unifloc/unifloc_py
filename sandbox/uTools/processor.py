@@ -33,8 +33,8 @@ import unifloc.sandbox.uTools.preprocessor as prep
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
 
 class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
-    def __init__(self, well_name='252',  # менять тут для адаптации/восстановления
-                 dir_name_with_input_data='restore_input_2019_11_16_17_36_10',  # менять тут для адаптации/восстановления
+    def __init__(self, well_name='601',  # менять тут для адаптации/восстановления
+                 dir_name_with_input_data='adapt_input_2019_11_22_15_43_21',  # менять тут для адаптации/восстановления
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  tr_name="Техрежим, , февраль 2019.xls",
@@ -43,8 +43,8 @@ class Calc_options():  #TODO сделать класс-структуру со �
                  use_pwh_in_loss=False,
                  calc_option=True,
                  debug_mode=False,
-                 vfm_calc_option=True,  # менять тут для адаптации/восстановления
-                 restore_q_liq_only=True,  # менять тут для адаптации/восстановления
+                 vfm_calc_option=False,  # менять тут для адаптации/восстановления
+                 restore_q_liq_only=False,  # менять тут для адаптации/восстановления
                  amount_iters_before_restart=100,
                  sleep_time_sec=25,
                  hydr_part_weight_in_error_coeff=0.5):  #TODO добавлять насосы в UniflocVBA
@@ -91,7 +91,11 @@ def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_o
     """
     this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
     this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
-    this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
+
+    #this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
+    #this_state.p_buf_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10  # костыль
+    this_state.p_buf_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']  # костыль
+
     # this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
     this_state.p_wellhead_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10
     this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
@@ -324,7 +328,7 @@ def calc(options=Calc_options()):
 
         if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d],
-                              bounds=[[0.45, 5], [0.45, 5]])
+                              bounds=[[0.35, 5], [0.35, 5]])
         else:
             if restore_q_liq_only == True:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[3, this_state.qliq_max_m3day * 1.2]])

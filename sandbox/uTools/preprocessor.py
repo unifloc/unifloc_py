@@ -77,6 +77,7 @@ def initial_editing(df, wellname):
 
 def extract_df_one_parametr_and_edit(df, list_of_params, number_of_param_in_list):
     extracted_df_one_param = df[df[0] == list_of_params[number_of_param_in_list]]
+    extracted_df_one_param = extracted_df_one_param.dropna()
     extracted_df_one_param = extracted_df_one_param.rename(columns = {2: extracted_df_one_param[0][0]})
     del extracted_df_one_param[0]
     return extracted_df_one_param
@@ -252,3 +253,14 @@ def read_tr_and_get_data(tr_file_full_path, well_name):
     this_well_row = tr[tr[('№\nскв', 'Unnamed: 4_level_1', 'Unnamed: 4_level_2', 'Unnamed: 4_level_3')] == well_name]
     tr_class = tr_data(this_well_row)
     return tr_class
+
+def del_inf_in_columns_name(df, well_name):
+    columns = df.columns
+    new_columns = []
+    for i in columns:
+            test_str = i
+            index = test_str.find(well_name)
+            str_to_delete = test_str[:index] + well_name + '. '
+            new_str = i.replace(str_to_delete, "")
+            new_columns.append(new_str)
+    return new_columns
