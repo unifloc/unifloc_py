@@ -92,9 +92,9 @@ def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_o
     this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
     this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
 
-    #this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
+    this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
     #this_state.p_buf_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10  # костыль
-    this_state.p_buf_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']  # костыль
+    #this_state.p_buf_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']  # костыль
 
     # this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
     this_state.p_wellhead_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10
