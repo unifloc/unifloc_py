@@ -221,22 +221,27 @@ def straight_calc(UniflocVBA, this_state):
                                                 this_state.c_calibr_rate_d)  # TODO сделать прямой расчет
     return result
 
-def divide_prepared_data(prepared_data, options):  #TODO сделать разбивку с запасом
+def divide_prepared_data(prepared_data, options):  #TODO сделать разбивку с запасом - убрать потери точек
     """
     Разбивка всех исходных данных на равные части для реализации многопоточности
     :param prepared_data: подготовленные входные данные
     :param options: класс настроек расчета
     :return: определенная часть исходных данных, которая будет считаться данным потоком
     """
-    if options.number_of_thread == options.amount_of_threads == 1:  # определение задействования многопоточности
+    #if prepared_data.shape[0] % options.amount_of_threads == 0:
+    #    add_step = 0
+    #else:
+    #    add_step = 1
+    add_step = 0 #TODO доделать, либо переделать
+    if options.number_of_thread == options.amount_of_threads == 1:
         pass
     elif options.number_of_thread == options.amount_of_threads:  # TODO переделать разбивку данных - есть пропуски
         prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
     elif options.number_of_thread == 1:
-        prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads)]
+        prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads) + add_step]
     else:
         first_index = int(len(prepared_data.index) / options.amount_of_threads * (options.number_of_thread - 1))
-        second_index = first_index + int(len(prepared_data.index) / options.amount_of_threads)
+        second_index = first_index + int(len(prepared_data.index) / options.amount_of_threads) + add_step
         prepared_data = prepared_data.iloc[first_index: second_index]
     return prepared_data
 
