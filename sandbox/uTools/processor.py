@@ -10,7 +10,7 @@
 # TODO точность
 # TODO use COBYLA, разобраться с методами
 # TODO изменение функции ошибки (деление на  добавление линейного давления, добавления штуцера)
-
+# TODO сохранять параметры расчета
 import sys
 import os
 sys.path.append('../')
@@ -181,7 +181,7 @@ class all_ESP_data(): # класс, в котором хранятся данн�
 
 def straight_calc(UniflocVBA, this_state):
     """
-    Функция длля прямого расчета скважины от приема ЭЦН
+    Функция для прямого расчета скважины от приема ЭЦН
     :param UniflocVBA: API для вызова функций
     :param this_state: класс-состояние со всеми параметрами скважины
     :return: result - результат расчета в форме списка
@@ -220,6 +220,46 @@ def straight_calc(UniflocVBA, this_state):
                                                 this_state.c_calibr_power_d,
                                                 this_state.c_calibr_rate_d)  # TODO сделать прямой расчет
     return result
+
+def divide_prepared_data(prepared_data, options):  #TODO сделать разбивку с запасом
+    """
+    Разбивка всех исходных данных на равные части для реализации многопоточности
+    :param prepared_data: подготовленные входные данные
+    :param options: класс настроек расчета
+    :return: определенная часть исходных данных, которая будет считаться данным потоком
+    """
+    if options.number_of_thread == options.amount_of_threads == 1:  # определение задействования многопоточности
+        pass
+    elif options.number_of_thread == options.amount_of_threads:  # TODO переделать разбивку данных - есть пропуски
+        prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
+    elif options.number_of_thread == 1:
+        prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads)]
+    else:
+        first_index = int(len(prepared_data.index) / options.amount_of_threads * (options.number_of_thread - 1))
+        second_index = first_index + int(len(prepared_data.index) / options.amount_of_threads)
+        prepared_data = prepared_data.iloc[first_index: second_index]
+    return prepared_data
+
+
+def create_new_result_df(this_result, this_state, prepared_data, i):
+    """
+    Объединение всех результатов для данной итерации в один DataFrame
+    :param this_result: список с результатами UniflocVBA
+    :param this_state: класс-состояние скважины для данной итерации (входные данные)
+    :param prepared_data: DataFrame входных данных
+    :param i: номер строки в prepared_data для текущей итерации
+    :return: new_dataframe - сводный результат расчета
+    """
+    new_dict = {}
+    for j in range(len(this_result[1])):
+        new_dict[this_result[1][j]] = [this_result[0][j]]
+        print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
+    new_dict['ГФ'] = [this_state.rp_m3m3]
+    new_dict['Значение функции ошибки'] = [this_state.error_in_step]
+    new_dict['Время'] = [prepared_data.index[i]]
+    new_dataframe = pd.DataFrame(new_dict)
+    new_dataframe.index = new_dataframe['Время']
+    return new_dataframe
 
 def calc(options=Calc_options()):
     """
@@ -331,7 +371,7 @@ def calc(options=Calc_options()):
                               bounds=[[0.35, 5], [0.35, 5]])
         else:
             if restore_q_liq_only == True:
-                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[3, this_state.qliq_max_m3day * 1.2]])
+                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20, this_state.qliq_max_m3day * 1.2]])  #TODO разобраться с левой границей
             else:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
         print(result)
@@ -341,25 +381,21 @@ def calc(options=Calc_options()):
     if calc_option == True: # основной цикл расчета начинается здесь
         prepared_data = pd.read_csv(input_data_filename_str + ".csv") # чтение входных данных
 
-        if options.number_of_thread == options.amount_of_threads == 1: # определение задействования многопоточности
-            pass
-        elif options.number_of_thread == options.amount_of_threads: # TODO переделать разбивку данных - есть пропуски
-            prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
-        elif options.number_of_thread == 1:
-            prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads)]
-        else:
-            first_index = int(len(prepared_data.index) / options.amount_of_threads * (options.number_of_thread - 1))
-            second_index = first_index + int(len(prepared_data.index) / options.amount_of_threads)
-            prepared_data = prepared_data.iloc[first_index: second_index]
+        prepared_data = divide_prepared_data(prepared_data, options)
 
         prepared_data.index = pd.to_datetime(prepared_data["Время"])
         del prepared_data["Время"]
 
-        result_list = []
         result_dataframe = {'d':[2]}
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
+
         this_state = all_ESP_data(UniflocVBA, tr_data)
+        this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
+        this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
+        this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
+        this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
+
         for i in range(prepared_data.shape[0]):  # начало итерации по строкам - наборам данных для определенного времени
         #for i in range(3):
             check = i % amount_iters_before_restart
@@ -370,32 +406,19 @@ def calc(options=Calc_options()):
                 UniflocVBA.book = xw.Book(current_path + options.addin_name)
             start_in_loop_time = time.time()
             row_in_prepared_data = prepared_data.iloc[i]
-            print("Расчет для времени:")
-            print(prepared_data.index[i])
+            print("Расчет для времени: " + str(prepared_data.index[i]))
             print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]) +
                   ' в потоке №' + str(options.number_of_thread))
 
             this_state = transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option)
 
-            this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
-            this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
-            this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
-            this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
-
             this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only)  # расчет
 
             end_in_loop_time = time.time()
             print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
-            new_dict = {} # преобразование и сохранение результатов
-            result_list.append(this_result)
-            for j in range(len(this_result[1])):
-                new_dict[this_result[1][j]] = [this_result[0][j]]
-                print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
-            new_dict['ГФ'] = [this_state.rp_m3m3]
-            new_dict['Значение функции ошибки'] = [this_state.error_in_step]
-            new_dict['Время'] = [prepared_data.index[i]]
-            new_dataframe = pd.DataFrame(new_dict)
-            new_dataframe.index = new_dataframe['Время']
+
+            new_dataframe = create_new_result_df(this_result, this_state, prepared_data, i)
+
             result_dataframe = result_dataframe.append(new_dataframe, sort=False)
             if vfm_calc_option == True:
                 result_dataframe.to_csv(dir_to_save_calculated_data + '\\' + well_name + "_restore_" + calc_mark_str + ".csv")
