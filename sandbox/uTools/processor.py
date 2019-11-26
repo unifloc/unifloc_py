@@ -32,9 +32,10 @@ import unifloc.sandbox.uTools.preprocessor as prep
 
 time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
 
-class Calc_options():  #TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
-    def __init__(self, well_name='601',  # менять тут для адаптации/восстановления
-                 dir_name_with_input_data='adapt_input_2019_11_22_15_43_21',  # менять тут для адаптации/восстановления
+
+class Calc_options():  # TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
+    def __init__(self, well_name='569',  # менять тут для адаптации/восстановления
+                 dir_name_with_input_data='adapt_input_2019_11_26_13_40_21',  # менять тут для адаптации/восстановления
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  tr_name="Техрежим, , февраль 2019.xls",
@@ -179,6 +180,7 @@ class all_ESP_data(): # класс, в котором хранятся данн�
         self.p_wellhead_data_max_atm = None
         self.qliq_max_m3day = None
 
+
 def straight_calc(UniflocVBA, this_state):
     """
     Функция для прямого расчета скважины от приема ЭЦН
@@ -221,29 +223,45 @@ def straight_calc(UniflocVBA, this_state):
                                                 this_state.c_calibr_rate_d)  # TODO сделать прямой расчет
     return result
 
-def divide_prepared_data(prepared_data, options):  #TODO сделать разбивку с запасом - убрать потери точек
+
+def get_fragmentation(length: int, slaves: int) -> list:
+    """
+    with length of jobs and amount of slaves returns list with turples.
+    job_list[out[slave][0]: out[slave][1]] is a sub-list of jobs for this slave. slave \in [0, slaves-1]
+    :param length: number of jobs
+    :param slaves: amount of slaves
+    :return: turples to distribute jobs
+    """
+    # defining step size
+    step = int(length / slaves)
+    # but int-like devision returns a bit less
+    r = length - step * slaves
+    # preparing out list with turples. r will be distributed over first slaves
+    out = []
+    cur_point = 0
+    for i in range(slaves):
+        if r > 0:
+            # if we have non dealed r, push a piece
+            out_el = (cur_point, cur_point + step + 1)
+            r -= 1
+        else:
+            # if all the r already distributed then ok
+            out_el = (cur_point, cur_point + step)
+        cur_point = out_el[1]
+        out.append(out_el)
+    return out
+
+
+def divide_prepared_data(prepared_data, options):  # TODO сделать разбивку с запасом - убрать потери точек
     """
     Разбивка всех исходных данных на равные части для реализации многопоточности
     :param prepared_data: подготовленные входные данные
     :param options: класс настроек расчета
     :return: определенная часть исходных данных, которая будет считаться данным потоком
     """
-    #if prepared_data.shape[0] % options.amount_of_threads == 0:
-    #    add_step = 0
-    #else:
-    #    add_step = 1
-    add_step = 0 #TODO доделать, либо переделать
-    if options.number_of_thread == options.amount_of_threads == 1:
-        pass
-    elif options.number_of_thread == options.amount_of_threads:  # TODO переделать разбивку данных - есть пропуски
-        prepared_data = prepared_data.iloc[-int(len(prepared_data.index) / options.amount_of_threads)::]
-    elif options.number_of_thread == 1:
-        prepared_data = prepared_data.iloc[0:int(len(prepared_data.index) / options.amount_of_threads) + add_step]
-    else:
-        first_index = int(len(prepared_data.index) / options.amount_of_threads * (options.number_of_thread - 1))
-        second_index = first_index + int(len(prepared_data.index) / options.amount_of_threads) + add_step
-        prepared_data = prepared_data.iloc[first_index: second_index]
-    return prepared_data
+    fragmentation = get_fragmentation(prepared_data.shape[0], options.amount_of_threads)
+    out = prepared_data[fragmentation[options.number_of_thread-1][0]: fragmentation[options.number_of_thread-1][1]]
+    return out
 
 
 def create_new_result_df(this_result, this_state, prepared_data, i):
@@ -265,6 +283,7 @@ def create_new_result_df(this_result, this_state, prepared_data, i):
     new_dataframe = pd.DataFrame(new_dict)
     new_dataframe.index = new_dataframe['Время']
     return new_dataframe
+
 
 def calc(options=Calc_options()):
     """
@@ -288,7 +307,7 @@ def calc(options=Calc_options()):
     tr_file_full_path = os.getcwd() + '\\data\\tr\\' + options.tr_name
     tr_data = prep.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
 
-    if vfm_calc_option == False:  # создание директорий для результатов расчета
+    if not vfm_calc_option:  # создание директорий для результатов расчета
         input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
         dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'adaptation_' + time_mark
         try:
@@ -308,7 +327,6 @@ def calc(options=Calc_options()):
             os.mkdir(dir_to_save_calculated_data)
         except:
             pass
-
 
 
     def mass_calculation(this_state, debug_print = False, restore_flow=False, restore_q_liq_only = True):
@@ -383,15 +401,15 @@ def calc(options=Calc_options()):
         true_result = this_state.result # сохранение результатов расчета оптимизированной модели
         return true_result
 
-    if calc_option == True: # основной цикл расчета начинается здесь
-        prepared_data = pd.read_csv(input_data_filename_str + ".csv") # чтение входных данных
+    if calc_option:  # основной цикл расчета начинается здесь
+        prepared_data = pd.read_csv(input_data_filename_str + ".csv")  # чтение входных данных
 
         prepared_data = divide_prepared_data(prepared_data, options)
 
         prepared_data.index = pd.to_datetime(prepared_data["Время"])
         del prepared_data["Время"]
 
-        result_dataframe = {'d':[2]}
+        result_dataframe = {'d': [2]}
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
 
@@ -404,7 +422,7 @@ def calc(options=Calc_options()):
         for i in range(prepared_data.shape[0]):  # начало итерации по строкам - наборам данных для определенного времени
         #for i in range(3):
             check = i % amount_iters_before_restart
-            if check == 0 and i != 0: # защита против подвисаний экселя - не работает в многопотоке
+            if check == 0 and i != 0:  # защита против подвисаний экселя - не работает в многопотоке
                 print('Перезапуск Excel и VBA')
                 UniflocVBA.book.close()
                 time.sleep(sleep_time_sec)
@@ -436,12 +454,16 @@ def calc(options=Calc_options()):
     close_f()
 
 # настройка многопоточности
-amount_of_threads = 4
+amount_of_threads = 8
 
 first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, amount_of_threads=amount_of_threads)
 second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads=amount_of_threads)
 third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads=amount_of_threads)
 fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads=amount_of_threads)
+fifth_thread = Calc_options(addin_name="UniflocVBA_7_4.xlam", number_of_thread=5, amount_of_threads=amount_of_threads)
+sixth_thread = Calc_options(addin_name="UniflocVBA_7_5.xlam", number_of_thread=6, amount_of_threads=amount_of_threads)
+seventh_thread = Calc_options(addin_name="UniflocVBA_7_6.xlam", number_of_thread=7, amount_of_threads=amount_of_threads)
+eightth_thread = Calc_options(addin_name="UniflocVBA_7_7.xlam", number_of_thread=8, amount_of_threads=amount_of_threads)
 
 #TODO добавить расчет для одного ядра
 
@@ -456,6 +478,8 @@ def run_calculation(thread_option_list):
             p.map(calc,
                   thread_option_list)
 
-thread_option_list =  [first_thread, second_thread, third_thread, fourth_thread]
+
+thread_option_list = [first_thread, second_thread, third_thread, fourth_thread, fifth_thread,
+                      sixth_thread, seventh_thread, eightth_thread]
 run_calculation(thread_option_list)
 
