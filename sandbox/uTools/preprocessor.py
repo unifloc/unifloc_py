@@ -5,6 +5,7 @@
 """
 import sys
 import os
+
 current_path = os.getcwd()
 path_to_vba = current_path.replace(r'unifloc\sandbox\uTools', '')
 sys.path.append(path_to_vba)
@@ -54,15 +55,14 @@ columns_name_dict = {"Pline_atma": "P лин., атм",
                      "ESP.power_CS_teor_calc_W": "Мощность, передаваемая СУ"}
 
 
-
 def mark_df_columns(df, mark):
     for i in df.columns:
-        df = df.rename(columns={i: i + ' (' + mark + ')' })
+        df = df.rename(columns={i: i + ' (' + mark + ')'})
     return df
 
 
 def initial_editing(df, wellname):
-    if len(df.columns)==4:
+    if len(df.columns) == 4:
         del df[0]
     df.columns = [0, 1, 2]
     test_str = df[0][0]
@@ -78,7 +78,7 @@ def initial_editing(df, wellname):
 def extract_df_one_parametr_and_edit(df, list_of_params, number_of_param_in_list):
     extracted_df_one_param = df[df[0] == list_of_params[number_of_param_in_list]]
     extracted_df_one_param = extracted_df_one_param.dropna()
-    extracted_df_one_param = extracted_df_one_param.rename(columns = {2: extracted_df_one_param[0][0]})
+    extracted_df_one_param = extracted_df_one_param.rename(columns={2: extracted_df_one_param[0][0]})
     del extracted_df_one_param[0]
     return extracted_df_one_param
 
@@ -89,8 +89,9 @@ def create_edited_df(df):
     result = init_one_parametr_df
     for i in range(1, len(parametrs_list)):
         new_one_parametr_df = extract_df_one_parametr_and_edit(df, parametrs_list, i)
-        result = result.join(new_one_parametr_df, how = "outer", sort=True)
+        result = result.join(new_one_parametr_df, how="outer", sort=True)
     return result
+
 
 def cut_df(df, left_boundary, right_boundary):
     """
@@ -104,7 +105,8 @@ def cut_df(df, left_boundary, right_boundary):
         df = df[(df.index >= start) & (df.index <= end)]
     return df
 
-def rename_columns_by_dict(df, dict = columns_name_dict):
+
+def rename_columns_by_dict(df, dict=columns_name_dict):
     """
     Специальное изменение названий столбцов по словарю
     :param df:
@@ -113,7 +115,7 @@ def rename_columns_by_dict(df, dict = columns_name_dict):
     """
     for i in df.columns:
         if i in dict.keys():
-            df = df.rename(columns={i: dict[i] })
+            df = df.rename(columns={i: dict[i]})
     return df
 
 
@@ -142,7 +144,7 @@ def load_calculated_data_from_csv(full_file_name):
     return calculated_data
 
 
-def make_gaps_and_interpolate(df, reverse = False):
+def make_gaps_and_interpolate(df, reverse=False):
     """
     Выкалывание точек и линейная интерполяция. (Восстановление дебитов путем интерполяции)
     :param df:
@@ -153,13 +155,13 @@ def make_gaps_and_interpolate(df, reverse = False):
     try_check['Время'] = try_check.index
     lenth = len(try_check['Время'])
     try_check.index = range(lenth)
-    if reverse == True:
+    if reverse:
         try_check = try_check[(try_check.index) % 2 != 0]
     else:
         try_check = try_check[(try_check.index) % 2 == 0]
     try_check = try_check.interpolate()
     empty = pd.DataFrame({'empty': list(range(lenth))})
-    result = empty.join(try_check, how = 'outer')
+    result = empty.join(try_check, how='outer')
     result.index = df.index
     result = result.interpolate()
     result['Время'] = result.index
@@ -169,24 +171,28 @@ def make_gaps_and_interpolate(df, reverse = False):
     return result
 
 
-def load_and_edit_cs_data(cs_data_filename, time_to_resamle, created_input_data_type):
+def load_and_edit_cs_data(cs_data_filename, created_input_data_type=0, time_to_resamle=None):
     """
     Загрузка и обработка данных со СУ (не сырых, предварительно обработанных)
-    :param cs_data_filename:
+    :param cs_data_filename: data
+    :param created_input_data_type: some kind of falg, 0 as default
     :param time_to_resamle:
-    :param created_input_data_type:
     :return:
     """
-    edited_data_cs = pd.read_csv(cs_data_filename, parse_dates = True, index_col = 'Время')
-    edited_data_cs = edited_data_cs.resample(time_to_resamle).mean()
+    edited_data_cs = pd.read_csv(cs_data_filename, parse_dates=True, index_col='Время')
+    if time_to_resamle is None:
+        print('lol')
+    else:
+        edited_data_cs = edited_data_cs.resample(time_to_resamle).mean()
     edited_data_cs['Выходная частота ПЧ'] = edited_data_cs['Выходная частота ПЧ'].fillna(method='ffill')
-    edited_data_cs['Температура на приеме насоса (пласт. жидкость)']  = \
-            edited_data_cs['Температура на приеме насоса (пласт. жидкость)'].fillna(method='ffill')
+    edited_data_cs['Температура на приеме насоса (пласт. жидкость)'] = \
+        edited_data_cs['Температура на приеме насоса (пласт. жидкость)'].fillna(method='ffill')
     if created_input_data_type == 0:
-        edited_data_cs = edited_data_cs.dropna(subset =['Объемный дебит жидкости'])
+        edited_data_cs = edited_data_cs.dropna(subset=['Объемный дебит жидкости'])
     edited_data_cs = edited_data_cs.fillna(method='ffill')
     edited_data_cs['ГФ'] = edited_data_cs['Объемный дебит газа'] / edited_data_cs['Объемный дебит нефти']
     edited_data_cs = mark_df_columns(edited_data_cs, 'СУ')
+
     return edited_data_cs
 
 
@@ -205,6 +211,7 @@ def get_dt_str_from_rus_date(rus_date: str) -> str:
 def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_changing=False):
     """
     Загрузка и обработка данных с шахматки
+    :param without_changing:
     :param chess_data_filename:
     :param time_to_resamle:
     :return:
@@ -264,33 +271,38 @@ def extract_power_from_motor_name(name_str):
     return float(name_str)
 
 
-class tr_data():
+class tr_data:
     def __init__(self, row):
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
         self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
-        self.esp_nom_rate_m3day = row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
+        self.esp_nom_rate_m3day = \
+        row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
         self.esp_nom_head_m = row[('Номинальный напор', 'Unnamed: 17_level_1', 'Unnamed: 17_level_2', 'м')].values[0]
         self.h_pump_m = row[('Н сп', 'Unnamed: 20_level_1', 'Unnamed: 20_level_2', 'м')].values[0]
-        self.esp_name_str = row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
+        self.esp_name_str = \
+        row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
         self.udl_m = row[('Удл (Нсп)', 'Unnamed: 161_level_1', 'Unnamed: 161_level_2', 'м')].values[0]
         self.i_motor_nom_a = row[('ПЭД', 'Unnamed: 131_level_1', 'I ном', 'А')].values[0]
         self.motor_name_str = row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0]
-        self.power_motor_nom_kwt = extract_power_from_motor_name(row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0])
+        self.power_motor_nom_kwt = extract_power_from_motor_name(
+            row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0])
 
 
 def read_tr_and_get_data(tr_file_full_path, well_name):
-    tr = pd.read_excel(tr_file_full_path, skiprows = 6, header = [0,1,2,3]) #при ошибке файл нужно открыть и сохранить повторно без изменений
+    tr = pd.read_excel(tr_file_full_path, skiprows=6,
+                       header=[0, 1, 2, 3])  # при ошибке файл нужно открыть и сохранить повторно без изменений
     this_well_row = tr[tr[('№\nскв', 'Unnamed: 4_level_1', 'Unnamed: 4_level_2', 'Unnamed: 4_level_3')] == well_name]
     tr_class = tr_data(this_well_row)
     return tr_class
+
 
 def del_inf_in_columns_name(df, well_name):
     columns = df.columns
     new_columns = []
     for i in columns:
-            test_str = i
-            index = test_str.find(well_name)
-            str_to_delete = test_str[:index] + well_name + '. '
-            new_str = i.replace(str_to_delete, "")
-            new_columns.append(new_str)
+        test_str = i
+        index = test_str.find(well_name)
+        str_to_delete = test_str[:index] + well_name + '. '
+        new_str = i.replace(str_to_delete, "")
+        new_columns.append(new_str)
     return new_columns

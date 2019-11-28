@@ -30,12 +30,12 @@ from multiprocessing import Pool
 import unifloc.sandbox.uTools.preprocessor as prep
 
 
-time_mark = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
+time_mark = ''  # datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
 
 
 class Calc_options():  # TODO сделать класс-структуру со всем (настройки расчета отдельно здесь, алгоритм отдельно)
-    def __init__(self, well_name='569',  # менять тут для адаптации/восстановления
-                 dir_name_with_input_data='adapt_input_2019_11_26_13_40_21',  # менять тут для адаптации/восстановления
+    def __init__(self, well_name='1628',  # менять тут для адаптации/восстановления
+                 dir_name_with_input_data='restore_input_',  # менять тут для адаптации/восстановления
                  multiprocessing=True,
                  addin_name="UniflocVBA_7.xlam",
                  tr_name="Техрежим, , февраль 2019.xls",
@@ -44,8 +44,8 @@ class Calc_options():  # TODO сделать класс-структуру со 
                  use_pwh_in_loss=False,
                  calc_option=True,
                  debug_mode=False,
-                 vfm_calc_option=False,  # менять тут для адаптации/восстановления
-                 restore_q_liq_only=False,  # менять тут для адаптации/восстановления
+                 vfm_calc_option=True,  # менять тут для адаптации/восстановления
+                 restore_q_liq_only=True,  # менять тут для адаптации/восстановления
                  amount_iters_before_restart=100,
                  sleep_time_sec=25,
                  hydr_part_weight_in_error_coeff=0.5):  #TODO добавлять насосы в UniflocVBA
