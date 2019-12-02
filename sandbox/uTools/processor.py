@@ -454,16 +454,16 @@ def calc(options=Calc_options()):
     close_f()
 
 # настройка многопоточности
-amount_of_threads = 8
+amount_of_threads = 4
 
 first_thread = Calc_options(addin_name="UniflocVBA_7.xlam", number_of_thread=1, amount_of_threads=amount_of_threads)
 second_thread = Calc_options(addin_name="UniflocVBA_7_1.xlam", number_of_thread=2, amount_of_threads=amount_of_threads)
 third_thread = Calc_options(addin_name="UniflocVBA_7_2.xlam", number_of_thread=3, amount_of_threads=amount_of_threads)
 fourth_thread = Calc_options(addin_name="UniflocVBA_7_3.xlam", number_of_thread=4, amount_of_threads=amount_of_threads)
-fifth_thread = Calc_options(addin_name="UniflocVBA_7_4.xlam", number_of_thread=5, amount_of_threads=amount_of_threads)
-sixth_thread = Calc_options(addin_name="UniflocVBA_7_5.xlam", number_of_thread=6, amount_of_threads=amount_of_threads)
-seventh_thread = Calc_options(addin_name="UniflocVBA_7_6.xlam", number_of_thread=7, amount_of_threads=amount_of_threads)
-eightth_thread = Calc_options(addin_name="UniflocVBA_7_7.xlam", number_of_thread=8, amount_of_threads=amount_of_threads)
+#fifth_thread = Calc_options(addin_name="UniflocVBA_7_4.xlam", number_of_thread=5, amount_of_threads=amount_of_threads)
+#sixth_thread = Calc_options(addin_name="UniflocVBA_7_5.xlam", number_of_thread=6, amount_of_threads=amount_of_threads)
+#seventh_thread = Calc_options(addin_name="UniflocVBA_7_6.xlam", number_of_thread=7, amount_of_threads=amount_of_threads)
+#eightth_thread = Calc_options(addin_name="UniflocVBA_7_7.xlam", number_of_thread=8, amount_of_threads=amount_of_threads)
 
 #TODO добавить расчет для одного ядра
 
@@ -479,7 +479,7 @@ def run_calculation(thread_option_list):
                   thread_option_list)
 
 
-thread_option_list = [first_thread, second_thread, third_thread, fourth_thread, fifth_thread,
-                      sixth_thread, seventh_thread, eightth_thread]
+thread_option_list = [first_thread, second_thread, third_thread, fourth_thread]#, fifth_thread,
+                      #sixth_thread, seventh_thread, eightth_thread]
 run_calculation(thread_option_list)
 
