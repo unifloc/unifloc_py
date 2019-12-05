@@ -208,6 +208,7 @@ def get_dt_str_from_rus_date(rus_date: str) -> str:
     return out
 
 
+
 def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_changing=False):
     """
     Загрузка и обработка данных с шахматки
@@ -219,21 +220,22 @@ def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_chang
     # reading data
     out = pd.read_excel(chess_data_filename)
     # 2 header rows
-    col_n_0 = out.T[0].values
-    col_n_1 = out.T[1].values
-    col_d = {}
-    cols = out.columns.values
-    # if 2nd is null, chose 1st nave for column
-    for i in range(len(col_n_0)):
-        if pd.isnull(col_n_1[i]):
-            col_d[cols[i]] = col_n_0[i]
-        else:
-            col_d[cols[i]] = col_n_1[i]
-    # renaming columns and dropping damn 2 columns
-    out.drop([0, 1], inplace=True)
-    out.rename(columns=col_d, inplace=True)
-    # converting data
-    out['Дата'] = out.apply(lambda x: get_dt_str_from_rus_date(x['Дата']), axis=1)
+    if out.columns.values[0] != 'Дата':
+        col_n_0 = out.T[0].values
+        col_n_1 = out.T[1].values
+        col_d = {}
+        cols = out.columns.values
+        # if 2nd is null, chose 1st nave for column
+        for i in range(len(col_n_0)):
+            if pd.isnull(col_n_1[i]):
+                col_d[cols[i]] = col_n_0[i]
+            else:
+                col_d[cols[i]] = col_n_1[i]
+        # renaming columns and dropping damn 2 columns
+        out.drop([0, 1], inplace=True)
+        out.rename(columns=col_d, inplace=True)
+        # converting data
+        out['Дата'] = out.apply(lambda x: get_dt_str_from_rus_date(x['Дата']), axis=1)
     # following with Oleg's code
     out.index = pd.to_datetime(out['Дата'], dayfirst=True, format="%d.%m.%Y", infer_datetime_format=True)
     del out['Дата']
