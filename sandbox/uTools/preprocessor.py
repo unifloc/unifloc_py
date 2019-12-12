@@ -3,15 +3,9 @@
 
 Модуль для обработки данных скважин, оснащенных УЭЦН (со СУ и шахматки)
 """
-import sys
-import os
 
-current_path = os.getcwd()
-path_to_vba = current_path.replace(r'unifloc\sandbox\uTools', '')
-sys.path.append(path_to_vba)
 import pandas as pd
 
-# import unifloc_vba.description_generated.python_api as python_api
 
 columns_name_dict = {"Pline_atma": "P лин., атм",
                      "pbuf_atma": "P буф., атм",
@@ -93,29 +87,33 @@ def create_edited_df(df):
     return result
 
 
-def cut_df(df, left_boundary, right_boundary):
+def cut_df(df, left_boundarys: list, right_boundarys: list) -> pd.DataFrame:
     """
     Вырезка из DataFrame временного интервала
     :param df:
-    :param left_boundary:
-    :param right_boundary:
+    :param left_boundarys:
+    :param right_boundarys:
     :return:
     """
-    for start, end in zip(left_boundary, right_boundary):
-        df = df[(df.index >= start) & (df.index <= end)]
-    return df
+    out = pd.DataFrame()
+    for start, end in zip(left_boundarys, right_boundarys):
+        if out.empty:
+            out = df[(df.index >= start) & (df.index <= end)]
+        else:
+            out = pd.concat([df[(df.index >= start) & (df.index <= end)], out])
+    return out
 
 
-def rename_columns_by_dict(df, dict=columns_name_dict):
+def rename_columns_by_dict(df, dictionary=columns_name_dict):
     """
     Специальное изменение названий столбцов по словарю
     :param df:
-    :param dict:
+    :param dictionary:
     :return:
     """
     for i in df.columns:
-        if i in dict.keys():
-            df = df.rename(columns={i: dict[i]})
+        if i in dictionary.keys():
+            df = df.rename(columns={i: dictionary[i]})
     return df
 
 
@@ -208,7 +206,6 @@ def get_dt_str_from_rus_date(rus_date: str) -> str:
     return out
 
 
-
 def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_changing=False):
     """
     Загрузка и обработка данных с шахматки
@@ -273,16 +270,16 @@ def extract_power_from_motor_name(name_str):
     return float(name_str)
 
 
-class tr_data:
+class TrData:
     def __init__(self, row):
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
         self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
         self.esp_nom_rate_m3day = \
-        row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
+            row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
         self.esp_nom_head_m = row[('Номинальный напор', 'Unnamed: 17_level_1', 'Unnamed: 17_level_2', 'м')].values[0]
         self.h_pump_m = row[('Н сп', 'Unnamed: 20_level_1', 'Unnamed: 20_level_2', 'м')].values[0]
         self.esp_name_str = \
-        row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
+            row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
         self.udl_m = row[('Удл (Нсп)', 'Unnamed: 161_level_1', 'Unnamed: 161_level_2', 'м')].values[0]
         self.i_motor_nom_a = row[('ПЭД', 'Unnamed: 131_level_1', 'I ном', 'А')].values[0]
         self.motor_name_str = row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0]
@@ -294,7 +291,7 @@ def read_tr_and_get_data(tr_file_full_path, well_name):
     tr = pd.read_excel(tr_file_full_path, skiprows=6,
                        header=[0, 1, 2, 3])  # при ошибке файл нужно открыть и сохранить повторно без изменений
     this_well_row = tr[tr[('№\nскв', 'Unnamed: 4_level_1', 'Unnamed: 4_level_2', 'Unnamed: 4_level_3')] == well_name]
-    tr_class = tr_data(this_well_row)
+    tr_class = TrData(this_well_row)
     return tr_class
 
 
