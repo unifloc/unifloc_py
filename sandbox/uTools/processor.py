@@ -430,7 +430,7 @@ def calc(options=Calc_options()):
             start_in_loop_time = time.time()
             row_in_prepared_data = prepared_data.iloc[i]
             print("Расчет для времени: " + str(prepared_data.index[i]))
-            print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]) +
+            print('Итерация № ' + str(i+1) + ' из ' + str(prepared_data.shape[0]) +
                   ' в потоке №' + str(options.number_of_thread))
 
             this_state = transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option)
@@ -469,12 +469,15 @@ def run_calculation(thread_option_list):
                   thread_option_list)
 
 def create_thread_list(well_name, dir_name_with_input_data, tr_name,
-                        vfm_calc_option, restore_q_liq_only,
                        amount_of_threads):
     thread_list = []
+    if 'restore' in dir_name_with_input_data:
+        vfm_calc_option = restore_q_liq_only = True
+    elif 'adapt' in dir_name_with_input_data:
+        vfm_calc_option = restore_q_liq_only = False
+
     for number_of_thread in range(amount_of_threads):
         addin_name = 'UniflocVBA_7_%s.xlam' % str(number_of_thread)
-        print(addin_name)
         this_thread = Calc_options(well_name= well_name,
                                    dir_name_with_input_data=dir_name_with_input_data, tr_name = tr_name,
                                    addin_name=addin_name,
@@ -485,17 +488,15 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 
 
 tr_name = "Техрежим, , февраль 2019.xls"
-well_name = '1354'
+well_name = '1509'
 dir_name_with_input_data = 'restore_input_'
-vfm_calc_option = True
-restore_q_liq_only = True
+
 amount_of_threads = 12
 
 thread_option_list = create_thread_list(well_name, dir_name_with_input_data, tr_name,
-                        vfm_calc_option, restore_q_liq_only,
                        amount_of_threads)
 
 start_time = time.time()
 run_calculation(thread_option_list)
 end_time = time.time()
-print('Затрачено времени всего:' + str(end_time - start_time))
+print('Затрачено времени всего: ' + str(end_time - start_time))
