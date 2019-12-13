@@ -486,7 +486,7 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 
 tr_name = "Техрежим, , февраль 2019.xls"
 well_name = '1354'
-dir_name_with_input_data = 'restore_input_2019_12_13_13_20_13'
+dir_name_with_input_data = 'restore_input_'
 vfm_calc_option = True
 restore_q_liq_only = True
 amount_of_threads = 12
