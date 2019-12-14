@@ -101,9 +101,19 @@ def cut_df(df, left_boundary, right_boundary):
     :param right_boundary:
     :return:
     """
+    df_list = []
     for start, end in zip(left_boundary, right_boundary):
-        df = df[(df.index >= start) & (df.index <= end)]
-    return df
+        this_df = df[(df.index >= start) & (df.index <= end)]
+        df_list.append(this_df)
+    if len(df_list) == 1:
+        return df_list[0]
+    else:
+        for number, this_df in enumerate(df_list):
+            if number == 0:
+                df = this_df
+            else:
+                df = df.append(this_df)
+        return df
 
 
 def rename_columns_by_dict(df, dict=columns_name_dict):
