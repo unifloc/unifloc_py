@@ -394,7 +394,7 @@ def calc(options=Calc_options()):
 
         if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d],
-                              bounds=[[0.35, 5], [0.35, 5]])
+                              bounds=[[0.35, 3.5], [0.35, 3.5]])
         else:
             if restore_q_liq_only == True:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20, this_state.qliq_max_m3day * 1.2]])  #TODO разобраться с левой границей
