@@ -258,27 +258,7 @@ def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_chang
         return out
 
 
-def extract_power_from_motor_name(name_str):
-    name_str = name_str.upper()
-    name_str = name_str.replace('9.8.4ЭДБТ ', '')
-    name_str = name_str.replace(' ', '')
-    name_str = name_str.replace('ПЭДНС', '')
-    name_str = name_str.replace('9ЭДБТК', '')
-    name_str = name_str.replace('ПЭДC', '')
-    name_str = name_str.replace('ПЭДН', '')
-    name_str = name_str.replace('9.8.4ЭДБТ', '')
-    name_str = name_str.replace('ПВЭДН', '')
-    name_str = name_str.replace('9ЭДБСТ', '')
-    name_str = name_str.replace('9ЭДБТ', '')
-    name_str = name_str.replace('ЭДБТ', '')
-    name_str = name_str.replace('ПЭД', '')
-    if name_str[0] == '-':
-        name_str = name_str[1:]
-    if name_str[3] == '-':
-        name_str = name_str[0:3]
-    elif name_str[2] == '-':
-        name_str = name_str[0:2]
-    return float(name_str)
+
 
 
 class tr_data:

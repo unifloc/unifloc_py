@@ -468,6 +468,7 @@ def run_calculation(thread_option_list):
             p.map(calc,
                   thread_option_list)
 
+
 def create_thread_list(well_name, dir_name_with_input_data, tr_name,
                        amount_of_threads):
     thread_list = []
@@ -478,8 +479,8 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 
     for number_of_thread in range(amount_of_threads):
         addin_name = 'UniflocVBA_7_%s.xlam' % str(number_of_thread)
-        this_thread = Calc_options(well_name= well_name,
-                                   dir_name_with_input_data=dir_name_with_input_data, tr_name = tr_name,
+        this_thread = Calc_options(well_name=well_name,
+                                   dir_name_with_input_data=dir_name_with_input_data, tr_name=tr_name,
                                    addin_name=addin_name,
                                    number_of_thread=number_of_thread, amount_of_threads=amount_of_threads,
                                    vfm_calc_option=vfm_calc_option, restore_q_liq_only=restore_q_liq_only)
