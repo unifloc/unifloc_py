@@ -1,11 +1,9 @@
 import pandas as pd
-
-
-def mark_df_columns(df, mark):
-    for i in df.columns:
-        df = df.rename(columns={i: i + ' (' + mark + ')'})
-    return df
-
+#from sandbox.uTools.preproc_p import preproc_tool
+import sys
+import os
+sys.path.append('../'*4)
+import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
 
 def get_dt_str_from_rus_date(rus_date: str) -> str:
     """
@@ -55,5 +53,6 @@ def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_chang
     else:
         out = out.resample(time_to_resamle).last()
         out = out.fillna(method='ffill')
-        out = mark_df_columns(out, 'Ш')
+        out = preproc_tool.mark_df_columns(out, 'Ш')
         return out
+

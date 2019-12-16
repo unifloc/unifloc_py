@@ -468,6 +468,7 @@ def run_calculation(thread_option_list):
             p.map(calc,
                   thread_option_list)
 
+
 def create_thread_list(well_name, dir_name_with_input_data, tr_name,
                        amount_of_threads):
     thread_list = []
