@@ -64,21 +64,50 @@ def final_edit_overall_data(overall_data):
     return overall_data
 
 
-def calc_calibr_interp_metrics(overall_data):
+def calc_calibr_interp_metrics(overall_data, return_df = False):
     overall_data_with_calibr_gaps = overall_data[overall_data['К. калибровки по напору - множитель (Модель) (ADAPT)'] !=
                                                 overall_data['К. калибровки по напору - множитель (Модель) (RESTORE)']]
     overall_data_with_calibr_gaps = overall_data_with_calibr_gaps.dropna(subset = ['Q ж, м3/сут (Модель) (RESTORE)'])
-    calibr_calc_metrics = calc_mertics(overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (ADAPT)'],
-                overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (RESTORE)'], 'Метрики восстановления Qж с помощью калибровок')
-    calibr_calc_metrics += 'Средняя относительная ошибка Q ж, %: ' + \
-                           str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (Q ж), %'].abs().mean()) + '\n'
-    calibr_calc_metrics += 'Средняя относительная ошибка N акт, %: ' + \
-                           str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт), %'].abs().mean()) + '\n'
+    if return_df == False:
+        calibr_calc_metrics = calc_mertics(overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (ADAPT)'],
+                    overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (RESTORE)'], 'Метрики восстановления Qж с помощью калибровок')
+        calibr_calc_metrics += 'Средняя относительная ошибка Q ж, %: ' + \
+                               str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (Q ж), %'].abs().mean()) + '\n'
+        calibr_calc_metrics += 'Средняя относительная ошибка N акт, %: ' + \
+                               str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт), %'].abs().mean()) + '\n'
 
-    interp_calc_metrics = calc_mertics(overall_data_with_calibr_gaps['Объемный дебит жидкости (СУ) (ADAPT)'],
-                overall_data_with_calibr_gaps['Объемный дебит жидкости (СУ) (ADAPT) (INTERP)'], 'Метрики восстановления Qж с помощью интерполяции')
-    interp_calc_metrics +='Средняя относительная ошибка Q ж (INTERP), %: ' +\
-                          str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (Q ж) (INTERP), %'].abs().mean()) + '\n'
-    interp_calc_metrics +='Средняя относительная ошибка N акт (INTERP), %: ' + \
-                          str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт) (INTERP), %'].abs().mean()) + '\n'
-    return (calibr_calc_metrics, interp_calc_metrics)
+        interp_calc_metrics = calc_mertics(overall_data_with_calibr_gaps['Объемный дебит жидкости (СУ) (ADAPT)'],
+                    overall_data_with_calibr_gaps['Объемный дебит жидкости (СУ) (ADAPT) (INTERP)'], 'Метрики восстановления Qж с помощью интерполяции')
+        interp_calc_metrics +='Средняя относительная ошибка Q ж (INTERP), %: ' +\
+                              str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (Q ж) (INTERP), %'].abs().mean()) + '\n'
+        interp_calc_metrics +='Средняя относительная ошибка N акт (INTERP), %: ' + \
+                              str(overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт) (INTERP), %'].abs().mean()) + '\n'
+        return (calibr_calc_metrics, interp_calc_metrics)
+    else:
+        calibr_calc_metrics = calc_mertics(overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (ADAPT)'],
+                                                 overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (RESTORE)'],
+                                                 'Метрики восстановления Qж с помощью калибровок', return_df=True)
+        interp_calc_metrics = calc_mertics(overall_data_with_calibr_gaps['Объемный дебит жидкости (СУ) (ADAPT)'],
+                                                 overall_data_with_calibr_gaps[
+                                                     'Объемный дебит жидкости (СУ) (ADAPT) (INTERP)'],
+                                                 'Метрики восстановления Qж с помощью интерполяции', return_df=True)
+        overall_metrics = calibr_calc_metrics.append(interp_calc_metrics)
+        overall_metrics['Средняя относительная ошибка Q ж'] = [
+            overall_data_with_calibr_gaps['Относительная ошибка расчетов (Q ж), %'].abs().mean(),
+            overall_data_with_calibr_gaps['Относительная ошибка расчетов (Q ж) (INTERP), %'].abs().mean()]
+        overall_metrics['Средняя относительная ошибка N акт'] = [
+            overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт), %'].abs().mean(),
+            overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт) (INTERP), %'].abs().mean()]
+        return overall_metrics
+
+
+def make_dimensionless_df(df):
+    result_df_dimensionless = df.copy()
+    for i in result_df_dimensionless.columns:
+        if i == 'Время':
+            del result_df_dimensionless['Время']
+        else:
+            new_new = result_df_dimensionless[i]/result_df_dimensionless[i].max()
+            result_df_dimensionless[i] = new_new
+
+    return result_df_dimensionless
