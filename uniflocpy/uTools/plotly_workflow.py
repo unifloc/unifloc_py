@@ -4,9 +4,7 @@
 Модуль для построения графиков через plotly
 
 """
-# TODO сделать через классы
-# TODO добавить оси и форматирование
-# TODO сделать аналогично для dash и matplotlib
+
 import pandas as pd
 import numpy as np
 import sys
@@ -20,7 +18,7 @@ from plotly import tools
 from datetime import date
 
 
-def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
+def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True):
     """
     Создание одного trace по данным
 
@@ -30,12 +28,22 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
     :param chosen_mode: настройка отображения 'lines', 'markers'
     :return: один trace
     """
-    one_trace = go.Scattergl(
-        x=data_x,
-        y=data_y,
-        name=namexy,
-        mode=chosen_mode
-    )
+    if use_gl == True:
+        one_trace = go.Scattergl(
+			x=data_x,
+			y=data_y,
+			name=namexy,
+			mode=chosen_mode,
+            hovertemplate = namexy + ": %{y:.3f}<extra></extra>"
+		)
+    else:
+        one_trace = go.Scatter(
+            x=data_x,
+            y=data_y,
+            name=namexy,
+            mode=chosen_mode,
+            hovertemplate=namexy + ": %{y:.3f}<extra></extra>"
+        )
     return one_trace
 
 
@@ -90,7 +98,7 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
     return trace_list"""
 
 
-def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
+def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl = False):
     """
     Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.
 
@@ -102,7 +110,8 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
     columns_name_list = data_frame.columns
     for i in columns_name_list:
         column_name = i
-        this_trace = create_plotly_trace(data_frame.index, data_frame[column_name], column_name, chosen_mode)
+        this_series = data_frame[column_name].dropna()
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, use_gl)
         trace_list.append(this_trace)
     return trace_list
 
@@ -121,3 +130,31 @@ def connect_traces(traces1, trace2):
     for j in trace2:
         connected_traces.append(j)
     return connected_traces
+
+
+def create_report_html(df, all_banches, filename):
+    """
+    Создание шаблонизированного и удобного набора графиков
+    :param df:
+    :param all_banches:
+    :param filename:
+    :return:
+    """
+    subplot_amount = len(all_banches)
+    subplot_titles = []
+    for z in all_banches:
+        subplot_titles.append(list(z.keys())[0])
+    fig = make_subplots(
+        rows=subplot_amount, cols=1, shared_xaxes=True,
+        vertical_spacing=0.01,
+        subplot_titles=subplot_titles
+    )
+    for i in range(subplot_amount):
+        this_df = df[all_banches[i][subplot_titles[i]]]
+        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', use_gl=True)
+        for j in this_banch_trace:
+            fig.add_trace(j, row=i + 1, col=1)
+
+    fig.layout.hovermode = 'x'
+    fig.layout.height = 450 * subplot_amount
+    plot(fig, filename=filename)
