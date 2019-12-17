@@ -51,7 +51,7 @@ def get_filtred_by_measurng_time(input_data: pd.DataFrame, first_edit_data:pd.Da
     out['Время замера фактическое'].fillna(np.inf, inplace=True)
     # избавляемся от некорректных замеров
     out = out[
-        out['Время замера фактическое'].dropna() - out['Время замера плановое (СУ)'] - 30 > 0]
+        out['Время замера фактическое'].dropna() > critical_difference]
     # чистим колонку, взятую из данных после первичной обработки
     out.drop(columns=['Время замера фактическое'])
     return out
