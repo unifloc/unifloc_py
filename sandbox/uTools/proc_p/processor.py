@@ -13,10 +13,13 @@
 # TODO сохранять параметры расчета
 import sys
 import os
-sys.path.append('../')
+sys.path.append('../' * 4)
+sys.path.append('../' * 5)
 current_path = os.getcwd()
+path_to_sys = current_path.replace(r'unifloc\sandbox\uTools\proc_p', '')
 path_to_sys = current_path.replace(r'unifloc\sandbox\uTools', '')
 sys.path.append(path_to_sys)  # добавляем путь в sys, чтобы нашелся проект unifloc_vba
+current_path = current_path.replace(r'unifloc\sandbox\uTools\proc_p', r'unifloc_vba\\')
 current_path = current_path.replace(r'unifloc\sandbox\uTools', r'unifloc_vba\\')
 print(current_path)
 import unifloc_vba.description_generated.python_api as python_api
@@ -27,7 +30,7 @@ sys.path.append("../")
 import datetime
 import time
 from multiprocessing import Pool
-import unifloc.sandbox.uTools.preprocessor as prep
+import unifloc.sandbox.uTools.preproc_p.workflow_tr_data as workflow_tr_data
 
 
 time_mark = ''  # datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
@@ -303,20 +306,20 @@ def calc(options=Calc_options()):
     amount_iters_before_restart = options.amount_iters_before_restart  # после 25 итерации (временных) могут возникать ошибки
     sleep_time_sec = options.sleep_time_sec
     hydr_part_weight_in_error_coeff = options.hydr_part_weight_in_error_coeff
-
-    tr_file_full_path = os.getcwd() + '\\data\\tr\\' + options.tr_name
-    tr_data = prep.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
+    app_path = os.getcwd().replace(r'proc_p', '')
+    tr_file_full_path = app_path + '\\data\\tr\\' + options.tr_name
+    tr_data = workflow_tr_data.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
 
     if not vfm_calc_option:  # создание директорий для результатов расчета
-        input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
-        dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'adaptation_' + time_mark
+        input_data_filename_str = app_path + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_adapt_input'
+        dir_to_save_calculated_data = app_path + '\\data\\' + well_name + '\\' + 'adaptation_' + time_mark
         try:
             os.mkdir(dir_to_save_calculated_data)
         except:
             pass
     else:
-        input_data_filename_str = os.getcwd() + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_restore_input'
-        dir_to_save_calculated_data = os.getcwd() + '\\data\\' + well_name + '\\' + 'restore_' + time_mark
+        input_data_filename_str = app_path + '\\data\\' + well_name + '\\' + dir_name_with_input_data + '\\' + well_name + '_restore_input'
+        dir_to_save_calculated_data = app_path + '\\data\\' + well_name + '\\' + 'restore_' + time_mark
         try:
             os.mkdir(dir_to_save_calculated_data)
         except:
@@ -489,7 +492,7 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 
 
 tr_name = "Техрежим, , февраль 2019.xls"
-well_name = '1509'
+well_name = '601'
 dir_name_with_input_data = 'restore_input_'
 
 amount_of_threads = 12
