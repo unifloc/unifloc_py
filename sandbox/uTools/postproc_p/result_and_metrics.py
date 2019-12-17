@@ -9,7 +9,7 @@ def relative_error_perc(y1, y2):
     return (y1 - y2) / y1 * 100
 
 
-def calc_mertics(y_fact, y_pred, mark_str, return_df = False):
+def calc_mertics(y_fact, y_pred, mark_str, return_df = False): #TODO добавить MAE чтобы было относительное
     """
     Расчет метрик успешности работы
     :param y_fact:
