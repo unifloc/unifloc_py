@@ -49,22 +49,27 @@ def del_inf_in_columns_name(df, well_name):
     return new_columns
 
 
-def read_and_edit_init_cs_data(well_name, path_to_work_dir):
+def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3h'):
     data_file_path = path_to_work_dir + well_name + ".csv"
     try:
         try:
             well_data = pd.read_csv(data_file_path,sep=';', header=None, skiprows = 1)
         except:
             well_data = pd.read_csv(data_file_path,sep='\\t', header=None)
+            if well_data[0][0] == 'Параметр;Дата;Значение':
+                well_data = pd.read_csv(data_file_path, sep=';', skipfooter=1)
         well_data = initial_editing(well_data, well_name)
         well_data = create_edited_df(well_data)
     except:
         data_file_path = path_to_work_dir + well_name + ".csv"
-        well_data = pd.read_csv(data_file_path, sep='\\t', skiprows = 1, skipfooter =1, index_col = 'Названия строк')
+        well_data = pd.read_csv(data_file_path, sep='\\t', skiprows=1, skipfooter=1, index_col='Названия строк')
         well_data.index.name = 'Время'
         well_data.index = pd.to_datetime(well_data.index)
         del well_data['Общий итог']
         well_data.columns = del_inf_in_columns_name(well_data, well_name)
+    if well_data.memory_usage().sum()/1024/1024 > 10000:
+        print('Потребление памяти слишком велико, произведем ресемпл')
+        well_data = well_data = well_data.resample('3h').mean()
     return  well_data
 
 
