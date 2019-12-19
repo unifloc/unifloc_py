@@ -67,7 +67,7 @@ def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3
         well_data.index = pd.to_datetime(well_data.index)
         del well_data['Общий итог']
         well_data.columns = del_inf_in_columns_name(well_data, well_name)
-    if well_data.memory_usage().sum()/1024/1024 > 10000:
+    if well_data.memory_usage().sum()/1024/1024 > 1000:
         print('Потребление памяти слишком велико, произведем ресемпл')
         well_data = well_data = well_data.resample('3h').mean()
     return  well_data

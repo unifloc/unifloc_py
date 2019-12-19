@@ -76,3 +76,16 @@ def make_gaps_and_interpolate(df, reverse=False):
     del result['empty']
     del result['Время']
     return result
+
+def check_input_data(df):
+    init_amount_rows = df.shape[0]
+    df = df[df['F вращ ТМ (Ш)'] > 30]
+    amount_rows = df.shape[0]
+    print('Отфильтровано по F вращ ТМ (Ш): ' + str(init_amount_rows - amount_rows))
+    df = df[df['Объемный дебит жидкости (СУ)'] > 10]
+    new_amount_rows = df.shape[0]
+    print('Отфильтровано по Объемный дебит жидкости (СУ): ' + str(amount_rows - new_amount_rows))
+    df = df[df['Давление на приеме насоса (пласт. жидкость) (СУ)'] > 1]
+    new2_amount_rows = df.shape[0]
+    print('Отфильтровано по Давление на приеме насоса (пласт. жидкость) (СУ): ' + str(new_amount_rows - new2_amount_rows))
+    return df
