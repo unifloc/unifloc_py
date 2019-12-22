@@ -1,5 +1,12 @@
 
 def create_banches_for_report(well_data, report_type):
+    """
+    Создание списка словарей для построения графиков в форме report
+    :param well_data: DataFrame с данными по скважине
+    :param report_type: string c типом report: init_cs_data, init_chess_data, adapt_input, adapt_report, restore_input,
+            overall_result
+    :return:
+    """
     if report_type == 'init_cs_data':
         qliq = {'Объемный дебит жидкости': ['Объемный дебит жидкости']}
         gor = {'ГФ, м3/м3': ['ГФ, м3/м3']}

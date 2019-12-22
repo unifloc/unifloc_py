@@ -49,7 +49,15 @@ def del_inf_in_columns_name(df, well_name):
     return new_columns
 
 
-def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3h'):
+def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3h'): #TODO избавиться от путей
+    """
+    Загрузка исходных данных со станции управления, преобразования их в шахмоткоподобный вид, при больших затратах памяти
+    будет произведен ресемпл
+    :param well_name: номер скважины, str
+    :param path_to_work_dir: путь к рабочей директории
+    :param time_to_resamle: время осреднения - ресемпла - '3h', '1d'
+    :return: DataFrame в шахмоткоподобном виде
+    """
     data_file_path = path_to_work_dir + well_name + ".csv"
     try:
         try:
@@ -69,8 +77,8 @@ def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3
         well_data.columns = del_inf_in_columns_name(well_data, well_name)
     if well_data.memory_usage().sum()/1024/1024 > 1000:
         print('Потребление памяти слишком велико, произведем ресемпл')
-        well_data = well_data = well_data.resample('3h').mean()
-    return  well_data
+        well_data = well_data = well_data.resample(time_to_resamle).mean() #TODO сначала нужна фильтрация, затем ресемпл
+    return well_data
 
 
 def load_and_edit_cs_data(cs_data_filename, created_input_data_type=0, time_to_resamle=None):

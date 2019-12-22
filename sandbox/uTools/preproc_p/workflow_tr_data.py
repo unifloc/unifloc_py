@@ -2,6 +2,11 @@ import pandas as pd
 
 
 def extract_power_from_motor_name(name_str):
+    """
+    Определение мощности двигателя по его шифру из строки техрежима
+    :param name_str: строка из техрежима, например 'ПЭД-100-117"
+    :return: мощность двигателя, кВт (100 для данного ПЭД)
+    """
     name_str = name_str.upper()
     name_str = name_str.replace('9.8.4ЭДБТ ', '')
     name_str = name_str.replace(' ', '')
@@ -26,6 +31,10 @@ def extract_power_from_motor_name(name_str):
 
 class Tr_data:
     def __init__(self, row):
+        """
+        Класс-структура для хранения данных о скважине из техрежима
+        :param row: строка, извлеченная с техрежима для данной скважины
+        """
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
         self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
         self.esp_nom_rate_m3day = \
@@ -42,8 +51,14 @@ class Tr_data:
 
 
 def read_tr_and_get_data(tr_file_full_path, well_name):
+    """
+    Чтение техрежима и извлечение данных по скважине
+    :param tr_file_full_path: абсолютный путь техрежиму
+    :param well_name: номер скважины, str
+    :return: класс-структура со всем данными
+    """
     tr = pd.read_excel(tr_file_full_path, skiprows=6,
                        header=[0, 1, 2, 3])  # при ошибке файл нужно открыть и сохранить повторно без изменений
     this_well_row = tr[tr[('№\nскв', 'Unnamed: 4_level_1', 'Unnamed: 4_level_2', 'Unnamed: 4_level_3')] == well_name]
-    tr_class = Tr_data(this_well_row)
-    return tr_class
+    tr_data = Tr_data(this_well_row)
+    return tr_data

@@ -3,12 +3,24 @@ import pandas as pd
 
 
 def mark_df_columns(df, mark):
+    """
+    Пометка названий столбцов DataFrame c помошью (this_mark)
+    :param df: исходный DataFrame
+    :param mark: str, который будет приписан к названию столбца (например, СУ, или Ш)
+    :return: DataFrame с новыми названиями столбцов
+    """
     for i in df.columns:
         df = df.rename(columns={i: i + ' (' + mark + ')'})
     return df
 
 
-def combine_multiprocessing_result(path_to_work_dir, dir_name_with_calculated_data):
+def combine_multiprocessing_result(path_to_work_dir, dir_name_with_calculated_data): #TODO избавиться от путей
+    """
+    Объединение результатов расчета в один файл
+    :param path_to_work_dir: абсолютный путь к рабочей директории
+    :param dir_name_with_calculated_data: путь к данным скважины
+    :return: объединенный файл результатов расчета в DataFrame
+    """
     filenames_list = []
     for (dirpath, dirnames, filenames) in os.walk(path_to_work_dir + dir_name_with_calculated_data + 'multiprocessing\\'):
         filenames_list.extend(filenames)
@@ -54,9 +66,9 @@ def cut_df(df, left_boundary, right_boundary):
 def make_gaps_and_interpolate(df, reverse=False):
     """
     Выкалывание точек и линейная интерполяция. (Восстановление дебитов путем интерполяции)
-    :param df:
-    :param reverse:
-    :return:
+    :param df: исходный DataFrame
+    :param reverse: выкалывается каждая вторая точка начиная с первой
+    :return: DataFrame с выколотыми вторыми точками и проинтерполированными значениями, чтобы заполнить выколотый точки
     """
     try_check = df.copy()
     try_check['Время'] = try_check.index
@@ -78,6 +90,11 @@ def make_gaps_and_interpolate(df, reverse=False):
     return result
 
 def check_input_data(df):
+    """
+    Проверка входных данных модели, выбрасывания неполных строк данных или наборов данных, при которых UniflocVBA падает
+    :param df: исходный DataFrame
+    :return: DataFrame с отфильтрованными данными
+    """
     init_amount_rows = df.shape[0]
     df = df[df['F вращ ТМ (Ш)'] > 30]
     amount_rows = df.shape[0]
