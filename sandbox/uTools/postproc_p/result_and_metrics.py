@@ -6,16 +6,23 @@
 from sklearn import metrics
 import pandas as pd
 def relative_error_perc(y1, y2):
+    """
+    Расчет относительной ошибки
+    :param y1: фактическое значение
+    :param y2: прогнозное значения
+    :return: относительная ошибка, %
+    """
     return (y1 - y2) / y1 * 100
 
 
 def calc_mertics(y_fact, y_pred, mark_str, return_df = False): #TODO добавить MAE чтобы было относительное
     """
-    Расчет метрик успешности работы
-    :param y_fact:
-    :param y_pred:
-    :param mark_str:
-    :return:
+    Расчет метрик модели
+    :param y_fact: фактические значения
+    :param y_pred: прогнозные значения
+    :param mark_str: string для пометки результатов в виде текста
+    :param return_df: bool - флаг для возврата метрик в виде DataFrame
+    :return: набор метрик в виде string или DataFrame
     """
     if return_df == True:
         df = {}
@@ -50,6 +57,12 @@ def calc_mertics(y_fact, y_pred, mark_str, return_df = False): #TODO добав�
 
 
 def final_edit_overall_data(overall_data):
+    """
+    Финальная обработка сведенных данных адаптации и восстановления
+    :param overall_data: DataFrame с адаптацией, восстановлением при помощи калибровок + линейной интерполяцией
+    :return: overall_data с поправленными размерностями данных и относительными ошибками по дебиту
+            и мощности (для калибровок и интерполяции)
+    """
     overall_data['Активная мощность (СУ) (ADAPT)'] = overall_data['Активная мощность (СУ) (ADAPT)'] * 1000
     overall_data['Активная мощность (СУ) (ADAPT) (INTERP)'] = overall_data['Активная мощность (СУ) (ADAPT) (INTERP)'] * 1000
     overall_data['Загрузка двигателя (СУ) (ADAPT)'] = overall_data['Загрузка двигателя (СУ) (ADAPT)'] / 100
@@ -64,7 +77,14 @@ def final_edit_overall_data(overall_data):
     return overall_data
 
 
-def calc_calibr_interp_metrics(overall_data, return_df = False):
+def calc_calibr_interp_metrics(overall_data, return_df=False):
+    """
+    Итоговый расчет метрик
+    :param overall_data: сведенные данные адаптации и восстановления на весь период.
+                         Преобразуется к overall_data_with_calibr_gaps - df только с тестовыми (прогнозными) значениями
+    :param return_df: bool - флаг для возврата DataFrame
+    :return:
+    """
     overall_data_with_calibr_gaps = overall_data[overall_data['К. калибровки по напору - множитель (Модель) (ADAPT)'] !=
                                                 overall_data['К. калибровки по напору - множитель (Модель) (RESTORE)']]
     overall_data_with_calibr_gaps = overall_data_with_calibr_gaps.dropna(subset = ['Q ж, м3/сут (Модель) (RESTORE)'])
@@ -102,6 +122,11 @@ def calc_calibr_interp_metrics(overall_data, return_df = False):
 
 
 def make_dimensionless_df(df):
+    """
+    Функция для обезразмеривания DataFrame
+    :param df: исходные df
+    :return: обезразмеренный df
+    """
     result_df_dimensionless = df.copy()
     for i in result_df_dimensionless.columns:
         if i == 'Время':
@@ -109,5 +134,4 @@ def make_dimensionless_df(df):
         else:
             new_new = result_df_dimensionless[i]/result_df_dimensionless[i].max()
             result_df_dimensionless[i] = new_new
-
     return result_df_dimensionless
