@@ -139,6 +139,7 @@ def calc(options=well_calculation.Calc_options()):
         this_state = workflow_input_data.all_ESP_data(UniflocVBA, tr_data)
         this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
         this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
+        #this_state.p_buf_data_max_atm = prepared_data['Рлин ТМ (Ш)'].max()  # костыль
         this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
         this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
 
