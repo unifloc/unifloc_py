@@ -27,7 +27,7 @@ and stored in temp folder
 """
 
 project_name = 'Brage'
-well_df = pd.read_csv('../data/' + project_name + '/preprocessed/df_well_resample.csv', index_col=0)
+well_df = pd.read_csv('df_well_resample.csv', index_col=0)
 df_sel = pd.DataFrame(columns=['Case', 'Date start', 'Date end'])
 
 
