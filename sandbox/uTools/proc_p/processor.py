@@ -125,8 +125,11 @@ def calc(options=well_calculation.Calc_options()):
         true_result = this_state.result # сохранение результатов расчета оптимизированной модели
         return true_result
 
+    prepared_data = pd.read_csv(input_data_filename_str + ".csv")  # чтение входных данных
+    if opt.number_of_thread > prepared_data.shape[0]:
+        print(f'Лишний поток {opt.number_of_thread} для входных данных с количеством строк {prepared_data.shape[0]}')
+        opt.calc_option = False
     if opt.calc_option:  # основной цикл расчета начинается здесь
-        prepared_data = pd.read_csv(input_data_filename_str + ".csv")  # чтение входных данных
 
         prepared_data = workflow_input_data.divide_prepared_data(prepared_data, options)
 
@@ -210,7 +213,7 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 
 
 tr_name = "Техрежим, , февраль 2019.xls"
-well_name = '570'
+well_name = '1628'
 dir_name_with_input_data = 'restore_input_'
 
 amount_of_threads = 12

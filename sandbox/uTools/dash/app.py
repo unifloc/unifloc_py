@@ -24,7 +24,11 @@ file_names = [file_path[6:] for file_path in file_paths]
 files = {}
 
 for file_name, file_path in zip(file_names, file_paths):
-    files.update({file_name: pd.read_csv(file_path, index_col=0)})
+    try:
+        files.update({file_name: pd.read_csv(file_path, index_col='Время')})
+    except:
+        files.update({file_name: pd.read_csv(file_path, index_col=0)})
+
 
 all_cols = list(files[file_names[0]].columns)
 for i in range(1, len(file_names)):
@@ -51,7 +55,7 @@ def plot_ex(list_dfs, list_df_keys, list_params, height):
         for trace in traces:
             fig.append_trace(trace, row=j, col=1)
 
-    fig.update_layout(height=height)
+    fig.update_layout(height=height, hovermode='x')
     return fig
 
 
