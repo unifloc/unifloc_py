@@ -77,7 +77,7 @@ def final_edit_overall_data(overall_data):
     return overall_data
 
 
-def calc_calibr_interp_metrics(overall_data, return_df=False):
+def calc_calibr_interp_metrics(overall_data, return_df=False):  #TODO оставить только df с методом to_string или excel, удалить str мусор
     """
     Итоговый расчет метрик
     :param overall_data: сведенные данные адаптации и восстановления на весь период.
@@ -118,6 +118,9 @@ def calc_calibr_interp_metrics(overall_data, return_df=False):
         overall_metrics['Средняя относительная ошибка N акт'] = [
             overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт), %'].abs().mean(),
             overall_data_with_calibr_gaps['Относительная ошибка расчетов (N акт) (INTERP), %'].abs().mean()]
+        overall_metrics['Q ж, м3/сут (Модель) (ADAPT) mean'] = [
+            overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (ADAPT)'].abs().mean(),
+            overall_data_with_calibr_gaps['Q ж, м3/сут (Модель) (ADAPT)'].abs().mean()]
         return overall_metrics
 
 

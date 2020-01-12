@@ -62,7 +62,7 @@ def plot_func(data, plot_title_str, filename_str):
     # iplot(fig)
 
 
-def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
+def plot_subplots(data_traces, filename_str, two_equal_subplots=False, auto_open = True):
     """
     Построение нескольких графиков
 
@@ -82,7 +82,7 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
         for i in range(len(data_traces)):
             fig.append_trace(data_traces[i], row=i + 1, col=1)
 
-    plot(fig, filename=filename_str)
+    plot(fig, filename=filename_str, auto_open=auto_open)
 
 
 """def create_traces_list_by_num(data_x_values, data_y, num_y_list):
@@ -128,7 +128,7 @@ def connect_traces(traces1, trace2):
     return connected_traces
 
 
-def create_report_html(df, all_banches, filename):
+def create_report_html(df, all_banches, filename, auto_open = True):
     """
     Создание шаблонизированного и удобного набора графиков
     :param df:
@@ -153,7 +153,7 @@ def create_report_html(df, all_banches, filename):
 
     fig.layout.hovermode = 'x'
     fig.layout.height = 450 * subplot_amount
-    plot(fig, filename=filename)
+    plot(fig, filename=filename, auto_open=auto_open)
 
 
 def create_heat_map_data(df, name):
@@ -214,7 +214,7 @@ def create_esp_traces(UniflocVBA, q_esp_nom_m3day, head_esp_nom_m):
     return {'head_trace': head_trace, 'power_trace':power_trace, 'efficiency_trace': efficiency_trace}
 
 
-def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, filename):
+def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, filename, auto_open=True):
     nedeed_param_list = ['Q ж, м3/сут (Модель) (ADAPT)',
                          'ГФ (Модель) (ADAPT)',
                          'Обв, % (Модель) (ADAPT)',
@@ -282,4 +282,4 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
                   row=7, col=1)
 
     fig.update_layout(height=7 * 500, showlegend=True)
-    plot(fig, filename=filename)
+    plot(fig, filename=filename, auto_open = auto_open)
