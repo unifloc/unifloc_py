@@ -10,6 +10,7 @@
 # TODO сохранять параметры расчета
 import sys
 import os
+import shutil
 sys.path.append('../' * 4)
 sys.path.append('../' * 5)
 current_path = os.getcwd()
@@ -171,9 +172,8 @@ def calc(options=well_calculation.Calc_options()):
     close_f = UniflocVBA.book.macro('close_book_by_macro')
     close_f()
 
+# TODO добавить расчет для одного ядра
 
-
-#TODO добавить расчет для одного ядра
 
 def run_calculation(thread_option_list):
     """
@@ -197,6 +197,8 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 
     for number_of_thread in range(amount_of_threads):
         addin_name = 'UniflocVBA_7_%s.xlam' % str(number_of_thread)
+        shutil.copyfile(current_path + 'UniflocVBA_7.xlam',
+                        current_path + addin_name)
         this_thread = well_calculation.Calc_options(well_name=well_name,
                                    dir_name_with_input_data=dir_name_with_input_data, tr_name=tr_name,
                                    addin_name=addin_name,
@@ -206,9 +208,10 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
     return thread_list
 
 
+
 tr_name = "Техрежим, , февраль 2019.xls"
-well_name = '601'
-dir_name_with_input_data = 'adapt_input_'
+well_name = '570'
+dir_name_with_input_data = 'restore_input_'
 
 amount_of_threads = 12
 

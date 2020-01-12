@@ -89,20 +89,33 @@ def make_gaps_and_interpolate(df, reverse=False):
     del result['Время']
     return result
 
+
+def filtr_data_by_min_value(df, column_name, min_value):
+    init_amount_rows = df.shape[0]
+    df = df[df[column_name] > min_value]
+    new_amount_rows = df.shape[0]
+    print('Отфильтровано по параметру: ' + column_name +
+          f' c минимальным значением {min_value}. Отброшено значений {init_amount_rows - new_amount_rows}')
+    return df
+
+
+def filtr_data_by_drop_nan(df: pd.DataFrame, column_name):
+    init_amount_rows = df.shape[0]
+    df = df.dropna(subset=[column_name])
+    new_amount_rows = df.shape[0]
+    print('Отфильтровано по параметру: ' + column_name +
+          f' по NaN. Отброшено значений {init_amount_rows - new_amount_rows}')
+    return df
+
+
 def check_input_data(df):
     """
     Проверка входных данных модели, выбрасывания неполных строк данных или наборов данных, при которых UniflocVBA падает
     :param df: исходный DataFrame
     :return: DataFrame с отфильтрованными данными
     """
-    init_amount_rows = df.shape[0]
-    df = df[df['F вращ ТМ (Ш)'] > 30]
-    amount_rows = df.shape[0]
-    print('Отфильтровано по F вращ ТМ (Ш): ' + str(init_amount_rows - amount_rows))
-    df = df[df['Объемный дебит жидкости (СУ)'] > 10]
-    new_amount_rows = df.shape[0]
-    print('Отфильтровано по Объемный дебит жидкости (СУ): ' + str(amount_rows - new_amount_rows))
-    df = df[df['Давление на приеме насоса (пласт. жидкость) (СУ)'] > 1]
-    new2_amount_rows = df.shape[0]
-    print('Отфильтровано по Давление на приеме насоса (пласт. жидкость) (СУ): ' + str(new_amount_rows - new2_amount_rows))
+    df = filtr_data_by_min_value(df, 'F вращ ТМ (Ш)', 30)
+    df = filtr_data_by_min_value(df, 'Объемный дебит жидкости (СУ)', 10)
+    df = filtr_data_by_min_value(df, 'Давление на приеме насоса (пласт. жидкость) (СУ)', 1)
+    df = filtr_data_by_drop_nan(df, 'Рбуф (Ш)')
     return df

@@ -77,7 +77,7 @@ def restore_calibr_via_ridge(adaptation_all_data_lol, calibr_data, use_80_20 = F
                                           ]
                                          ]
     # уберем пропуски в существенных данных
-    adaptation_data_lol.dropna(inplace=True)
+    adaptation_data_lol = adaptation_data_lol.dropna()
     # и обновляем индексы
     adaptation_data_lol.reset_index(inplace=True)
     del adaptation_data_lol['Время']
