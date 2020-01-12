@@ -5,18 +5,14 @@
 
 """
 
-import pandas as pd
-import numpy as np
+
 import sys
 sys.path.append('../')
-from _plotly_future_ import v4_subplots
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from plotly.offline import download_plotlyjs, plot, iplot
-from plotly import tools
-
-from datetime import date
-
+from plotly.offline import plot
+import plotly.figure_factory as ff
+import pandas as pd
 
 def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True):
     """
@@ -157,4 +153,133 @@ def create_report_html(df, all_banches, filename):
 
     fig.layout.hovermode = 'x'
     fig.layout.height = 450 * subplot_amount
+    plot(fig, filename=filename)
+
+
+def create_heat_map_data(df, name):
+    data = go.Heatmap(
+        z=df.values,
+        x=list(df.columns),
+        y=list(df.index), showscale=False, colorscale='RdBu', zmid=0, name=name)
+    return data
+
+
+def plot_corr_heatmap(df, filename_str):
+    corrs = df.corr()
+    figure = ff.create_annotated_heatmap(
+        z=corrs.values,
+        x=list(corrs.columns),
+        y=list(corrs.index),
+        annotation_text=corrs.round(2).values,
+        showscale=True)
+    figure.layout.update(
+        margin=go.layout.Margin(
+            l=400,
+            r=50,
+            b=100,
+            t=250
+        ))
+    plot(figure, filename=filename_str)
+
+
+def plot_scatterplotmatrix(df, file_name):
+    figure = ff.create_scatterplotmatrix(df, diag='histogram')
+    figure.layout.update(width=2000, height=1500)
+    figure.layout.update(font=dict(size=7))
+
+    plot(figure, filename=file_name)
+
+
+def create_esp_traces(UniflocVBA, q_esp_nom_m3day, head_esp_nom_m):
+    h_m = []
+    efficency_perc = []
+    power_wt = []
+    q_m3day = list(range(1, int(q_esp_nom_m3day * 1.8), 10))
+    pump_id = UniflocVBA.calc_ESP_id_by_rate(q_esp_nom_m3day)
+    num_stages = int(head_esp_nom_m / UniflocVBA.calc_ESP_head_m(q_esp_nom_m3day, pump_id=pump_id))
+    for i in q_m3day:
+        h_m.append(UniflocVBA.calc_ESP_head_m(i, num_stages=num_stages, pump_id=pump_id))
+        power_wt.append(UniflocVBA.calc_ESP_power_W(i, num_stages=num_stages, pump_id=pump_id) / 1000)
+        efficency_perc.append(UniflocVBA.calc_ESP_eff_fr(i, num_stages=num_stages, pump_id=pump_id) * 100)
+    esp_curve = pd.DataFrame({'Напор, м/100': h_m, 'Мощность, кВт': power_wt, 'КПД, %.': efficency_perc})
+    esp_curve.index = q_m3day
+
+    esp_curve.head()
+
+    head_trace = create_plotly_trace(q_m3day, h_m, 'Напор, м')
+    power_trace = create_plotly_trace(q_m3day, power_wt, 'Мощность, кВт')
+    efficiency_trace = create_plotly_trace(q_m3day, efficency_perc, 'КПД, %.')
+    close_f = UniflocVBA.book.macro('close_book_by_macro')
+    close_f()
+    return {'head_trace': head_trace, 'power_trace':power_trace, 'efficiency_trace': efficiency_trace}
+
+
+def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, filename):
+    nedeed_param_list = ['Q ж, м3/сут (Модель) (ADAPT)',
+                         'ГФ (Модель) (ADAPT)',
+                         'Обв, % (Модель) (ADAPT)',
+                         'К. калибровки по напору - множитель (Модель) (ADAPT)',
+                         'К. калибровки по мощности - множитель (Модель) (ADAPT)',
+                         'F тока, ГЦ (Модель) (ADAPT)',
+                         'Мощность, передаваемая СУ (Модель) (ADAPT)',
+                         'КПД ЭЦН, д.ед. (Модель) (ADAPT)',
+                         'Перепад давления в ЭЦН, атм (Модель) (ADAPT)',
+                         'P буф., атм (Модель) (ADAPT)',
+                         'Рлин ТМ (Ш) (ADAPT)',
+                         'Давление на приеме насоса (пласт. жидкость) (СУ) (ADAPT)'
+                         ]
+    all_data_corr = overall_data[nedeed_param_list]
+    all_data_corr = all_data_corr.corr()
+    data = go.Heatmap(
+        z=all_data_corr.values,
+        x=list(all_data_corr.columns),
+        y=list(all_data_corr.index), showscale=False, colorscale='RdBu', zmid=0)
+    q_wc_gor = overall_data_dimensionless[
+        ['Q ж, м3/сут (Модель) (ADAPT)', 'ГФ (Модель) (ADAPT)', 'Обв, % (Модель) (ADAPT)']]
+    q_wc_gor_trace = create_traces_list_for_all_columms(q_wc_gor)
+    calibrs = overall_data_dimensionless[['К. калибровки по напору - множитель (Модель) (ADAPT)',
+                                          'К. калибровки по мощности - множитель (Модель) (ADAPT)']]
+    calibrs_trace = create_traces_list_for_all_columms(calibrs)
+    loss = overall_data_dimensionless[['P буф., атм (Модель) (ADAPT)',
+                                       'Рлин ТМ (Ш) (ADAPT)',
+                                       'Мощность, передаваемая СУ (Модель) (ADAPT)']]
+    loss_trace = create_traces_list_for_all_columms(loss)
+    fig = make_subplots(
+        rows=7, cols=1,
+        specs=[[{"type": "scattergl"}], [{"type": "scattergl"}],
+               [{"type": "scattergl"}], [{"type": "heatmap"}],
+               [{"type": "scattergl"}], [{"type": "scattergl"}],
+               [{"type": "scattergl"}]]
+    )
+    fig.add_trace(q_wc_gor_trace[0],
+                  row=1, col=1)
+    fig.add_trace(q_wc_gor_trace[1],
+                  row=1, col=1)
+    fig.add_trace(q_wc_gor_trace[2],
+                  row=1, col=1)
+
+    fig.add_trace(calibrs_trace[0],
+                  row=2, col=1)
+    fig.add_trace(calibrs_trace[1],
+                  row=2, col=1)
+
+    fig.add_trace(loss_trace[0],
+                  row=3, col=1)
+    fig.add_trace(loss_trace[1],
+                  row=3, col=1)
+    fig.add_trace(loss_trace[2],
+                  row=3, col=1)
+
+    fig.add_trace(esp_traces['head_trace'],
+                  row=4, col=1)
+    fig.add_trace(esp_traces['power_trace'],
+                  row=5, col=1)
+
+    fig.add_trace(esp_traces['efficiency_trace'],
+                  row=6, col=1)
+
+    fig.add_trace(data,
+                  row=7, col=1)
+
+    fig.update_layout(height=7 * 500, showlegend=True)
     plot(fig, filename=filename)
