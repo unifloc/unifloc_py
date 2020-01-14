@@ -30,7 +30,7 @@ def run_calculation(thread_option_list):
         with Pool(amount_of_threads) as p:
             p.map(proc.calc,
                   thread_option_list)
-
+            p.close()
 
 auto_open_html = False
 tr_name = "Техрежим, , февраль 2019.xls"
@@ -38,7 +38,7 @@ amount_of_threads = 12
 well_names = ['1354', '1479', '1509', '1540', '1567', '1602', '1628',
               '202', '252', '326', '353', '507', '540', '569', '570', '601',
               '627', '658', '689', '693']
-well_names = ['1354']#, '1479']
+#well_names = ['1354']#, '1479']
 
 
 def massive_adaptation(well_name):
@@ -65,7 +65,7 @@ def massive_adaptation(well_name):
     end_time = time.time()
     log += 'Время завершения расчета: ' + str(datetime.datetime.today()) + '\n'
     log += 'Затрачено времени всего, часов' + '  ' + str((end_time - start_time)/3600) + '\n'
-    text_file = open('log_massive_adaptation.txt', "w")
+    text_file = open('log_massive_adaptation.txt', "a")
     text_file.write(log)
     text_file.close()
 
@@ -93,7 +93,7 @@ def massive_restore_by_calibr(well_name):
     end_time = time.time()
     log += 'Время завершения расчета: ' + str(datetime.datetime.today()) + '\n'
     log += 'Затрачено времени всего, часов' + '  ' + str((end_time - start_time)/3600) + '\n'
-    text_file = open('log_massive_restore_by_calibr.txt', "w")
+    text_file = open('log_massive_restore_by_calibr.txt', "a")
     text_file.write(log)
     text_file.close()
 
@@ -340,5 +340,9 @@ def general_runner(func, well_names):
 
 #cs_data_init_edit, chess_data_init_edit, generate_adaptation_input, massive_adaptation,
 # load_adaptation_data_and_generate_restore_data, massive_restore_by_calibr, final_step
-general_runner(final_step, well_names)
 
+#general_runner(generate_adaptation_input, well_names)
+#general_runner(massive_adaptation, well_names)
+#general_runner(load_adaptation_data_and_generate_restore_data, well_names)
+#general_runner(massive_restore_by_calibr, well_names)
+general_runner(final_step, well_names)
