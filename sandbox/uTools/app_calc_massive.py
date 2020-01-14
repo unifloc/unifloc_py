@@ -38,7 +38,7 @@ amount_of_threads = 12
 well_names = ['1354', '1479', '1509', '1540', '1567', '1602', '1628',
               '202', '252', '326', '353', '507', '540', '569', '570', '601',
               '627', '658', '689', '693']
-#well_names = ['1354']#, '1479']
+well_names = ['1354']#, '1479']
 
 
 def massive_adaptation(well_name):
@@ -344,5 +344,6 @@ def general_runner(func, well_names):
 #general_runner(generate_adaptation_input, well_names)
 #general_runner(massive_adaptation, well_names)
 #general_runner(load_adaptation_data_and_generate_restore_data, well_names)
-#general_runner(massive_restore_by_calibr, well_names)
-general_runner(final_step, well_names)
+general_runner(massive_restore_by_calibr, well_names)
+#general_runner(final_step, well_names)
+
