@@ -1,9 +1,11 @@
 import pandas as pd
-#from sandbox.uTools.preproc_p import preproc_tool
+# from sandbox.uTools.preproc_p import preproc_tool
 import sys
 import os
-sys.path.append('../'*4)
+
+sys.path.append('../' * 4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+
 
 def initial_editing(df, wellname):
     if len(df.columns) == 4:
@@ -11,8 +13,9 @@ def initial_editing(df, wellname):
     df.columns = [0, 1, 2]
     test_str = df[0][0]
     index = test_str.find(wellname)
-    str_to_delete = test_str[:index] + wellname + '. '
-    df[0] = df[0].str.replace(str_to_delete, "")
+    if index != -1:
+        str_to_delete = test_str[:index] + wellname + '. '
+        df[0] = df[0].str.replace(str_to_delete, "")
     df = df.rename(columns={1: 'Время'})
     df.index = pd.to_datetime(df['Время'])
     del df['Время']
@@ -49,7 +52,7 @@ def del_inf_in_columns_name(df, well_name):
     return new_columns
 
 
-def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3h'): #TODO избавиться от путей
+def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle='3h'):  # TODO избавиться от путей
     """
     Загрузка исходных данных со станции управления, преобразования их в шахмоткоподобный вид, при больших затратах памяти
     будет произведен ресемпл
@@ -61,13 +64,23 @@ def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3
     data_file_path = path_to_work_dir + well_name + ".csv"
     try:
         try:
-            well_data = pd.read_csv(data_file_path,sep=';', header=None, skiprows = 1)
+            well_data = pd.read_csv(data_file_path, sep=';', header=None, skiprows=1)
         except:
-            well_data = pd.read_csv(data_file_path,sep='\\t', header=None)
+            well_data = pd.read_csv(data_file_path, sep='\\t', header=None)
             if well_data[0][0] == 'Параметр;Дата;Значение':
                 well_data = pd.read_csv(data_file_path, sep=';', skipfooter=1)
-        well_data = initial_editing(well_data, well_name)
-        well_data = create_edited_df(well_data)
+        if well_data[0][0].split(';')[0] == 'Месторождение':
+            well_data = pd.read_csv(data_file_path, delimiter=';', engine='python')
+            well_data.reset_index(inplace=True)
+            well_data.columns = list(well_data.columns[1::].values) + ['to_del']
+            columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая', 'to_del']
+            for i in columns_to_del:
+                del well_data[i]
+            well_data = initial_editing(well_data, well_name)
+            well_data = create_edited_df(well_data)
+        else:
+            well_data = initial_editing(well_data, well_name)
+            well_data = create_edited_df(well_data)
     except:
         data_file_path = path_to_work_dir + well_name + ".csv"
         well_data = pd.read_csv(data_file_path, sep='\\t', skiprows=1, skipfooter=1, index_col='Названия строк')
@@ -75,9 +88,10 @@ def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle = '3
         well_data.index = pd.to_datetime(well_data.index)
         del well_data['Общий итог']
         well_data.columns = del_inf_in_columns_name(well_data, well_name)
-    if well_data.memory_usage().sum()/1024/1024 > 1000:
+    if well_data.memory_usage().sum() / 1024 / 1024 > 1000:
         print('Потребление памяти слишком велико, произведем ресемпл')
-        well_data = well_data = well_data.resample(time_to_resamle).mean() #TODO сначала нужна фильтрация, затем ресемпл
+        well_data = well_data = well_data.resample(
+            time_to_resamle).mean()  # TODO сначала нужна фильтрация, затем ресемпл
     return well_data
 
 
@@ -100,9 +114,10 @@ def load_and_edit_cs_data(cs_data_filename, created_input_data_type=0, time_to_r
     if created_input_data_type == 0:
         edited_data_cs = edited_data_cs.dropna(subset=['Объемный дебит жидкости'])
     edited_data_cs = edited_data_cs.fillna(method='ffill')
-    edited_data_cs['ГФ'] = edited_data_cs['Объемный дебит газа'] / edited_data_cs['Объемный дебит нефти']  #TODO технический долг - когда дебит по нефти равен нулю - inf - ошибка в адаптации или восстановлении калибровок
+    edited_data_cs['ГФ'] = edited_data_cs['Объемный дебит газа'] / edited_data_cs[
+        'Объемный дебит нефти']  # TODO технический долг - когда дебит по нефти равен нулю - inf - ошибка в адаптации или восстановлении калибровок
     # TODO надо избавляться от inf - возможно переключение расчета на газовую скважину, или 0
-    edited_data_cs = edited_data_cs[edited_data_cs['Объемный дебит нефти'] != 0]  #TODO технический долг убрать костыль
+    edited_data_cs = edited_data_cs[edited_data_cs['Объемный дебит нефти'] != 0]  # TODO технический долг убрать костыль
     edited_data_cs = preproc_tool.mark_df_columns(edited_data_cs, 'СУ')
 
     return edited_data_cs
