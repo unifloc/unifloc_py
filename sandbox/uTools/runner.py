@@ -20,6 +20,9 @@ from postproc_p import result_and_metrics as result_and_metrics
 
 import app_calc_massive
 
+
+amount_of_threads = 12
+
 def run_calculation(thread_option_list):
     if __name__ == '__main__':
         with Pool(amount_of_threads) as p:
@@ -27,7 +30,9 @@ def run_calculation(thread_option_list):
                   thread_option_list)
             p.close()
 
-well_names = ['1354']
+well_names = ['1354', '1479', '1509', '1540', '1567', '1602', '1628',
+              '202', '252', '326', '353', '507', '540', '569', '570', '601',
+              '627', '658', '689', '693']
 
 
 import subprocess
