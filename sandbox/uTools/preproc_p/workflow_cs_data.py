@@ -6,6 +6,23 @@ import os
 sys.path.append('../' * 4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
 
+columns_name_grad_dict = {"Активная мощность (ТМ)": "Активная мощность",
+                          "Давление линейное (ТМ)": "Линейное давление",
+                          "Давление на входе ЭЦН (ТМ)": "Давление на приеме насоса (пласт. жидкость)",
+                          "Температура двигателя ЭЦН (ТМ)": "Температура на приеме насоса (пласт. жидкость)", #TODO может взять температуру ЭЦН?
+
+                          "Загрузка ПЭД (ТМ)": "Загрузка двигателя",
+                          "Напряжение AB (ТМ)": "Входное напряжение АВ",
+                          "Ток фазы A (ТМ)": "Ток фазы А",
+                          "Частота вращения (ТМ)": "Выходная частота ПЧ",
+
+                          "Коэффициент мощности (ТМ)": "Коэффициент мощности",
+
+                          "Дебит жидкости (ТМ)": "Объемный дебит жидкости",
+                          "Дебит газа (ТМ)": "Объемный дебит газа",
+                          "Обводненность (ТМ)": "Процент обводненности",
+                          "Дебит нефти (ТМ)": "Объемный дебит нефти"}
+
 
 def initial_editing(df, wellname):
     if len(df.columns) == 4:
@@ -78,6 +95,7 @@ def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle='3h'
                 del well_data[i]
             well_data = initial_editing(well_data, well_name)
             well_data = create_edited_df(well_data)
+            well_data = preproc_tool.rename_columns_by_dict(well_data, columns_name_grad_dict)
         else:
             well_data = initial_editing(well_data, well_name)
             well_data = create_edited_df(well_data)

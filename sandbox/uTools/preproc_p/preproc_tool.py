@@ -2,6 +2,19 @@ import os
 import pandas as pd
 
 
+def rename_columns_by_dict(df, dict):
+    """
+    Специальное изменение названий столбцов по словарю
+    :param df:
+    :param dict:
+    :return:
+    """
+    for i in df.columns:
+        if i in dict.keys():
+            df = df.rename(columns={i: dict[i]})
+    return df
+
+
 def mark_df_columns(df, mark):
     """
     Пометка названий столбцов DataFrame c помошью (this_mark)
