@@ -56,6 +56,17 @@ class Tr_data:
         self.motor_name_str = None
         self.power_motor_nom_kwt = None
 
+
+        self.gamma_oil = None
+        self.gamma_gas = None
+        self.gamma_wat = None
+        self.rsb_m3m3 = None
+        self.tres_c = None
+        self.pb_atm = None
+        self.bob_m3m3 = None
+        self.muob_cp = None
+        self.rp_m3m3 = None
+
     def fill_by_true_tr(self, row):
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
         self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
@@ -127,3 +138,24 @@ def read_tr_and_get_data(tr_file_full_path, well_name,
         this_well_row = pump_base[(pump_base['№ скважины'] == well_name) & (pump_base['Месторождение'] == field)]
         tr_data.fill_by_pump_base(this_well_row)
     return tr_data
+
+
+def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str,  tr_data: Tr_data):
+    pvt_file = pd.read_excel(pvt_file_full_path)
+    try:
+        this_well_row = pvt_file[pvt_file['пласт/скважина'] == well_name]
+        if this_well_row.shape[0] == 0:
+            this_well_row = pvt_file[pvt_file['пласт/скважина'] == 'м']
+    except:
+        this_well_row = pvt_file[pvt_file['пласт/скважина'] == 'м']
+    tr_data.gamma_oil = to_float(this_well_row['gamma_oil'].values[0])
+    tr_data.gamma_gas = to_float(this_well_row['gamma_gas'].values[0])
+    tr_data.gamma_wat = to_float(this_well_row['gamma_wat'].values[0])
+    tr_data.rsb_m3m3 = to_float(this_well_row['rsb_m3m3'].values[0])
+    tr_data.tres_c = to_float(this_well_row['tres_c'].values[0])
+    tr_data.pb_atm = to_float(this_well_row['pb_atm'].values[0])
+    tr_data.bob_m3m3 = to_float(this_well_row['bob_m3m3'].values[0])
+    tr_data.muob_cp = to_float(this_well_row['muob_cp'].values[0])
+    tr_data.rp_m3m3 = to_float(this_well_row['rp_m3m3'].values[0])
+    return tr_data
+

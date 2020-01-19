@@ -48,8 +48,9 @@ def calc(options=well_calculation.Calc_options()):
 
     app_path = os.getcwd().replace(r'proc_p', '')
     tr_file_full_path = app_path + '\\data\\tr\\' + options.tr_name
+    pvt_file_full_path = app_path + '\\data\\tr\\' + options.pvt_name
     tr_data = workflow_tr_data.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
-
+    tr_data = workflow_tr_data.read_pvt_file_and_fill_tr_data(pvt_file_full_path, options.well_name, tr_data)
     input_data_filename_str, dir_to_save_calculated_data = \
         proc_tool.create_directories(opt.vfm_calc_option, app_path, opt.well_name, options, opt.dir_name_with_input_data, time_mark)
 
@@ -114,13 +115,13 @@ def calc(options=well_calculation.Calc_options()):
             return result_for_folve
 
         if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
-            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], method='SLSQP',
-                              bounds=[[0.35, 3.5], [0.35, 3.5]])
+            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], method='SLSQP', tol= 1e-04,
+                              bounds=[[1.25, 1.85], [0.8, 1.5]], options={'maxiter': 50, 'ftol': 1e-04})
         else:
             if restore_q_liq_only == True:
-                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20, this_state.qliq_max_m3day * 1.2]])  #TODO разобраться с левой границей
+                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[50, 70]], options={'maxiter': 50, 'ftol': 1e-04})  #TODO разобраться с левой границей
             else:
-                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
+                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]], options={'maxiter': 50, 'ftol': 1e-04})
         print(result)
         true_result = this_state.result # сохранение результатов расчета оптимизированной модели
         return true_result
@@ -190,7 +191,7 @@ def run_calculation(thread_option_list):
                   thread_option_list)
 
 
-def create_thread_list(well_name, dir_name_with_input_data, tr_name,
+def create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
                        amount_of_threads):
     thread_list = []
     if 'restore' in dir_name_with_input_data:
@@ -206,7 +207,8 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
                                    dir_name_with_input_data=dir_name_with_input_data, tr_name=tr_name,
                                    addin_name=addin_name,
                                    number_of_thread=number_of_thread, amount_of_threads=amount_of_threads,
-                                   vfm_calc_option=vfm_calc_option, restore_q_liq_only=restore_q_liq_only)
+                                   vfm_calc_option=vfm_calc_option, restore_q_liq_only=restore_q_liq_only,
+                                                    pvt_name=pvt_name)
         thread_list.append(this_thread)
     return thread_list
 
@@ -215,10 +217,11 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name,
 tr_name = "Техрежим, , февраль 2019.xls"
 well_name = '1628'
 dir_name_with_input_data = 'restore_input_'
+pvt_name = 'pvt.xlsx'
 
 amount_of_threads = 12
 
-thread_option_list = create_thread_list(well_name, dir_name_with_input_data, tr_name,
+thread_option_list = create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
                        amount_of_threads)
 
 start_time = time.time()

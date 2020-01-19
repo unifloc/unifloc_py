@@ -18,7 +18,8 @@ class Calc_options():
                  restore_q_liq_only=True,  # менять тут для адаптации/восстановления
                  amount_iters_before_restart=100,
                  sleep_time_sec=25,
-                 hydr_part_weight_in_error_coeff=0.5):  #TODO добавлять насосы в UniflocVBA
+                 hydr_part_weight_in_error_coeff=0.5,
+                 pvt_name='pvt.xlsx'):  #TODO добавлять насосы в UniflocVBA
         """
         класс для сбора всех настроек, необходимых для расчета
         :param well_name: имя скважины
@@ -51,6 +52,7 @@ class Calc_options():
         self.amount_iters_before_restart = amount_iters_before_restart
         self.sleep_time_sec = sleep_time_sec
         self.hydr_part_weight_in_error_coeff = hydr_part_weight_in_error_coeff
+        self.pvt_name = pvt_name
 
 
 def straight_calc(UniflocVBA, this_state):
