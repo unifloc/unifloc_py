@@ -77,7 +77,9 @@ def restore_calibr_via_ridge(adaptation_all_data_lol, calibr_data, use_80_20 = F
                                           ]
                                          ]
     # уберем пропуски в существенных данных
+    first_amount_of_rows = adaptation_data_lol.shape[0]
     adaptation_data_lol = adaptation_data_lol.dropna()
+    print(f"Удалено строк {first_amount_of_rows - adaptation_data_lol.shape[0]}")
     # и обновляем индексы
     adaptation_data_lol.reset_index(inplace=True)
     del adaptation_data_lol['Время']

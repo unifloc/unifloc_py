@@ -7,26 +7,30 @@ def extract_power_from_motor_name(name_str):
     :param name_str: строка из техрежима, например 'ПЭД-100-117"
     :return: мощность двигателя, кВт (100 для данного ПЭД)
     """
-    name_str = name_str.upper()
-    name_str = name_str.replace('9.8.4ЭДБТ ', '')
-    name_str = name_str.replace(' ', '')
-    name_str = name_str.replace('ПЭДНС', '')
-    name_str = name_str.replace('9ЭДБТК', '')
-    name_str = name_str.replace('ПЭДC', '')
-    name_str = name_str.replace('ПЭДН', '')
-    name_str = name_str.replace('9.8.4ЭДБТ', '')
-    name_str = name_str.replace('ПВЭДН', '')
-    name_str = name_str.replace('9ЭДБСТ', '')
-    name_str = name_str.replace('9ЭДБТ', '')
-    name_str = name_str.replace('ЭДБТ', '')
-    name_str = name_str.replace('ПЭД', '')
-    if name_str[0] == '-':
-        name_str = name_str[1:]
-    if name_str[3] == '-':
-        name_str = name_str[0:3]
-    elif name_str[2] == '-':
-        name_str = name_str[0:2]
-    return float(name_str)
+    try:
+        name_str = name_str.upper()
+        name_str = name_str.replace('9.8.4ЭДБТ ', '')
+        name_str = name_str.replace(' ', '')
+        name_str = name_str.replace('ПЭДНС', '')
+        name_str = name_str.replace('9ЭДБТК', '')
+        name_str = name_str.replace('ПЭДC', '')
+        name_str = name_str.replace('ПЭДН', '')
+        name_str = name_str.replace('9.8.4ЭДБТ', '')
+        name_str = name_str.replace('ПВЭДН', '')
+        name_str = name_str.replace('9.11ВЭДБ', '')
+        name_str = name_str.replace('9ЭДБСТ', '')
+        name_str = name_str.replace('9ЭДБТ', '')
+        name_str = name_str.replace('ЭДБТ', '')
+        name_str = name_str.replace('ПЭД', '')
+        if name_str[0] == '-':
+            name_str = name_str[1:]
+        if name_str[3] == '-':
+            name_str = name_str[0:3]
+        elif name_str[2] == '-':
+            name_str = name_str[0:2]
+        return float(name_str)
+    except:
+        float(100)
 
 
 def to_float(string):
@@ -56,7 +60,6 @@ class Tr_data:
         self.motor_name_str = None
         self.power_motor_nom_kwt = None
 
-
         self.gamma_oil = None
         self.gamma_gas = None
         self.gamma_wat = None
@@ -71,11 +74,11 @@ class Tr_data:
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
         self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
         self.esp_nom_rate_m3day = \
-        row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
+            row[('Номинальная\nпроизводительность', 'Unnamed: 16_level_1', 'Unnamed: 16_level_2', 'м3/сут')].values[0]
         self.esp_nom_head_m = row[('Номинальный напор', 'Unnamed: 17_level_1', 'Unnamed: 17_level_2', 'м')].values[0]
         self.h_pump_m = row[('Н сп', 'Unnamed: 20_level_1', 'Unnamed: 20_level_2', 'м')].values[0]
         self.esp_name_str = \
-        row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
+            row[('Тип насоса', 'Unnamed: 15_level_1', 'Unnamed: 15_level_2', 'Unnamed: 15_level_3')].values[0]
         self.udl_m = row[('Удл (Нсп)', 'Unnamed: 161_level_1', 'Unnamed: 161_level_2', 'м')].values[0]
         self.i_motor_nom_a = row[('ПЭД', 'Unnamed: 131_level_1', 'I ном', 'А')].values[0]
         self.motor_name_str = row[('ПЭД', 'Unnamed: 128_level_1', 'Марка', 'Unnamed: 128_level_3')].values[0]
@@ -108,9 +111,10 @@ class Tr_data:
         self.motor_name_str = this_well_row['Длина'].values[0]
         self.power_motor_nom_kwt = extract_power_from_motor_name(self.motor_name_str)
 
+
 def read_tr_and_get_data(tr_file_full_path, well_name,
                          pump_base_path='БОМД. Оборудование актуальных паспортов_Филиал Муравленковскнефть ОАО Газпромнефть-ННГ_30.12.2019.xlsx',
-                         field='Вынгаяхинское'):
+                         field='Восточно-Пякутинское'):
     """
     Чтение техрежима и извлечение данных по скважине
     :param tr_file_full_path: абсолютный путь техрежиму
@@ -140,7 +144,7 @@ def read_tr_and_get_data(tr_file_full_path, well_name,
     return tr_data
 
 
-def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str,  tr_data: Tr_data):
+def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str, tr_data: Tr_data):
     pvt_file = pd.read_excel(pvt_file_full_path)
     try:
         this_well_row = pvt_file[pvt_file['пласт/скважина'] == well_name]
@@ -158,4 +162,3 @@ def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str,  tr_
     tr_data.muob_cp = to_float(this_well_row['muob_cp'].values[0])
     tr_data.rp_m3m3 = to_float(this_well_row['rp_m3m3'].values[0])
     return tr_data
-

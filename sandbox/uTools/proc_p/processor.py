@@ -116,10 +116,10 @@ def calc(options=well_calculation.Calc_options()):
 
         if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], method='SLSQP', tol= 1e-04,
-                              bounds=[[1.25, 1.85], [0.8, 1.5]], options={'maxiter': 50, 'ftol': 1e-04})
+                              bounds=[[0.01, 0.2], [0.1, 2]], options={'maxiter': 50, 'ftol': 1e-04})
         else:
             if restore_q_liq_only == True:
-                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[50, 70]], options={'maxiter': 50, 'ftol': 1e-04})  #TODO разобраться с левой границей
+                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20,  this_state.qliq_max_m3day * 1.2]], options={'maxiter': 50, 'ftol': 1e-04})  #TODO разобраться с левой границей
             else:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]], options={'maxiter': 50, 'ftol': 1e-04})
         print(result)
@@ -213,13 +213,15 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
     return thread_list
 
 
-
+november_work = True
 tr_name = "Техрежим, , февраль 2019.xls"
-well_name = '1628'
+if november_work:
+    tr_name = "ТР Восточно-Пякутинское Январь 2020.csv"
+well_name = '6012'
 dir_name_with_input_data = 'restore_input_'
 pvt_name = 'pvt.xlsx'
 
-amount_of_threads = 12
+amount_of_threads = 1
 
 thread_option_list = create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
                        amount_of_threads)
