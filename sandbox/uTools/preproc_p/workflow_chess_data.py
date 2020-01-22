@@ -12,7 +12,8 @@ def get_dt_str_from_rus_date(rus_date: str) -> str:
     :return: string like '28/2/2019'
     """
     tokens = rus_date.split(' ')
-    month_dict = dict(авг=8, сен=9, окт=10, ноя=11, дек=12, янв=1, фев=2)
+    month_dict = dict(авг=8, сен=9, окт=10, ноя=11, дек=12, янв=1, фев=2, март=3, апр=4, май=5,
+                      июнь=6, июль=7)
     out = f'{tokens[0]}/{month_dict[tokens[1]]}/{tokens[2]}'
     return out
 
