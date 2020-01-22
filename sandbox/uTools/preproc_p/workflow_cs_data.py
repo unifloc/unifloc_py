@@ -139,3 +139,123 @@ def load_and_edit_cs_data(cs_data_filename, created_input_data_type=0, time_to_r
     edited_data_cs = preproc_tool.mark_df_columns(edited_data_cs, 'СУ')
 
     return edited_data_cs
+
+
+columns_name_to_rename = {"Активная мощность": ["Активная мощность (ТМ)", 'Pa,кВт', 'акт.P,кВт', 'Pакт(кВт)'],
+                          "Полная мощность": ["Pполн,кВт", 'P, кВА', 'Pполн(кВA)'],
+                          "Линейное давление": ["Давление линейное (ТМ)"],
+
+                          "Давление на приеме насоса (пласт. жидкость)": ["Давление на входе ЭЦН (ТМ)",
+                                                                          'P на приеме,ат',
+                                                                          'P, ат.', 'P,atm', 'Pвх(МПа)'],
+                          "Температура на приеме насоса (пласт. жидкость)": ["Температура двигателя ЭЦН (ТМ)",
+                                                                             "Тжид,Гр",
+                                                                             'Tжид, °C', 'Твх(°С)'],
+
+                          'Температура обмоток двигателя': ["Температура двигателя ЭЦН (ТМ)", "ТПЭД,Гр", 'Tдвиг, °C',
+                                                            'Тобм(°С)'],
+
+                          "Загрузка двигателя": ["Загрузка ПЭД (ТМ)", "Загр,%", 'Загр., %', 'Загр., %', 'Загрузка,%',
+                                                 'Загр(%)'],
+                          "Входное напряжение АВ": ["Напряжение AB (ТМ)", "UAB,В", 'Uвх.AB,В', 'Uab,В', 'UвхAB(B)'],
+                          "Ток фазы А": ["Ток фазы A (ТМ)", "Ia,А", 'Ia, A', 'Iа(A)'],
+                          "Выходная частота ПЧ": ["Частота вращения (ТМ)", "F,Гц", 'F, Гц', 'F(Гц)',
+                                                  'Коэффициент мощности'],
+
+                          "Коэффициент мощности": ["Коэффициент мощности (ТМ)", "Cos", 'cos', 'Коэффициент мощности'],
+
+                          "Объемный дебит жидкости": ["Дебит жидкости (ТМ)"],
+                          "Объемный дебит газа": ["Дебит газа (ТМ)"],
+                          "Процент обводненности": ["Обводненность (ТМ)"],
+                          "Объемный дебит нефти": ["Дебит нефти (ТМ)"]}
+
+essential_parameters = ["Активная мощность", "Давление на приеме насоса (пласт. жидкость)",
+                        "Температура на приеме насоса (пласт. жидкость)", 'Температура обмоток двигателя',
+                        "Входное напряжение АВ", "Ток фазы А", "Выходная частота ПЧ", "Коэффициент мощности"]  # ,
+
+
+# "Объемный дебит жидкости", "Объемный дебит газа", "Процент обводненности", "Объемный дебит нефти"]
+
+
+def rename_columns_by_dict(df, columns_name_dict):
+    """
+    Специальное изменение названий столбцов по словарю
+    :param df:
+    :param dict:
+    :return:
+    """
+
+    for i in df.columns:
+        for items in columns_name_dict.items():
+            if i in items[1]:
+                df = df.rename(columns={i: items[0]})
+    return df
+
+
+def drop_string_columns(df):
+    columns_list = df.columns
+    for i in columns_list:
+        if type(df[i][0]) == str:
+            df = df.drop(columns=i)
+    return df
+
+
+def replace_string_by_nan(value):
+    try:
+        float_value = float(value)
+        return float_value
+    except:
+        return None
+
+
+def delete_string_axis(df: pd.DataFrame, column_name):
+    df[column_name] = df[column_name].apply(replace_string_by_nan)
+    df = df.dropna(subset=[column_name])
+    return df
+
+
+def clear_df_from_string(df: pd.DataFrame, columns_name=["Активная мощность", "Полная мощность", "Загрузка двигателя"]):
+    delete_all = False
+    for i in columns_name:
+        if i in df.columns and not delete_all:
+            df = delete_string_axis(df, i)
+            delete_all = True
+    return df
+
+
+def read_control_station_data(filename):
+    print(f"Чтение файла{filename}")
+    flash_data = pd.read_excel(filename, header=None)
+    if flash_data[0][0] == 'Основная страница':
+        print('Тип данных: Зеленый Борец')
+        loaded_file = pd.read_excel(filename, skiprows=4, index_col='Дата/Время', parse_dates=True)
+        loaded_file = loaded_file.replace(to_replace='###', value=None)
+        loaded_file = loaded_file[loaded_file['   Состояние   '] == 'Работа']
+
+    elif flash_data[0][0] == 'Дата, Время':
+        print('Тип данных: Почти нормальный тип')
+        loaded_file = pd.read_excel(filename, index_col='Дата, Время', parse_dates=True)
+        loaded_file = loaded_file.replace(to_replace='-----', value=None)
+        loaded_file = loaded_file.dropna(subset=['P, кВА'])
+
+    elif flash_data[0][2] == 'Nп/п':
+        print('Тип данных: Борец энергетика')
+        loaded_file = pd.read_excel(filename, skiprows=2, index_col='Дата        Время', parse_dates=True)
+
+    elif flash_data[1][1] == 'Информация:':
+        print('Тип данных: Зеленый Борец с несколькими листами')
+        loaded_file = pd.read_excel(filename, sheet_name='Журнал', skiprows=4, index_col='Дата/Время', parse_dates=True)
+        loaded_file = loaded_file.replace(to_replace='###', value=None)
+        loaded_file[(loaded_file['   Состояние   '] == 'ПИД реж.') | (loaded_file['   Состояние   '] == 'работа')]
+    elif flash_data[0][0] == 'ID':
+        print('Тип данных: почти нормальный с большой точностью')
+        loaded_file = pd.read_excel(filename, index_col='Дата время', parse_dates=True)
+        loaded_file = loaded_file.dropna(subset=['№Скв'])
+    else:
+        print('Тип данных: тип не распознан')
+
+    loaded_file = rename_columns_by_dict(loaded_file, columns_name_to_rename)
+    loaded_file = drop_string_columns(loaded_file)
+    loaded_file = clear_df_from_string(loaded_file)
+    loaded_file.index.name = 'Время'
+    return loaded_file

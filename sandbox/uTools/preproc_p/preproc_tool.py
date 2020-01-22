@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+from pathlib import Path
 
 def rename_columns_by_dict(df, dict):
     """
@@ -132,3 +133,11 @@ def check_input_data(df):
     df = filtr_data_by_min_value(df, 'Давление на приеме насоса (пласт. жидкость) (СУ)', 1)
     df = filtr_data_by_drop_nan(df, 'Рбуф (Ш)')
     return df
+
+
+def find_full_path_by_pattern(initial_dir, pattern):
+    full_path_list = []
+    for filename in Path(initial_dir).rglob(pattern):
+        full_path_list.append(str(filename))
+        print(filename)
+    return full_path_list
