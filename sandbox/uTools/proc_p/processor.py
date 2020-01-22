@@ -47,14 +47,14 @@ def calc(options=well_calculation.Calc_options()):
     UniflocVBA = python_api.API(current_path + options.addin_name)
 
     app_path = os.getcwd().replace(r'proc_p', '')
-    tr_file_full_path = app_path + '\\data\\tr\\' + options.tr_name
-    pvt_file_full_path = app_path + '\\data\\tr\\' + options.pvt_name
-    tr_data = workflow_tr_data.read_tr_and_get_data(tr_file_full_path, options.well_name)  # прочитаем техрежим и извлечем данным
-    tr_data = workflow_tr_data.read_pvt_file_and_fill_tr_data(pvt_file_full_path, options.well_name, tr_data)
+    static_data = workflow_tr_data.Static_data()
+    static_data_df = pd.read_excel(opt.static_data_full_path)
+    static_data = workflow_tr_data.fill_static_data_structure_by_df(static_data, static_data_df, opt.well_name + " (ready)")
+
     input_data_filename_str, dir_to_save_calculated_data = \
         proc_tool.create_directories(opt.vfm_calc_option, app_path, opt.well_name, options, opt.dir_name_with_input_data, time_mark)
 
-    def mass_calculation(this_state, debug_print = False, restore_flow=False, restore_q_liq_only = True):
+    def mass_calculation(this_state: workflow_input_data.all_ESP_data, debug_print = False, restore_flow=False, restore_q_liq_only = True):
         """
         Функция для массового расчета - модель скважины UniflocVBA + оптимизатор scipy
         :param this_state: структура со всеми необходимыми данными модели
@@ -116,7 +116,9 @@ def calc(options=well_calculation.Calc_options()):
 
         if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], method='SLSQP', tol= 1e-04,
-                              bounds=[[0.01, 0.2], [0.1, 2]], options={'maxiter': 50, 'ftol': 1e-04})
+                              bounds=[[this_state.c_calibr_head_d_min_limit, this_state.c_calibr_head_d_max_limit],
+                                      [this_state.c_calibr_power_d_min_limit, this_state.c_calibr_power_d_max_limit]],
+                              options={'maxiter': 50, 'ftol': 1e-04})
         else:
             if restore_q_liq_only == True:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20,  this_state.qliq_max_m3day * 1.2]], options={'maxiter': 50, 'ftol': 1e-04})  #TODO разобраться с левой границей
@@ -140,8 +142,7 @@ def calc(options=well_calculation.Calc_options()):
         result_dataframe = {'d': [2]}
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
-
-        this_state = workflow_input_data.all_ESP_data(UniflocVBA, tr_data)
+        this_state = workflow_input_data.all_ESP_data(UniflocVBA, static_data)
         this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
         this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
         #this_state.p_buf_data_max_atm = prepared_data['Рлин ТМ (Ш)'].max()  # костыль
@@ -191,7 +192,7 @@ def run_calculation(thread_option_list):
                   thread_option_list)
 
 
-def create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
+def create_thread_list(well_name, dir_name_with_input_data,static_data_full_path,
                        amount_of_threads):
     thread_list = []
     if 'restore' in dir_name_with_input_data:
@@ -204,26 +205,23 @@ def create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
         shutil.copyfile(current_path + 'UniflocVBA_7.xlam',
                         current_path + addin_name)
         this_thread = well_calculation.Calc_options(well_name=well_name,
-                                   dir_name_with_input_data=dir_name_with_input_data, tr_name=tr_name,
+                                   dir_name_with_input_data=dir_name_with_input_data,
                                    addin_name=addin_name,
                                    number_of_thread=number_of_thread, amount_of_threads=amount_of_threads,
                                    vfm_calc_option=vfm_calc_option, restore_q_liq_only=restore_q_liq_only,
-                                                    pvt_name=pvt_name)
+                                                    static_data_full_path=static_data_full_path)
         thread_list.append(this_thread)
     return thread_list
 
 
-november_work = True
-tr_name = "Техрежим, , февраль 2019.xls"
-if november_work:
-    tr_name = "ТР Восточно-Пякутинское Январь 2020.csv"
+static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
+
 well_name = '6012'
 dir_name_with_input_data = 'restore_input_'
-pvt_name = 'pvt.xlsx'
 
 amount_of_threads = 1
 
-thread_option_list = create_thread_list(well_name, dir_name_with_input_data, tr_name, pvt_name,
+thread_option_list = create_thread_list(well_name, dir_name_with_input_data, static_data_full_path,
                        amount_of_threads)
 
 start_time = time.time()

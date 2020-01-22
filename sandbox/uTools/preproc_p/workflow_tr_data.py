@@ -10,6 +10,7 @@ def extract_power_from_motor_name(name_str):
     try:
         name_str = name_str.upper()
         name_str = name_str.replace('9.8.4ЭДБТ ', '')
+        name_str = name_str.replace('9.1ВЭДБТ', '')
         name_str = name_str.replace(' ', '')
         name_str = name_str.replace('ПЭДНС', '')
         name_str = name_str.replace('9ЭДБТК', '')
@@ -21,6 +22,7 @@ def extract_power_from_motor_name(name_str):
         name_str = name_str.replace('9ЭДБСТ', '')
         name_str = name_str.replace('9ЭДБТ', '')
         name_str = name_str.replace('ЭДБТ', '')
+        name_str = name_str.replace('9.1ВЭДБТ', '')
         name_str = name_str.replace('ПЭД', '')
         if name_str[0] == '-':
             name_str = name_str[1:]
@@ -43,7 +45,7 @@ def to_float(string):
     return this_float
 
 
-class Tr_data:
+class Static_data:
     def __init__(self):
         """
         Класс-структура для хранения данных о скважине из техрежима
@@ -69,6 +71,15 @@ class Tr_data:
         self.bob_m3m3 = None
         self.muob_cp = None
         self.rp_m3m3 = None
+
+        self.qliq_m3day_initial_guess = None
+        self.c_calibr_head_d_initial_guess = None
+        self.c_calibr_power_d_initial_guess = None
+
+        self.c_calibr_head_d_max_limit = None
+        self.c_calibr_head_d_min_limit = None
+        self.c_calibr_power_d_max_limit = None
+        self.c_calibr_power_d_min_limit = None
 
     def fill_by_true_tr(self, row):
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
@@ -126,7 +137,7 @@ def read_tr_and_get_data(tr_file_full_path, well_name,
                            header=[0, 1, 2, 3])  # при ошибке файл нужно открыть и сохранить повторно без изменений
         this_well_row = tr[
             tr[('№\nскв', 'Unnamed: 4_level_1', 'Unnamed: 4_level_2', 'Unnamed: 4_level_3')] == well_name]
-        tr_data = Tr_data()
+        tr_data = Static_data()
         tr_data.fill_by_true_tr(this_well_row)
     except:
         tr = pd.read_csv(tr_file_full_path, engine='c', delimiter=';', skiprows=2)
@@ -135,7 +146,7 @@ def read_tr_and_get_data(tr_file_full_path, well_name,
             this_well_row = tr[tr['Скважина'] == well_name + '_1']
         if this_well_row.shape[0] == 2:
             this_well_row = this_well_row[this_well_row.index == this_well_row.index[0]]
-        tr_data = Tr_data()
+        tr_data = Static_data()
         tr_data.fill_by_grad(this_well_row)
 
         pump_base = pd.read_excel(pump_base_path, skiprows=3)
@@ -144,7 +155,7 @@ def read_tr_and_get_data(tr_file_full_path, well_name,
     return tr_data
 
 
-def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str, tr_data: Tr_data):
+def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str, tr_data: Static_data):
     pvt_file = pd.read_excel(pvt_file_full_path)
     try:
         this_well_row = pvt_file[pvt_file['пласт/скважина'] == well_name]
@@ -162,3 +173,43 @@ def read_pvt_file_and_fill_tr_data(pvt_file_full_path: str, well_name: str, tr_d
     tr_data.muob_cp = to_float(this_well_row['muob_cp'].values[0])
     tr_data.rp_m3m3 = to_float(this_well_row['rp_m3m3'].values[0])
     return tr_data
+
+
+def fill_static_data_structure_by_df(static_data: Static_data,
+                                     static_data_df: pd.DataFrame,
+                                     chosen_column_name: str):
+    this_static_data_series = static_data_df.set_index(static_data_df['Параметр'])[chosen_column_name]
+    static_data.d_cas_mm = this_static_data_series.d_cas_mm
+    static_data.d_tube_mm = this_static_data_series.d_tube_mm
+    static_data.udl_m = this_static_data_series.udl_m
+
+    static_data.esp_nom_rate_m3day = this_static_data_series.esp_nom_rate_m3day
+    static_data.esp_nom_head_m = this_static_data_series.esp_nom_head_m
+    static_data.h_pump_m = this_static_data_series.h_pump_m
+    static_data.esp_name_str = this_static_data_series.esp_name_str
+
+    static_data.i_motor_nom_a = this_static_data_series.i_motor_nom_a
+    static_data.motor_name_str = this_static_data_series.motor_name_str
+    static_data.power_motor_nom_kwt = this_static_data_series.power_motor_nom_kwt
+
+    static_data.gamma_oil = this_static_data_series.gamma_oil
+    static_data.gamma_gas = this_static_data_series.gamma_gas
+    static_data.gamma_wat = this_static_data_series.gamma_wat
+    static_data.rsb_m3m3 = this_static_data_series.rsb_m3m3
+    static_data.tres_c = this_static_data_series.tres_c
+    static_data.pb_atm = this_static_data_series.pb_atm
+    static_data.bob_m3m3 = this_static_data_series.bob_m3m3
+    static_data.muob_cp = this_static_data_series.muob_cp
+    static_data.rp_m3m3 = this_static_data_series.rp_m3m3
+
+    static_data.qliq_m3day_initial_guess = this_static_data_series.qliq_m3day_initial_guess
+    static_data.c_calibr_head_d_initial_guess = this_static_data_series.c_calibr_head_d_initial_guess
+    static_data.c_calibr_power_d_initial_guess = this_static_data_series.c_calibr_power_d_initial_guess
+    static_data.c_calibr_head_d_max_limit = this_static_data_series.c_calibr_head_d_max_limit
+    static_data.c_calibr_head_d_min_limit = this_static_data_series.c_calibr_head_d_min_limit
+    static_data.c_calibr_power_d_max_limit = this_static_data_series.c_calibr_power_d_max_limit
+    static_data.c_calibr_power_d_min_limit = this_static_data_series.c_calibr_power_d_min_limit
+
+    return static_data
+
+

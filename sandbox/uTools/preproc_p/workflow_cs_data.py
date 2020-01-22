@@ -130,12 +130,18 @@ def load_and_edit_cs_data(cs_data_filename, created_input_data_type=0, time_to_r
     edited_data_cs['Температура на приеме насоса (пласт. жидкость)'] = \
         edited_data_cs['Температура на приеме насоса (пласт. жидкость)'].fillna(method='ffill')
     if created_input_data_type == 0:
-        edited_data_cs = edited_data_cs.dropna(subset=['Объемный дебит жидкости'])
+        try:
+            edited_data_cs = edited_data_cs.dropna(subset=['Объемный дебит жидкости'])
+            print('Произведена фильтрация по None по Объемному дебиту жидкости')
+        except:pass
     edited_data_cs = edited_data_cs.fillna(method='ffill')
-    edited_data_cs['ГФ'] = edited_data_cs['Объемный дебит газа'] / edited_data_cs[
-        'Объемный дебит нефти']  # TODO технический долг - когда дебит по нефти равен нулю - inf - ошибка в адаптации или восстановлении калибровок
-    # TODO надо избавляться от inf - возможно переключение расчета на газовую скважину, или 0
-    edited_data_cs = edited_data_cs[edited_data_cs['Объемный дебит нефти'] != 0]  # TODO технический долг убрать костыль
+    try:
+        edited_data_cs['ГФ'] = edited_data_cs['Объемный дебит газа'] / edited_data_cs[
+            'Объемный дебит нефти']  # TODO технический долг - когда дебит по нефти равен нулю - inf - ошибка в адаптации или восстановлении калибровок
+        # TODO надо избавляться от inf - возможно переключение расчета на газовую скважину, или 0
+        edited_data_cs = edited_data_cs[edited_data_cs['Объемный дебит нефти'] != 0]  # TODO технический долг убрать костыль
+    except:
+        pass
     edited_data_cs = preproc_tool.mark_df_columns(edited_data_cs, 'СУ')
 
     return edited_data_cs
