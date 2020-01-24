@@ -115,13 +115,13 @@ def calc(options=well_calculation.Calc_options()):
             return result_for_folve
 
         if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
-            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], method='SLSQP', tol= 1e-04,
+            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], method='SLSQP', tol= 1e-07,
                               bounds=[[this_state.c_calibr_head_d_min_limit, this_state.c_calibr_head_d_max_limit],
                                       [this_state.c_calibr_power_d_min_limit, this_state.c_calibr_power_d_max_limit]],
-                              options={'maxiter': 50, 'ftol': 1e-04})
+                              options={'maxiter': 50, 'ftol': 1e-07})
         else:
             if restore_q_liq_only == True:
-                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20,  this_state.qliq_max_m3day * 1.2]], options={'maxiter': 50, 'ftol': 1e-04})  #TODO разобраться с левой границей
+                result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.qliq_m3day], bounds=[[20,  100]], options={'maxiter': 100, 'ftol': 1e-07})  #TODO разобраться с левой границей
             else:
                 result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]], options={'maxiter': 50, 'ftol': 1e-04})
         print(result)

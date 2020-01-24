@@ -234,7 +234,7 @@ def read_control_station_data(filename):
     flash_data = pd.read_excel(filename, header=None)
     if flash_data[0][0] == 'Основная страница':
         print('Тип данных: Зеленый Борец')
-        loaded_file = pd.read_excel(filename, skiprows=4, index_col='Дата/Время', parse_dates=True)
+        loaded_file = pd.read_excel(filename, skiprows=4, index_col='Дата/Время', parse_dates=True, dayfirst=True)
         loaded_file = loaded_file.replace(to_replace='###', value=None)
         loaded_file = loaded_file[loaded_file['   Состояние   '] == 'Работа']
 
