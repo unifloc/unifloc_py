@@ -1,27 +1,11 @@
 import pandas as pd
-# from sandbox.uTools.preproc_p import preproc_tool
 import sys
 import os
 
 sys.path.append('../' * 4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
 
-columns_name_grad_dict = {"Активная мощность (ТМ)": "Активная мощность",
-                          "Давление линейное (ТМ)": "Линейное давление",
-                          "Давление на входе ЭЦН (ТМ)": "Давление на приеме насоса (пласт. жидкость)",
-                          "Температура двигателя ЭЦН (ТМ)": "Температура на приеме насоса (пласт. жидкость)", #TODO может взять температуру ЭЦН?
-
-                          "Загрузка ПЭД (ТМ)": "Загрузка двигателя",
-                          "Напряжение AB (ТМ)": "Входное напряжение АВ",
-                          "Ток фазы A (ТМ)": "Ток фазы А",
-                          "Частота вращения (ТМ)": "Выходная частота ПЧ",
-
-                          "Коэффициент мощности (ТМ)": "Коэффициент мощности",
-
-                          "Дебит жидкости (ТМ)": "Объемный дебит жидкости",
-                          "Дебит газа (ТМ)": "Объемный дебит газа",
-                          "Обводненность (ТМ)": "Процент обводненности",
-                          "Дебит нефти (ТМ)": "Объемный дебит нефти"}
+global_names = preproc_tool.GlobalNames()
 
 
 def initial_editing(df, wellname):
@@ -69,25 +53,23 @@ def del_inf_in_columns_name(df, well_name):
     return new_columns
 
 
-def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle='3h'):  # TODO избавиться от путей
+def read_and_format_good_tm_data(well_name, file_name_full_path, time_to_resamle='3h'):
     """
-    Загрузка исходных данных со станции управления, преобразования их в шахмоткоподобный вид, при больших затратах памяти
-    будет произведен ресемпл
-    :param well_name: номер скважины, str
-    :param path_to_work_dir: путь к рабочей директории
-    :param time_to_resamle: время осреднения - ресемпла - '3h', '1d'
-    :return: DataFrame в шахмоткоподобном виде
+    Загрузка данных в стандартном формате ГРАДА и его вариациях, преобразования его в шахмоткоподобный вид
+    :param well_name: название скважины
+    :param file_name_full_path: полный путь к файлу .csv с данными
+    :param time_to_resamle: время осреднения - ресемпла - '3h', '1d', будет произведено при недостатке памяти
+    :return:  DataFrame в шахмоткоподобном виде
     """
-    data_file_path = path_to_work_dir + well_name + ".csv"
     try:
         try:
-            well_data = pd.read_csv(data_file_path, sep=';', header=None, skiprows=1)
+            well_data = pd.read_csv(file_name_full_path, sep=';', header=None, skiprows=1)
         except:
-            well_data = pd.read_csv(data_file_path, sep='\\t', header=None)
+            well_data = pd.read_csv(file_name_full_path, sep='\\t', header=None)
             if well_data[0][0] == 'Параметр;Дата;Значение':
-                well_data = pd.read_csv(data_file_path, sep=';', skipfooter=1)
+                well_data = pd.read_csv(file_name_full_path, sep=';', skipfooter=1)
         if well_data[0][0].split(';')[0] == 'Месторождение':
-            well_data = pd.read_csv(data_file_path, delimiter=';', engine='python')
+            well_data = pd.read_csv(file_name_full_path, delimiter=';', engine='python')
             well_data.reset_index(inplace=True)
             well_data.columns = list(well_data.columns[1::].values) + ['to_del']
             columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая', 'to_del']
@@ -95,13 +77,11 @@ def read_and_edit_init_cs_data(well_name, path_to_work_dir, time_to_resamle='3h'
                 del well_data[i]
             well_data = initial_editing(well_data, well_name)
             well_data = create_edited_df(well_data)
-            well_data = preproc_tool.rename_columns_by_dict(well_data, columns_name_grad_dict)
         else:
             well_data = initial_editing(well_data, well_name)
             well_data = create_edited_df(well_data)
     except:
-        data_file_path = path_to_work_dir + well_name + ".csv"
-        well_data = pd.read_csv(data_file_path, sep='\\t', skiprows=1, skipfooter=1, index_col='Названия строк')
+        well_data = pd.read_csv(file_name_full_path, sep='\\t', skiprows=1, skipfooter=1, index_col='Названия строк')
         well_data.index.name = 'Время'
         well_data.index = pd.to_datetime(well_data.index)
         del well_data['Общий итог']
@@ -147,62 +127,14 @@ def load_and_edit_cs_data(cs_data_filename, created_input_data_type=0, time_to_r
     return edited_data_cs
 
 
-columns_name_to_rename = {"Активная мощность": ["Активная мощность (ТМ)", 'Pa,кВт', 'акт.P,кВт', 'Pакт(кВт)'],
-                          "Полная мощность": ["Pполн,кВт", 'P, кВА', 'Pполн(кВA)'],
-                          "Линейное давление": ["Давление линейное (ТМ)"],
-
-                          "Давление на приеме насоса (пласт. жидкость)": ["Давление на входе ЭЦН (ТМ)",
-                                                                          'P на приеме,ат',
-                                                                          'P, ат.', 'P,atm', 'Pвх(МПа)'],
-                          "Температура на приеме насоса (пласт. жидкость)": ["Температура двигателя ЭЦН (ТМ)",
-                                                                             "Тжид,Гр",
-                                                                             'Tжид, °C', 'Твх(°С)'],
-
-                          'Температура обмоток двигателя': ["Температура двигателя ЭЦН (ТМ)", "ТПЭД,Гр", 'Tдвиг, °C',
-                                                            'Тобм(°С)'],
-
-                          "Загрузка двигателя": ["Загрузка ПЭД (ТМ)", "Загр,%", 'Загр., %', 'Загр., %', 'Загрузка,%',
-                                                 'Загр(%)'],
-                          "Входное напряжение АВ": ["Напряжение AB (ТМ)", "UAB,В", 'Uвх.AB,В', 'Uab,В', 'UвхAB(B)'],
-                          "Ток фазы А": ["Ток фазы A (ТМ)", "Ia,А", 'Ia, A', 'Iа(A)'],
-                          "Выходная частота ПЧ": ["Частота вращения (ТМ)", "F,Гц", 'F, Гц', 'F(Гц)',
-                                                  'Коэффициент мощности'],
-
-                          "Коэффициент мощности": ["Коэффициент мощности (ТМ)", "Cos", 'cos', 'Коэффициент мощности'],
-
-                          "Объемный дебит жидкости": ["Дебит жидкости (ТМ)"],
-                          "Объемный дебит газа": ["Дебит газа (ТМ)"],
-                          "Процент обводненности": ["Обводненность (ТМ)"],
-                          "Объемный дебит нефти": ["Дебит нефти (ТМ)"]}
-
-essential_parameters = ["Активная мощность", "Давление на приеме насоса (пласт. жидкость)",
-                        "Температура на приеме насоса (пласт. жидкость)", 'Температура обмоток двигателя',
-                        "Входное напряжение АВ", "Ток фазы А", "Выходная частота ПЧ", "Коэффициент мощности"]  # ,
-
-
-# "Объемный дебит жидкости", "Объемный дебит газа", "Процент обводненности", "Объемный дебит нефти"]
-
-
-def rename_columns_by_dict(df, columns_name_dict):
-    """
-    Специальное изменение названий столбцов по словарю
-    :param df:
-    :param dict:
-    :return:
-    """
-
-    for i in df.columns:
-        for items in columns_name_dict.items():
-            if i in items[1]:
-                df = df.rename(columns={i: items[0]})
-    return df
-
-
 def drop_string_columns(df):
+    init_amount_of_rows = df.shape[1]
     columns_list = df.columns
     for i in columns_list:
         if type(df[i][0]) == str:
             df = df.drop(columns=i)
+    deleted_rows = init_amount_of_rows - df.shape[1]
+    print(f"Удалено столбцов, в которых есть текст вместо параметров (пометки СУ): {deleted_rows}")
     return df
 
 
@@ -220,48 +152,68 @@ def delete_string_axis(df: pd.DataFrame, column_name):
     return df
 
 
-def clear_df_from_string(df: pd.DataFrame, columns_name=["Активная мощность", "Полная мощность", "Загрузка двигателя"]):
+def clear_df_from_string(df: pd.DataFrame):
+    column_names = df.columns
     delete_all = False
-    for i in columns_name:
+    for i in column_names:
         if i in df.columns and not delete_all:
             df = delete_string_axis(df, i)
             delete_all = True
     return df
 
 
-def read_control_station_data(filename):
-    print(f"Чтение файла{filename}")
-    flash_data = pd.read_excel(filename, header=None)
+def read_and_format_bad_tm_data(filename_full_path):
+    """
+    Чтение данных телеметрии (высокочастотные данные со СУ) разных новых форматов
+    :param filename_full_path: полный путь к файлу, либо просто название, если находится в той же директории
+    :return:
+    """
+    print(f"Чтение файла{filename_full_path}")
+    flash_data = pd.read_excel(filename_full_path, header=None)
     if flash_data[0][0] == 'Основная страница':
         print('Тип данных: Зеленый Борец')
-        loaded_file = pd.read_excel(filename, skiprows=4, index_col='Дата/Время', parse_dates=True, dayfirst=True)
+        loaded_file = pd.read_excel(filename_full_path, skiprows=4, index_col='Дата/Время', parse_dates=True, dayfirst=True)
         loaded_file = loaded_file.replace(to_replace='###', value=None)
         loaded_file = loaded_file[loaded_file['   Состояние   '] == 'Работа']
 
     elif flash_data[0][0] == 'Дата, Время':
         print('Тип данных: Почти нормальный тип')
-        loaded_file = pd.read_excel(filename, index_col='Дата, Время', parse_dates=True)
+        loaded_file = pd.read_excel(filename_full_path, index_col='Дата, Время', parse_dates=True)
         loaded_file = loaded_file.replace(to_replace='-----', value=None)
         loaded_file = loaded_file.dropna(subset=['P, кВА'])
 
     elif flash_data[0][2] == 'Nп/п':
         print('Тип данных: Борец энергетика')
-        loaded_file = pd.read_excel(filename, skiprows=2, index_col='Дата        Время', parse_dates=True)
+        loaded_file = pd.read_excel(filename_full_path, skiprows=2, index_col='Дата        Время', parse_dates=True)
 
     elif flash_data[1][1] == 'Информация:':
         print('Тип данных: Зеленый Борец с несколькими листами')
-        loaded_file = pd.read_excel(filename, sheet_name='Журнал', skiprows=4, index_col='Дата/Время', parse_dates=True)
+        loaded_file = pd.read_excel(filename_full_path, sheet_name='Журнал', skiprows=4, index_col='Дата/Время', parse_dates=True)
         loaded_file = loaded_file.replace(to_replace='###', value=None)
         loaded_file[(loaded_file['   Состояние   '] == 'ПИД реж.') | (loaded_file['   Состояние   '] == 'работа')]
     elif flash_data[0][0] == 'ID':
         print('Тип данных: почти нормальный с большой точностью')
-        loaded_file = pd.read_excel(filename, index_col='Дата время', parse_dates=True)
+        loaded_file = pd.read_excel(filename_full_path, index_col='Дата время', parse_dates=True)
         loaded_file = loaded_file.dropna(subset=['№Скв'])
     else:
         print('Тип данных: тип не распознан')
 
-    loaded_file = rename_columns_by_dict(loaded_file, columns_name_to_rename)
     loaded_file = drop_string_columns(loaded_file)
     loaded_file = clear_df_from_string(loaded_file)
     loaded_file.index.name = 'Время'
     return loaded_file
+
+
+def find_parameters_in_df_columns(df, pattern):
+    """
+    Поиск параметров в столбцах DataFrame
+    :param df: pd.DataFrame
+    :param pattern: str, например обв или ТМ
+    :return: список параметров (названий столбцов)
+    """
+    parameters_list = []
+    for i in df.columns:
+        if pattern in i:
+            parameters_list.append(i)
+    return parameters_list
+

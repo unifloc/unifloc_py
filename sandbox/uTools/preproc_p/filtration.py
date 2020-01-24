@@ -6,30 +6,24 @@ sys.path.append('../'*4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
 
 
-def get_filtred_by_sigma(input_data: pd.DataFrame, lower_sigma=2, upper_sigma=3, inplace=False):
+def get_filtred_by_sigma(df: pd.DataFrame, column_name='Объемный дебит жидкости (СУ)', lower_sigma=2,
+                         upper_sigma=3): #TODO сделать возможность замены значений в колонке на None, а не дропа строк
     """
-    Обязательно, чтобы в данном фрэйме был столбец 'Объемный дебит жидкости (СУ)'
-    :param input_data:
+
+    :param df:
+    :param column_name: названия столбца, по которому будет фильтрация
     :param lower_sigma: количество нормальных отклонений для нижней границе, по которой мы отсеиваем выбросы.
      По идее должна быть меньшн чем верхняя
     :param upper_sigma: верхняя граница разумных значений в терминах отклонения по нормальному распределению.
-    :param inplace: если мы не хотим засорять память и не возвращать df, а на месте его исправить
     :return:
     """
-    m = input_data['Объемный дебит жидкости (СУ)'].mean()
-    sigma = input_data['Объемный дебит жидкости (СУ)'].values.std()
-    if not inplace:
-        out = input_data.copy()
-        out = out[out['Объемный дебит жидкости (СУ)'] <= m + upper_sigma * sigma]
-        out = out[out['Объемный дебит жидкости (СУ)'] >= m - lower_sigma * sigma]
-        return out
-    else:
-        input_data = input_data[input_data['Объемный дебит жидкости (СУ)'] <= m + upper_sigma * sigma]
-        input_data = input_data[input_data['Объемный дебит жидкости (СУ)'] >= m - lower_sigma * sigma]
-        return 0
+    m = df[column_name].mean()
+    sigma = df[column_name].values.std()
+    df = df[df[column_name] <= m + upper_sigma * sigma]
+    df = df[df[column_name] >= m - lower_sigma * sigma]
+    return df
 
-
-def get_filtred_by_measurng_time(input_data: pd.DataFrame, first_edit_data:pd.DataFrame, critical_difference=30):
+def get_filtred_by_measurng_time(input_data: pd.DataFrame, first_edit_data:pd.DataFrame, critical_difference=30): #TODO переделать или выкинуть
     """
     Это функция по даным, после первичной обработки отбросит явно лишние данные, которые неверно измерили: плновое
     время замера отличается от фактичекого

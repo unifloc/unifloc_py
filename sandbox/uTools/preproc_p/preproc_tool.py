@@ -1,18 +1,116 @@
 import os
 import pandas as pd
-
 from pathlib import Path
 
-def rename_columns_by_dict(df, dict):
+
+class GlobalNames():
+    """
+    Класс для хранения названий всех важных названий, а также приведения их к одному типу
+    """
+    def __init__(self):
+        self.q_liq_m3day = 'Дебит жидкости, м3/сут'
+        self.q_gas_m3day = 'Дебит газа, м3/сут'
+        self.q_wat_m3day = 'Дебит воды, м3/сут'
+        self.q_oil_m3day = 'Дебит нефти, м3/сут'
+        self.q_oil_mass_tday = 'Дебит нефти массовый, т/сут'
+        self.watercut_perc = 'Обводненность, %'
+        self.gor_m3m3 = 'ГФ, м3/м3'
+
+        self.p_buf_atm = 'Буферное давление, атм'
+        self.p_lin_atm = 'Линейное давление, атм'
+        self.p_intake_atm = 'Давление на приеме, атм'
+        self.t_intake_c = 'Температура на приеме, С'
+        self.t_motor_c = 'Температура двигателя, С'
+
+        self.d_choke_mm = 'Диаметр штуцера, мм'
+
+        self.cos_phi_perc = 'Коэффициент мощности, %'
+        self.u_motor_v = 'Напряжение на выходе ТМПН, В'
+        self.u_ab_v = 'Напряжение AB, В'
+        self.i_a_motor_a = 'Ток фазы А, А'
+        self.motor_load_perc = 'Загрузка двигателя, %'
+        self.freq_hz = 'Частота вращения, Гц'
+        self.active_power_kwt = 'Активная мощность, кВт'
+        self.full_power_kwt = 'Полная мощность, кВт'
+
+        self.c_calibr_head_d = 'К. калибровки по напору - множитель, ед'
+        self.c_calibr_power_d = 'К. калибровки по мощности - множитель, ед'
+
+    def return_dict_column_to_rename(self):
+        columns_name_to_rename = {
+            self.active_power_kwt: ["Активная мощность", "Активная мощность (ТМ)", 'Pa,кВт', 'акт.P,кВт', 'Pакт(кВт)'],
+            self.full_power_kwt: ["Pполн,кВт", 'P, кВА', 'Pполн(кВA)'],
+            self.p_lin_atm: ["Линейное давление", "Давление линейное (ТМ)"],
+
+            self.p_intake_atm: ["Давление на приеме насоса (пласт. жидкость)",
+                                        "Давление на входе ЭЦН (ТМ)",
+                                        'P на приеме,ат',
+                                        'P, ат.', 'P,atm', 'Pвх(МПа)'],
+            self.t_intake_c: ["Температура насоса ЭЦН (ТМ)", "Температура на приеме насоса (пласт. жидкость)",
+                                      "Тжид,Гр",
+                                      'Tжид, °C', 'Твх(°С)'],
+
+            self.t_motor_c: ["Температура двигателя ЭЦН (ТМ)", "ТПЭД,Гр", 'Tдвиг, °C',
+                                     'Тобм(°С)'],
+
+            self.motor_load_perc: ["Загрузка двигателя",
+                                            "Загрузка ПЭД (ТМ)", "Загр,%", 'Загр., %', 'Загр., %',
+                                           'Загрузка,%', 'Загр(%)'],
+            self.u_ab_v: ["Входное напряжение АВ", "Напряжение AB (ТМ)", "UAB,В", 'Uвх.AB,В', 'Uab,В',
+                                  'UвхAB(B)'],
+            self.i_a_motor_a: ["Ток фазы А", "Ток фазы A (ТМ)", "Ia,А", 'Ia, A', 'Iа(A)'],
+            self.freq_hz: ["Выходная частота ПЧ", "Частота вращения (ТМ)", "F,Гц", 'F, Гц', 'F(Гц)',
+                                   'Коэффициент мощности'],
+
+            self.cos_phi_perc: ["Коэффициент мощности", "Коэффициент мощности (ТМ)", "Cos", 'cos',
+                                        'Коэффициент мощности'],
+
+            self.q_liq_m3day: ["Объемный дебит жидкости", "Дебит жидкости (ТМ)"],
+            self.q_gas_m3day: ["Объемный дебит газа", "Дебит газа (ТМ)"],
+            self.watercut_perc: ["Процент обводненности", "Обводненность (ТМ)"],
+            self.q_oil_m3day: ["Объемный дебит нефти"],
+            self.q_oil_mass_tday: ["Дебит нефти (ТМ)"]}
+
+        return columns_name_to_rename
+
+    def return_essential_parameters(self):
+        essential_parameters_list = [self.q_liq_m3day,
+                                     self.q_gas_m3day,
+                                     self.q_wat_m3day,
+                                     self.q_oil_m3day,
+                                     self.q_oil_mass_tday,
+                                     self.watercut_perc,
+                                     self.gor_m3m3,
+                                     self.p_buf_atm,
+                                     self.p_lin_atm,
+                                     self.p_intake_atm,
+                                     self.t_intake_c,
+                                     self.t_motor_c,
+                                     self.cos_phi_perc,
+                                     self.u_motor_v,
+                                     self.u_ab_v,
+                                     self.i_a_motor_a,
+                                     self.motor_load_perc,
+                                     self.freq_hz,
+                                     self.active_power_kwt]
+        return essential_parameters_list
+
+
+global_names = GlobalNames()
+
+
+def rename_columns_by_dict(df, columns_name_dict = global_names.return_dict_column_to_rename()):
     """
     Специальное изменение названий столбцов по словарю
     :param df:
     :param dict:
     :return:
     """
+
     for i in df.columns:
-        if i in dict.keys():
-            df = df.rename(columns={i: dict[i]})
+        for items in columns_name_dict.items():
+            if i in items[1]:
+                df = df.rename(columns={i: items[0]})
     return df
 
 
@@ -128,16 +226,30 @@ def check_input_data(df):
     :param df: исходный DataFrame
     :return: DataFrame с отфильтрованными данными
     """
-    df = filtr_data_by_min_value(df, 'F вращ ТМ (Ш)', 30)
-    df = filtr_data_by_min_value(df, 'Объемный дебит жидкости (СУ)', 10)
-    df = filtr_data_by_min_value(df, 'Давление на приеме насоса (пласт. жидкость) (СУ)', 1)
-    df = filtr_data_by_drop_nan(df, 'Рбуф (Ш)')
+    df = filtr_data_by_min_value(df, global_names.freq_hz, 30)
+    df = filtr_data_by_min_value(df, global_names.q_liq_m3day, 10)
+    df = filtr_data_by_min_value(df, global_names.p_intake_atm, 1)
+    df = filtr_data_by_drop_nan(df, global_names.p_buf_atm)
     return df
 
 
-def find_full_path_by_pattern(initial_dir, pattern):
+def find_full_path_by_pattern(initial_dir, pattern, additional_pattern_string=None):
     full_path_list = []
+    print('Найденные пути по основному паттерну:')
     for filename in Path(initial_dir).rglob(pattern):
         full_path_list.append(str(filename))
         print(filename)
-    return full_path_list
+    if additional_pattern_string != None:
+        specific_full_path_list = []
+        for i in full_path_list:
+            if additional_pattern_string in i:
+                specific_full_path_list.append(i)
+        print('Найденные пути по вспомогательному паттерну:')
+        print(specific_full_path_list)
+        return specific_full_path_list
+    else:
+        return full_path_list
+
+
+
+

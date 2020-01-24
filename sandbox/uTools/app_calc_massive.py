@@ -130,7 +130,7 @@ def cs_data_init_edit(well_name):
         os.mkdir(path_to_work_dir + save_dir_name)
     except:
         pass
-    well_data = workflow_cs_data.read_and_edit_init_cs_data(well_name, path_to_work_dir)
+    well_data = workflow_cs_data.read_and_format_good_tm_data(well_name, path_to_work_dir)
     well_data.to_csv(path_to_save + well_name + "_first_edit.csv")
     well_data['ГФ, м3/м3'] = well_data['Объемный дебит газа'] / well_data['Объемный дебит нефти']
     all_banches = pltl_opt.create_banches_for_report(well_data, report_type = 'init_cs_data')

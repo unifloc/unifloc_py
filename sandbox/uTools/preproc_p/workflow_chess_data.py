@@ -5,6 +5,7 @@ import os
 sys.path.append('../'*4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
 
+
 def get_dt_str_from_rus_date(rus_date: str) -> str:
     """
     convert date in russian to numerical like
@@ -18,16 +19,16 @@ def get_dt_str_from_rus_date(rus_date: str) -> str:
     return out
 
 
-def load_and_edit_chess_data(chess_data_filename, time_to_resamle, without_changing=False):
+def load_and_edit_chess_data(chess_data_filename_full_path, time_to_resamle='24h', without_changing=False):
     """
     Загрузка и обработка данных с шахматки
     :param without_changing:
-    :param chess_data_filename:
+    :param chess_data_filename_full_path:
     :param time_to_resamle:
     :return:
     """
     # reading data
-    out = pd.read_excel(chess_data_filename)
+    out = pd.read_excel(chess_data_filename_full_path)
     # 2 header rows
     col_n_0 = out.T[0].values
     col_n_1 = out.T[1].values
