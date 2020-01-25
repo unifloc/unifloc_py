@@ -1,8 +1,13 @@
-import os
 import sys
-sys.path.append('../'*4)
+sys.path.append('../' * 4)
+sys.path.append('../' * 3)
+sys.path.append('../' * 2)
+import sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
 import pandas as pd
 from unifloc.sandbox.uTools.preproc_p import workflow_tr_data
+
+global_names = preproc_tool.GlobalNames()
 
 class all_ESP_data():  # класс, в котором хранятся данные
     def __init__(self, UniflocVBA, static_data: workflow_tr_data.Static_data):
@@ -80,32 +85,27 @@ def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_o
     :param vfm_calc_option: флаг восстановления дебитов - если False - адаптация
     :return: заполненное состояние this_state
     """
-    this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']  # заполнение структуры данными
-    this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
+    this_state.watercut_perc = row_in_prepared_data[global_names.watercut_perc]  # заполнение структуры данными
+    this_state.rp_m3m3 = row_in_prepared_data[global_names.gor_m3m3]
 
-    this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
-    #this_state.p_buf_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10  # костыль
-    #this_state.p_buf_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']  # костыль
-
-    # this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
-    this_state.p_wellhead_data_atm = row_in_prepared_data['Линейное давление (СУ)'] * 10
-    this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
-    this_state.p_intake_data_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-    this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-    this_state.p_wf_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-    this_state.d_choke_mm = row_in_prepared_data['Dшт (Ш)']
-    this_state.ESP_freq = row_in_prepared_data['F вращ ТМ (Ш)']
-    # this_state.ESP_freq = row_in_prepared_data['Выходная частота ПЧ (СУ)']
-    this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
-    this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
-    this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
+    this_state.p_buf_data_atm = row_in_prepared_data[global_names.p_buf_atm]  #TODO заменить настоящим буф
+    this_state.p_wellhead_data_atm = row_in_prepared_data[global_names.p_buf_atm]  #TODO заменить настоящим лин
+    this_state.tsep_c = row_in_prepared_data[global_names.t_intake_c]
+    this_state.p_intake_data_atm = row_in_prepared_data[global_names.p_intake_atm]
+    this_state.psep_atm = row_in_prepared_data[global_names.p_intake_atm]
+    this_state.p_wf_atm = row_in_prepared_data[global_names.p_intake_atm]
+    this_state.d_choke_mm = row_in_prepared_data[global_names.d_choke_mm]
+    this_state.ESP_freq = row_in_prepared_data[global_names.freq_hz]
+    this_state.active_power_cs_data_kwt = row_in_prepared_data[global_names.active_power_kwt]
+    this_state.u_motor_data_v = row_in_prepared_data[global_names.u_motor_v]
+    this_state.cos_phi_data_d = row_in_prepared_data[global_names.cos_phi_d]
     if vfm_calc_option == True:
         this_state.c_calibr_head_d = row_in_prepared_data[
             "К. калибровки по напору - множитель (Модель) (Подготовленные)"]
         this_state.c_calibr_power_d = row_in_prepared_data[
             "К. калибровки по мощности - множитель (Модель) (Подготовленные)"]
     else:
-        this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
+        this_state.qliq_m3day = row_in_prepared_data[global_names.q_liq_m3day]
     return this_state
 
 

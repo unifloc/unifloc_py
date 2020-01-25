@@ -32,8 +32,12 @@ import unifloc.sandbox.uTools.preproc_p.workflow_tr_data as workflow_tr_data
 import unifloc.sandbox.uTools.proc_p.well_calculation as well_calculation
 import unifloc.sandbox.uTools.proc_p.workflow_input_data as workflow_input_data
 import unifloc.sandbox.uTools.proc_p.proc_tool as proc_tool
-
-
+sys.path.append('../' * 4)
+sys.path.append('../' * 3)
+sys.path.append('../' * 2)
+import sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+global_names = preproc_tool.GlobalNames()
 time_mark = ''  # datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')  # временная метка для сохранения без перезаписи
 
 
@@ -98,19 +102,13 @@ def calc(options=well_calculation.Calc_options()):
             if options.use_pwh_in_loss == True: # функция ошибки
                 result_for_folve = opt.hydr_part_weight_in_error_coeff * \
                                    ((p_line_calc_atm - this_state.p_wellhead_data_atm) / this_state.p_wellhead_data_max_atm) ** 2 + \
-                                   (1 - opt.hydr_part_weight_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                                   (1 - opt.hydr_part_weight_in_error_coeff) * ((power_CS_calc_W/1000 - this_state.active_power_cs_data_kwt) /
                                     this_state.active_power_cs_data_max_kwt) ** 2
             else:
                 result_for_folve = opt.hydr_part_weight_in_error_coeff * \
                                    ((p_buf_calc_atm - this_state.p_buf_data_atm) / this_state.p_buf_data_max_atm) ** 2 + \
-                                   (1 - opt.hydr_part_weight_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                                   (1 - opt.hydr_part_weight_in_error_coeff) * ((power_CS_calc_W/1000 - this_state.active_power_cs_data_kwt) /
                                     this_state.active_power_cs_data_max_kwt) ** 2
-
-            if debug_print:
-                print("Линейное давление в модели = " + str(p_line_calc_atm))
-                print("Буферное давление в модели = " + str(p_buf_calc_atm))
-                print("Мощность в модели = " + str(power_CS_calc_W))
-                print("ошибка на текущем шаге = " + str(result_for_folve))
             this_state.error_in_step = result_for_folve
             return result_for_folve
 
@@ -143,11 +141,10 @@ def calc(options=well_calculation.Calc_options()):
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
         this_state = workflow_input_data.all_ESP_data(UniflocVBA, static_data)
-        this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
-        this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
-        #this_state.p_buf_data_max_atm = prepared_data['Рлин ТМ (Ш)'].max()  # костыль
-        this_state.p_wellhead_data_max_atm = prepared_data['Линейное давление (СУ)'].max() * 10
-        this_state.qliq_max_m3day = prepared_data['Объемный дебит жидкости (СУ)'].max()
+        this_state.active_power_cs_data_max_kwt = prepared_data[global_names.active_power_kwt].max() * 1000
+        this_state.p_buf_data_max_atm = prepared_data[global_names.p_buf_atm].max()
+        this_state.p_wellhead_data_max_atm = prepared_data[global_names.p_buf_atm].max()
+        this_state.qliq_max_m3day = prepared_data[global_names.q_liq_m3day].max()
 
         for i in range(prepared_data.shape[0]):  # начало итерации по строкам - наборам данных для определенного времени
         #for i in range(3):

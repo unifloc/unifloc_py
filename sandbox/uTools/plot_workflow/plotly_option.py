@@ -32,8 +32,9 @@ def create_banches_for_report(well_data, report_type):
         voltage = {global_names.u_motor_v: [global_names.u_motor_v]}
         cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
         current = {global_names.i_a_motor_a: [global_names.i_a_motor_a]}
+        choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, current]
+                       temp_intake, frequencies, load, power, voltage, cos, current, choke]
         return all_banches
     if report_type == 'init_cs_data':
         qliq = {'Объемный дебит жидкости': ['Объемный дебит жидкости']}
