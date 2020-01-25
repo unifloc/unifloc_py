@@ -17,10 +17,14 @@ def get_filtred_by_sigma(df: pd.DataFrame, column_name='Объемный деб�
     :param upper_sigma: верхняя граница разумных значений в терминах отклонения по нормальному распределению.
     :return:
     """
+    init_amount_of_row = df.shape[0]
     m = df[column_name].mean()
     sigma = df[column_name].values.std()
     df = df[df[column_name] <= m + upper_sigma * sigma]
     df = df[df[column_name] >= m - lower_sigma * sigma]
+    amount_of_filtered_rows = init_amount_of_row - df.shape[0]
+    print(f"Произведена фильтрация по стандартному отклонению (верхнее: {upper_sigma}, нижнее: {lower_sigma}, удалено "
+          f"строк: {amount_of_filtered_rows}")
     return df
 
 def get_filtred_by_measurng_time(input_data: pd.DataFrame, first_edit_data:pd.DataFrame, critical_difference=30): #TODO переделать или выкинуть

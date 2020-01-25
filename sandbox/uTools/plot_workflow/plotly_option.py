@@ -1,3 +1,15 @@
+import pandas as pd
+import sys
+import os
+
+sys.path.append('../' * 4)
+sys.path.append('../' * 3)
+sys.path.append('../' * 2)
+import sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+
+global_names = preproc_tool.GlobalNames()
+
 
 def create_banches_for_report(well_data, report_type):
     """
@@ -7,6 +19,22 @@ def create_banches_for_report(well_data, report_type):
             overall_result
     :return:
     """
+    if report_type == 'second_edit_data':
+        qliq = {global_names.q_liq_m3day: [global_names.q_liq_m3day]}
+        gor = {global_names.gor_m3m3: [global_names.gor_m3m3]}
+        wc = {global_names.watercut_perc: [global_names.watercut_perc]}
+        pressure_intake = {global_names.p_intake_atm: [global_names.p_intake_atm]}
+        pressure_wh = {global_names.p_buf_atm: [global_names.p_buf_atm]}
+        temp_intake = {global_names.t_intake_c: [global_names.t_intake_c]}
+        frequencies = {global_names.freq_hz: [global_names.freq_hz]}
+        load = {global_names.motor_load_perc: [global_names.motor_load_perc]}
+        power = {global_names.active_power_kwt: [global_names.active_power_kwt]}
+        voltage = {global_names.u_motor_v: [global_names.u_motor_v]}
+        cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
+        current = {global_names.i_a_motor_a: [global_names.i_a_motor_a]}
+        all_banches = [qliq, gor, wc, pressure_intake, pressure_wh,
+                       temp_intake, frequencies, load, power, voltage, cos, current]
+        return all_banches
     if report_type == 'init_cs_data':
         qliq = {'Объемный дебит жидкости': ['Объемный дебит жидкости']}
         gor = {'ГФ, м3/м3': ['ГФ, м3/м3']}

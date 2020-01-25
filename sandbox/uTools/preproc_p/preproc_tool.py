@@ -24,7 +24,7 @@ class GlobalNames():
 
         self.d_choke_mm = 'Диаметр штуцера, мм'
 
-        self.cos_phi_perc = 'Коэффициент мощности, %'
+        self.cos_phi_d = 'Коэффициент мощности, д.ед.'
         self.u_motor_v = 'Напряжение на выходе ТМПН, В'
         self.u_ab_v = 'Напряжение AB, В'
         self.i_a_motor_a = 'Ток фазы А, А'
@@ -35,6 +35,22 @@ class GlobalNames():
 
         self.c_calibr_head_d = 'К. калибровки по напору - множитель, ед'
         self.c_calibr_power_d = 'К. калибровки по мощности - множитель, ед'
+
+        self.chosen_q_liq_m3day = None
+        self.chosen_watercut_perc = None
+        self.chosen_gor_m3m3 = None
+
+        self.chosen_p_buf_atm = None
+        self.chosen_p_intake_atm = None
+        self.chosen_t_intake_c = None
+
+        self.chosen_d_choke_mm = None
+
+        self.chosen_cos_phi_d = None
+        self.chosen_u_motor_v = None
+        self.chosen_motor_load_perc = None
+        self.chosen_freq_hz = None
+        self.chosen_active_power_kwt = None
 
     def return_dict_column_to_rename(self):
         columns_name_to_rename = {
@@ -62,7 +78,7 @@ class GlobalNames():
             self.freq_hz: ["Выходная частота ПЧ", "Частота вращения (ТМ)", "F,Гц", 'F, Гц', 'F(Гц)',
                                    'Коэффициент мощности'],
 
-            self.cos_phi_perc: ["Коэффициент мощности", "Коэффициент мощности (ТМ)", "Cos", 'cos',
+            self.cos_phi_d: ["Коэффициент мощности", "Коэффициент мощности (ТМ)", "Cos", 'cos',
                                         'Коэффициент мощности'],
 
             self.q_liq_m3day: ["Объемный дебит жидкости", "Дебит жидкости (ТМ)"],
@@ -86,7 +102,7 @@ class GlobalNames():
                                      self.p_intake_atm,
                                      self.t_intake_c,
                                      self.t_motor_c,
-                                     self.cos_phi_perc,
+                                     self.cos_phi_d,
                                      self.u_motor_v,
                                      self.u_ab_v,
                                      self.i_a_motor_a,
@@ -94,6 +110,21 @@ class GlobalNames():
                                      self.freq_hz,
                                      self.active_power_kwt]
         return essential_parameters_list
+
+    def return_chosen_parameters(self):
+        chosen_parameters_list = [self.chosen_q_liq_m3day,
+                                  self.chosen_watercut_perc,
+                                  self.chosen_gor_m3m3,
+                                  self.chosen_p_buf_atm,
+                                  self.chosen_p_intake_atm,
+                                  self.chosen_t_intake_c,
+                                  self.chosen_d_choke_mm,
+                                  self.chosen_cos_phi_d,
+                                  self.chosen_u_motor_v,
+                                  self.chosen_motor_load_perc,
+                                  self.chosen_freq_hz,
+                                  self.chosen_active_power_kwt]
+        return chosen_parameters_list
 
 
 global_names = GlobalNames()
@@ -251,5 +282,33 @@ def find_full_path_by_pattern(initial_dir, pattern, additional_pattern_string=No
         return full_path_list
 
 
+def find_column_in_df_columns(df, pattern):
+    """
+    Функция для поиска названий столбцов по шаблону
+    :param df: DataFrame, в котором ведется поиск
+    :param pattern: шаблон, например обв, или ШТР
+    :return:
+    """
+    found_columns = []
+    for i in df.columns:
+        if pattern in i:
+            found_columns.append(i)
+    return found_columns
 
 
+def solve_dimensions(df: pd.DataFrame, global_names=global_names):
+    if global_names.p_lin_atm in df.columns:
+        p_lin_series = df[global_names.p_lin_atm]
+        p_lin_series = p_lin_series.dropna()
+        if len(p_lin_series) != 0:
+            first_value = p_lin_series[0]
+            if first_value < 5:
+                print(f'Приведение размерностей. Давление в МПа, т.к первое значение равно = {first_value},'
+                      f' колонка {global_names.p_lin_atm} будет умножена на 10')
+                df[global_names.p_lin_atm] = df[global_names.p_lin_atm] * 10
+            else:
+                print(f'Приведение размерностей. Давление в МПа, т.к первое значение равно = {first_value},'
+                      f' колонка {global_names.p_lin_atm} не будет умножена на 10')
+    else:
+        print(f"Приведение размерностей. Нет столбца с именем: {global_names.p_lin_atm}")
+    return df
