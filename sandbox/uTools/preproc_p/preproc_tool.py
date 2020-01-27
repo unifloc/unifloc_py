@@ -25,16 +25,17 @@ class GlobalNames():
         self.d_choke_mm = 'Диаметр штуцера, мм'
 
         self.cos_phi_d = 'Коэффициент мощности, д.ед.'
-        self.u_motor_v = 'Напряжение на выходе ТМПН, В'
+        self.u_motor_v = 'Напряжение на выходе ТМПН, В' #TODO напряжение на двигателе
         self.u_ab_v = 'Напряжение AB, В'
         self.i_a_motor_a = 'Ток фазы А, А'
         self.motor_load_perc = 'Загрузка двигателя, %'
-        self.freq_hz = 'Частота вращения, Гц'
+        self.freq_hz = 'Частота вращения, Гц' #TODO и частота тока
         self.active_power_kwt = 'Активная мощность, кВт'
         self.full_power_kwt = 'Полная мощность, кВт'
 
         self.c_calibr_head_d = 'К. калибровки по напору - множитель, ед'
         self.c_calibr_power_d = 'К. калибровки по мощности - множитель, ед'
+        self.c_calibr_rate_d = 'К. калибровки по дебиту - множитель, ед'
 
         self.chosen_q_liq_m3day = None
         self.chosen_watercut_perc = None
@@ -51,6 +52,41 @@ class GlobalNames():
         self.chosen_motor_load_perc = None
         self.chosen_freq_hz = None
         self.chosen_active_power_kwt = None
+
+        self.p_discharge_atm = "Давление на выкиде, атм"
+        self.p_wf_atm = "Давление на приеме (Забойное модели), атм"
+        self.t_wf_c = 'Температура на приеме (Забойное модели), C'
+        self.t_wh_c = "Температура на устье, C"
+        self.t_surface_c = "Температура на поверхности, С"
+        self.t_discharge_c = "Температура на выкиде, С"
+
+        self.c_degrad_fr = "К. деградации для штуцера, д.ед."
+        self.p_cas_atm = 'Затрубное давление, атм'
+        self.h_dyn_m = "H динамического уровня, м"
+        #self.power_CS_calc_kwt = "Активная мощность на СУ, кВт"
+        self.i_motor_a = "Ток двигателя, А"
+        self.efficiency_esp_d = 'КПД ЭЦН, д.ед.'
+        self.KsepTotal_fr = "К. сеп. общий, д.ед."
+        self.KsepNat_fr = "К. сеп. естесственной, д.ед."
+        self.KSepGasSep_fr = "К. сеп. газосепаратора"
+        self.power_motor_nom_kwt = "Номинальная мощность ПЭД, кВт"
+        self.cable_dU_V = "dU в кабеле, В"
+        self.dPower_GasSep_kwt = "Мощность, потребляемая газосепаратором, кВт"
+        self.dPower_protector_kwt = "Мощность, потребляемая протектором, кВт"
+        self.cable_dPower_kwt = "Мощность, потребляемая (рассеиваемая) кабелем, кВт"
+        self.dPower_transform_kwt = "Мощность, потребляемая ТМПН, кВт"
+        self.dPower_CS_kwt = "Мощность, потребляемая СУ, кВт"
+        self.Powerfluid_kwt = "Мощность, передаваемая жидкости, кВт"
+        self.PowerESP_kwt = "Мощность, передаваемая ЭЦН, кВт"
+        self.power_shaft_kwt = "Мощность, передаваемая валу от ПЭД, кВт"
+        self.power_motor_kwt = "Мощность, передаваемая ПЭД, кВт"
+        self.cable_power_kwt = "Мощность, передаваемая кабелю, кВт"
+        self.power_CS_teor_calc_kwt = "Мощность, передаваемая СУ, кВт"
+
+        self.dp_esp_atm = 'Перепад давления ЭЦН, атм'
+        self.ch_cp_multiply = 'Произведение калибровок по напору и мощности'
+
+        self.error_in_model = 'Значение функции ошибки, безразм.'
 
     def return_dict_column_to_rename(self):
         columns_name_to_rename = {
@@ -178,7 +214,7 @@ def combine_multiprocessing_result(path_to_work_dir, dir_name_with_calculated_da
                                               parse_dates=True, index_col='Время')
             first_result_data = first_result_data.append(another_result_data, sort=True)
             del first_result_data['d']
-            first_result_data = first_result_data.dropna(subset=['ESP.ESPpump.EffiencyESP_d'])
+            #first_result_data = first_result_data.dropna(subset=['ESP.ESPpump.EffiencyESP_d'])
     first_result_data = first_result_data.sort_index()
     return first_result_data
 

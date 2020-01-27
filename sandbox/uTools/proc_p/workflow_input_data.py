@@ -9,6 +9,7 @@ from unifloc.sandbox.uTools.preproc_p import workflow_tr_data
 
 global_names = preproc_tool.GlobalNames()
 
+
 class all_ESP_data():  # класс, в котором хранятся данные
     def __init__(self, UniflocVBA, static_data: workflow_tr_data.Static_data):
         """
@@ -149,7 +150,7 @@ def divide_prepared_data(prepared_data, options):  # TODO сделать раз�
     return out
 
 
-def create_new_result_df(this_result, this_state, prepared_data, i):
+def create_new_result_df(this_result, this_state, prepared_data, i, global_names = global_names):
     """
     Объединение всех результатов для данной итерации в один DataFrame
     :param this_result: список с результатами UniflocVBA
@@ -162,8 +163,8 @@ def create_new_result_df(this_result, this_state, prepared_data, i):
     for j in range(len(this_result[1])):
         new_dict[this_result[1][j]] = [this_result[0][j]]
         print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
-    new_dict['ГФ'] = [this_state.rp_m3m3]
-    new_dict['Значение функции ошибки'] = [this_state.error_in_step]
+    new_dict[global_names.gor_m3m3] = [this_state.rp_m3m3]
+    new_dict[global_names.error_in_model] = [this_state.error_in_step]
     new_dict['Время'] = [prepared_data.index[i]]
     new_dataframe = pd.DataFrame(new_dict)
     new_dataframe.index = new_dataframe['Время']
