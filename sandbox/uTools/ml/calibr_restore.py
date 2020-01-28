@@ -3,6 +3,30 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import linear_model
 import numpy as np
 import pandas as pd
+import sys
+sys.path.append('../'*4)
+import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+global_names = preproc_tool.GlobalNames()
+
+
+def check_ml_input_by_drop(df: pd.DataFrame):
+    init_amount_of_rows, init_amount_of_columns = df.shape[0], df.shape[1]
+    df = df.dropna()
+    new_amount_of_rows, new_amount_of_columns = df.shape[0], df.shape[1]
+    print(f"Удалено строк :{init_amount_of_rows - new_amount_of_rows},"
+          f" удалено столбцов: {init_amount_of_columns - new_amount_of_columns}")
+    return df
+
+
+def extract_time_from_df(df: pd.DataFrame):
+    """
+    Разделение DataFrame на отельную колонку с временем и DataFrame без времени
+    :param df: исходный df
+    :return: df, time_columns
+    """
+    time_columns = df['Время']
+    df = df.drop(columns=['Время'])
+    return df, time_columns
 
 
 def get_test_train_drop_2_points(data: pd.DataFrame, target: pd.Series):
@@ -66,74 +90,20 @@ def get_joined_80_20(y_test, y_train):
     return out
 
 
-def restore_calibr_via_ridge(adaptation_all_data_lol, calibr_data, use_80_20 = False): #TODO подозрительно много warnings - надо исправить
-    # но всё нам не нужно, возьмём только хорошее
-    adaptation_data_lol = adaptation_all_data_lol[['ГФ (СУ)', 'Процент обводненности (СУ)',
-                                           'Давление на приеме насоса (пласт. жидкость) (СУ)', 'Рлин ТМ (Ш)', 'Рбуф (Ш)',
-                                           'Температура на приеме насоса (пласт. жидкость) (СУ)', 'F вращ ТМ (Ш)', 'Dшт (Ш)',
-                                           'Активная мощность (СУ)', 'Напряжение на выходе ТМПН (СУ)', 'Коэффициент мощности (СУ)',
-                                           'К. калибровки по напору - множитель (Модель)',
-                                           'К. калибровки по мощности - множитель (Модель)'
-                                          ]
-                                         ]
-    # уберем пропуски в существенных данных
-    first_amount_of_rows = adaptation_data_lol.shape[0]
-    adaptation_data_lol = adaptation_data_lol.dropna()
-    print(f"Удалено строк {first_amount_of_rows - adaptation_data_lol.shape[0]}")
-    # и обновляем индексы
-    adaptation_data_lol.reset_index(inplace=True)
-    del adaptation_data_lol['Время']
-    # берём ответы в отдельную переменную
-    y_f_lol = adaptation_data_lol['К. калибровки по напору - множитель (Модель)']
-    y_p_lol = adaptation_data_lol['К. калибровки по мощности - множитель (Модель)']
-    # а в общих данных удаляем их
-    adaptation_data_lol.drop(columns=['К. калибровки по напору - множитель (Модель)',
-                                  'К. калибровки по мощности - множитель (Модель)'],
-                         inplace=True
-                        )
-    # Разделим
-
-    if use_80_20:
-        x_train_lol, x_test_lol, y_train_p_lol, y_test_p_lol = get_test_train_80_20(adaptation_data_lol,
-                                                                                            y_p_lol)
-        _, _, y_train_f_lol, y_test_f_lol = get_test_train_80_20(adaptation_data_lol, y_f_lol)
-    else:
-        x_train_lol, x_test_lol, y_train_p_lol, y_test_p_lol = get_test_train_drop_2_points(adaptation_data_lol,
-                                                                                            y_p_lol)
-        _, _, y_train_f_lol, y_test_f_lol = get_test_train_drop_2_points(adaptation_data_lol, y_f_lol)
-
+def restore_calibr_via_ridge(x_train, x_test, y_train):
     # отмаштабируем данные
-    sc_lol = StandardScaler()
-    sc_lol.fit(x_train_lol)
-    x_train_sc_lol = sc_lol.transform(x_train_lol)
-    x_test_sc_lol = sc_lol.transform(x_test_lol)
+    sc = StandardScaler()
+    sc.fit(x_train)
+    x_train_sc = sc.transform(x_train)
+    x_test_sc = sc.transform(x_test)
     # у модели. которой сейчас будем пользоваться есть параметр, задающийся из вне
     # пробежимся на данных для обучения и подберём его
-    parameters_lol = {'alpha': np.linspace(1e-7, 30, 1000)}
+    parameters = {'alpha': np.linspace(1e-7, 30, 1000)}
 
-    r_est_p_lol = linear_model.Ridge()
-    clf_p_lol = GridSearchCV(r_est_p_lol, parameters_lol, cv=5)
-    _ = clf_p_lol.fit(x_train_sc_lol, y_train_p_lol)
-    b_reg_p_lol = clf_p_lol.best_estimator_
-    p_pred_lol = b_reg_p_lol.predict(x_test_sc_lol)
+    r_est_power = linear_model.Ridge()
+    clf = GridSearchCV(r_est_power, parameters, cv=5)
+    _ = clf.fit(x_train_sc, y_train)
+    b_reg = clf.best_estimator_
+    y_test = b_reg.predict(x_test_sc)
 
-    r_est_f_lol = linear_model.Ridge()
-    clf_f_lol = GridSearchCV(r_est_f_lol, parameters_lol, cv=5)
-    _ =clf_f_lol.fit(x_train_sc_lol, y_train_f_lol)
-    b_reg_f_lol = clf_f_lol.best_estimator_
-    f_pred_lol = b_reg_f_lol.predict(x_test_sc_lol)
-    # пробежались
-    # тепрь нужно сшить предсказания и тест
-    # сшиваем
-
-    if use_80_20:
-        p_out_lol = get_joined_80_20(y_test=p_pred_lol, y_train=y_train_p_lol)
-        f_out_lol = get_joined_80_20(y_test=f_pred_lol, y_train=y_train_f_lol)
-    else:
-        p_out_lol = get_joined_2_points_target(y_test=p_pred_lol, y_train=y_train_p_lol)
-        f_out_lol = get_joined_2_points_target(y_test=f_pred_lol, y_train=y_train_f_lol)
-    # вдруг потерялись точки
-    if len(calibr_data['К. калибровки по напору - множитель (Модель) (Подготовленные)']) != len(p_out_lol):
-        print("WTFFFFF чтото с размерами, останавливай нафиг всё")
-    # ну если не потерялись, то чуть ниже вставим машинно обученные предсказания в модель
-    return (p_out_lol, f_out_lol)
+    return y_test

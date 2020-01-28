@@ -101,10 +101,8 @@ def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_o
     this_state.u_motor_data_v = row_in_prepared_data[global_names.u_motor_v]
     this_state.cos_phi_data_d = row_in_prepared_data[global_names.cos_phi_d]
     if vfm_calc_option == True:
-        this_state.c_calibr_head_d = row_in_prepared_data[
-            "К. калибровки по напору - множитель (Модель) (Подготовленные)"]
-        this_state.c_calibr_power_d = row_in_prepared_data[
-            "К. калибровки по мощности - множитель (Модель) (Подготовленные)"]
+        this_state.c_calibr_head_d = row_in_prepared_data[global_names.c_calibr_head_d]
+        this_state.c_calibr_power_d = row_in_prepared_data[global_names.c_calibr_power_d]
     else:
         this_state.qliq_m3day = row_in_prepared_data[global_names.q_liq_m3day]
     return this_state
