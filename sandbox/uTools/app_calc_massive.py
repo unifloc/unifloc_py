@@ -288,11 +288,11 @@ def final_step(well_name):
     result = preproc_tool.make_gaps_and_interpolate(q_liq)
     result = preproc_tool.mark_df_columns(result, 'INTERP')
     overall_data = overall_data.join(result)
-    overall_data = result_and_metrics.final_edit_overall_data(overall_data)
+    overall_data = result_and_metrics.add_relative_errors_to_overall_data(overall_data)
     all_banches = pltl_opt.create_banches_for_report(overall_data, report_type = 'overall_result')
     plot_file_path = path_to_work_dir + path_to_restore_dir + well_name + '_adapt_and_restore_report' +  '.html'
     pltl_wf.create_report_html(overall_data, all_banches, plot_file_path,  auto_open = auto_open_html)
-    calibr_calc_metrics, interp_calc_metrics = result_and_metrics.calc_calibr_interp_metrics(overall_data)
+    calibr_calc_metrics, interp_calc_metrics = result_and_metrics.make_result(overall_data)
     metrics_text_file_path = path_to_work_dir + path_to_restore_dir + well_name + '_adapt_and_restore_metrics_report' +  '.txt'
     text_file = open(metrics_text_file_path, "w")
     text_file.write(calibr_calc_metrics + '\n' + interp_calc_metrics)
@@ -302,7 +302,7 @@ def final_step(well_name):
     tr_data = workflow_tr_data.read_tr_and_get_data(tr_file_full_path, well_name)
     tr_data_df = pd.DataFrame({'Параметры скважины с ТР': list(tr_data.__dict__.values())})
     tr_data_df.index = list(tr_data.__dict__.keys())
-    overall_metrics = result_and_metrics.calc_calibr_interp_metrics(overall_data, return_df = True)
+    overall_metrics = result_and_metrics.make_result(overall_data, return_df = True)
 
     overall_metrics['ЭЦН'] = [tr_data.esp_name_str, tr_data.esp_name_str]
     overall_metrics['ПЭД'] = [tr_data.motor_name_str, tr_data.motor_name_str]

@@ -97,3 +97,30 @@ def create_banches_for_report(report_type):
         all_banches = [qliq, calibr, error, gor, wc, pressure_intake, pressure_wh,
                        temp_intake, frequencies, load, power, voltage, cos, choke]
         return all_banches
+    if report_type == 'overall_result':
+        mark = " (PREDICTION)"
+        mark0 = " (ADAPT)"
+        qliq = {global_names.q_liq_m3day: [global_names.q_liq_m3day+ mark0, global_names.q_liq_m3day + mark]}
+        calibr = {"Калибровки по напору и мощности": [global_names.c_calibr_head_d + mark0,
+                                                      global_names.c_calibr_head_d + mark,
+                                                      global_names.c_calibr_power_d + mark0,
+                                                      global_names.c_calibr_power_d + mark]}
+        relative_errors = {"Относительные ошибки расчета": [global_names.relative_error_active_power_perc,
+                                                            global_names.relative_error_q_liq_perc,
+                                                            global_names.relative_error_head_calibr_perc,
+                                                            global_names.relative_error_power_calibr_perc]}
+        error = {global_names.error_in_model: [global_names.error_in_model + mark, global_names.error_in_model + mark0]}
+        gor = {global_names.gor_m3m3: [global_names.gor_m3m3+ mark0, global_names.gor_m3m3 + mark]}
+        wc = {global_names.watercut_perc: [global_names.watercut_perc + mark0, global_names.watercut_perc + mark]}
+        pressure_intake = {global_names.p_intake_atm: [global_names.p_intake_atm + mark0, global_names.p_intake_atm + mark]}
+        pressure_wh = {global_names.p_buf_atm: [global_names.p_buf_atm + mark0, global_names.p_buf_atm + mark]}
+        temp_intake = {global_names.t_intake_c: [global_names.t_intake_c + mark0, global_names.t_intake_c + mark]}
+        frequencies = {global_names.freq_hz: [global_names.freq_hz + mark0, global_names.freq_hz + mark]}
+        load = {global_names.motor_load_perc: [global_names.motor_load_perc + mark0, global_names.motor_load_perc + mark]}
+        power = {global_names.active_power_kwt: [global_names.active_power_kwt + mark0, global_names.active_power_kwt + mark]}
+        voltage = {global_names.u_motor_v: [global_names.u_motor_v + mark0, global_names.u_motor_v + mark]}
+        cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
+        choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
+        all_banches = [qliq, relative_errors, calibr,  error, gor, wc, pressure_intake, pressure_wh,
+                       temp_intake, frequencies, load, power, voltage, cos, choke]
+        return all_banches

@@ -88,6 +88,11 @@ class GlobalNames():
 
         self.error_in_model = 'Значение функции ошибки, безразм.'
 
+        self.relative_error_active_power_perc = 'Относительная ошибка по активной мощности, %'
+        self.relative_error_q_liq_perc = 'Относительная ошибка по дебиту жидкости, %'
+        self.relative_error_head_calibr_perc = 'Относительная ошибка по калибровке по напору, %'
+        self.relative_error_power_calibr_perc = 'Относительная ошибка по калибровке по мощности, %'
+
     def return_dict_column_to_rename(self):
         columns_name_to_rename = {
             self.active_power_kwt: ["Активная мощность", "Активная мощность (ТМ)", 'Pa,кВт', 'акт.P,кВт', 'Pакт(кВт)'],
