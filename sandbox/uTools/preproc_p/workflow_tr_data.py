@@ -57,6 +57,7 @@ class Static_data:
         self.esp_nom_head_m = None
         self.h_pump_m = None
         self.esp_name_str = None
+        self.esp_id = None
         self.udl_m = None
         self.i_motor_nom_a = None
         self.motor_name_str = None
@@ -187,6 +188,7 @@ def fill_static_data_structure_by_df(static_data: Static_data,
     static_data.esp_nom_head_m = this_static_data_series.esp_nom_head_m
     static_data.h_pump_m = this_static_data_series.h_pump_m
     static_data.esp_name_str = this_static_data_series.esp_name_str
+    static_data.esp_id = this_static_data_series.esp_id
 
     static_data.i_motor_nom_a = this_static_data_series.i_motor_nom_a
     static_data.motor_name_str = this_static_data_series.motor_name_str

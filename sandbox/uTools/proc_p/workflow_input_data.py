@@ -18,7 +18,9 @@ class all_ESP_data():  # класс, в котором хранятся данн
         :param static_data: данные техрежима
         """
         self.esp_nom_rate_m3day = static_data.esp_nom_rate_m3day
-        self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.esp_nom_rate_m3day)
+        #self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.esp_nom_rate_m3day)
+        self.esp_id = static_data.esp_id
+
         self.esp_nom_head_m = static_data.esp_nom_head_m
         self.d_cas_mm = static_data.d_cas_mm
         self.h_pump_m = static_data.h_pump_m
@@ -29,7 +31,7 @@ class all_ESP_data():  # класс, в котором хранятся данн
         self.i_motor_nom_a = static_data.i_motor_nom_a
         self.power_motor_nom_kwt = static_data.power_motor_nom_kwt
         self.h_tube_m = self.h_pump_m  # ТР
-        self.h_perf_m = self.h_pump_m + 1  # ТР
+        self.h_perf_m = self.h_pump_m + 0.0001  # ТР
         self.udl_m = static_data.udl_m  # ТР
 
         self.c_calibr_rate_d = 1
