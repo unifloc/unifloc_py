@@ -50,10 +50,9 @@ def calc_well_plin_pwf_atma_for_minimize(minimaze_parameters, args):
     """
     this_state = args[0]
     restore_flow = args[1]
-    debug_print = args[2]
-    restore_q_liq_only = args[3]
-    UniflocVBA = args[4]
-    opt = args[5]
+    restore_q_liq_only = args[2]
+    UniflocVBA = args[3]
+    opt = args[4]
     if restore_flow == False:  # определение и сохранение подбираемых параметров
         this_state.c_calibr_power_d = minimaze_parameters[1]
         this_state.c_calibr_head_d = minimaze_parameters[0]
@@ -88,7 +87,7 @@ def calc_well_plin_pwf_atma_for_minimize(minimaze_parameters, args):
     return result_for_minimize
 
 
-def mass_calculation(this_state: workflow_input_data.all_ESP_data, debug_print, restore_flow,
+def mass_calculation(this_state: workflow_input_data.all_ESP_data, restore_flow,
                      restore_q_liq_only, UniflocVBA, opt):
     """
     Функция для массового расчета - модель скважины UniflocVBA + оптимизатор scipy
@@ -99,7 +98,7 @@ def mass_calculation(this_state: workflow_input_data.all_ESP_data, debug_print, 
     :return: результат оптимизационной задачи - параметры скважины - для определенного набора данных
     """
 
-    args = [this_state, restore_flow, debug_print, restore_q_liq_only,  UniflocVBA, opt]
+    args = [this_state, restore_flow,  restore_q_liq_only,  UniflocVBA, opt]
     if restore_flow == False: # выполнение оптимизации модели скважины с текущим набором данных
         result = minimize(calc_well_plin_pwf_atma_for_minimize, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], args=args, method='SLSQP', tol=1e-07,
                           bounds=[[this_state.c_calibr_head_d_min_limit, this_state.c_calibr_head_d_max_limit],
@@ -146,7 +145,7 @@ def calc(options=well_calculation.Calc_options()):
         result_dataframe = {'d': [2]}
         result_dataframe = pd.DataFrame(result_dataframe)
         start_time = time.time()
-        this_state = workflow_input_data.all_ESP_data(UniflocVBA, static_data)
+        this_state = workflow_input_data.all_ESP_data(static_data)
         this_state.active_power_cs_data_max_kwt = prepared_data[global_names.active_power_kwt].max()
         this_state.p_buf_data_max_atm = prepared_data[global_names.p_buf_atm].max()
         this_state.p_wellhead_data_max_atm = prepared_data[global_names.p_buf_atm].max()
@@ -161,7 +160,7 @@ def calc(options=well_calculation.Calc_options()):
 
             this_state = workflow_input_data.transfer_data_from_row_to_state(this_state, row_in_prepared_data, opt.vfm_calc_option)
 
-            this_result = mass_calculation(this_state, opt.debug_mode, opt.vfm_calc_option, opt.restore_q_liq_only, UniflocVBA, opt)  # расчет
+            this_result = mass_calculation(this_state, opt.vfm_calc_option, opt.restore_q_liq_only, UniflocVBA, opt)  # расчет
 
             end_in_loop_time = time.time()
             print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))

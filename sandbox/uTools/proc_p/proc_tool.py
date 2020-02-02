@@ -31,6 +31,7 @@ def create_directories(vfm_calc_option, app_path, well_name, options, dir_name_w
             pass
     return input_data_filename_str, dir_to_save_calculated_data
 
+
 def auto_restart(i,options, UniflocVBA, current_path):
     check = i % options.amount_iters_before_restart
     if check == 0 and i != 0:  # защита против подвисаний экселя - не работает в многопотоке
@@ -38,3 +39,4 @@ def auto_restart(i,options, UniflocVBA, current_path):
         UniflocVBA.book.close()
         time.sleep(options.sleep_time_sec)
         UniflocVBA.book = xw.Book(current_path + options.addin_name)
+

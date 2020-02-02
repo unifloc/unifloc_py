@@ -11,14 +11,13 @@ global_names = preproc_tool.GlobalNames()
 
 
 class all_ESP_data():  # класс, в котором хранятся данные
-    def __init__(self, UniflocVBA, static_data: workflow_tr_data.Static_data):
+    def __init__(self, static_data: workflow_tr_data.Static_data):
         """
         класс для хранение и доступа ко всем данным скважины - входным, выходным
         :param UniflocVBA: текущая надстройка UniflocVBA API
         :param static_data: данные техрежима
         """
         self.esp_nom_rate_m3day = static_data.esp_nom_rate_m3day
-        #self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.esp_nom_rate_m3day)
         self.esp_id = static_data.esp_id
 
         self.esp_nom_head_m = static_data.esp_nom_head_m
@@ -78,6 +77,9 @@ class all_ESP_data():  # класс, в котором хранятся данн
         self.c_calibr_head_d_min_limit = static_data.c_calibr_head_d_min_limit
         self.c_calibr_power_d_max_limit = static_data.c_calibr_power_d_max_limit
         self.c_calibr_power_d_min_limit = static_data.c_calibr_power_d_min_limit
+
+        self.well_str = None
+        self.pvt_str = None
 
 
 def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option):

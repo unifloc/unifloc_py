@@ -86,7 +86,6 @@ def load_calculated_data_from_csv(full_file_name, mark, columns_to_dim_solve = c
     """
     calculated_data = pd.read_csv(full_file_name)
     del calculated_data['Unnamed: 0']
-    del calculated_data['Unnamed: 42']
     try:
         del calculated_data['d']
         calculated_data = calculated_data.iloc[1:]
