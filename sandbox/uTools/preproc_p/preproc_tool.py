@@ -83,6 +83,11 @@ class GlobalNames():
         self.cable_power_kwt = "Мощность, передаваемая кабелю, кВт"
         self.power_CS_teor_calc_kwt = "Мощность, передаваемая СУ, кВт"
 
+        self.q_mix_intake_m3day = 'Дебит ГЖС на приеме, м3/сут'
+        self.q_mix_dis_m3day = 'Дебит ГЖС на выкиде, м3/сут'
+        self.esp_head_m = 'Напор ЭЦН, м'
+        self.q_mix_mean_m3day = 'Дебит ГЖС в условиях насоса (средний), м3/сут'
+
         self.dp_esp_atm = 'Перепад давления ЭЦН, атм'
         self.ch_cp_multiply = 'Произведение калибровок по напору и мощности'
 

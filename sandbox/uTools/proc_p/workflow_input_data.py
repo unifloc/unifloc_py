@@ -30,7 +30,7 @@ class all_ESP_data():  # класс, в котором хранятся данн
         self.i_motor_nom_a = static_data.i_motor_nom_a
         self.power_motor_nom_kwt = static_data.power_motor_nom_kwt
         self.h_tube_m = self.h_pump_m  # ТР
-        self.h_perf_m = self.h_pump_m + 0.0001  # ТР
+        self.h_perf_m = self.h_pump_m + 0.000001  # ТР
         self.udl_m = static_data.udl_m  # ТР
 
         self.c_calibr_rate_d = 1

@@ -46,7 +46,10 @@ columns_name_dict = {"Pline_atma": global_names.p_lin_atm,
                      "ESP.power_shaft_W": global_names.power_shaft_kwt,
                      "ESP.power_motor_W": global_names.power_motor_kwt,
                      "ESP.cable_power_W": global_names.cable_power_kwt,
-                     "ESP.power_CS_teor_calc_W": global_names.power_CS_teor_calc_kwt}
+                     "ESP.power_CS_teor_calc_W": global_names.power_CS_teor_calc_kwt,
+                     ".ESP.ESPpump.Qmix_intake_m3day":  global_names.q_mix_intake_m3day,
+                     ".ESP.ESPpump.Qmix_dis_m3day":  global_names.q_mix_dis_m3day,
+                     ".ESP.ESPpump.head_m":  global_names.esp_head_m}
 
 
 columns_to_dim_solve = [global_names.active_power_kwt,
@@ -100,5 +103,7 @@ def load_calculated_data_from_csv(full_file_name, mark, columns_to_dim_solve = c
                                                      calculated_data[global_names.p_intake_atm]
     calculated_data[columns_to_dim_solve] = calculated_data[columns_to_dim_solve] / 1000  #Перевод в кВт
     calculated_data[global_names.motor_load_perc] = calculated_data[global_names.motor_load_perc] * 100
+    calculated_data[global_names.q_mix_mean_m3day] = (calculated_data[global_names.q_mix_intake_m3day] +
+                                                     calculated_data[global_names.q_mix_dis_m3day]) / 2
     calculated_data = preproc_tool.mark_df_columns(calculated_data, mark)
     return calculated_data

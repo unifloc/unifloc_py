@@ -91,17 +91,17 @@ def make_result(overall_data: pd.DataFrame, gn = global_names, time_to_resample 
         overall_data_with_calibr_gaps[gn.relative_error_power_calibr_perc].abs().mean()]
     calibr_calc_metrics[gn.q_liq_m3day + ' (MEAN)'] = [
         overall_data_with_calibr_gaps[gn.q_liq_m3day].abs().mean()]
-    calibr_calc_metrics[f"MAE/{gn.q_liq_m3day} (MEAN)"] = calibr_calc_metrics['Mean absolute error'] / \
-        calibr_calc_metrics[gn.q_liq_m3day + ' (MEAN)'] * 100
+    calibr_calc_metrics[f"MAE/{gn.q_liq_m3day} (MEAN), %"] = abs(calibr_calc_metrics['Mean absolute error'] / \
+        calibr_calc_metrics[gn.q_liq_m3day + ' (MEAN)'] * 100)
     calibr_calc_metrics["Накопленная добыча жидкости, м3 (ADAPT)"] = calc_cumulative_oil_production_m3(overall_data_with_calibr_gaps,
                                                                                          gn.q_liq_m3day + " (ADAPT)",
                                                                                          time_to_resample)
     calibr_calc_metrics["Накопленная добыча жидкости, м3 (PREDICTION)"] = calc_cumulative_oil_production_m3(overall_data_with_calibr_gaps,
                                                                                          gn.q_liq_m3day + " (PREDICTION)",
                                                                                          time_to_resample)
-    calibr_calc_metrics['Относительная ошибка по накопленной добыче жидкости, %'] = relative_error_perc(calibr_calc_metrics["Накопленная добыча жидкости, м3 (ADAPT)"],
+    calibr_calc_metrics['Относительная ошибка по накопленной добыче жидкости, %'] = abs(relative_error_perc(calibr_calc_metrics["Накопленная добыча жидкости, м3 (ADAPT)"],
                                                                                                          calibr_calc_metrics[
-                                                                                                             "Накопленная добыча жидкости, м3 (PREDICTION)"])
+                                                                                                             "Накопленная добыча жидкости, м3 (PREDICTION)"]))
     calibr_calc_metrics['Количество точек overall_data, шт'] = len(overall_data[gn.q_liq_m3day + " (ADAPT)"])
     return calibr_calc_metrics
 
