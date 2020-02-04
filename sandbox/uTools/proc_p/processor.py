@@ -157,7 +157,7 @@ def calc(options=well_calculation.Calc_options()):
             row_in_prepared_data = prepared_data.iloc[i]
             print('Итерация № ' + str(i+1) + ' из ' + str(prepared_data.shape[0]) +
                   ' в потоке №' + str(options.number_of_thread) + ' для времени ' + str(prepared_data.index[i]))
-
+            this_state.time = prepared_data.index[i]
             this_state = workflow_input_data.transfer_data_from_row_to_state(this_state, row_in_prepared_data, opt.vfm_calc_option)
 
             this_result = mass_calculation(this_state, opt.vfm_calc_option, opt.restore_q_liq_only, UniflocVBA, opt)  # расчет
@@ -217,15 +217,17 @@ def create_thread_list(well_name, dir_name_with_input_data, static_data_full_pat
 
 static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
 
-well_name = '6012'
-dir_name_with_input_data = 'restore_input_'
+well_name = '1976'
+dir_name_with_input_data = 'adapt_input_'
 
 amount_of_threads = 1
+if __name__ == '__main__':
+    thread_option_list = create_thread_list(well_name, dir_name_with_input_data, static_data_full_path,
+                           amount_of_threads)
 
-thread_option_list = create_thread_list(well_name, dir_name_with_input_data, static_data_full_path,
-                       amount_of_threads)
+    #start_time = time.time()
+    #run_calculation(thread_option_list)
+    #end_time = time.time()
+    #print('Затрачено времени всего: ' + str(end_time - start_time))
 
-start_time = time.time()
-run_calculation(thread_option_list)
-end_time = time.time()
-print('Затрачено времени всего: ' + str(end_time - start_time))
+    calc(thread_option_list[0])

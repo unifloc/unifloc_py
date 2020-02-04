@@ -81,6 +81,8 @@ class all_ESP_data():  # класс, в котором хранятся данн
         self.well_str = None
         self.pvt_str = None
 
+        self.time = None
+
 
 def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option):
     """
