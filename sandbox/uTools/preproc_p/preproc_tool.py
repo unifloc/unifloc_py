@@ -88,6 +88,11 @@ class GlobalNames():
         self.esp_head_m = 'Напор ЭЦН, м'
         self.q_mix_mean_m3day = 'Дебит ГЖС в условиях насоса (средний), м3/сут'
 
+        self.rs_intake_m3m3 = 'Газосодержание на приеме, м3/м3'
+        self.rs_dis_m3m3 = 'Газосодержание на выкиде, м3/м3'
+        self.gas_fraction_intake_d = 'Доля газа в потоке ГЖС на приеме, д.ед.'
+        self.gas_fraction_dis_d = 'Доля газа в потоке ГЖС на выкиде, д.ед.'
+
         self.dp_esp_atm = 'Перепад давления ЭЦН, атм'
         self.ch_cp_multiply = 'Произведение калибровок по напору и мощности'
 

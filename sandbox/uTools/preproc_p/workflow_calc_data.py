@@ -49,7 +49,11 @@ columns_name_dict = {"Pline_atma": global_names.p_lin_atm,
                      "ESP.power_CS_teor_calc_W": global_names.power_CS_teor_calc_kwt,
                      ".ESP.ESPpump.Qmix_intake_m3day":  global_names.q_mix_intake_m3day,
                      ".ESP.ESPpump.Qmix_dis_m3day":  global_names.q_mix_dis_m3day,
-                     ".ESP.ESPpump.head_m":  global_names.esp_head_m}
+                     ".ESP.ESPpump.head_m":  global_names.esp_head_m,
+                     ".ESP.ESPpump.rs_intake_m3m3":  global_names.rs_intake_m3m3,
+                     ".ESP.ESPpump.rs_dis_m3m3":  global_names.rs_dis_m3m3,
+                     ".ESP.ESPpump.gas_fraction_intake_d":  global_names.gas_fraction_intake_d,
+                     ".ESP.ESPpump.gas_fraction_dis_d":  global_names.gas_fraction_dis_d}
 
 
 columns_to_dim_solve = [global_names.active_power_kwt,

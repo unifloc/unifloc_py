@@ -82,6 +82,11 @@ class Static_data:
         self.c_calibr_power_d_max_limit = None
         self.c_calibr_power_d_min_limit = None
 
+        self.qliq_max_predict_m3day = None
+        self.qliq_min_predict_m3day = None
+
+
+
     def fill_by_true_tr(self, row):
         self.d_cas_mm = row[('D э/к', 'Unnamed: 9_level_1', 'Unnamed: 9_level_2', 'мм')].values[0]
         self.d_tube_mm = row[('D нкт', 'Unnamed: 10_level_1', 'Unnamed: 10_level_2', 'мм')].values[0]
@@ -211,6 +216,9 @@ def fill_static_data_structure_by_df(static_data: Static_data,
     static_data.c_calibr_head_d_min_limit = this_static_data_series.c_calibr_head_d_min_limit
     static_data.c_calibr_power_d_max_limit = this_static_data_series.c_calibr_power_d_max_limit
     static_data.c_calibr_power_d_min_limit = this_static_data_series.c_calibr_power_d_min_limit
+
+    static_data.qliq_max_predict_m3day = this_static_data_series.qliq_max_predict_m3day
+    static_data.qliq_min_predict_m3day = this_static_data_series.qliq_min_predict_m3day
 
     return static_data
 

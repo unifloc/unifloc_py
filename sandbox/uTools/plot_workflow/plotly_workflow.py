@@ -246,11 +246,12 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
                                        gn.p_buf_atm + ' (ADAPT)']]
     loss_trace = create_traces_list_for_all_columms(loss)
     fig = make_subplots(
-        rows=8, cols=1,
+        rows=9, cols=1,
         specs=[[{"type": "scattergl"}], [{"type": "scattergl"}],
-               [{"type": "scattergl"}], [{"type": "heatmap"}],
                [{"type": "scattergl"}], [{"type": "scattergl"}],
-               [{"type": "scattergl"}], [{"type": "scattergl"}]]
+               [{"type": "scattergl"}], [{"type": "scattergl"}],
+               [{"type": "scattergl"}], [{"type": "scattergl"}],
+               [{"type": "heatmap"}]]
     )
     fig.add_trace(q_wc_gor_trace[0],
                   row=1, col=1)
@@ -275,7 +276,7 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
                   row=4, col=1)
     fig.add_trace(esp_traces['power_trace'],
                   row=5, col=1)
-    fig.add_trace(esp_df_traces[-1],
+    fig.add_trace(esp_df_traces[4],
                   row=5, col=1)
 
     fig.add_trace(esp_traces['efficiency_trace'],
@@ -286,10 +287,19 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
                   row=7, col=1)
     fig.add_trace(esp_df_traces[0],
                   row=7, col=1)
-
-    fig.add_trace(data,
+    fig.add_trace(esp_traces['efficiency_trace'],
                   row=8, col=1)
+    fig.add_trace(esp_df_traces[5],
+                  row=8, col=1)
+    fig.add_trace(esp_df_traces[6],
+                  row=8, col=1)
+    fig.add_trace(esp_df_traces[7],
+                  row=8, col=1)
+    fig.add_trace(esp_df_traces[8],
+                  row=8, col=1)
+    fig.add_trace(data,
+                  row=9, col=1)
 
-    fig.update_layout(height=7 * 500, showlegend=True)
+    fig.update_layout(height=8 * 500, showlegend=True)
     fig.layout.hovermode = 'x'
     plot(fig, filename=filename, auto_open=auto_open)

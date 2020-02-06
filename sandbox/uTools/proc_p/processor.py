@@ -106,7 +106,9 @@ def mass_calculation(this_state: workflow_input_data.all_ESP_data, restore_flow,
                           options={'maxiter': 50, 'ftol': 1e-07})
     else:
         if restore_q_liq_only == True:
-            result = minimize(calc_well_plin_pwf_atma_for_minimize, [this_state.qliq_m3day], args=args, bounds=[[20, 100]], options={'maxiter': 100, 'ftol': 1e-07})  #TODO разобраться с левой границей
+            result = minimize(calc_well_plin_pwf_atma_for_minimize, [this_state.qliq_m3day], args=args,
+                              bounds=[[this_state.qliq_min_predict_m3day, this_state.qliq_max_predict_m3day]],
+                              options={'maxiter': 100, 'ftol': 1e-07})  #TODO разобраться с левой границей
         else:
             result = minimize(calc_well_plin_pwf_atma_for_minimize, [100, 20], args=args, bounds=[[5, 175], [10, 35]], options={'maxiter': 50, 'ftol': 1e-04})
     print(result)
