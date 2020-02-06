@@ -129,6 +129,7 @@ def calc(options=well_calculation.Calc_options()):
     static_data = workflow_tr_data.Static_data()
     static_data_df = pd.read_excel(opt.static_data_full_path)
     static_data = workflow_tr_data.fill_static_data_structure_by_df(static_data, static_data_df, opt.well_name + " (ready)")
+    opt.hydr_part_weight_in_error_coeff = static_data.hydr_part_weight_in_error_coeff
 
     input_data_filename_str, dir_to_save_calculated_data = \
         proc_tool.create_directories(opt.vfm_calc_option, app_path, opt.well_name, options, opt.dir_name_with_input_data, time_mark)
@@ -219,7 +220,7 @@ def create_thread_list(well_name, dir_name_with_input_data, static_data_full_pat
 
 static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
 
-well_name = '1976'
+well_name = '1984'
 dir_name_with_input_data = 'adapt_input_'
 
 amount_of_threads = 1

@@ -142,21 +142,13 @@ class GlobalNames():
 
     def return_essential_parameters(self):
         essential_parameters_list = [self.q_liq_m3day,
-                                     self.q_gas_m3day,
-                                     self.q_wat_m3day,
-                                     self.q_oil_m3day,
-                                     self.q_oil_mass_tday,
                                      self.watercut_perc,
                                      self.gor_m3m3,
                                      self.p_buf_atm,
-                                     self.p_lin_atm,
                                      self.p_intake_atm,
                                      self.t_intake_c,
-                                     self.t_motor_c,
                                      self.cos_phi_d,
                                      self.u_motor_v,
-                                     self.u_ab_v,
-                                     self.i_a_motor_a,
                                      self.motor_load_perc,
                                      self.freq_hz,
                                      self.active_power_kwt]
@@ -363,3 +355,21 @@ def solve_dimensions(df: pd.DataFrame, global_names=global_names):
     else:
         print(f"Приведение размерностей. Нет столбца с именем: {global_names.p_lin_atm}")
     return df
+
+
+def fill_input_data(df, essential_parameters):
+    real_lenth = df.shape[0]
+    new_df = df.copy()
+    for i in essential_parameters:
+        this_series = df[i]
+        init_len = len(this_series)
+        this_series_drop = this_series.dropna()
+        new_len  = len(this_series_drop)
+        if new_len < init_len:
+            print(f"Пропуски в колонке {i}, количество NaN {init_len - new_len}, проиведем заполнение с помощью fill_na")
+            new_series = this_series.fillna(method = 'ffill')
+            new_df[i] = new_series
+        else:
+            pass
+    return new_df
+
