@@ -226,8 +226,8 @@ def create_thread_list(well_name, dir_name_with_input_data, static_data_full_pat
 
 static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
 
-well_name = '3900'
-dir_name_with_input_data = 'adapt_input_'
+well_name = '3026'
+dir_name_with_input_data = 'restore_input_'
 
 amount_of_threads = 1
 if __name__ == '__main__':
