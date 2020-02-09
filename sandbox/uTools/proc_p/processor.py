@@ -69,6 +69,9 @@ def calc_well_plin_pwf_atma_for_minimize(minimaze_parameters, args):
     this_state.result = result  # сохранение результата в форме списка в структуру для последующего извлечения
     p_line_calc_atm = result[0][0]
     p_buf_calc_atm = result[0][2]
+    print(f"p_buf_calc_atm: {p_buf_calc_atm}")
+    print(f"this_state.c_calibr_head_d: {this_state.c_calibr_head_d}")
+    print(f"this_state.qliq_m3day: {this_state.qliq_m3day}")
     power_CS_calc_W = result[0][16]
     if opt.use_pwh_in_loss == True:  # функция ошибки
         result_for_minimize = opt.hydr_part_weight_in_error_coeff * \
@@ -159,14 +162,17 @@ def calc(options=well_calculation.Calc_options()):
             start_in_loop_time = time.time()
             row_in_prepared_data = prepared_data.iloc[i]
             print('Итерация № ' + str(i+1) + ' из ' + str(prepared_data.shape[0]) +
-                  ' в потоке №' + str(options.number_of_thread) + ' для времени ' + str(prepared_data.index[i]))
+                  ' в потоке №' + str(options.number_of_thread) + ' для времени ' + str(prepared_data.index[i]) +
+                  " в надстройке " + str(options.addin_name))
             this_state.time = prepared_data.index[i]
             this_state = workflow_input_data.transfer_data_from_row_to_state(this_state, row_in_prepared_data, opt.vfm_calc_option)
 
             this_result = mass_calculation(this_state, opt.vfm_calc_option, opt.restore_q_liq_only, UniflocVBA, opt)  # расчет
 
             end_in_loop_time = time.time()
-            print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
+            print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time) +
+                  ' в потоке №' + str(options.number_of_thread) + ' для времени ' + str(prepared_data.index[i]) +
+                  " в надстройке " + str(options.addin_name))
 
             new_dataframe = workflow_input_data.create_new_result_df(this_result, this_state, prepared_data, i)
 
@@ -220,7 +226,7 @@ def create_thread_list(well_name, dir_name_with_input_data, static_data_full_pat
 
 static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
 
-well_name = '1984'
+well_name = '3900'
 dir_name_with_input_data = 'adapt_input_'
 
 amount_of_threads = 1

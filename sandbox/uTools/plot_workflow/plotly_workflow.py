@@ -212,21 +212,22 @@ def create_esp_traces(UniflocVBA, q_esp_nom_m3day, head_esp_nom_m, pump_id):
             'dp_trace': dp_trace}
 
 
-def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, filename, esp_df_traces, auto_open=True):
-    nedeed_param_list = [gn.q_liq_m3day + ' (ADAPT)',
-                         gn.gor_m3m3 + ' (ADAPT)',
-                         gn.watercut_perc + ' (ADAPT)',
+def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, filename, esp_df_traces, auto_open=True,
+                          mark=' (ADAPT)'):
+    nedeed_param_list = [gn.q_liq_m3day + mark,
+                         gn.gor_m3m3 + mark,
+                         gn.watercut_perc + mark,
 
-                         gn.c_calibr_head_d + ' (ADAPT)',
-                         gn.c_calibr_power_d + ' (ADAPT)',
+                         gn.c_calibr_head_d + mark,
+                         gn.c_calibr_power_d + mark,
 
-                         gn.freq_hz + ' (ADAPT)',
-                         gn.active_power_kwt + ' (ADAPT)',
-                         gn.efficiency_esp_d + ' (ADAPT)',
-                         gn.dp_esp_atm + ' (ADAPT)',
+                         gn.freq_hz + mark,
+                         gn.active_power_kwt + mark,
+                         gn.efficiency_esp_d + mark,
+                         gn.dp_esp_atm + mark,
 
-                         gn.p_buf_atm + ' (ADAPT)',
-                         gn.p_intake_atm + ' (ADAPT)'
+                         gn.p_buf_atm + mark,
+                         gn.p_intake_atm + mark
                          ]
     all_data_corr = overall_data[nedeed_param_list]
     all_data_corr = all_data_corr.corr()
@@ -235,15 +236,15 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
         x=list(all_data_corr.columns),
         y=list(all_data_corr.index), showscale=False, colorscale='RdBu', zmid=0)
     q_wc_gor = overall_data_dimensionless[
-        [gn.q_liq_m3day + ' (ADAPT)',
-                         gn.gor_m3m3 + ' (ADAPT)',
-                         gn.watercut_perc + ' (ADAPT)']]
+        [gn.q_liq_m3day + mark,
+                         gn.gor_m3m3 + mark,
+                         gn.watercut_perc + mark]]
     q_wc_gor_trace = create_traces_list_for_all_columms(q_wc_gor)
-    calibrs = overall_data_dimensionless[[gn.c_calibr_head_d + ' (ADAPT)',
-                         gn.c_calibr_power_d + ' (ADAPT)']]
+    calibrs = overall_data_dimensionless[[gn.c_calibr_head_d + mark,
+                         gn.c_calibr_power_d + mark]]
     calibrs_trace = create_traces_list_for_all_columms(calibrs)
-    loss = overall_data_dimensionless[[gn.active_power_kwt + ' (ADAPT)',
-                                       gn.p_buf_atm + ' (ADAPT)']]
+    loss = overall_data_dimensionless[[gn.active_power_kwt + mark,
+                                       gn.p_buf_atm + mark]]
     loss_trace = create_traces_list_for_all_columms(loss)
     fig = make_subplots(
         rows=9, cols=1,
