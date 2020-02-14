@@ -77,6 +77,13 @@ def make_result(overall_data: pd.DataFrame, gn = global_names, time_to_resample 
     :return:
     """
     overall_data_with_calibr_gaps = overall_data.dropna(subset=[gn.q_liq_m3day + " (PREDICTION)"])
+    if (overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (ADAPT)"][-1] !=
+        overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (PREDICTION)"][-1]) and \
+        (overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (ADAPT)"][-2] ==
+         overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (PREDICTION)"][-2]):
+        print('Прогноз метрик для последней точки')
+        overall_data_with_calibr_gaps = overall_data_with_calibr_gaps.tail(1)
+
     calibr_calc_metrics = calc_mertics(overall_data_with_calibr_gaps[gn.q_liq_m3day + " (ADAPT)"],
                                              overall_data_with_calibr_gaps[gn.q_liq_m3day + " (PREDICTION)"])
 

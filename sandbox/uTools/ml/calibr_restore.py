@@ -110,7 +110,7 @@ def predict_parameter_via_linear_model(x_train, x_test, y_train):
     parameters = {'alpha': np.linspace(1e-7, 30, 1000)}
 
     r_est_power = linear_model.Ridge()
-    clf = GridSearchCV(r_est_power, parameters, cv=5)
+    clf = GridSearchCV(r_est_power, parameters, cv=5, n_jobs=-1)
     _ = clf.fit(x_train_sc, y_train)
     b_reg = clf.best_estimator_
     y_test = b_reg.predict(x_test_sc)
