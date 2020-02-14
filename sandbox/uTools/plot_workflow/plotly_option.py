@@ -33,7 +33,7 @@ def create_banches_for_report(report_type):
         current = {global_names.i_a_motor_a: [global_names.i_a_motor_a]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, current, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, current, choke, qliq]
         return all_banches
     if report_type == 'adaptation':
         mark = " (ADAPT)"
@@ -54,7 +54,7 @@ def create_banches_for_report(report_type):
         current = {global_names.i_a_motor_a: [global_names.i_a_motor_a, global_names.i_motor_a + mark]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, calibr, error, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, current, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, current, choke, qliq]
         return all_banches
     if report_type == 'predict_input':
         mark = " (ADAPT)"
@@ -73,7 +73,7 @@ def create_banches_for_report(report_type):
         cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, calibr, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, choke, qliq]
         return all_banches
     if report_type == 'forecast_input':
         mark = " (ADAPT)"
@@ -92,7 +92,7 @@ def create_banches_for_report(report_type):
         cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, calibr, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, choke, qliq]
         return all_banches
     if report_type == 'prediction':
         mark = " (PREDICTION)"
@@ -114,7 +114,7 @@ def create_banches_for_report(report_type):
         cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, calibr, error, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, choke, qliq]
         return all_banches
     if report_type == 'forecast':
         mark = " (PREDICTION)"
@@ -134,7 +134,7 @@ def create_banches_for_report(report_type):
         cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, calibr, error, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, choke, qliq]
         return all_banches
     if report_type == 'overall_result':
         mark = " (PREDICTION)"
@@ -161,5 +161,5 @@ def create_banches_for_report(report_type):
         cos = {global_names.cos_phi_d: [global_names.cos_phi_d]}
         choke = {global_names.d_choke_mm: [global_names.d_choke_mm]}
         all_banches = [qliq, relative_errors, calibr,  error, gor, wc, pressure_intake, pressure_wh,
-                       temp_intake, frequencies, load, power, voltage, cos, choke]
+                       temp_intake, frequencies, load, power, voltage, cos, choke, qliq]
         return all_banches

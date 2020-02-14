@@ -77,7 +77,6 @@ def make_result(overall_data: pd.DataFrame, gn = global_names, time_to_resample 
     :return:
     """
     overall_data_with_calibr_gaps = overall_data.dropna(subset=[gn.q_liq_m3day + " (PREDICTION)"])
-
     calibr_calc_metrics = calc_mertics(overall_data_with_calibr_gaps[gn.q_liq_m3day + " (ADAPT)"],
                                              overall_data_with_calibr_gaps[gn.q_liq_m3day + " (PREDICTION)"])
 
@@ -103,6 +102,7 @@ def make_result(overall_data: pd.DataFrame, gn = global_names, time_to_resample 
                                                                                                          calibr_calc_metrics[
                                                                                                              "Накопленная добыча жидкости, м3 (PREDICTION)"]))
     calibr_calc_metrics['Количество точек overall_data, шт'] = len(overall_data[gn.q_liq_m3day + " (ADAPT)"])
+    calibr_calc_metrics['Количество точек на прогноз, шт'] = len(overall_data_with_calibr_gaps[gn.q_liq_m3day + " (ADAPT)"])
     return calibr_calc_metrics
 
 
