@@ -18,28 +18,49 @@ def check_ml_input_by_drop(df: pd.DataFrame):
     return df
 
 
-def extract_time_from_df(df: pd.DataFrame):
+def extract_time_from_df(df: pd.DataFrame, use_time_as_int_in_column=False):
     """
     Разделение DataFrame на отельную колонку с временем и DataFrame без времени
-    :param df: исходный df
+    :param use_time_as_int_in_column:
+    :param df: исходный df с индексом времени
     :return: df, time_columns
     """
-    time_columns = df['Время']
-    df = df.drop(columns=['Время'])
-    return df, time_columns
+    time_index = df.index.copy()
+    df = df.reset_index(drop=True)
+    if use_time_as_int_in_column:
+        df['Время'] = time_index.astype(int)
+    return df, time_index
 
 
-def get_test_train_drop_2_points(data: pd.DataFrame, target: pd.Series):
+def get_test_train_drop_2_points(feature_data: pd.DataFrame, target_data: pd.Series):
     """
     Разделение DataFrame на train и test через 2
-    :param data: исходные данные - фичи
-    :param target: исходные данные - ответы
+    :param feature_data: исходные данные - фичи
+    :param target_data: исходные данные - ответы
     :return: out_x_train, out_x_test, out_y_train, out_y_test
     """
-    out_x_train = data[data.index % 2 == 0]
-    out_y_train = target[target.index % 2 == 0]
-    out_x_test = data[data.index % 2 == 1]
-    out_y_test = target[target.index % 2 == 1]
+    feature_data_without_index, _ = extract_time_from_df(feature_data,
+                                                         use_time_as_int_in_column=True)
+    target_data_without_index, _ = extract_time_from_df(target_data,
+                                                        use_time_as_int_in_column=True)
+
+    out_x_train = feature_data_without_index[feature_data_without_index.index % 2 == 0]
+    out_y_train = target_data_without_index[target_data_without_index.index % 2 == 0]
+    out_x_test = feature_data_without_index[feature_data_without_index.index % 2 == 1]
+    out_y_test = target_data_without_index[target_data_without_index.index % 2 == 1]
+
+    out_x_train = out_x_train.set_index('Время')
+    out_x_train.index = pd.to_datetime(out_x_train.index)
+
+    out_y_train = out_y_train.set_index('Время')
+    out_y_train.index = pd.to_datetime(out_y_train.index)
+
+    out_x_test = out_x_test.set_index('Время')
+    out_x_test.index = pd.to_datetime(out_x_test.index)
+
+    out_y_test = out_y_test.set_index('Время')
+    out_y_test.index = pd.to_datetime(out_y_test.index)
+
     return out_x_train, out_x_test, out_y_train, out_y_test
 
 
@@ -58,39 +79,27 @@ def get_test_train_80_20(data: pd.DataFrame, target: pd.Series):
     return out_x_train, out_x_test, out_y_train, out_y_test
 
 
+def predict_parameter_in_df(x_train, x_test, y_train, use_time_as_int_in_column=False):
+    x_train_without_index, x_train_index = extract_time_from_df(x_train, use_time_as_int_in_column=use_time_as_int_in_column)
+    x_test_without_index, x_test_index = extract_time_from_df(x_test, use_time_as_int_in_column=use_time_as_int_in_column)
+    y_train_without_index, y_train_index = extract_time_from_df(y_train, use_time_as_int_in_column=False)
+    y_test_without_index = predict_parameter_via_linear_model(x_train_without_index, x_test_without_index, y_train_without_index)
 
-def get_joined_2_points_target(y_test, y_train):
-    """
-    Склейка данных теста и обучения
-    :param y_test:
-    :param y_train:
-    :return: исходный DataFrame с предсказанными значениями через 2
-    """
-    out = [None] * (len(y_test) + len(y_train))
-    y_test = list(y_test)
-    y_train = list(y_train)
-    for i in range(len(out)):
-        if i % 2 == 0:
-            out[i] = y_train[int(i/2)]
-        else:
-            out[i] = y_test[int((i-1)/2)]
-    return out
-
-
-def get_joined_80_20(y_test, y_train):
-    """
-    Склейка данных теста и обучения
-    :param y_test:
-    :param y_train:
-    :return: исходный DataFrame с предсказанными значениями (20% последних)
-    """
-    y_test = list(y_test)
-    y_train = list(y_train)
-    out = y_train + y_test
-    return out
+    if type(y_train) == pd.DataFrame:
+        y_test_df = {}
+        for i, j in enumerate(y_train.columns):
+            y_test_df[j] = y_test_without_index[i]
+        y_test_df = pd.DataFrame(y_test_df, index=x_test_index)
+        y_test_df.index.name = 'Время'
+    else:
+        y_test_df = pd.Series(y_test_without_index)
+        y_test_df.name = y_train.name
+        y_test_df.index = x_test_index
+        y_test_df.index.name = 'Время'
+    return y_test_df
 
 
-def restore_calibr_via_ridge(x_train, x_test, y_train):
+def predict_parameter_via_linear_model(x_train, x_test, y_train):
     # отмаштабируем данные
     sc = StandardScaler()
     sc.fit(x_train)
@@ -105,5 +114,4 @@ def restore_calibr_via_ridge(x_train, x_test, y_train):
     _ = clf.fit(x_train_sc, y_train)
     b_reg = clf.best_estimator_
     y_test = b_reg.predict(x_test_sc)
-
     return y_test

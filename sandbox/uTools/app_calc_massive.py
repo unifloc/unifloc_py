@@ -216,7 +216,7 @@ def load_adaptation_data_and_generate_restore_data(well_name): #TODO сдела�
     calibr_data = preproc_tool.mark_df_columns(calibr_data, 'Подготовленные')
     # calibr_data = calibr_data.resample('3h').mean()
     # calibr_data = calibr_data.interpolate()
-    p_out_lol, f_out_lol = calibr_restore.restore_calibr_via_ridge(all_data, calibr_data,,
+    p_out_lol, f_out_lol = calibr_restore.predict_parameter_via_linear_model(all_data, calibr_data,,
     time_to_resamle = '3h'
     created_input_data_type = 1  # костыль для 252 и 693 скважины
     edited_data_cs = workflow_cs_data.load_and_edit_cs_data(cs_data_filename, created_input_data_type,
