@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.append('../'*4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
-
+import scipy
 
 def get_filtred_by_sigma(df: pd.DataFrame, column_name='Объемный дебит жидкости (СУ)', lower_sigma=2,
                          upper_sigma=3): #TODO сделать возможность замены значений в колонке на None, а не дропа строк
@@ -26,6 +26,7 @@ def get_filtred_by_sigma(df: pd.DataFrame, column_name='Объемный деб�
     print(f"Произведена фильтрация по стандартному отклонению (верхнее: {upper_sigma}, нижнее: {lower_sigma}, удалено "
           f"строк: {amount_of_filtered_rows}")
     return df
+
 
 def get_filtred_by_measurng_time(input_data: pd.DataFrame, first_edit_data:pd.DataFrame, critical_difference=30): #TODO переделать или выкинуть
     """
@@ -53,3 +54,21 @@ def get_filtred_by_measurng_time(input_data: pd.DataFrame, first_edit_data:pd.Da
     # чистим колонку, взятую из данных после первичной обработки
     out.drop(columns=['Время замера фактическое'])
     return out
+
+
+def check_medfit(df, column_name, items, plot=True):
+    """
+    Использование медианного фильтра к колонке dataframe
+    :param df: исходный зашумленный df
+    :param column_name: имя колонки для фильтрации
+    :param items: количество точек для окна медианного фильтра
+    :param plot: построение графиков
+    :return: df с колонками column_name + ' (real)' и + ' (median)'
+    """
+    real = df[column_name].dropna()
+    median = scipy.signal.medfilt(df[column_name].dropna().values, items)
+    df = pd.DataFrame({column_name + ' (real)': real,
+                      column_name + ' (median)': median})
+    if plot:
+        df.plot()
+    return df
