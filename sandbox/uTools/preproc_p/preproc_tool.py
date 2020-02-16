@@ -226,17 +226,22 @@ def combine_multiprocessing_result(path_to_work_dir, dir_name_with_calculated_da
     return first_result_data
 
 
-def cut_df(df, left_boundary, right_boundary):
+def cut_df(df: pd.DataFrame, left_boundary: list, right_boundary: list, save_interval=True):
     """
     Вырезка из DataFrame временного интервала
-    :param df:
-    :param left_boundary:
-    :param right_boundary:
-    :return:
+    :param save_interval: True - интервалы сохраняются, False - интервалы удаляются
+    :param df: исходный DataFrame с индексом DateTime
+    :param left_boundary: левые границы интервалов
+    :param right_boundary: правые границы интервалов
+    :return: df с нужными интервалами (save_interval = True) или без ненужных интервалов (save_interval = False
     """
     df_list = []
+
     for start, end in zip(left_boundary, right_boundary):
-        this_df = df[(df.index >= start) & (df.index <= end)]
+        if save_interval:
+            this_df = df[(df.index >= start) & (df.index <= end)]
+        else:
+            this_df = df[(df.index < start) | (df.index > end)]
         df_list.append(this_df)
     if len(df_list) == 1:
         return df_list[0]
@@ -246,6 +251,7 @@ def cut_df(df, left_boundary, right_boundary):
                 df = this_df
             else:
                 df = df.append(this_df)
+        df = df.drop_duplicates()
         return df
 
 
