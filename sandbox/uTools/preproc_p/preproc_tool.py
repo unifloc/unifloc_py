@@ -235,8 +235,8 @@ def cut_df(df: pd.DataFrame, left_boundary: list, right_boundary: list, save_int
     :param right_boundary: правые границы интервалов
     :return: df с нужными интервалами (save_interval = True) или без ненужных интервалов (save_interval = False
     """
+    initial_len = df.shape[0]
     df_list = []
-
     for start, end in zip(left_boundary, right_boundary):
         if save_interval:
             this_df = df[(df.index >= start) & (df.index <= end)]
@@ -244,15 +244,17 @@ def cut_df(df: pd.DataFrame, left_boundary: list, right_boundary: list, save_int
             this_df = df[(df.index < start) | (df.index > end)]
         df_list.append(this_df)
     if len(df_list) == 1:
-        return df_list[0]
+        df = df_list[0]
     else:
         for number, this_df in enumerate(df_list):
             if number == 0:
                 df = this_df
             else:
                 df = df.append(this_df)
-        df = df.drop_duplicates()
-        return df
+    df = df.drop_duplicates()
+    new_len = df.shape[0]
+    print(f'Удалено строк: {initial_len - new_len}, т.е {int((initial_len - new_len)/ initial_len * 100)}%')
+    return df
 
 
 def make_gaps_and_interpolate(df, reverse=False):
