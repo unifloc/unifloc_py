@@ -88,7 +88,7 @@ def fill_input_data(df, essential_parameters):
         new_len = len(this_series_drop)
         if new_len < init_len:
             print(f"Пропуски в колонке {i}, количество NaN {init_len - new_len}, проиведем заполнение с помощью fill_na"
-                  f" ({init_len} ==> {new_len})")
+                  f" ({new_len} ==> {init_len})")
             new_series = this_series.fillna(method='ffill')
             new_df[i] = new_series
         else:
