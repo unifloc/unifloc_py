@@ -81,9 +81,11 @@ def make_result(overall_data: pd.DataFrame, gn = global_names, time_to_resample 
         overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (PREDICTION)"][-1]) and \
         (overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (ADAPT)"][-2] ==
          overall_data_with_calibr_gaps[global_names.c_calibr_power_d + " (PREDICTION)"][-2]):
-        print('Прогноз метрик для последней точки')
+        print('Расчет для последней точки')
         overall_data_with_calibr_gaps = overall_data_with_calibr_gaps.tail(1)
-
+    if overall_data.dropna(subset=[gn.q_liq_m3day + " (PREDICTION)"]).shape[0] > overall_data.dropna(subset=[gn.q_liq_m3day + " (ADAPT)"]).shape[0]:
+        print('Расчет метрик для аллокации по известным точкам')
+        overall_data_with_calibr_gaps = overall_data_with_calibr_gaps.dropna(subset=[gn.q_liq_m3day + " (ADAPT)"]) #TODO проверить, возможно интервалы не пересекаются
     calibr_calc_metrics = calc_mertics(overall_data_with_calibr_gaps[gn.q_liq_m3day + " (ADAPT)"],
                                              overall_data_with_calibr_gaps[gn.q_liq_m3day + " (PREDICTION)"])
 

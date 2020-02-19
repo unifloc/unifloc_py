@@ -92,7 +92,7 @@ def fill_input_data(df, essential_parameters):
             new_series = this_series.fillna(method='ffill')
             new_df[i] = new_series
         else:
-            pass
+            print(f"Пропусков в колонке {i} нет")
     return new_df
 
 
