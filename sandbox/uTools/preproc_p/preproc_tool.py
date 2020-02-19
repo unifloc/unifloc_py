@@ -235,7 +235,7 @@ def cut_df(df: pd.DataFrame, left_boundary: list, right_boundary: list, save_int
     :param right_boundary: правые границы интервалов
     :return: df с нужными интервалами (save_interval = True) или без ненужных интервалов (save_interval = False
     """
-    initial_len = df.shape[0]
+    init_len = df.shape[0]
     df_list = []
     for start, end in zip(left_boundary, right_boundary):
         if save_interval:
@@ -251,13 +251,15 @@ def cut_df(df: pd.DataFrame, left_boundary: list, right_boundary: list, save_int
                 df = this_df
             else:
                 df = df.append(this_df)
-    if not save_interval:
+    if not save_interval: #TODO что-то тут не так - странно дропает дубли
         initial_len_dupl = df.shape[0]
         df = df.drop_duplicates()
         new_len_dupl = df.shape[0]
-        print(f'Удалено строк дублированных: {initial_len_dupl - new_len_dupl}, т.е {int((initial_len_dupl - new_len_dupl) / initial_len_dupl * 100)}%')
+        print(f'Удалено строк дублированных: {initial_len_dupl - new_len_dupl}, '
+              f'т.е {int((initial_len_dupl - new_len_dupl) / initial_len_dupl * 100)}%')
     new_len = df.shape[0]
-    print(f'Удалено строк: {initial_len - new_len}, т.е {int((initial_len - new_len)/ initial_len * 100)}%')
+    print(f'Удалено строк: {init_len - new_len}, т.е {int((init_len - new_len)/ init_len * 100)}%'
+          f' ({init_len} ==> {new_len})')
     return df
 
 
@@ -369,19 +371,4 @@ def solve_dimensions(df: pd.DataFrame, global_names=global_names):
     return df
 
 
-def fill_input_data(df, essential_parameters):
-    real_lenth = df.shape[0]
-    new_df = df.copy()
-    for i in essential_parameters:
-        this_series = df[i]
-        init_len = len(this_series)
-        this_series_drop = this_series.dropna()
-        new_len  = len(this_series_drop)
-        if new_len < init_len:
-            print(f"Пропуски в колонке {i}, количество NaN {init_len - new_len}, проиведем заполнение с помощью fill_na")
-            new_series = this_series.fillna(method = 'ffill')
-            new_df[i] = new_series
-        else:
-            pass
-    return new_df
 

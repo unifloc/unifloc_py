@@ -32,18 +32,20 @@ def get_filtred_by_sigma(df: pd.DataFrame, column_name, lower_sigma=2,
     :param upper_sigma: верхняя граница разумных значений в терминах отклонения по нормальному распределению.
     :return:
     """
-    init_amount_of_row = len(df[column_name].dropna())
+    init_len = len(df[column_name].dropna())
     m = df[column_name].dropna().mean()
     sigma = df[column_name].dropna().values.std()
     max_border = m + upper_sigma * sigma
     min_border = m - lower_sigma * sigma
     df[column_name] = df[column_name].apply(carefull_filtr_data, args=[min_border, max_border])
-    amount_of_filtered_rows = init_amount_of_row - len(df[column_name].dropna())
+    new_len = len(df[column_name].dropna())
+    amount_of_filtered_rows = init_len - new_len
 
     print(f"Произведена фильтрация по стандартному отклонению для колонки {column_name}"
           f" Границы: верхняя: {max_border} ({upper_sigma}), "
           f"нижняя: {min_border} ({lower_sigma}), заменено "
-          f"значенией на None: {amount_of_filtered_rows}")
+          f"значенией на None: {amount_of_filtered_rows}"
+          f" ({init_len} ==> {new_len})")
     return df
 
 
@@ -63,3 +65,45 @@ def check_medfit(df, column_name, items, plot=True):
     if plot:
         df.plot()
     return df
+
+
+def dropna_for_adaptation(df, parameters):
+    new_df = df.copy()
+    for i in parameters:
+        init_len = new_df.shape[0]
+        new_df = new_df.dropna(subset = [i])
+        new_len = new_df.shape[0]
+        print(f"По столбцу {i} удалено значений {init_len-new_len},"
+             f" т.е. {int((init_len - new_len)/init_len*100)}%"
+             f" ({init_len} ==> {new_len})")
+    return new_df
+
+
+def fill_input_data(df, essential_parameters):
+    new_df = df.copy()
+    for i in essential_parameters:
+        this_series = df[i]
+        init_len = len(this_series)
+        this_series_drop = this_series.dropna()
+        new_len = len(this_series_drop)
+        if new_len < init_len:
+            print(f"Пропуски в колонке {i}, количество NaN {init_len - new_len}, проиведем заполнение с помощью fill_na"
+                  f" ({init_len} ==> {new_len})")
+            new_series = this_series.fillna(method='ffill')
+            new_df[i] = new_series
+        else:
+            pass
+    return new_df
+
+
+def filtr_df_by_phisycal_borders(df, phisycal_borders_to_values):
+    new_df = df.copy()
+    for key, value in phisycal_borders_to_values.items():
+        init_len = len(new_df[key].dropna())
+        new_df[key] = new_df[key].apply(carefull_filtr_data, args = value)
+        new_len = len(new_df[key].dropna())
+        print(f"В столбце {key} удалено значений {init_len-new_len},"
+             f"т.е. {int((init_len - new_len)/init_len*100)}%"
+             f" ({init_len} ==> {new_len})")
+    return new_df
+
