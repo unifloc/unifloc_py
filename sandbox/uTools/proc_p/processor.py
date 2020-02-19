@@ -106,14 +106,14 @@ def mass_calculation(this_state: workflow_input_data.all_ESP_data, restore_flow,
         result = minimize(calc_well_plin_pwf_atma_for_minimize, [this_state.c_calibr_head_d, this_state.c_calibr_power_d], args=args, method='SLSQP', tol=1e-07,
                           bounds=[[this_state.c_calibr_head_d_min_limit, this_state.c_calibr_head_d_max_limit],
                                   [this_state.c_calibr_power_d_min_limit, this_state.c_calibr_power_d_max_limit]],
-                          options={'maxiter': 50, 'ftol': 1e-07})
+                          options={'maxiter': 10, 'ftol': 1e-07})
     else:
         if restore_q_liq_only == True:
             result = minimize(calc_well_plin_pwf_atma_for_minimize, [this_state.qliq_m3day], args=args,
                               bounds=[[this_state.qliq_min_predict_m3day, this_state.qliq_max_predict_m3day]],
-                              options={'maxiter': 100, 'ftol': 1e-07})  #TODO разобраться с левой границей
+                              options={'maxiter': 20, 'ftol': 1e-07})  #TODO разобраться с левой границей
         else:
-            result = minimize(calc_well_plin_pwf_atma_for_minimize, [100, 20], args=args, bounds=[[5, 175], [10, 35]], options={'maxiter': 50, 'ftol': 1e-04})
+            result = minimize(calc_well_plin_pwf_atma_for_minimize, [100, 20], args=args, bounds=[[5, 175], [10, 35]], options={'maxiter': 20, 'ftol': 1e-04})
     print(result)
     true_result = this_state.result # сохранение результатов расчета оптимизированной модели
     return true_result

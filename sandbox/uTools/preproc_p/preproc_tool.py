@@ -251,7 +251,11 @@ def cut_df(df: pd.DataFrame, left_boundary: list, right_boundary: list, save_int
                 df = this_df
             else:
                 df = df.append(this_df)
-    df = df.drop_duplicates()
+    if not save_interval:
+        initial_len_dupl = df.shape[0]
+        df = df.drop_duplicates()
+        new_len_dupl = df.shape[0]
+        print(f'Удалено строк дублированных: {initial_len_dupl - new_len_dupl}, т.е {int((initial_len_dupl - new_len_dupl) / initial_len_dupl * 100)}%')
     new_len = df.shape[0]
     print(f'Удалено строк: {initial_len - new_len}, т.е {int((initial_len - new_len)/ initial_len * 100)}%')
     return df
