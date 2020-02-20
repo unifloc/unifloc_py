@@ -12,11 +12,17 @@
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uTools.data_workflow as data_workflow
 import uniflocpy.uWell.uPipe as pipe
-import uniflocpy.uWell.deviation_survey as well_profile
+import uniflocpy.uWell.deviation_survey as deviation_survey
 import numpy as np
+import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 
 class self_flow_well():
-    def __init__(self, h_conductor_mes_m=500, h_conductor_vert_m=500,
+    def __init__(self, fluid=BlackOil_model.Fluid(),
+                 well_profile=deviation_survey.simple_well_deviation_survey(),
+                 casing_pipe=pipe.Pipe(),
+                 tube_pipe=pipe.Pipe(),
+                 data=data_workflow.Data(),
+                 h_conductor_mes_m=500, h_conductor_vert_m=500,
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
                  qliq_on_surface_m3day=100, fw_perc=10,
@@ -79,12 +85,15 @@ class self_flow_well():
         self.t_earth_init_in_reservoir_c = t_earth_init_in_reservoir_c
         self.geothermal_grad_cm = geothermal_grad_cm
 
-        self.well_profile = well_profile.simple_well_deviation_survey()
+        self.well_profile = well_profile
 
-        self.casing_pipe = pipe.Pipe()
-        self.tube_pipe = pipe.Pipe()
+        self.casing_pipe = casing_pipe
+        self.tube_pipe = tube_pipe
 
-        self.data = data_workflow.Data()
+        self.casing_pipe.fluid_flow.fl = fluid
+        self.casing_pipe.fluid_flow.fl = fluid
+
+        self.data = data
 
         self.qliq_on_surface_m3day = qliq_on_surface_m3day
         self.fw_perc = fw_perc

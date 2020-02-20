@@ -72,15 +72,15 @@ def pressure_drop_BeggsBrill_odeint(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm,
         fl = PVT.FluidMcCain(gamma_oil, gamma_gas, gamma_wat, rsb_m3m3, gamma_gassp, y_h2s, y_co2, y_n2,
                              s_ppm, par_wat, pbcal_bar, tpb_C, bobcal_m3m3, muobcal_cP)
         fl.calc(p1, t_array)
-        q_liq = (q_oil_m3d * fl.bo_m3m3 + q_water_m3d * fl.bw_m3m3)
-        q_gas = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.bg_m3m3)
+        q_liq = (q_oil_m3d * fl.b_oil_m3m3 + q_water_m3d * fl.b_wat_m3m3)
+        q_gas = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.b_gas_m3m3)
         vel_gas_super_ms = q_gas / (86400 * uc.pi * d_m ** 2 / 4)
         vel_liq_super_ms = q_liq / (86400 * uc.pi * d_m ** 2 / 4)
-        rho_liq_kgm3 = ((fl.rho_oil_kgm3 + fl.rs_m3m3 * fl.rho_gas_kgm3) / fl.bo_m3m3) * (1 - wct) + \
-                       fl.rho_wat_kgm3 / fl.bw_m3m3 * wct
+        rho_liq_kgm3 = ((fl.rho_oil_kgm3 + fl.rs_m3m3 * fl.rho_gas_kgm3) / fl.b_oil_m3m3) * (1 - wct) + \
+                       fl.rho_wat_kgm3 / fl.b_wat_m3m3 * wct
         rho_gas_kgm3 = fl.rho_gas_kgm3
-        mu_liq_cP = fl.mu_oil_cP * (1 - wct) + fl.mu_wat_cP * wct
-        mu_gas_cP = fl.mu_gas_cP
+        mu_liq_cP = fl.mu_oil_cp * (1 - wct) + fl.mu_wat_cp * wct
+        mu_gas_cP = fl.mu_gas_cp
         dpdl = uc.Pa2bar(unf_BeggsBrill_gradient(vel_gas_super_ms, vel_liq_super_ms, rho_liq_kgm3, rho_gas_kgm3,
                                                  mu_liq_cP, mu_gas_cP, d_m, sigma_liq_Nm, theta, e, rough_pipe))
         return dpdl
@@ -144,15 +144,15 @@ def pressure_drop_BeggsBrill(l, p1, t1, t2, d_m, q_liq_m3d, sigma_liq_Nm, theta,
             fl = PVT.FluidMcCain(gamma_oil, gamma_gas, gamma_wat, rsb_m3m3, gamma_gassp, y_h2s, y_co2, y_n2,
                                  s_ppm, par_wat, pbcal_bar, tpb_C, bobcal_m3m3, muobcal_cP)
             fl.calc(p_pvt, t_pvt)
-            q_liq = (q_oil_m3d * fl.bo_m3m3 + q_water_m3d * fl.bw_m3m3)
-            q_gas = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.bg_m3m3)
+            q_liq = (q_oil_m3d * fl.b_oil_m3m3 + q_water_m3d * fl.b_wat_m3m3)
+            q_gas = ((q_gas_m3d - fl.rs_m3m3 * q_oil_m3d) * fl.b_gas_m3m3)
             vel_gas_super_ms = q_gas / (86400 * uc.pi * d_m ** 2 / 4)
             vel_liq_super_ms = q_liq / (86400 * uc.pi * d_m ** 2 / 4)
-            rho_liq_kgm3 = ((fl.rho_oil_kgm3 + fl.rs_m3m3 * fl.rho_gas_kgm3) / fl.bo_m3m3) * (1 - wct) +\
-                fl.rho_wat_kgm3 / fl.bw_m3m3 * wct
+            rho_liq_kgm3 = ((fl.rho_oil_kgm3 + fl.rs_m3m3 * fl.rho_gas_kgm3) / fl.b_oil_m3m3) * (1 - wct) + \
+                           fl.rho_wat_kgm3 / fl.b_wat_m3m3 * wct
             rho_gas_kgm3 = fl.rho_gas_kgm3
-            mu_liq_cP = fl.mu_oil_cP * (1 - wct) + fl.mu_wat_cP * wct
-            mu_gas_cP = fl.mu_gas_cP
+            mu_liq_cP = fl.mu_oil_cp * (1 - wct) + fl.mu_wat_cp * wct
+            mu_gas_cP = fl.mu_gas_cp
             dpdl = uc.Pa2bar(unf_BeggsBrill_gradient(vel_gas_super_ms, vel_liq_super_ms, rho_liq_kgm3, rho_gas_kgm3, mu_liq_cP,
                                            mu_gas_cP, d_m, sigma_liq_Nm, theta, e, rough_pipe))
             delta_p = dpdl * delta_l

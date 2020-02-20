@@ -50,7 +50,7 @@ class TestMatBalance(unittest.TestCase):
         fluid.rsb_m3m3 = 100
         fluid.calc(p_res_init_bar, t_res_init_c)
 
-        STOIIP_by_VOL_m3 = uc.pi * r_drainage_m ** 2 * h_eff_res_m * porosity_d * (1 - S_wat_connate_d) / fluid.bo_m3m3
+        STOIIP_by_VOL_m3 = uc.pi * r_drainage_m ** 2 * h_eff_res_m * porosity_d * (1 - S_wat_connate_d) / fluid.b_oil_m3m3
 
         N_cum_oil_recovery_m3 = q_oil_surf_m3day * t_step_days * 45
 
