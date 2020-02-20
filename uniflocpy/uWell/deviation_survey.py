@@ -312,7 +312,7 @@ class simple_well_deviation_survey():
         :param h_mes_m: измеренная глубина вдоль ствола скважины, м
         :return: абсолютная вертикальная глубина, м
         """
-        return self.interpolation_h_vert_by_h_mes(h_mes_m)
+        return float(self.interpolation_h_vert_by_h_mes(h_mes_m))
 
     def get_angle_to_horizontal_grad(self, h_mes_m):
         """
