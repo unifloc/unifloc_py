@@ -11,12 +11,17 @@
 
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uTools.data_workflow as data_workflow
-import uniflocpy.uWell.uPipe as pipe
-import uniflocpy.uWell.deviation_survey as well_profile
+import uniflocpy.uWell.uPipe as uPipe
+import uniflocpy.uWell.deviation_survey as deviation_survey
+import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import numpy as np
 
 class self_flow_well():
-    def __init__(self, h_conductor_mes_m=500, h_conductor_vert_m=500,
+    def __init__(self, fluid=PVT_fluids.FluidStanding(),
+                 well_profile=deviation_survey.simple_well_deviation_survey(),
+                 data=data_workflow.Data(),
+                 pipe=uPipe.Pipe(),
+                 h_conductor_mes_m=500, h_conductor_vert_m=500,
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
                  qliq_on_surface_m3day=100, fw_perc=10,
@@ -79,12 +84,10 @@ class self_flow_well():
         self.t_earth_init_in_reservoir_c = t_earth_init_in_reservoir_c
         self.geothermal_grad_cm = geothermal_grad_cm
 
-        self.well_profile = well_profile.simple_well_deviation_survey()
-
-        self.casing_pipe = pipe.Pipe()
-        self.tube_pipe = pipe.Pipe()
-
-        self.data = data_workflow.Data()
+        self.well_profile = well_profile
+        self.pipe = pipe
+        self.pipe.fluid_flow.fl = fluid
+        self.data = data
 
         self.qliq_on_surface_m3day = qliq_on_surface_m3day
         self.fw_perc = fw_perc
@@ -168,12 +171,12 @@ class self_flow_well():
 
         self.data.clear_data()
 
-        self.__transfer_data_to_pipe__(self.casing_pipe, True, self.d_casing_inner_m)
+        self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_casing_inner_m)
         while self.h_calculated_mes_m >= self.h_intake_mes_m:
-            self.__calc_pipe__(self.casing_pipe)
+            self.__calc_pipe__(self.pipe)
 
-        self.__transfer_data_to_pipe__(self.tube_pipe, False, self.d_tube_inner_m)
-        while self.h_calculated_mes_m < self.h_intake_mes_m and self.h_calculated_mes_m >= self.step_lenth_in_calc_along_wellbore_m:
-            self.__calc_pipe__(self.tube_pipe)
-        self.__calc_pipe__(self.tube_pipe, option_last_calc_boolean=True)
+        self.__transfer_data_to_pipe__(self.pipe, section_casing=False, d_inner_pipe_m=self.d_tube_inner_m)
+        while self.h_intake_mes_m > self.h_calculated_mes_m >= self.step_lenth_in_calc_along_wellbore_m:
+            self.__calc_pipe__(self.pipe)
+        self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
 

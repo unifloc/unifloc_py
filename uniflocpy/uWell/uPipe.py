@@ -20,7 +20,7 @@ class Pipe():
         :param hydr_cor: гидравлическая корреляция, класс
         :param temp_cor: температурная корреляция, класс
         """
-        self.fluid_flow = PVT.FluidFlow(fluid = fluid)
+        self.fluid_flow = PVT.FluidFlow(fluid=fluid)
         self.hydr_cor = hydr_cor
         self.temp_cor = temp_cor
 
@@ -117,7 +117,6 @@ class Pipe():
         self.temp_cor.Joule_Thompson_coef_cpa = self.fluid_flow.Joule_Thompson_coef_cpa
         self.temp_cor.grad_p_pam = self.calc_p_grad_pam(self.p_bar, self.t_c)
         self.temp_cor.grad_v_msecm = self.fluid_flow.dvdp_msecpam * self.temp_cor.grad_p_pam
-
 
         self.t_grad_cm = self.temp_cor.calc_grad_t_cm(self.p_bar, self.t_c)
         return self.t_grad_cm

@@ -11,13 +11,10 @@ import pandas as pd
 import numpy as np
 import sys
 sys.path.append('../')
-from _plotly_future_ import v4_subplots
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from plotly.offline import download_plotlyjs, plot, iplot
-from plotly import tools
+from plotly.offline import plot
 
-from datetime import date
 
 
 def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
@@ -79,15 +76,6 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
             fig.append_trace(data_traces[i], row=i + 1, col=1)
 
     plot(fig, filename=filename_str)
-
-
-"""def create_traces_list_by_num(data_x_values, data_y, num_y_list):
-    trace_list = []
-    for i in num_y_list:
-        namexy = data_y.get_saved_parameter_name_by_number(i)
-        this_trace = create_plotly_trace(data_x_values, data_y.get_saved_values_by_number(i), namexy)
-        trace_list.append(this_trace)
-    return trace_list"""
 
 
 def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
