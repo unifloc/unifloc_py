@@ -38,7 +38,7 @@ class TestSelfFlowWell(unittest.TestCase):
     def test_calc_all_from_down_to_up(self):
         self_flow_well_object = self_flow_well_module.self_flow_well()
         self_flow_well_object.calc_all_from_down_to_up()
-        self.assertAlmostEquals(self_flow_well_object.t_calculated_c, 75.98485926724206, delta=0.00000001)
+        self.assertAlmostEquals(self_flow_well_object.t_calculated_c, 76.0924818311061, delta=0.00000001)
 
 
 class TestDeviationSurvey(unittest.TestCase):

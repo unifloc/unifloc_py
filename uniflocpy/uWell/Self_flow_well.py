@@ -25,7 +25,7 @@ class self_flow_well():
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
                  qliq_on_surface_m3day=100, fw_perc=10,
-                 d_casing_inner_m=0.062, d_tube_inner_m=0.120,
+                 d_casing_inner_m=0.120, d_tube_inner_m=0.062,
                  p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
                  t_earth_init_on_surface_c=3, t_earth_init_in_reservoir_c=90, geothermal_grad_cm=0.03,
