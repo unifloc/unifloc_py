@@ -13,11 +13,11 @@ import sys
 sys.path.append('../')
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from plotly.offline import plot
+from plotly.offline import plot, iplot
 
 
 
-def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True):
+def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True, swap_xy = False):
     """
     Создание одного trace по данным
 
@@ -27,13 +27,18 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = Tr
     :param chosen_mode: настройка отображения 'lines', 'markers'
     :return: один trace
     """
+    if swap_xy:
+        data_x, data_y = data_y, data_x
+        hovertemplate = namexy + ": %{x}<extra></extra>"
+    else:
+        hovertemplate = namexy + ": %{y}<extra></extra>"
     if use_gl == True:
         one_trace = go.Scattergl(
 			x=data_x,
 			y=data_y,
 			name=namexy,
 			mode=chosen_mode,
-            hovertemplate = namexy + ": %{y}<extra></extra>"
+            hovertemplate=hovertemplate
 		)
     else:
         one_trace = go.Scatter(
@@ -41,28 +46,30 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = Tr
             y=data_y,
             name=namexy,
             mode=chosen_mode,
-            hovertemplate=namexy + ": %{y:.3f}<extra></extra>"
+            hovertemplate=hovertemplate
         )
     return one_trace
 
 
-def plot_func(data, plot_title_str, filename_str):
+def plot_func(data, plot_title_str, filename_str, reversed_y=False, iplot_option=False):
     """
     Итоговая функция для построения графиков
 
+    :param reversed_y:
     :param data: созданный список из trace
     :param plot_title_str: название графика
     :param filename_str: названия html файлика
     :return: None
     """
-    layout = dict(title=plot_title_str)
-
+    if reversed_y:
+        layout = dict(title=plot_title_str, yaxis=dict(autorange='reversed'), hovermode='x')
+    else:
+        layout = dict(title=plot_title_str)
     fig = dict(data=data, layout=layout)
-
-    # fig = make_subplots(rows=8, cols=1)
-
-    plot(fig, filename=filename_str)
-    # iplot(fig)
+    if iplot_option:
+        iplot(fig, filename=filename_str)
+    else:
+        plot(fig, filename=filename_str)
 
 
 def plot_subplots(data_traces, filename_str, two_equal_subplots=False, auto_open = True):
@@ -88,7 +95,7 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False, auto_open
     plot(fig, filename=filename_str, auto_open=auto_open)
 
 
-def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl=True):
+def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl=True, swap_xy=False):
     """
     Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.
 
@@ -101,7 +108,7 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl=T
     for i in columns_name_list:
         column_name = i
         this_series = data_frame[column_name].dropna()
-        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, use_gl)
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, use_gl, swap_xy)
         trace_list.append(this_trace)
     return trace_list
 

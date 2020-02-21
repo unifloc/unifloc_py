@@ -24,7 +24,7 @@ class Pipe():
         self.hydr_cor = hydr_cor
         self.temp_cor = temp_cor
 
-        self.section_casing = False # если True, будет считать ОК
+        self.section_casing = False  # если True, будет считать ОК
 
         self.time_sec = 100 * 24 * 60 * 60
 

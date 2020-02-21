@@ -180,3 +180,7 @@ class self_flow_well():
             self.__calc_pipe__(self.pipe)
         self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
 
+
+this_well = self_flow_well()
+this_well.well_work_time_sec = 10
+this_well.calc_all_from_down_to_up()
