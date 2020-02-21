@@ -32,16 +32,19 @@ class Data():
         """
         all_class_dicts_well = []
 
-        def extract_recursicely_data_from_obj(this_class):
+        def rec(this_class, level=1, init_class_name=init_class_name):
+            # print(f"Уровень{level}")
             this_class_dict = this_class.__dict__
+            all_class_dicts_well.append({init_class_name: this_class_dict})
             for i, j in this_class_dict.items():
                 if "uniflocpy" in str(type(j)):
-                    this_class_dict = extract_recursicely_data_from_obj(j)
-                    all_class_dicts_well.append({i: this_class_dict})
+                    # print(f"Спускаемся в {i}")
+                    this_class_dict = rec(j, level + 1, init_class_name=i)
+                    # print(f"Возвращаемся из {i}")
             return this_class_dict
 
-        ___ = extract_recursicely_data_from_obj(this_class)
-        all_class_dicts_well.append({init_class_name: this_class.__dict__})
+        ___ = rec(this_class)
+
         return all_class_dicts_well
 
     def __combine_object_dicts_into_one(self, data):
@@ -68,8 +71,9 @@ class Data():
         new_data = {}
         for i, j in data.items():
             if str(type(j)) == "<class 'numpy.ndarray'>":
-
-                if len(j) == 1:
+                if type(j.tolist()) == float or type(j.tolist()) == int:
+                    new_data[i] = float(j)
+                elif len(j) == 1:
                     new_data[i] = float(j)
                 else:
                     pass
@@ -117,6 +121,8 @@ class Data():
         self.h_list = []
         self.p_list = []
         self.t_list = []
+        self.df_list = []
+        self.result_df = None
 
     def get_values(self, number):
         """
