@@ -17,7 +17,7 @@ from plotly.offline import plot
 
 
 
-def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
+def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True):
     """
     Создание одного trace по данным
 
@@ -27,12 +27,22 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
     :param chosen_mode: настройка отображения 'lines', 'markers'
     :return: один trace
     """
-    one_trace = go.Scattergl(
-        x=data_x,
-        y=data_y,
-        name=namexy,
-        mode=chosen_mode
-    )
+    if use_gl == True:
+        one_trace = go.Scattergl(
+			x=data_x,
+			y=data_y,
+			name=namexy,
+			mode=chosen_mode,
+            hovertemplate = namexy + ": %{y}<extra></extra>"
+		)
+    else:
+        one_trace = go.Scatter(
+            x=data_x,
+            y=data_y,
+            name=namexy,
+            mode=chosen_mode,
+            hovertemplate=namexy + ": %{y:.3f}<extra></extra>"
+        )
     return one_trace
 
 
@@ -55,7 +65,7 @@ def plot_func(data, plot_title_str, filename_str):
     # iplot(fig)
 
 
-def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
+def plot_subplots(data_traces, filename_str, two_equal_subplots=False, auto_open = True):
     """
     Построение нескольких графиков
 
@@ -74,11 +84,11 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
         fig = make_subplots(rows=len(data_traces), cols=1, shared_xaxes=True, vertical_spacing=0.02)
         for i in range(len(data_traces)):
             fig.append_trace(data_traces[i], row=i + 1, col=1)
+    fig.layout.hovermode = 'x'
+    plot(fig, filename=filename_str, auto_open=auto_open)
 
-    plot(fig, filename=filename_str)
 
-
-def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
+def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl=True):
     """
     Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.
 
@@ -90,7 +100,8 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
     columns_name_list = data_frame.columns
     for i in columns_name_list:
         column_name = i
-        this_trace = create_plotly_trace(data_frame.index, data_frame[column_name], column_name, chosen_mode)
+        this_series = data_frame[column_name].dropna()
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, use_gl)
         trace_list.append(this_trace)
     return trace_list
 
