@@ -61,8 +61,9 @@ class BlackOil_option():
 
 
 class Fluid:
-    def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassep=0, y_h2s=0, y_co2=0,
-                 y_n2=0, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=80, b_oil_b_cal_m3m3=0, mu_oil_b_cal_cp=0.5,
+    def __init__(self, gamma_oil=0.87, gamma_gas=0.81, gamma_wat=1.0, rsb_m3m3=80, gamma_gassep=0, y_h2s=0, y_co2=0,
+                 y_n2=0, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=-1, b_oil_b_cal_m3m3=-1, mu_oil_b_cal_cp=-1,
+                 t_res_c=90,
                  option=BlackOil_option()):
         """
         Cоздает флюид с заданными базовыми свойствами и определенным набором методик/корреляций для расчета
@@ -99,6 +100,7 @@ class Fluid:
         self.s_ppm = s_ppm
         self.par_wat = par_wat
         self.rho_oil_stkgm3 = gamma_oil * uc.rho_w_kgm3_sc  # TODO check?
+        self.t_res_c = t_res_c
         # термобарические условия
         self.p_bar = uc.psc_bar                 # thermobaric conditions for all parameters
         self.t_c = uc.tsc_c                     # can be set up by calc method
@@ -144,14 +146,15 @@ class Fluid:
         self.tpc_k = 0.0
         self.ppc_mpa = 0.0
         self.pb_mpa = 0.0
+        self.t_res_k = 0.0
 
     def _calc_pb_MPaa(self, number_cor): # TODO калибровку свойств делать внутри функций контейнеров, чтобы оставался выбор корреляций
         if number_cor == 0:
-            return PVT.unf_pb_Standing_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
+            return PVT.unf_pb_Standing_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_res_k)
         if number_cor == 1:
-            return PVT.unf_pb_Valko_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
+            return PVT.unf_pb_Valko_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_res_k)
         if number_cor == 2:  # TODO check cor
-            return PVT.unf_pb_Glaso_MPaa(self.rsb_m3m3, self.t_k, self.gamma_oil, self.gamma_gas)
+            return PVT.unf_pb_Glaso_MPaa(self.rsb_m3m3, self.t_res_k, self.gamma_oil, self.gamma_gas)
 
     def _calc_rs_m3m3(self, number_cor):
         if number_cor == 0:
@@ -306,6 +309,7 @@ class Fluid:
         self.t_c = t_c
         self.t_k = uc.c2k(self.t_c)
         self.p_mpa = uc.bar2MPa(self.p_bar)
+        self.t_res_k = uc.c2k(self.t_res_c)
 
         # oil
         # давление насыщения нефти

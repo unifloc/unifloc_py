@@ -52,7 +52,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_flow.__dict__.items():
             if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 13144.511219057467,
+        self.assertAlmostEqual(sum, 13326.88768795837,
                                delta=0.0001)
 
     def test_BlackOil_option(self):
