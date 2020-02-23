@@ -14,6 +14,8 @@ import uniflocpy.uTools.data_workflow as data_workflow
 import uniflocpy.uWell.uPipe as uPipe
 import uniflocpy.uWell.deviation_survey as deviation_survey
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
+import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_BB
+import uniflocpy.uTemperature.temp_cor_Hasan_Kabir as temp_cor_HK
 import numpy as np
 
 class self_flow_well():
@@ -117,6 +119,10 @@ class self_flow_well():
         pipe_object.fluid_flow.fw_perc = self.fw_perc
         pipe_object.time_sec = self.well_work_time_sec
         pipe_object.fluid_flow.d_m = d_inner_pipe_m
+        pipe_object.t_in_c = self.t_bottomhole_c
+        pipe_object.t_out_c = self.t_wellhead_c
+        pipe_object.h_mes_in_m = self.h_bottomhole_mes_m
+        pipe_object.h_mes_out_m = 0
 
     def __calc_pipe__(self, pipe_object, option_last_calc_boolean = False):
         """
@@ -134,7 +140,6 @@ class self_flow_well():
                                                                                  self.t_calculated_c))
         self.t_grad_calculated_cm = pipe_object.calc_t_grad_cm(self.p_calculated_bar, self.t_calculated_c)
 
-
         self.data.get_data(self)
         if not option_last_calc_boolean:
             self.step_lenth_calculated_along_vert_m = np.abs(self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
@@ -145,7 +150,6 @@ class self_flow_well():
             self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m
             self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
             self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m
-
 
     def calc_all_from_down_to_up(self):
         """
@@ -171,25 +175,37 @@ class self_flow_well():
         self.step_lenth_calculated_along_vert_m = (self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
                                                                                  self.step_lenth_in_calc_along_wellbore_m) -
                                                    self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
-
         self.data.clear_data()
 
         self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_casing_inner_m)
-        while self.h_calculated_mes_m >= self.h_intake_mes_m:
+
+        while self.h_calculated_mes_m > self.h_intake_mes_m:
             self.__calc_pipe__(self.pipe)
+
+        step_lenth_in_calc_along_wellbore_m = self.step_lenth_in_calc_along_wellbore_m
+        self.step_lenth_in_calc_along_wellbore_m = self.h_calculated_mes_m-self.h_intake_mes_m * 0.99
+        self.__calc_pipe__(self.pipe)
+        self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
+
         if self.without_annulus_space:
             self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_tube_inner_m)
         else:
             self.__transfer_data_to_pipe__(self.pipe, section_casing=False, d_inner_pipe_m=self.d_tube_inner_m)
+
         while self.h_intake_mes_m > self.h_calculated_mes_m >= self.step_lenth_in_calc_along_wellbore_m:
             self.__calc_pipe__(self.pipe)
-        self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
 
+        # last_step
+        step_lenth_in_calc_along_wellbore_m = self.step_lenth_in_calc_along_wellbore_m
+        self.step_lenth_in_calc_along_wellbore_m = self.h_calculated_mes_m
+        self.__calc_pipe__(self.pipe, option_last_calc_boolean=False)
+        self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
 
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import pandas as pd
+import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
-calc_options ={"step_lenth_in_calc_along_wellbore_m":5,
+calc_options ={"step_lenth_in_calc_along_wellbore_m":100,
                 "without_annulus_space":False}
 
 rsb_m3m3 = 56
@@ -199,7 +215,7 @@ gamma_gas = 1.45
 
 well_data = {"h_intake_mes_m": 1205,
              "h_intake_vert_m": 1205,
-             "h_bottomhole_mes_m": 1605,  # 1756.8
+             "h_bottomhole_mes_m": 1607,  # 1756.8
              "h_bottomhole_vert_m": 1605,
 
              "geothermal_grad_cm": 0.02,
@@ -215,7 +231,8 @@ real_measurements = pd.DataFrame(
     {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
      'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
 fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3)
-simple_well = self_flow_well(fluid=fluid, **well_data, **calc_options)
+simple_well = self_flow_well(fluid=fluid,
+                             pipe=uPipe.Pipe(temp_cor=temp_cor_simple_line.SimpleLineCor()), **well_data, **calc_options)
 simple_well.well_work_time_sec = 1
 
 simple_well.calc_all_from_down_to_up()

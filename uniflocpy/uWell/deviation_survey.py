@@ -222,10 +222,10 @@ class simple_well_deviation_survey():
 
         self.interpolation_func_slinear_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
                                                                                self.h_vert_init_data_for_interpolation_m,
-                                                                               kind='linear')
+                                                                               kind='linear', fill_value='extrapolate')
         self.interpolation_func_cubic_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_init_data_for_interpolation_m,
                                                                              self.h_vert_init_data_for_interpolation_m,
-                                                                             kind='cubic')
+                                                                             kind='cubic', fill_value='extrapolate')
 
         self.amounts_of_parts = int(self.h_bottomhole_mes_m / self.lenth_of_one_part)
 
@@ -278,23 +278,23 @@ class simple_well_deviation_survey():
 
         self.interpolation_x_displacement_by_h_mes = interpolate.interp1d(self.h_mes_m,
                                                                           self.x_displacement_m,
-                                                                          kind='cubic')
+                                                                          kind='cubic', fill_value='extrapolate')
 
         self.interpolation_h_vert_by_h_mes = interpolate.interp1d(self.h_mes_m,
                                                                   self.h_vert_m,
-                                                                  kind='cubic')
+                                                                  kind='cubic', fill_value='extrapolate') #TODO убрать экстрапаляцию
 
         self.interpolation_angle_to_horizontal_by_h_mes = interpolate.interp1d(self.h_mes_m,
                                                                                self.angle_to_horizontal_grad,
-                                                                               kind='cubic')
+                                                                               kind='cubic', fill_value='extrapolate')
 
         self.interpolation_borehole_extension_by_h_mes = interpolate.interp1d(self.h_mes_m,
                                                                               self.borehole_extension_m,
-                                                                              kind='cubic')
+                                                                              kind='cubic', fill_value='extrapolate')
 
         self.interpolation_curvature_rate_by_h_mes = interpolate.interp1d(self.h_mes_m,
                                                                           self.curvature_rate_grad10m,
-                                                                          kind='cubic')
+                                                                          kind='cubic', fill_value='extrapolate')
 
     def get_x_displacement_m(self, h_mes_m):
         """

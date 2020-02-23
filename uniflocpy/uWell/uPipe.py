@@ -38,10 +38,10 @@ class Pipe():
         self.p_grad_pam = None
         self.t_grad_cm = None
 
-        self.t_out_bar = None
+        self.t_out_c = None
         self.t_in_c = None
-        self.h_mes_out = None
-        self.h_mes_in_c = None
+        self.h_mes_out_m = None
+        self.h_mes_in_m = None
 
     def calc_p_grad_pam(self, p_bar, t_c):
         """расчет градиента давления"""
@@ -77,6 +77,11 @@ class Pipe():
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
 
+        self.temp_cor.t_out_c = self.t_out_c
+        self.temp_cor.t_in_c = self.t_in_c
+        self.temp_cor.h_mes_out = self.h_mes_out_m
+        self.temp_cor.h_mes_in_c = self.h_mes_in_m
+
         self.temp_cor.angle_rad = uc.grad2rad(self.angle_to_horizontal_grad)
         self.temp_cor.section_casing = self.section_casing
 
@@ -102,7 +107,7 @@ class Pipe():
         self.temp_cor.mass_flowraten_kgsec = self.fluid_flow.mass_flowraten_kgsec
         self.temp_cor.vm_msec = self.fluid_flow.vm_msec
 
-        self.temp_cor.sigma_liq_Nm = self.temp_cor.sigma_liq_Nm
+        self.temp_cor.sigma_liq_Nm = self.fluid_flow.sigma_liq_Nm
         self.temp_cor.rhon_kgm3 = self.fluid_flow.rhon_kgm3
         self.temp_cor.mun_cP = self.fluid_flow.mun_cP
         self.temp_cor.heatcapn_jkgc = self.fluid_flow.heatcapn_jkgc
