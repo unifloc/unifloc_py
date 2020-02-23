@@ -29,7 +29,7 @@ class self_flow_well():
                  p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
                  t_earth_init_on_surface_c=3, t_earth_init_in_reservoir_c=90, geothermal_grad_cm=0.03,
-                 well_work_time_sec=60 * 24 * 60 * 60, step_lenth_in_calc_along_wellbore_m=10):
+                 well_work_time_sec=60 * 24 * 60 * 60, step_lenth_in_calc_along_wellbore_m=10, without_annulus_space=False):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
         вместе с граничными условиями. Кроме параметров, которые предлагается задать при
@@ -100,6 +100,8 @@ class self_flow_well():
         self.t_grad_calculated_cm = None
         self.p_grad_calculated_barm = None
 
+        self.without_annulus_space = without_annulus_space
+
     def __transfer_data_to_pipe__(self, pipe_object, section_casing,  d_inner_pipe_m):
         """
         Происходит изменение параметров в используемом подмодуле - трубе -
@@ -158,6 +160,7 @@ class self_flow_well():
         self.well_profile.h_pump_vert_m = self.h_intake_vert_m
         self.well_profile.h_bottomhole_mes_m = self.h_bottomhole_mes_m
         self.well_profile.h_bottomhole_vert_m = self.h_bottomhole_vert_m
+        self.well_profile.lenth_of_one_part = self.step_lenth_in_calc_along_wellbore_m
         self.well_profile.calc_all()
 
         self.h_calculated_mes_m = self.h_bottomhole_mes_m
@@ -174,17 +177,45 @@ class self_flow_well():
         self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_casing_inner_m)
         while self.h_calculated_mes_m >= self.h_intake_mes_m:
             self.__calc_pipe__(self.pipe)
-
-        self.__transfer_data_to_pipe__(self.pipe, section_casing=False, d_inner_pipe_m=self.d_tube_inner_m)
+        if self.without_annulus_space:
+            self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_tube_inner_m)
+        else:
+            self.__transfer_data_to_pipe__(self.pipe, section_casing=False, d_inner_pipe_m=self.d_tube_inner_m)
         while self.h_intake_mes_m > self.h_calculated_mes_m >= self.step_lenth_in_calc_along_wellbore_m:
             self.__calc_pipe__(self.pipe)
         self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
 
 
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
-fluid=BlackOil_model.Fluid()
-this_well = self_flow_well(fluid=fluid)
-this_well.well_work_time_sec = 10
-this_well.calc_all_from_down_to_up()
-fluid.calc(1,80)
+import pandas as pd
 
+calc_options ={"step_lenth_in_calc_along_wellbore_m":5,
+                "without_annulus_space":False}
+
+rsb_m3m3 = 56
+pb_bar = 9 * 10 ** 5
+gamma_oil = 0.86
+gamma_gas = 1.45
+
+well_data = {"h_intake_mes_m": 1205,
+             "h_intake_vert_m": 1205,
+             "h_bottomhole_mes_m": 1605,  # 1756.8
+             "h_bottomhole_vert_m": 1605,
+
+             "geothermal_grad_cm": 0.02,
+             "t_bottomhole_c": 40,
+             "t_earth_init_in_reservoir_c": 40,
+             'p_bottomhole_bar': 114.35,
+             "d_casing_inner_m": 0.133,
+             "d_tube_inner_m": 0.0503,
+             "qliq_on_surface_m3day": 40,
+             "fw_perc": 0}
+
+real_measurements = pd.DataFrame(
+    {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
+     'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
+fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3)
+simple_well = self_flow_well(fluid=fluid, **well_data, **calc_options)
+simple_well.well_work_time_sec = 1
+
+simple_well.calc_all_from_down_to_up()
