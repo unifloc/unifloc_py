@@ -20,7 +20,7 @@ keywords = {"gamma_oil": gamma_oil, "gamma_gas": gamma_gas, "gamma_wat":gamma_wa
                                     "rsb_m3m3": rsb_m3m3, "t_res_c": t_res_c}
 
 keywords_vba = {"t_c": t_c, "gamma_gas": gamma_gas,
-                "gamma_oil": gamma_oil, "gamma_wat": gamma_water, "rsb_m3m3": rsb_m3m3, "tres_C": t_res_c}
+                "gamma_oil": gamma_oil, "gamma_wat": gamma_water, "rsb_m3m3": rsb_m3m3, "tres_C": t_res_c} #проверено, улетают свойства газа (из-за z), st oil-gas, mu_wate
 
 python_fluid = BlackOil_model.Fluid(**keywords)
 

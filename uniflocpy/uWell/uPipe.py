@@ -38,6 +38,11 @@ class Pipe():
         self.p_grad_pam = None
         self.t_grad_cm = None
 
+        self.t_out_bar = None
+        self.t_in_c = None
+        self.h_mes_out = None
+        self.h_mes_in_c = None
+
     def calc_p_grad_pam(self, p_bar, t_c):
         """расчет градиента давления"""
         self.p_bar = p_bar

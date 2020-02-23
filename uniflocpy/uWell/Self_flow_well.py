@@ -183,8 +183,8 @@ class self_flow_well():
 
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 fluid=BlackOil_model.Fluid()
-# this_well = self_flow_well(fluid=BlackOil_model())
-# this_well.well_work_time_sec = 10
-# this_well.calc_all_from_down_to_up()
+this_well = self_flow_well(fluid=fluid)
+this_well.well_work_time_sec = 10
+this_well.calc_all_from_down_to_up()
 fluid.calc(1,80)
 
