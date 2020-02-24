@@ -15,6 +15,8 @@ import uniflocpy.uWell.uPipe as uPipe
 import uniflocpy.uWell.deviation_survey as deviation_survey
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
 import numpy as np
+import uniflocpy.uReservoir.IPR_simple_line as IPR_simple_line
+
 
 class self_flow_well():
     def __init__(self, fluid=PVT_fluids.FluidStanding(),
@@ -173,6 +175,7 @@ class self_flow_well():
         self.h_calculated_vert_m = self.h_bottomhole_vert_m
         if self.ipr != None:
             self.p_calculated_bar = self.ipr.calc_p_bottomhole_bar(self.qliq_on_surface_m3day)
+            self.p_bottomhole_bar = self.p_calculated_bar
         else:
             self.p_calculated_bar = self.p_bottomhole_bar
         self.t_calculated_c = self.t_bottomhole_c
@@ -209,12 +212,14 @@ class self_flow_well():
         self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
         if not self.save_all:
             self.data.get_data(self)
+        self.p_wellhead_bar = self.p_calculated_bar
+        self.t_wellhead_c = self.t_calculated_c
 
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import pandas as pd
 import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
-calc_options ={"step_lenth_in_calc_along_wellbore_m": 20,
+calc_options ={"step_lenth_in_calc_along_wellbore_m": 10,
                 "without_annulus_space": False,
                "save_all": True}
 
@@ -240,8 +245,14 @@ well_data = {"h_intake_mes_m": 1205,
 real_measurements = pd.DataFrame(
     {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
      'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
+
+
+reservoir = IPR_simple_line.IPRSimpleLine()
+ipr_m3daybar = reservoir.calc_pi_m3daybar(well_data['qliq_on_surface_m3day'], well_data['p_bottomhole_bar'], 250)
+well_data['qliq_on_surface_m3day'] = 20
+
 fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3)
-simple_well = self_flow_well(fluid=fluid,
+simple_well = self_flow_well(fluid=fluid,reservoir=reservoir,
                              pipe=uPipe.Pipe(temp_cor=temp_cor_simple_line.SimpleLineCor()), **well_data, **calc_options)
 simple_well.well_work_time_sec = 1
 import time
