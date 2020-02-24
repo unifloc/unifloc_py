@@ -150,7 +150,6 @@ class self_flow_well():
             self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m
             self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
             self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m
-
     def calc_all_from_down_to_up(self):
         """
         Расчет фонтанирующей скважины методом снизу-вверх
@@ -178,12 +177,12 @@ class self_flow_well():
         self.data.clear_data()
 
         self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_casing_inner_m)
-
-        while self.h_calculated_mes_m > self.h_intake_mes_m:
+        # casing calc
+        while self.h_calculated_mes_m >= self.h_intake_mes_m + self.step_lenth_in_calc_along_wellbore_m:
             self.__calc_pipe__(self.pipe)
-
+        # last calc in casing
         step_lenth_in_calc_along_wellbore_m = self.step_lenth_in_calc_along_wellbore_m
-        self.step_lenth_in_calc_along_wellbore_m = self.h_calculated_mes_m-self.h_intake_mes_m * 0.99
+        self.step_lenth_in_calc_along_wellbore_m = self.h_calculated_mes_m-self.h_intake_mes_m * 0.9999
         self.__calc_pipe__(self.pipe)
         self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
 
@@ -191,21 +190,23 @@ class self_flow_well():
             self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_tube_inner_m)
         else:
             self.__transfer_data_to_pipe__(self.pipe, section_casing=False, d_inner_pipe_m=self.d_tube_inner_m)
-
+        # tubing calc
         while self.h_intake_mes_m > self.h_calculated_mes_m >= self.step_lenth_in_calc_along_wellbore_m:
             self.__calc_pipe__(self.pipe)
 
-        # last_step
+        # last step in tubing before 0 point
         step_lenth_in_calc_along_wellbore_m = self.step_lenth_in_calc_along_wellbore_m
         self.step_lenth_in_calc_along_wellbore_m = self.h_calculated_mes_m
         self.__calc_pipe__(self.pipe, option_last_calc_boolean=False)
         self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
+        # calc grad in 0 point and save
+        self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
 
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import pandas as pd
 import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
-calc_options ={"step_lenth_in_calc_along_wellbore_m":100,
+calc_options ={"step_lenth_in_calc_along_wellbore_m":33,
                 "without_annulus_space":False}
 
 rsb_m3m3 = 56
@@ -216,7 +217,7 @@ gamma_gas = 1.45
 well_data = {"h_intake_mes_m": 1205,
              "h_intake_vert_m": 1205,
              "h_bottomhole_mes_m": 1607,  # 1756.8
-             "h_bottomhole_vert_m": 1605,
+             "h_bottomhole_vert_m": 1607,
 
              "geothermal_grad_cm": 0.02,
              "t_bottomhole_c": 40,
