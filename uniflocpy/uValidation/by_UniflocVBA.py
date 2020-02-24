@@ -3,13 +3,13 @@ import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import uniflocpy.uValidation.python_api as python_api
 import math
 import uniflocpy.uTools.uconst as uc
-p_bar = 300
+p_bar = 250
 p_atma = uc.bar2atm(p_bar)
-t_c = 150
+t_c = 80
 gamma_oil = 0.87
 gamma_water = 1
-gamma_gas = 0.81
-rsb_m3m3 = 300
+gamma_gas = 1.2
+rsb_m3m3 = 50
 rp_m3m3 = 80
 pb_cal_bar = 120
 t_res_c = 100

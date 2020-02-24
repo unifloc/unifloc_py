@@ -14,8 +14,6 @@ import uniflocpy.uTools.data_workflow as data_workflow
 import uniflocpy.uWell.uPipe as uPipe
 import uniflocpy.uWell.deviation_survey as deviation_survey
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
-import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_BB
-import uniflocpy.uTemperature.temp_cor_Hasan_Kabir as temp_cor_HK
 import numpy as np
 
 class self_flow_well():
@@ -23,6 +21,7 @@ class self_flow_well():
                  well_profile=deviation_survey.simple_well_deviation_survey(),
                  data=data_workflow.Data(),
                  pipe=uPipe.Pipe(),
+                 reservoir=None,
                  h_conductor_mes_m=500, h_conductor_vert_m=500,
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
@@ -31,7 +30,8 @@ class self_flow_well():
                  p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
                  t_earth_init_on_surface_c=3, t_earth_init_in_reservoir_c=90, geothermal_grad_cm=0.03,
-                 well_work_time_sec=60 * 24 * 60 * 60, step_lenth_in_calc_along_wellbore_m=10, without_annulus_space=False):
+                 well_work_time_sec=60 * 24 * 60 * 60, step_lenth_in_calc_along_wellbore_m=10, without_annulus_space=False,
+                 save_all=True):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
         вместе с граничными условиями. Кроме параметров, которые предлагается задать при
@@ -103,6 +103,9 @@ class self_flow_well():
         self.p_grad_calculated_barm = None
 
         self.without_annulus_space = without_annulus_space
+        self.save_all = save_all
+
+        self.ipr = reservoir
 
     def __transfer_data_to_pipe__(self, pipe_object, section_casing,  d_inner_pipe_m):
         """
@@ -139,8 +142,8 @@ class self_flow_well():
         self.p_grad_calculated_barm = uc.Pa2bar(pipe_object.calc_p_grad_pam(self.p_calculated_bar,
                                                                                  self.t_calculated_c))
         self.t_grad_calculated_cm = pipe_object.calc_t_grad_cm(self.p_calculated_bar, self.t_calculated_c)
-
-        self.data.get_data(self)
+        if self.save_all:
+            self.data.get_data(self)
         if not option_last_calc_boolean:
             self.step_lenth_calculated_along_vert_m = np.abs(self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
                                                                                             self.step_lenth_in_calc_along_wellbore_m) -
@@ -168,7 +171,10 @@ class self_flow_well():
 
         self.h_calculated_mes_m = self.h_bottomhole_mes_m
         self.h_calculated_vert_m = self.h_bottomhole_vert_m
-        self.p_calculated_bar = self.p_bottomhole_bar
+        if self.ipr != None:
+            self.p_calculated_bar = self.ipr.calc_p_bottomhole_bar(self.qliq_on_surface_m3day)
+        else:
+            self.p_calculated_bar = self.p_bottomhole_bar
         self.t_calculated_c = self.t_bottomhole_c
         self.t_calculated_earth_init = self.t_earth_init_in_reservoir_c
         self.step_lenth_calculated_along_vert_m = (self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
@@ -201,13 +207,16 @@ class self_flow_well():
         self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
         # calc grad in 0 point and save
         self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
+        if not self.save_all:
+            self.data.get_data(self)
 
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import pandas as pd
 import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
-calc_options ={"step_lenth_in_calc_along_wellbore_m":33,
-                "without_annulus_space":False}
+calc_options ={"step_lenth_in_calc_along_wellbore_m": 20,
+                "without_annulus_space": False,
+               "save_all": True}
 
 rsb_m3m3 = 56
 pb_bar = 9 * 10 ** 5
@@ -235,5 +244,9 @@ fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=
 simple_well = self_flow_well(fluid=fluid,
                              pipe=uPipe.Pipe(temp_cor=temp_cor_simple_line.SimpleLineCor()), **well_data, **calc_options)
 simple_well.well_work_time_sec = 1
+import time
+start = time.time()
 
 simple_well.calc_all_from_down_to_up()
+stop = time.time()
+print(stop-start)
