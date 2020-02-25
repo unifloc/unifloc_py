@@ -86,6 +86,8 @@ class all_ESP_data():  # класс, в котором хранятся данн
         self.qliq_max_predict_m3day = static_data.qliq_max_predict_m3day
         self.qliq_min_predict_m3day = static_data.qliq_min_predict_m3day
 
+        self.p_buf_calculated_atm = None
+
 
 def transfer_data_from_row_to_state(this_state, row_in_prepared_data, vfm_calc_option):
     """
