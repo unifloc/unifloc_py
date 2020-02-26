@@ -98,11 +98,11 @@ class Data():
         df = pd.DataFrame(data, index=index_to_df)
         return df
 
-    def get_data(self, method_or_correlation):
+    def get_data(self, method_or_correlation, object_name='well'):
         """
         Получение атрибутов (всех данных) из расчетного класса
         """
-        this_df = self.extract_data_from_object(method_or_correlation)
+        this_df = self.extract_data_from_object(method_or_correlation, object_name=object_name)
         self.df_list.append(this_df)
         this_data = method_or_correlation.__dict__
         self.saved_dicts.append(this_data)
