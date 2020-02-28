@@ -482,6 +482,50 @@ class API():
         return self.f_PVT_all_pvt(p_atma, t_C, gamma_gas, gamma_oil, gamma_wat, rsb_m3m3, rp_m3m3, pb_atma, tres_C,
                                   bob_m3m3, muob_cP, PVTcorr, ksep_fr, p_ksep_atma, t_ksep_C, str_PVT)
 
+
+    def MF_all_mf(self, qliq_sm3day, fw_perc, p_atma, t_C, gamma_gas=const_gg_, gamma_oil=const_go_, gamma_wat=const_gw_,
+                    rsb_m3m3=const_rsb_default, rp_m3m3=-1, pb_atma=-1, tres_C=const_tres_default, bob_m3m3=-1,
+                    muob_cP=-1, PVTcorr=Standing_based, ksep_fr=0, p_ksep_atma=-1, t_ksep_C=-1, str_PVT=""):
+        """" функция расчета объемного коэффициента газа
+
+                       p_atma давление, атм
+
+        t_c температура, с.
+
+        gamma_gas удельная плотность газа, по воздуху.  const_gg_ = 0.6
+
+        gamma_oil удельная плотность нефти, по воде.  const_go_ = 0.86
+
+        gamma_wat удельная плотность воды, по воде.  const_gw_ = 1
+
+        rsb_m3m3 газосодержание при давлении насыщения, м3/м3.  const_rsb_default = 100
+
+        rp_m3m3 замерной газовый фактор, м3/м3.  имеет приоритет перед rsb если rp < rsb
+
+        pb_atma давление насыщения при температуре пласта, атма.  опциональный калибровочный параметр,  если не задан или = 0 то рассчитается по корреляции
+
+        tres_c пластовая температура, с.  учитывается при расчете давления насыщения.  const_tres_default = 90
+
+        bob_m3m3 объемный коэффициент нефти, м3/м3.
+
+        muob_cp вязкость нефти при давлении насыщения  по умолчанию рассчитывается по корреляции
+
+        pvtcorr номер набора pvt корреляций для расчета  standing_based = 0 - на основе кор-ии стендинга  mccain_based = 1 - на основе кор-ии маккейна  straigth_line = 2 - на основ..см.мануал
+
+        ksep_fr коэффициент сепарации - определяет изменение свойств  нефти после сепарации доли свободного газа.  изменение свойств нефти зависит от условий  сепарации газа, котор..см.мануал
+
+        p_ksep_atma давление при которой была сепарация
+
+        t_ksep_c температура при которой была сепарация
+
+        str_pvt закодированная строка с параметрами pvt.  если задана - перекрывает другие значения    )
+
+        """
+
+        self.f_MF_all_mf = self.book.macro("MF_all_mf")
+        return self.f_MF_all_mf(qliq_sm3day, fw_perc, p_atma, t_C, gamma_gas, gamma_oil, gamma_wat, rsb_m3m3, rp_m3m3, pb_atma, tres_C,
+                                  bob_m3m3, muob_cP, PVTcorr, ksep_fr, p_ksep_atma, t_ksep_C, str_PVT)
+
     def PVT_bo_m3m3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,p_ksep_atma=-1,t_ksep_C=-1,str_PVT=""):
         """" расчет объемного коэффициента нефти
         
