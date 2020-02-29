@@ -27,7 +27,7 @@ class self_flow_well():
                  h_conductor_mes_m=500, h_conductor_vert_m=500,
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
-                 qliq_on_surface_m3day=100, fw_perc=10,
+                 qliq_on_surface_m3day=100, fw_on_surface_perc=10,
                  d_casing_inner_m=0.120, d_tube_inner_m=0.062,
                  p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
@@ -48,7 +48,7 @@ class self_flow_well():
         :param h_bottomhole_mes_m: измеренная глубина забоя, м
         :param h_bottomhole_vert_m: вертикальная глубина забоя, м
         :param qliq_on_surface_m3day: дебит жидкости на поверхности, м3/сутки
-        :param fw_perc: обводненность продукции на поверхности, %
+        :param fw_on_surface_perc: обводненность продукции на поверхности, %
         :param d_casing_inner_m: внутренний диаметр обсадной колонны, м
         :param d_tube_inner_m: внутренни диаметр НКТ
         :param p_bottomhole_bar: давление на забое, бар
@@ -94,7 +94,7 @@ class self_flow_well():
         self.data = data
 
         self.qliq_on_surface_m3day = qliq_on_surface_m3day
-        self.fw_perc = fw_perc
+        self.fw_on_surface_perc = fw_on_surface_perc
 
         self.h_calculated_vert_m = None
         self.h_calculated_mes_m = None
@@ -121,7 +121,7 @@ class self_flow_well():
         """
         pipe_object.section_casing = section_casing
         pipe_object.fluid_flow.qliq_on_surface_m3day = self.qliq_on_surface_m3day
-        pipe_object.fluid_flow.fw_on_surface_perc = self.fw_perc
+        pipe_object.fluid_flow.fw_on_surface_perc = self.fw_on_surface_perc
         pipe_object.time_sec = self.well_work_time_sec
         pipe_object.fluid_flow.d_m = d_inner_pipe_m
         pipe_object.t_in_c = self.t_bottomhole_c
@@ -151,6 +151,8 @@ class self_flow_well():
                                                                                             self.step_lenth_in_calc_along_wellbore_m) -
                                                              self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
             self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m
+            #if self.p_calculated_bar < 1:
+            #    self.p_calculated_bar = 1
             self.t_calculated_c -= self.t_grad_calculated_cm * self.step_lenth_in_calc_along_wellbore_m
             self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m
             self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
@@ -240,7 +242,7 @@ well_data = {"h_intake_mes_m": 1205,
              "d_casing_inner_m": 0.133,
              "d_tube_inner_m": 0.0503,
              "qliq_on_surface_m3day": 40,
-             "fw_perc": 0}
+             "fw_on_surface_perc": 0}
 
 real_measurements = pd.DataFrame(
     {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],

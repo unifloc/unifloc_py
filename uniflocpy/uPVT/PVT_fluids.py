@@ -559,6 +559,7 @@ class FluidFlow:
 
         self.mass_flowrate_liq_kgsec = self.mass_flowrate_wat_kgsec + self.mass_flowrate_oil_kgsec
 
+        self.mass_flowraten_kgsec = self.mass_flowrate_gas_kgsec + self.mass_flowrate_liq_kgsec
 
 
     def __calc_dvdp_msecpam__(self):
@@ -622,9 +623,6 @@ class FluidFlow:
 
         self.thermal_conductn_wmk = self.thermal_conduct_liq_wmk * self.liquid_content +\
                                     self.fl.thermal_conduct_gas_wmk * (1 - self.liquid_content)
-
-        #self.mass_flowraten_kgsec = self.rhon_kgm3 * self.vm_msec * self.Ap_m2
-        self.mass_flowraten_kgsec = self.mass_flowrate_gas_kgsec + self.mass_flowrate_liq_kgsec
 
         self.number_re_n = self.rhon_kgm3 * self.vm_msec * self.d_m / uc.cP2pasec(self.mun_cP)
 

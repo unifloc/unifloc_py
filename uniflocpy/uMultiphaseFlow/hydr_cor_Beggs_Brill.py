@@ -73,8 +73,10 @@ class Beggs_Brill_cor():
 
         self.friction_grad_pam = None
         self.density_grad_pam = None
+        self.acceleration_grad_pam = None
         self.friction_grad_part_percent = None
         self.density_grad_part_percent = None
+        self.acceleration_grad_part_percent = None
 
     def __calc_hltetta__(self):
         """
@@ -212,9 +214,13 @@ class Beggs_Brill_cor():
 
             self.density_grad_pam = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
 
-            self.friction_grad_part_percent = self.friction_grad_pam / (1 - self.Ek) / self.result_grad_pam * 100
+            self.acceleration_grad_pam = self.result_grad_pam * self.Ek
 
-            self.density_grad_part_percent = self.density_grad_pam / (1 - self.Ek) / self.result_grad_pam * 100
+            self.friction_grad_part_percent = self.friction_grad_pam / self.result_grad_pam * 100
+
+            self.density_grad_part_percent = self.density_grad_pam / self.result_grad_pam * 100
+
+            self.acceleration_grad_part_percent = self.acceleration_grad_pam / self.result_grad_pam * 100
 
             return self.result_grad_pam
 
