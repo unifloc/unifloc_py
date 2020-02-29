@@ -121,7 +121,7 @@ class self_flow_well():
         """
         pipe_object.section_casing = section_casing
         pipe_object.fluid_flow.qliq_on_surface_m3day = self.qliq_on_surface_m3day
-        pipe_object.fluid_flow.fw_perc = self.fw_perc
+        pipe_object.fluid_flow.fw_on_surface_perc = self.fw_perc
         pipe_object.time_sec = self.well_work_time_sec
         pipe_object.fluid_flow.d_m = d_inner_pipe_m
         pipe_object.t_in_c = self.t_bottomhole_c
