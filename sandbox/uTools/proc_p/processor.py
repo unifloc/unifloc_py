@@ -98,7 +98,7 @@ def adjustment_borders(this_state: workflow_input_data.all_ESP_data, adaptation_
     :return:
     """
     adjustment_on = False
-    value_to_move_borders = 0.2
+    value_to_move_borders = 0.4
     multiplier_to_increase = 1 + value_to_move_borders
     multiplier_to_decrease = 1 - value_to_move_borders
     if adaptation_mode:
@@ -108,26 +108,37 @@ def adjustment_borders(this_state: workflow_input_data.all_ESP_data, adaptation_
         if this_state.c_calibr_head_d == this_state.c_calibr_head_d_max_limit:
             this_state.c_calibr_head_d_max_limit = this_state.c_calibr_head_d = this_state.c_calibr_head_d * multiplier_to_increase
             adjustment_on = True
-
         if this_state.c_calibr_power_d == this_state.c_calibr_power_d_min_limit:
             this_state.c_calibr_power_d_min_limit = this_state.c_calibr_power_d = this_state.c_calibr_power_d * multiplier_to_decrease
             adjustment_on = True
         if this_state.c_calibr_power_d == this_state.c_calibr_power_d_max_limit:
             this_state.c_calibr_power_d_max_limit = this_state.c_calibr_power_d = this_state.c_calibr_power_d * multiplier_to_increase
             adjustment_on = True
-
         if this_state.p_buf_calculated_atm < 1:
             this_state.c_calibr_head_d_min_limit = this_state.c_calibr_head_d = this_state.c_calibr_head_d * multiplier_to_increase
             adjustment_on = True
+        if this_state.p_buf_calculated_atm > this_state.p_buf_data_max_atm * 2:
+            this_state.c_calibr_head_d_min_limit = this_state.c_calibr_head_d_min_limit * multiplier_to_decrease
+            this_state.c_calibr_head_d_max_limit = this_state.c_calibr_head_d = this_state.c_calibr_head_d * multiplier_to_decrease
+
+        if this_state.c_calibr_head_d_min_limit > this_state.c_calibr_head_d_max_limit:
+            this_state.c_calibr_head_d_min_limit, this_state.c_calibr_head_d_max_limit = \
+                this_state.c_calibr_head_d_max_limit, this_state.c_calibr_head_d_min_limit
+        if this_state.c_calibr_power_d_min_limit > this_state.c_calibr_power_d_max_limit:
+            this_state.c_calibr_power_d_min_limit, this_state.c_calibr_power_d_max_limit = \
+                this_state.c_calibr_power_d_max_limit, this_state.c_calibr_power_d_min_limit
+
         if adjustment_on:
             print(" \n Выполнен сдвиг границ \n")
         return adjustment_on
     else:
         if this_state.qliq_m3day == this_state.qliq_min_predict_m3day:
             this_state.qliq_min_predict_m3day = this_state.qliq_m3day = this_state.qliq_m3day * multiplier_to_decrease
+            this_state.qliq_max_predict_m3day = this_state.qliq_max_predict_m3day * multiplier_to_decrease
             adjustment_on = True
         if this_state.qliq_m3day == this_state.qliq_max_predict_m3day:
             this_state.qliq_max_predict_m3day = this_state.qliq_m3day = this_state.qliq_m3day * multiplier_to_increase
+            this_state.qliq_min_predict_m3day = this_state.qliq_min_predict_m3day * multiplier_to_increase
             adjustment_on = True
         if this_state.p_buf_calculated_atm > this_state.p_buf_data_max_atm * 2:
             this_state.qliq_min_predict_m3day = this_state.qliq_m3day = this_state.qliq_m3day * multiplier_to_increase
@@ -162,7 +173,7 @@ def mass_calculation(this_state: workflow_input_data.all_ESP_data, restore_flow,
                           options={'maxiter': 10, 'ftol': 1e-07})
         adjustment_on = adjustment_borders(this_state, adaptation_mode = True)
         amount_of_calculations = 1
-        max_amount_of_calculations = 5
+        max_amount_of_calculations = 7
         while adjustment_on and amount_of_calculations < max_amount_of_calculations:
             result = minimize(calc_well_plin_pwf_atma_for_minimize,
                               [this_state.c_calibr_head_d, this_state.c_calibr_power_d], args=args, method='SLSQP',
