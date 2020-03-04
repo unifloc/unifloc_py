@@ -103,6 +103,13 @@ class GlobalNames():
         self.relative_error_head_calibr_perc = 'Относительная ошибка по калибровке по напору, %'
         self.relative_error_power_calibr_perc = 'Относительная ошибка по калибровке по мощности, %'
 
+        self.c_calibr_head_d_min_limit = 'Граница min для калибровки по напору, д.ед'
+        self.c_calibr_head_d_max_limit = 'Граница max для калибровки по напору, д.ед'
+        self.c_calibr_power_d_min_limit = 'Граница min для калибровки по мощности, д.ед'
+        self.c_calibr_power_d_max_limit = 'Граница max для калибровки по мощности, д.ед'
+        self.qliq_min_predict_m3day = 'Граница min дебит жидкости, м3/сут'
+        self.qliq_max_predict_m3day = 'Граница max дебит жидкости, м3/сут'
+
     def return_dict_column_to_rename(self):
         columns_name_to_rename = {
             self.active_power_kwt: ["Активная мощность", "Активная мощность (ТМ)", 'Pa,кВт', 'акт.P,кВт', 'Pакт(кВт)'],

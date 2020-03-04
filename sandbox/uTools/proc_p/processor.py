@@ -72,6 +72,7 @@ def calc_well_plin_pwf_atma_for_minimize(minimaze_parameters, args):
     this_state.p_buf_calculated_atm = p_buf_calc_atm
     print(f"p_buf_calc_atm: {p_buf_calc_atm}")
     print(f"this_state.c_calibr_head_d: {this_state.c_calibr_head_d}")
+    print(f"this_state.c_calibr_power_d: {this_state.c_calibr_power_d}")
     print(f"this_state.qliq_m3day: {this_state.qliq_m3day}")
     power_CS_calc_W = result[0][16]
     if opt.use_pwh_in_loss == True:  # функция ошибки
@@ -102,6 +103,11 @@ def adjustment_borders(this_state: workflow_input_data.all_ESP_data, adaptation_
     multiplier_to_increase = 1 + value_to_move_borders
     multiplier_to_decrease = 1 - value_to_move_borders
     if adaptation_mode:
+        c_calibr_head_d_min_limit_init = this_state.c_calibr_head_d_min_limit
+        c_calibr_head_d_max_limit_init = this_state.c_calibr_head_d_max_limit
+        c_calibr_power_d_min_limit_init = this_state.c_calibr_power_d_min_limit
+        c_calibr_power_d_max_limit_init = this_state.c_calibr_power_d_max_limit
+
         if this_state.c_calibr_head_d == this_state.c_calibr_head_d_min_limit:
             this_state.c_calibr_head_d_min_limit = this_state.c_calibr_head_d = this_state.c_calibr_head_d * multiplier_to_decrease
             adjustment_on = True
@@ -129,9 +135,15 @@ def adjustment_borders(this_state: workflow_input_data.all_ESP_data, adaptation_
                 this_state.c_calibr_power_d_max_limit, this_state.c_calibr_power_d_min_limit
 
         if adjustment_on:
-            print(" \n Выполнен сдвиг границ \n")
+            print(" \n Выполнен сдвиг границ калибровок\n")
+            print(f"c_calibr_head_d_min_limit {c_calibr_head_d_min_limit_init} ==> {this_state.c_calibr_head_d_min_limit}\n"
+                  f"c_calibr_head_d_max_limit {c_calibr_head_d_max_limit_init} ==> {this_state.c_calibr_head_d_max_limit}\n"
+                  f"c_calibr_power_d_min_limit {c_calibr_power_d_min_limit_init} ==> {this_state.c_calibr_power_d_min_limit}\n"
+                  f"c_calibr_power_d_max_limit {c_calibr_power_d_max_limit_init} ==> {this_state.c_calibr_power_d_max_limit}\n")
         return adjustment_on
     else:
+        qliq_min_predict_m3day_init = this_state.qliq_min_predict_m3day
+        qliq_max_predict_m3day_init = this_state.qliq_max_predict_m3day
         if this_state.qliq_m3day == this_state.qliq_min_predict_m3day:
             this_state.qliq_min_predict_m3day = this_state.qliq_m3day = this_state.qliq_m3day * multiplier_to_decrease
             this_state.qliq_max_predict_m3day = this_state.qliq_max_predict_m3day * multiplier_to_decrease
@@ -147,8 +159,10 @@ def adjustment_borders(this_state: workflow_input_data.all_ESP_data, adaptation_
             this_state.qliq_max_predict_m3day = this_state.qliq_m3day = this_state.qliq_m3day
             this_state.qliq_min_predict_m3day = this_state.qliq_m3day = this_state.qliq_m3day * multiplier_to_decrease
             adjustment_on = True
-        print(f"Границы qliq_min_predict_m3day={this_state.qliq_min_predict_m3day} и "
-              f"qliq_max_predict_m3day = {this_state.qliq_max_predict_m3day}")
+        if adjustment_on:
+            print(" \n Выполнен сдвиг границ возможных дебитов\n")
+            print(f"qliq_min_predict_m3day {qliq_min_predict_m3day_init} ==> {this_state.qliq_min_predict_m3day}\n"
+                  f"qliq_max_predict_m3day {qliq_max_predict_m3day_init} ==> {this_state.qliq_max_predict_m3day}\n")
         return adjustment_on
 
 
@@ -182,10 +196,10 @@ def mass_calculation(this_state: workflow_input_data.all_ESP_data, restore_flow,
                                       [this_state.c_calibr_power_d_min_limit, this_state.c_calibr_power_d_max_limit]],
                               options={'maxiter': 10, 'ftol': 1e-07})
             amount_of_calculations +=1
-            if amount_of_calculations==max_amount_of_calculations:
+            if amount_of_calculations == max_amount_of_calculations:
                 print(f"\n Достигнуно максимальное количество сдвигов границ решения в ({max_amount_of_calculations})" +
                       ' в потоке №' + str(args[-1].number_of_thread) + " в надстройке " + str(args[-1].addin_name))
-            adjustment_on = adjustment_borders(this_state, adaptation_mode = True)
+            adjustment_on = adjustment_borders(this_state, adaptation_mode=True)
 
     else:
         if restore_q_liq_only == True:
@@ -194,11 +208,11 @@ def mass_calculation(this_state: workflow_input_data.all_ESP_data, restore_flow,
                               options={'maxiter': 10, 'ftol': 1e-07})  #TODO разобраться с левой границей
             adjustment_on = adjustment_borders(this_state, adaptation_mode=False)
             amount_of_calculations = 1
-            max_amount_of_calculations = 10
+            max_amount_of_calculations = 7
             while adjustment_on and amount_of_calculations < max_amount_of_calculations and this_state.qliq_m3day >= 5:
                 result = minimize(calc_well_plin_pwf_atma_for_minimize, [this_state.qliq_m3day], args=args,
                                   bounds=[[this_state.qliq_min_predict_m3day, this_state.qliq_max_predict_m3day]],
-                                  options={'maxiter': 10, 'ftol': 1e-07})
+                                  options={'maxiter': 20, 'ftol': 1e-07})
                 amount_of_calculations += 1
                 if amount_of_calculations == max_amount_of_calculations:
                     print(
@@ -320,7 +334,7 @@ def create_thread_list(well_name, dir_name_with_input_data, static_data_full_pat
 
 static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
 
-well_name = '491'
+well_name = '566'
 dir_name_with_input_data = 'restore_input_'
 
 amount_of_threads = 1
