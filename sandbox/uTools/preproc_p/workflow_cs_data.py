@@ -68,11 +68,15 @@ def read_and_format_good_tm_data(well_name, file_name_full_path, time_to_resamle
             well_data = pd.read_csv(file_name_full_path, sep='\\t', header=None)
             if well_data[0][0] == 'Параметр;Дата;Значение':
                 well_data = pd.read_csv(file_name_full_path, sep=';', skipfooter=1)
-        if well_data[0][0].split(';')[0] == 'Месторождение':
+        if well_data[0][0].split(';')[0] == 'Месторождение':  # Формат выгрузки града
             well_data = pd.read_csv(file_name_full_path, delimiter=';', engine='python')
             well_data.reset_index(inplace=True)
-            well_data.columns = list(well_data.columns[1::].values) + ['to_del']
-            columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая', 'to_del']
+            if 'index' in well_data.columns:
+                del well_data['index']
+                columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая']
+            else:
+                well_data.columns = list(well_data.columns[1::].values) + ['to_del']
+                columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая', 'to_del']
             for i in columns_to_del:
                 del well_data[i]
             well_data = initial_editing(well_data, well_name)
