@@ -148,14 +148,13 @@ class Beggs_Brill_cor():
         if self.liquid_content_with_Pains_cor < self.liquid_content:  #TODO check reality
             self.liquid_content_with_Pains_cor = self.liquid_content
 
-    def __determine_flow_pattern(self):
+    def determine_flow_pattern(self, number_Fr, liquid_content):
         """
         Определение режима течения
         :return:
         """
-        self.val_number_Fr = self.vm_msec ** 2 / const_g_m2sec / self.d_m  # (4.109)
-
-        number_Fr = self.val_number_Fr
+        self.val_number_Fr = number_Fr
+        self.liquid_content = liquid_content
 
         self.L1 = 316 * self.liquid_content ** 0.302
         self.L2 = 0.0009252 * self.liquid_content ** (-2.4684)
@@ -177,6 +176,7 @@ class Beggs_Brill_cor():
                 if (self.liquid_content < 0.4 and number_Fr >= self.L1) or (self.liquid_content >= 0.4 and number_Fr > self.L4):
                     # Distributed Flow - распределенный режим
                     self.flow_regime = 2
+        return self.flow_regime
 
     def calc_grad(self, p_bar, t_c):
         """
@@ -192,8 +192,9 @@ class Beggs_Brill_cor():
             self.result_grad_pam = 0
             return 0
         else:
+            self.val_number_Fr = self.vm_msec ** 2 / const_g_m2sec / self.d_m  # (4.109)
 
-            self.__determine_flow_pattern()
+            self.flow_regime = self.determine_flow_pattern(self.val_number_Fr, self.liquid_content)
 
             if self.flow_regime != 3:
                 self.__calc_hltetta__()
