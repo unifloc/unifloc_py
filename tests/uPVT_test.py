@@ -134,6 +134,15 @@ class TestPVT(unittest.TestCase):
         p_MPaa = 15
         self.assertAlmostEqual(PVT_correlations.unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa), 1.2883524924047487, delta=0.0001)
 
+    def test_unf_compressibility_saturated_oil_VB_1Mpa(self):
+        rsb_m3m3 = 200
+        t_k = 350
+        gamma_oil = 0.86
+        p_MPaa = 10
+        pb_mpa = 15
+        self.assertAlmostEqual(PVT_correlations.unf_compressibility_saturated_oil_McCain_1Mpa(p_MPaa, pb_mpa, t_k, gamma_oil, rsb_m3m3),
+                               0.004934802450463976, delta=0.0001)
+
     def test_unf_compressibility_oil_VB_1Mpa(self):
         rs_m3m3 = 200
         t_K = 350
@@ -266,11 +275,29 @@ class TestPVT(unittest.TestCase):
         self.assertAlmostEqual(PVT_correlations.unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z, par), 0.0004241522548512511,
                                delta=0.0001)
 
+    def test_unf_density_brine_uniflocvba_kgm3(self):
+        gamma_w = 1
+        bw_m3m3 = 1.1
+        self.assertAlmostEqual(PVT_correlations.unf_density_brine_uniflocvba_kgm3(gamma_w, bw_m3m3), 909.090909090909, delta=0.0001)
+
+
+    def test_unf_fvf_brine_McCain_m3m3(self):
+        t_K = 300
+        p_MPaa =20
+        self.assertAlmostEqual(PVT_correlations.unf_fvf_brine_McCain_m3m3(t_K, p_MPaa), 1.0007434853666817,
+                               delta=0.0001)
+
     def test_unf_fvf_brine_Spivey_m3m3(self):
         t_K = 350
         p_MPaa = 20
         s_ppm = 10000
         self.assertAlmostEqual(PVT_correlations.unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm), 1.0279011434122953, delta=0.0001)
+
+    def test_unf_viscosity_brine_McCain_cp(self):
+        t_K = 350
+        p_MPaa = 20
+        s_ppm = 10000
+        self.assertAlmostEqual(PVT_correlations.unf_viscosity_brine_McCain_cp(t_K, p_MPaa, s_ppm), 0.4165673950441691, delta=0.0001)
 
     def test_unf_viscosity_brine_MaoDuan_cP(self):
         t_K = 350

@@ -677,7 +677,7 @@ def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
 
     t_f = uc.c2f(t_c)
     api = uc.gamma_oil2api(gamma_oil)
-    heat_capacity_oil_btulbmF = ((0.388 + 0.00045 * t_f) / gamma_oil ** (1/2) )
+    heat_capacity_oil_btulbmF = ((0.388 + 0.00045 * t_f) / gamma_oil ** (1/2))
     return uc.btulbmF2kJkgK(heat_capacity_oil_btulbmF) * 1000
 
 
@@ -1019,6 +1019,7 @@ def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
     p_Pa = 10 ** 6 * p_MPaa
     rho_gas = p_Pa * m / (z * 8.31 * t_K)
     return rho_gas
+
 
 def unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas):
     """
