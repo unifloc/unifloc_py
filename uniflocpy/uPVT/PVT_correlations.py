@@ -1313,7 +1313,7 @@ def unf_fvf_brine_McCain_m3m3(t_K, p_MPaa):
     return fvf_brine_McCain
 
 
-def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
+def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):  # TODO check
     """
         Modified Spivey et al. correlation for brine(water) formation volume factor (2009)
 
@@ -1416,7 +1416,7 @@ def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
     return bw
 
 
-def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
+def unf_gwr_brine_Spivey_m3m3(s_ppm, z):  # TODO check
     """
         Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)
 
@@ -1497,7 +1497,7 @@ def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
     return gwr
 
 
-def unf_viscosity_brine_McCain_cp(t_K, p_MPaa, s_ppm):
+def unf_viscosity_brine_McCain_cp(t_K, p_MPaa, s_ppm):  #TODO check
     """
         McCain correlation for brine(water) viscosity
 
@@ -1524,7 +1524,7 @@ def unf_viscosity_brine_McCain_cp(t_K, p_MPaa, s_ppm):
     return viscosity_cp
 
 
-def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
+def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):  #TODO check
     """
         Mao-Duan correlation for brine(water) viscosity (2009)
 

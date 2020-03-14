@@ -14,14 +14,15 @@ class TestWell(unittest.TestCase):
         p_bar = 100
         t_c = 80
         pipe = Pipe.Pipe()
-        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 10247.413809815911,
+        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 7868.62775467331,
                                delta=0.0001)
+
     def test_Pipe_calc_t_grad_cm_in_tube(self):
         p_bar = 100
         t_c = 80
         pipe = Pipe.Pipe()
         pipe.section_casing = False
-        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.020113527637494258,
+        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.02099958136957478,
                                delta=0.0001)
 
     def test_Pipe_calc_t_grad_cm_in_casing(self):
@@ -29,7 +30,7 @@ class TestWell(unittest.TestCase):
         t_c = 80
         pipe = Pipe.Pipe()
         pipe.section_casing = True
-        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.017798062343446185,
+        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.018684116075526704,
                                delta=0.0001)
 # TODO температура последний рассчитанный параметр, но может быть поменять на сумму для более точной проверки?
 
@@ -38,7 +39,7 @@ class TestSelfFlowWell(unittest.TestCase):
     def test_calc_all_from_down_to_up(self):
         self_flow_well_object = self_flow_well_module.self_flow_well()
         self_flow_well_object.calc_all_from_down_to_up()
-        self.assertAlmostEquals(self_flow_well_object.t_calculated_c, 76.0924818311061, delta=0.00000001)
+        self.assertAlmostEquals(self_flow_well_object.t_calculated_c, 75.02481203406701, delta=0.00000001)
 
 
 class TestDeviationSurvey(unittest.TestCase):

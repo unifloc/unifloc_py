@@ -40,7 +40,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_flow.__dict__.items():
             if type(i[-1]) != type(PVT_fluids.FluidStanding()):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 52964.45783497338,
+        self.assertAlmostEqual(sum, 53221.725353030706,
                                delta=0.0001)
 
     def test_BlackOil_model(self):
@@ -52,7 +52,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_flow.__dict__.items():
             if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 13320.993350375373,
+        self.assertAlmostEqual(sum, 13320.994251413265,
                                delta=0.0001)
 
     def test_BlackOil_option(self):
