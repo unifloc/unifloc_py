@@ -110,6 +110,10 @@ class GlobalNames():
         self.qliq_min_predict_m3day = 'Граница min дебит жидкости, м3/сут'
         self.qliq_max_predict_m3day = 'Граница max дебит жидкости, м3/сут'
 
+        self.vibration_xy_msec2 = 'Вибрация X/Y, м/с2'
+        self.vibration_z_msec2 = 'Вибрация X/Y, м/с2'
+        self.work_status_number = 'Номер режима работы'
+
     def return_dict_column_to_rename(self):
         columns_name_to_rename = {
             self.active_power_kwt: ["Активная мощность", 'Ракт, кВт',
@@ -148,7 +152,10 @@ class GlobalNames():
             self.q_gas_m3day: ["Объемный дебит газа", "Дебит газа (ТМ)"],
             self.watercut_perc: ["Процент обводненности", "Обводненность (ТМ)"],
             self.q_oil_m3day: ["Объемный дебит нефти"],
-            self.q_oil_mass_tday: ["Дебит нефти (ТМ)"]}
+            self.q_oil_mass_tday: ["Дебит нефти (ТМ)"],
+            self.vibration_xy_msec2: ['Вибр X/Y, м/с2'],
+            self.vibration_z_msec2: ['Вибр Z, м/с2'],
+            self.work_status_number: ['work_status']}
 
         return columns_name_to_rename
 

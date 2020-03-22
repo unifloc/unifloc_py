@@ -124,7 +124,35 @@ def connect_traces(traces1, trace2):
     return connected_traces
 
 
-def create_report_html(df, all_banches, filename, auto_open = True):
+def create_shapes_to_plotly(borders):
+    """
+    Выделение событий для графиков с помощью форм на фоне
+    :param borders:
+    :return:
+    """
+    shapes = []
+    for i in borders:
+        this_shape = dict(
+            type="rect",
+            # x-reference is assigned to the x-values
+            xref="x",
+            # y-reference is assigned to the plot paper [0,1]
+            yref="paper",
+            x0=i[0],
+            y0=0,
+            x1=i[1],
+            y1=1,
+            fillcolor="LightSalmon",
+            opacity=0.9,
+            layer="below",
+            line_width=1,
+            line_color="LightSalmon"
+        )
+        shapes.append(this_shape)
+    return shapes
+
+def create_report_html(df, all_banches, filename, auto_open = True, layout_height = 450,
+                       vertical_spacing = 0.01, borders = []):
     """
     Создание шаблонизированного и удобного набора графиков
     :param df:
@@ -138,7 +166,7 @@ def create_report_html(df, all_banches, filename, auto_open = True):
         subplot_titles.append(list(z.keys())[0])
     fig = make_subplots(
         rows=subplot_amount, cols=1, shared_xaxes=True,
-        vertical_spacing=0.01,
+        vertical_spacing=vertical_spacing,
         subplot_titles=subplot_titles
     )
     for i in range(subplot_amount):
@@ -148,7 +176,11 @@ def create_report_html(df, all_banches, filename, auto_open = True):
             fig.add_trace(j, row=i + 1, col=1)
 
     fig.layout.hovermode = 'x'
-    fig.layout.height = 450 * subplot_amount
+    fig.layout.height = layout_height * subplot_amount
+
+    fig.update_layout(
+        shapes=create_shapes_to_plotly(borders))
+
     plot(fig, filename=filename, auto_open=auto_open)
 
 
