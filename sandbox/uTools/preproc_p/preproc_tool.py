@@ -390,4 +390,28 @@ def solve_dimensions(df: pd.DataFrame, global_names=global_names):
     return df
 
 
+def parse_standart_file(file_name, time_column_name, param_name_column_name, value_column_name):
+    if '.xls' in file_name:
+        file = pd.read_excel(file_name, index_col=time_column_name, parse_dates=True, dayfirst=True)
+    elif '.csv' in file_name:
+        file = pd.read_csv(file_name, index_col=time_column_name, parse_dates=True, dayfirst=True)
+    else:
+        print('Не тот тип файла, проверьте расширение или измените функцию')
+
+    for j, i in enumerate(file[param_name_column_name].unique()):
+        one_df = file[file[param_name_column_name] == i]
+        one_series = one_df[value_column_name]
+        one_series.name = i
+        if j == 0:
+            result_df = one_series.copy()
+        elif j == 1:
+            result_df = pd.concat([result_df, one_series], axis=1)
+        else:
+            result_df = result_df.join(one_series, how='outer')
+
+    result_df = result_df.sort_index()
+    result_df.index.name = 'Время'
+    return result_df
+
+
 
