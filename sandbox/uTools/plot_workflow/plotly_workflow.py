@@ -10,7 +10,7 @@ import sys
 sys.path.append('../')
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from plotly.offline import plot
+from plotly.offline import plot, iplot
 import plotly.figure_factory as ff
 import pandas as pd
 sys.path.append('../'*4)
@@ -48,7 +48,7 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = Tr
     return one_trace
 
 
-def plot_func(data, plot_title_str, filename_str):
+def plot_func(data, iplot_option = False, plot_title_str=None, filename_str=None):
     """
     Итоговая функция для построения графиков
 
@@ -62,8 +62,10 @@ def plot_func(data, plot_title_str, filename_str):
     fig = dict(data=data, layout=layout)
 
     # fig = make_subplots(rows=8, cols=1)
-
-    plot(fig, filename=filename_str)
+    if iplot_option:
+        iplot(fig)
+    else:
+        plot(fig, filename=filename_str)
     # iplot(fig)
 
 
