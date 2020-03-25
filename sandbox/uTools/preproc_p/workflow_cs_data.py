@@ -71,6 +71,8 @@ def read_and_format_good_tm_data(well_name, file_name_full_path, time_to_resamle
         if well_data[0][0].split(';')[0] == 'Месторождение':  # Формат выгрузки града
             well_data = pd.read_csv(file_name_full_path, delimiter=';', engine='python')
             well_data.reset_index(inplace=True)
+            if well_data.columns[0] == 'index':
+                well_data.columns = list(well_data.columns[1:]) + ['index']
             if 'index' in well_data.columns:
                 del well_data['index']
                 columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая']
@@ -92,7 +94,7 @@ def read_and_format_good_tm_data(well_name, file_name_full_path, time_to_resamle
         well_data.columns = del_inf_in_columns_name(well_data, well_name)
     if well_data.memory_usage().sum() / 1024 / 1024 > 1000:
         print('Потребление памяти слишком велико, произведем ресемпл')
-        well_data = well_data = well_data.resample(
+        well_data = well_data.resample(
             time_to_resamle).mean()  # TODO сначала нужна фильтрация, затем ресемпл
     return well_data
 

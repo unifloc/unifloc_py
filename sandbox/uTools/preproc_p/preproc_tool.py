@@ -390,8 +390,10 @@ def solve_dimensions(df: pd.DataFrame, global_names=global_names):
     return df
 
 
-def parse_standart_file(file_name, time_column_name, param_name_column_name, value_column_name):
-    if '.xls' in file_name:
+def parse_standart_file(file_name, time_column_name, param_name_column_name, value_column_name, file=None):
+    if type(file) != type(None):
+        file = file.copy()
+    elif '.xls' in file_name:
         file = pd.read_excel(file_name, index_col=time_column_name, parse_dates=True, dayfirst=True)
     elif '.csv' in file_name:
         file = pd.read_csv(file_name, index_col=time_column_name, parse_dates=True, dayfirst=True)
@@ -400,7 +402,7 @@ def parse_standart_file(file_name, time_column_name, param_name_column_name, val
 
     for j, i in enumerate(file[param_name_column_name].unique()):
         one_df = file[file[param_name_column_name] == i]
-        one_series = one_df[value_column_name]
+        one_series = one_df[value_column_name].dropna()
         one_series.name = i
         if j == 0:
             result_df = one_series.copy()
@@ -414,4 +416,21 @@ def parse_standart_file(file_name, time_column_name, param_name_column_name, val
     return result_df
 
 
-
+def smart_resample(dataframe, low_freq_param_name, this_time_delta = pd.to_timedelta(1, unit = 'hour')):
+    """
+    Функция для правильного ресемлпа интегральных замеров дебита жидкости
+    :param dataframe:
+    :param low_freq_param_name:
+    :param this_time_delta:
+    :return:
+    """
+    df = dataframe.copy()
+    for j,i in enumerate(df[low_freq_param_name].dropna().index):
+        this_df = df[(df.index > i - this_time_delta) & (df.index <= i)]
+        one_df = this_df.rolling(this_time_delta).mean()
+        one_df =  one_df[one_df.index == i]
+        if j == 0:
+            result_df = one_df.copy()
+        else:
+            result_df = result_df.append(one_df, sort=True)
+    return result_df
