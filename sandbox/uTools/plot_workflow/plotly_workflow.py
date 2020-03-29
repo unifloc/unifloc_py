@@ -153,8 +153,26 @@ def create_shapes_to_plotly(borders):
         shapes.append(this_shape)
     return shapes
 
-def create_report_html(df, all_banches, filename, auto_open = True, layout_height = 450,
-                       vertical_spacing = 0.01, borders = []):
+
+def create_trace_for_table(df):
+    all_columns = [df.index.name] + list(df.columns)
+    header_values = [x.replace(' ', '<br>') for x in all_columns]
+    cells_values = [df.index.to_list()] + [df[x].to_list() for x in df.columns]
+    trace = go.Table(
+        header=dict(
+            values=header_values,
+            font=dict(size=10),
+            align="left"
+        ),
+        cells=dict(
+            values=cells_values,
+            align="left")
+    )
+    return trace
+
+
+def create_report_html(df, all_banches, filename, auto_open=True, layout_height=450,
+                       vertical_spacing=0.01, borders=[], df_for_table=None, df_for_table_name='Сводная таблица'):
     """
     Создание шаблонизированного и удобного набора графиков
     :param df:
@@ -162,20 +180,36 @@ def create_report_html(df, all_banches, filename, auto_open = True, layout_heigh
     :param filename:
     :return:
     """
-    subplot_amount = len(all_banches)
+    if type(df_for_table) != type(None):
+        additional_row = 1
+        specs = [[{'type': 'table'}]] + [[{'type': 'scattergl'}] for x in range(len(all_banches))]
+        table_titiles = [df_for_table_name]
+    else:
+        additional_row = 0
+        specs = [[{'type': 'scattergl'}] for x in range(len(all_banches))]
+        table_titiles = []
+    subplot_amount = len(all_banches) + additional_row
+
     subplot_titles = []
     for z in all_banches:
         subplot_titles.append(list(z.keys())[0])
+
     fig = make_subplots(
         rows=subplot_amount, cols=1, shared_xaxes=True,
         vertical_spacing=vertical_spacing,
-        subplot_titles=subplot_titles
+        subplot_titles=table_titiles + subplot_titles,
+        specs=specs
     )
-    for i in range(subplot_amount):
+
+    if type(df_for_table) != type(None):
+        fig.add_trace(create_trace_for_table(df_for_table),
+                      row=1, col=1)
+
+    for i in range(subplot_amount - additional_row):
         this_df = df[all_banches[i][subplot_titles[i]]]
         this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', use_gl=True)
         for j in this_banch_trace:
-            fig.add_trace(j, row=i + 1, col=1)
+            fig.add_trace(j, row=i + additional_row + 1, col=1)
 
     fig.layout.hovermode = 'x'
     fig.layout.height = layout_height * subplot_amount
@@ -340,12 +374,29 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
     plot(fig, filename=filename, auto_open=auto_open)
 
 
-def create_banches_for_report(df, parameters_list):
+def create_banches_for_report(df, parameters_list, fuzzy_names=False):
     all_banches = []
-    for i in parameters_list:
-        if i in df.columns:
-            test_df = df.dropna(subset = [i])
-            if test_df.shape[0] > 0:
-                one_banch = {i:[i]}
+    if fuzzy_names == False:
+        for i in parameters_list:
+            if i in df.columns:
+                test_df = df.dropna(subset=[i])
+                if test_df.shape[0] > 0:
+                    one_banch = {i: [i]}
+                    all_banches.append(one_banch)
+        return all_banches
+    else:
+        for i in parameters_list:
+            one_banch = {}
+            for j in df.columns:
+                if i in j:
+                    test_df = df.dropna(subset=[j])
+                    if test_df.shape[0] > 0:
+                        if len(one_banch) >= 1:
+                            one_banch[i] = one_banch[i] + [j]
+                        else:
+                            one_banch = {i: [j]}
+            if len(one_banch) > 0:
                 all_banches.append(one_banch)
-    return all_banches
+        return all_banches
+
+

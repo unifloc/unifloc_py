@@ -225,3 +225,94 @@ def fill_static_data_structure_by_df(static_data: Static_data,
     return static_data
 
 
+class WellInfo:
+    def __init__(self):
+        """
+        Класс-структура для хранения данных о скважине из БОМД
+        :param row: строка, извлеченная с техрежима для данной скважины
+        """
+        self.well_name = None
+        self.field_name = None
+        self.esp_name = None
+        self.motor_name = None
+        self.h_pump_m = None
+        self.gassep_name = None
+        self.back_pressure_valve_name = None
+
+        self.payzone_name = None
+        self.h_dyn_m = None
+        self.p_annulus_atm = None
+        self.watercut_perc = None
+        self.gor_m3m3 = None
+        self.h_upper_perforation_m = None
+        self.h_bottomhole_m = None
+        self.d_casing_m = None
+        self.d_tube_m = None
+        self.p_b_atm = None
+        self.mu_oil_b_atm = None
+        self.b_oil_b_m3m3 = None
+        self.rho_oil_b_kgm3 = None
+        self.t_reservoir_c = None
+        self.rho_wat_kgm3 = None
+
+    def get_data_from_bomd(self, file_name, well_name, field_name):
+        self.well_name = well_name
+        self.field_name = field_name
+
+        file = pd.read_excel(file_name, skiprows=3)
+        file = file[file['Месторождение'] == field_name]
+        file = file[file['№ скважины'] == well_name]
+        if file.shape[0] == 0:
+            print('Ошибка: не найдена скважина')
+        else:
+            self.esp_name = file['Наименование сборки'].values[0]
+            self.motor_name = file['Длина'].values[0]
+            self.h_pump_m = file['Глубина спуска'].values[0]
+            self.gassep_name = file['Газосепаратор'].values[0]
+            self.back_pressure_valve_name = file['1_Типоразмер обратного клапана'].values[0]
+        return None
+
+    def get_data_from_tr(self, file_name, well_name, field_name):
+        file = pd.read_excel(file_name, skiprows=2)
+        file = file.dropna(subset=['Скважина'])
+        this_row = file[file['Скважина'] == well_name]
+        if this_row.shape[0] == 0:
+            this_row = file[file['Скважина'] == well_name + '_1']
+
+        self.payzone_name = this_row['Пласт МЭР'].values[0]
+        self.h_dyn_m = this_row['Динамическая высота'].values[0]
+        self.p_annulus_atm = this_row['Затрубное давление'].values[0]
+        self.watercut_perc = this_row['Обводненность'].values[0]
+        self.gor_m3m3 = this_row['Газовый фактор'].values[0]
+
+        self.h_upper_perforation_m = this_row['Глубина верхних дыр перфорации'].values[0]
+        self.h_bottomhole_m = this_row['Глубина текущего забоя'].values[0]
+        self.d_casing_m = this_row['Диаметр экспл.колонны'].values[0]
+        self.d_tube_m = this_row['Диаметр НКТ'].values[0]
+
+        self.p_b_atm = this_row['Давление наcыщения'].values[0]
+        self.mu_oil_b_atm = this_row['Вязкость нефти в пластовых условиях'].values[0]
+        self.b_oil_b_m3m3 = this_row['объемный коэффициент'].values[0]
+        self.rho_oil_b_kgm3 = this_row['Плотность нефти'].values[0]
+        self.rho_wat_kgm3 = this_row['Плотность воды'].values[0]
+        self.t_reservoir_c = this_row['Температура пласта'].values[0]
+        return None
+
+    def return_df(self, without_none=True):
+        df = pd.DataFrame.from_dict(self.__dict__, orient='index')
+        df.index.name = 'Название параметра'
+        df.columns = ['Значение параметра']
+        if without_none:
+            df = df.dropna()
+            return df
+        else:
+            return df
+
+    def facade_get_all_data_and_return_df(self, tr_name, bomd_name, well_name, field_name):
+        self.get_data_from_bomd(bomd_name, well_name, field_name)
+        self.get_data_from_tr(tr_name, well_name, field_name)
+        df = self.return_df()
+        return df
+
+
+
