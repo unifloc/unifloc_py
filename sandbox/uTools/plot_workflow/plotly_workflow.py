@@ -338,3 +338,14 @@ def create_overall_report(overall_data, overall_data_dimensionless, esp_traces, 
     fig.update_layout(height=8 * 500, showlegend=True)
     fig.layout.hovermode = 'x'
     plot(fig, filename=filename, auto_open=auto_open)
+
+
+def create_banches_for_report(df, parameters_list):
+    all_banches = []
+    for i in parameters_list:
+        if i in df.columns:
+            test_df = df.dropna(subset = [i])
+            if test_df.shape[0] > 0:
+                one_banch = {i:[i]}
+                all_banches.append(one_banch)
+    return all_banches

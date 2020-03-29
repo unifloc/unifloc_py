@@ -72,7 +72,10 @@ def read_and_format_good_tm_data(well_name, file_name_full_path, time_to_resamle
             well_data = pd.read_csv(file_name_full_path, delimiter=';', engine='python')
             well_data.reset_index(inplace=True)
             if well_data.columns[0] == 'index':
-                well_data.columns = list(well_data.columns[1:]) + ['index']
+                if well_data['index'][0] == 0:
+                    pass
+                else:
+                    well_data.columns = list(well_data.columns[1:]) + ['index']
             if 'index' in well_data.columns:
                 del well_data['index']
                 columns_to_del = ['Месторождение', 'Скважина', 'Скважина ОИС', 'Дата Общая']
@@ -223,3 +226,52 @@ def find_parameters_in_df_columns(df, pattern):
             parameters_list.append(i)
     return parameters_list
 
+
+def parse_cs_data_magazine_type(file_name):
+    file = pd.read_excel(file_name)
+    if file.loc[0, file.columns[1]] == 'Журнал работы станций управления':
+        file = pd.read_excel(file_name, header=5)
+        file = file[file.columns[3:]]
+        file = file.set_index(file.columns[0])
+        file.index = pd.to_datetime(file.index, dayfirst=True)
+        file.index.name = 'Время'
+        file = file.dropna(subset=[file.columns[1]])
+        file = preproc_tool.rename_columns_by_dict(file)
+        file = file.sort_index()
+        return file
+    else:
+        print('Не тот тип файла, воспользуйтесь другим парсером')
+        return None
+
+
+def parse_cs_data_vibration_type(file_name):
+    file = pd.read_excel(file_name)
+    if file.loc[1, file.columns[0]] == 'Вибрация':
+        file = pd.read_excel(file_name, header=2)
+        for i, j in enumerate(file.columns):
+            if 'Unnamed' in j:
+                one_df = file[file.columns[i - 1:i + 1]]
+                one_df = one_df.set_index(one_df.columns[0])
+                one_df.columns = [one_df.index.name]
+                one_df.index = pd.to_datetime(one_df.index, dayfirst=True)
+                one_df.index.name = 'Время'
+                one_df = one_df.dropna()
+                if i > 1:
+                    result_df = result_df.join(one_df, how='outer')
+                else:
+                    result_df = one_df.copy()
+        result_df = preproc_tool.rename_columns_by_dict(result_df)
+        result_df = result_df.sort_index()
+        return result_df
+    else:
+        print('Не тот тип файла, воспользуйтесь другим парсером')
+        return None
+
+
+def parse_cs_data_all_types(this_name):
+    file = parse_cs_data_magazine_type(this_name)
+    if type(file) == type(None):
+        file = parse_cs_data_vibration_type(this_name)
+        if type(file) == type(None):
+            file = read_and_format_bad_tm_data(this_name)
+    return file

@@ -60,7 +60,6 @@ def make_sub(dfs, df_keys, params):
         for par in params:
             if par in df.columns:
                 this_df = df.dropna(subset = [par])
-                print(this_df.shape)
                 if this_df.shape[0] > 0:
                     traces.append(go.Scattergl(x=this_df.index, y=this_df[par], name=key + ', ' + par, mode=graph_mode,
                                                marker=dict(size=5)))

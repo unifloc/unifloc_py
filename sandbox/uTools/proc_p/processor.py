@@ -266,7 +266,7 @@ def calc(options=well_calculation.Calc_options()):
         this_state.qliq_max_m3day = prepared_data[global_names.q_liq_m3day].max()
 
         for i in range(prepared_data.shape[0]):  # начало итерации по строкам - наборам данных для определенного времени
-            proc_tool.auto_restart(i, options, UniflocVBA, current_path)
+            #proc_tool.auto_restart(i, options, UniflocVBA, current_path)
             start_in_loop_time = time.time()
             row_in_prepared_data = prepared_data.iloc[i]
             print('Итерация № ' + str(i+1) + ' из ' + str(prepared_data.shape[0]) +
@@ -334,17 +334,17 @@ def create_thread_list(well_name, dir_name_with_input_data, static_data_full_pat
 
 static_data_full_path = "E:\\Git\\unifloc\\sandbox\\uTools\\data\\tr\\static_data.xlsx"
 
-well_name = '566'
+well_name = '1005'
 dir_name_with_input_data = 'restore_input_'
 
-amount_of_threads = 1
+amount_of_threads = 6
 if __name__ == '__main__':
     thread_option_list = create_thread_list(well_name, dir_name_with_input_data, static_data_full_path,
                            amount_of_threads)
 
-    #start_time = time.time()
-    #run_calculation(thread_option_list)
-    #end_time = time.time()
-    #print('Затрачено времени всего: ' + str(end_time - start_time))
+    start_time = time.time()
+    run_calculation(thread_option_list)
+    end_time = time.time()
+    print('Затрачено времени всего: ' + str(end_time - start_time))
 
-    calc(thread_option_list[0])
+    #calc(thread_option_list[0])

@@ -174,6 +174,10 @@ def create_new_result_df(this_result, this_state, prepared_data, i, global_names
         print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
     new_dict[global_names.gor_m3m3] = [this_state.rp_m3m3]
     new_dict[global_names.error_in_model] = [this_state.error_in_step]
+    new_dict[global_names.c_calibr_head_d_min_limit ] = [this_state.c_calibr_head_d_min_limit ]
+    new_dict[global_names.c_calibr_head_d_max_limit ] = [this_state.c_calibr_head_d_max_limit ]
+    new_dict[global_names.c_calibr_power_d_min_limit] = [this_state.c_calibr_power_d_min_limit]
+    new_dict[global_names.c_calibr_power_d_max_limit] = [this_state.c_calibr_power_d_max_limit]
     new_dict['Время'] = [prepared_data.index[i]]
     new_dataframe = pd.DataFrame(new_dict)
     new_dataframe.index = new_dataframe['Время']
