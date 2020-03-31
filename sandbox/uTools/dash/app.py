@@ -70,7 +70,7 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
                                 html.Div([
                                     html.P('Управление графиком 1', id='text-1'),
                                     dcc.Dropdown(
-                                        id='files-subplot-1',
+                                        id='loaded_files_dict-subplot-1',
                                         options=[{'label': i, 'value': i} for i in file_names],
                                         value=[file_names[0]],
                                         multi=True),
@@ -82,7 +82,7 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
                                 html.Div([
                                     html.P('Управление графиком 2', id='text-2'),
                                     dcc.Dropdown(
-                                        id='files-subplot-2',
+                                        id='loaded_files_dict-subplot-2',
                                         options=[{'label': i, 'value': i} for i in file_names],
                                         value=[file_names[0]],
                                         multi=True),
@@ -94,7 +94,7 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
                                 html.Div([
                                     html.P('Управление графиком 3', id='text-3'),
                                     dcc.Dropdown(
-                                        id='files-subplot-3',
+                                        id='loaded_files_dict-subplot-3',
                                         options=[{'label': i, 'value': i} for i in file_names],
                                         value=[file_names[0]],
                                         multi=True),
@@ -106,7 +106,7 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
                                 html.Div([
                                     html.P('Управление графиком 4', id='text-4'),
                                     dcc.Dropdown(
-                                        id='files-subplot-4',
+                                        id='loaded_files_dict-subplot-4',
                                         options=[{'label': i, 'value': i} for i in file_names],
                                         value=[file_names[0]],
                                         multi=True),
@@ -118,7 +118,7 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
                                 html.Div([
                                     html.P('Управление графиком 5', id='text-5'),
                                     dcc.Dropdown(
-                                        id='files-subplot-5',
+                                        id='loaded_files_dict-subplot-5',
                                         options=[{'label': i, 'value': i} for i in file_names],
                                         value=[file_names[0]],
                                         multi=True),
@@ -130,7 +130,7 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
                                 html.Div([
                                     html.P('Управление графиком 6', id='text-6'),
                                     dcc.Dropdown(
-                                        id='files-subplot-6',
+                                        id='loaded_files_dict-subplot-6',
                                         options=[{'label': i, 'value': i} for i in file_names],
                                         value=[file_names[0]],
                                         multi=True),
@@ -151,17 +151,17 @@ app.layout = html.Div(children=[html.Div([html.H4('Удобный просмот
 
 
 @app.callback(Output('plot', 'figure'),
-              [Input('files-subplot-1', 'value'),
+              [Input('loaded_files_dict-subplot-1', 'value'),
                Input('cols-subplot-1', 'value'),
-               Input('files-subplot-2', 'value'),
+               Input('loaded_files_dict-subplot-2', 'value'),
                Input('cols-subplot-2', 'value'),
-               Input('files-subplot-3', 'value'),
+               Input('loaded_files_dict-subplot-3', 'value'),
                Input('cols-subplot-3', 'value'),
-               Input('files-subplot-4', 'value'),
+               Input('loaded_files_dict-subplot-4', 'value'),
                Input('cols-subplot-4', 'value'),
-               Input('files-subplot-5', 'value'),
+               Input('loaded_files_dict-subplot-5', 'value'),
                Input('cols-subplot-5', 'value'),
-               Input('files-subplot-6', 'value'),
+               Input('loaded_files_dict-subplot-6', 'value'),
                Input('cols-subplot-6', 'value')],
               [State('add-graph-button', 'n_clicks')])
 def update_graph(file_vals1, col_vals1, file_vals2, col_vals2, file_vals3, col_vals3, file_vals4, col_vals4,
