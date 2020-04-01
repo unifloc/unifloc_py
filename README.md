@@ -1,6 +1,6 @@
 # Unifloc #
 
-## 0.9.0 ##
+## 0.10.0 ##
 ## 1.04.2019 ##
 ### Authors:
 * Rinat Khabibullin
