@@ -1,7 +1,7 @@
 # Unifloc #
 
-## 0.8.0 ##
-## 20.08.2019 ##
+## 0.9.0 ##
+## 1.04.2019 ##
 ### Authors:
 * Rinat Khabibullin
 * Alexey Vodopyan
