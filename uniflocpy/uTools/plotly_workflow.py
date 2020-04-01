@@ -4,9 +4,7 @@
 Модуль для построения графиков через plotly
 
 """
-# TODO сделать через классы
-# TODO добавить оси и форматирование
-# TODO сделать аналогично для dash и matplotlib
+
 import pandas as pd
 import numpy as np
 import sys
@@ -93,6 +91,7 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False, auto_open
             fig.append_trace(data_traces[i], row=i + 1, col=1)
     fig.layout.hovermode = 'x'
     plot(fig, filename=filename_str, auto_open=auto_open)
+
 
 
 def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl=True, swap_xy=False):
@@ -197,3 +196,29 @@ def plot_by_patterns(result_df, group_patterns, antipatterns=[],
         columns_to_plot = filtr_by_antipatterns(columns_to_plot, antipatterns)
     plot_specific_columns(result_df, columns_to_plot,swap_xy=swap_xy, reversed_y=reversed_y,
                           iplot_option=iplot_option, plot_name=plot_name)
+def create_report_html(df, all_banches, filename):
+    """
+    Создание шаблонизированного и удобного набора графиков
+    :param df:
+    :param all_banches:
+    :param filename:
+    :return:
+    """
+    subplot_amount = len(all_banches)
+    subplot_titles = []
+    for z in all_banches:
+        subplot_titles.append(list(z.keys())[0])
+    fig = make_subplots(
+        rows=subplot_amount, cols=1, shared_xaxes=True,
+        vertical_spacing=0.01,
+        subplot_titles=subplot_titles
+    )
+    for i in range(subplot_amount):
+        this_df = df[all_banches[i][subplot_titles[i]]]
+        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', use_gl=True)
+        for j in this_banch_trace:
+            fig.add_trace(j, row=i + 1, col=1)
+
+    fig.layout.hovermode = 'x'
+    fig.layout.height = 450 * subplot_amount
+    plot(fig, filename=filename)
