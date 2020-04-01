@@ -20,11 +20,11 @@ class Pipe():
         :param hydr_cor: гидравлическая корреляция, класс
         :param temp_cor: температурная корреляция, класс
         """
-        self.fluid_flow = PVT.FluidFlow(fluid = fluid)
+        self.fluid_flow = PVT.FluidFlow(fluid=fluid)
         self.hydr_cor = hydr_cor
         self.temp_cor = temp_cor
 
-        self.section_casing = False # если True, будет считать ОК
+        self.section_casing = False  # если True, будет считать ОК
 
         self.time_sec = 100 * 24 * 60 * 60
 
@@ -37,6 +37,11 @@ class Pipe():
 
         self.p_grad_pam = None
         self.t_grad_cm = None
+
+        self.t_out_c = None
+        self.t_in_c = None
+        self.h_mes_out_m = None
+        self.h_mes_in_m = None
 
     def calc_p_grad_pam(self, p_bar, t_c):
         """расчет градиента давления"""
@@ -72,6 +77,11 @@ class Pipe():
         self.t_c = t_c
         self.fluid_flow.calc(self.p_bar, self.t_c)
 
+        self.temp_cor.t_out_c = self.t_out_c
+        self.temp_cor.t_in_c = self.t_in_c
+        self.temp_cor.h_mes_out = self.h_mes_out_m
+        self.temp_cor.h_mes_in_c = self.h_mes_in_m
+
         self.temp_cor.angle_rad = uc.grad2rad(self.angle_to_horizontal_grad)
         self.temp_cor.section_casing = self.section_casing
 
@@ -97,7 +107,7 @@ class Pipe():
         self.temp_cor.mass_flowraten_kgsec = self.fluid_flow.mass_flowraten_kgsec
         self.temp_cor.vm_msec = self.fluid_flow.vm_msec
 
-        self.temp_cor.sigma_liq_Nm = self.temp_cor.sigma_liq_Nm
+        self.temp_cor.sigma_liq_Nm = self.fluid_flow.sigma_liq_Nm
         self.temp_cor.rhon_kgm3 = self.fluid_flow.rhon_kgm3
         self.temp_cor.mun_cP = self.fluid_flow.mun_cP
         self.temp_cor.heatcapn_jkgc = self.fluid_flow.heatcapn_jkgc
@@ -117,7 +127,6 @@ class Pipe():
         self.temp_cor.Joule_Thompson_coef_cpa = self.fluid_flow.Joule_Thompson_coef_cpa
         self.temp_cor.grad_p_pam = self.calc_p_grad_pam(self.p_bar, self.t_c)
         self.temp_cor.grad_v_msecm = self.fluid_flow.dvdp_msecpam * self.temp_cor.grad_p_pam
-
 
         self.t_grad_cm = self.temp_cor.calc_grad_t_cm(self.p_bar, self.t_c)
         return self.t_grad_cm

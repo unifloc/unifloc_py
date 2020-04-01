@@ -30,7 +30,7 @@ class Beggs_Brill_cor():
         self.epsilon_friction_m = epsilon_friction_m
 
         self.angle_grad = angle_grad  # угол наклона ствола скважины от горизонтали
-        self.angle_rad = self.angle_grad * math.pi / 180
+        self.angle_rad = None
 
         self.d_m = None
 
@@ -73,8 +73,15 @@ class Beggs_Brill_cor():
 
         self.friction_grad_pam = None
         self.density_grad_pam = None
+        self.acceleration_grad_pam = None
         self.friction_grad_part_percent = None
         self.density_grad_part_percent = None
+        self.acceleration_grad_part_percent = None
+
+        self.L1 = None
+        self.L2 = None
+        self.L3 = None
+        self.L4 = None
 
     def __calc_hltetta__(self):
         """
@@ -123,16 +130,53 @@ class Beggs_Brill_cor():
             else:
                 self.correction_factor_c = result
 
+        self.angle_rad = self.angle_grad * math.pi / 180
+
         self.angle_correction_factor = (1 + self.correction_factor_c *
                                         ((math.sin(1.8 * self.angle_rad)) - (1 / 3) *
-                                         (math.sin(1.8 * self.angle_rad)) ** 3))
+                                         (math.sin(1.8 * self.angle_rad)) ** 3))  #TODO знак - в экселе
 
         self.liquid_content_with_angle = self.liquid_content_with_zero_angle * self.angle_correction_factor
 
-        if self.angle_grad > 0:
+        if self.angle_grad > 0:  # uphill flow
             self.liquid_content_with_Pains_cor = 0.924 * self.liquid_content_with_angle
-        else:
+        else:  # downhill flow
             self.liquid_content_with_Pains_cor = 0.685 * self.liquid_content_with_angle
+
+        if self.liquid_content_with_Pains_cor > 1:  # reality check
+            self.liquid_content_with_Pains_cor = 1
+        if self.liquid_content_with_Pains_cor < self.liquid_content:  #TODO check reality
+            self.liquid_content_with_Pains_cor = self.liquid_content
+
+    def determine_flow_pattern(self, number_Fr, liquid_content):
+        """
+        Определение режима течения
+        :return:
+        """
+        self.val_number_Fr = number_Fr
+        self.liquid_content = liquid_content
+
+        self.L1 = 316 * self.liquid_content ** 0.302
+        self.L2 = 0.0009252 * self.liquid_content ** (-2.4684)
+        self.L3 = 0.1 * self.liquid_content ** (-1.4516)
+        self.L4 = 0.5 * self.liquid_content ** (-6.738)
+
+        if (self.liquid_content < 0.01 and number_Fr < self.L1) or (self.liquid_content >= 0.01 and number_Fr < self.L2):
+            # Segregated Flow - разделенный режим
+            self.flow_regime = 0
+        else:
+            if self.L2 <= number_Fr < self.L3 and self.liquid_content >= 0.01:
+                # Transition Flow - переходный режим
+                self.flow_regime = 3
+            else:
+                if (0.01 <= self.liquid_content < 0.4 and self.L3 < number_Fr <= self.L1) or (
+                        self.liquid_content >= 0.4 and self.L3 < number_Fr <= self.L4):
+                    # Intermittent Flow - прерывистый режим
+                    self.flow_regime = 1
+                if (self.liquid_content < 0.4 and number_Fr >= self.L1) or (self.liquid_content >= 0.4 and number_Fr > self.L4):
+                    # Distributed Flow - распределенный режим
+                    self.flow_regime = 2
+        return self.flow_regime
 
     def calc_grad(self, p_bar, t_c):
         """
@@ -148,28 +192,9 @@ class Beggs_Brill_cor():
             self.result_grad_pam = 0
             return 0
         else:
-
             self.val_number_Fr = self.vm_msec ** 2 / const_g_m2sec / self.d_m  # (4.109)
 
-            number_Fr = self.val_number_Fr
-
-            CL = self.liquid_content
-            L1 = 316 * CL ** 0.302
-            L2 = 0.0009252 * CL ** (-2.4684)
-            L3 = 0.1 * CL ** (-1.4516)
-            L4 = 0.5 * CL ** (-6.738)
-            if (CL < 0.01 and number_Fr < L1) or (CL >= 0.01 and number_Fr < L2):
-                # Segregated Flow - разделенный режим
-                self.flow_regime = 0
-            if (0.01 <= CL < 0.4 and L3 < number_Fr <= L1) or (CL >= 0.4 and L3 < number_Fr <= L4):
-                # Intermittent Flow - прерывистый режим
-                self.flow_regime = 1
-            if (CL < 0.4 and number_Fr >= L1) or (CL >= 0.4 and number_Fr > L4):
-                # Distributed Flow - распределенный режим
-                self.flow_regime = 2
-            if L2 <= number_Fr < L3 and CL >= 0.01:
-                # Transition Flow - переходный режим
-                self.flow_regime = 3
+            self.flow_regime = self.determine_flow_pattern(self.val_number_Fr, self.liquid_content)
 
             if self.flow_regime != 3:
                 self.__calc_hltetta__()
@@ -180,9 +205,9 @@ class Beggs_Brill_cor():
                 self.flow_regime = 1
                 self.__calc_hltetta__()
                 hltetta_inter = self.liquid_content_with_Pains_cor
-                A = (L3 - self.val_number_Fr) / (L3 - L2)
+                A = (self.L3 - self.val_number_Fr) / (self.L3 - self.L2)
                 B = 1 - A
-                self.liquid_content_with_Pains_cor = (A * hltetta_segr + B * hltetta_inter)
+                self.liquid_content_with_Pains_cor = A * hltetta_segr + B * hltetta_inter
 
             self.number_Re = self.rhon_kgm3 * self.vm_msec * self.d_m / self.mun_pas
 
@@ -212,9 +237,13 @@ class Beggs_Brill_cor():
 
             self.density_grad_pam = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
 
-            self.friction_grad_part_percent = self.friction_grad_pam / (1 - self.Ek) / self.result_grad_pam * 100
+            self.acceleration_grad_pam = self.result_grad_pam * self.Ek
 
-            self.density_grad_part_percent = self.density_grad_pam / (1 - self.Ek) / self.result_grad_pam * 100
+            self.friction_grad_part_percent = self.friction_grad_pam / self.result_grad_pam * 100
+
+            self.density_grad_part_percent = self.density_grad_pam / self.result_grad_pam * 100
+
+            self.acceleration_grad_part_percent = self.acceleration_grad_pam / self.result_grad_pam * 100
 
             return self.result_grad_pam
 

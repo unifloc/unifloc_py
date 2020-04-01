@@ -68,12 +68,12 @@ class MatBalance():
         self.p_drop_bar = self.p_reservoir_init_bar - self.p_reservoir_bar
 
         self.fluid.calc(self.p_reservoir_init_bar, self.t_reservoir_init_c)
-        self.b_oil_init_m3m3 = self.fluid.bo_m3m3
-        self.b_wat_init_m3m3 = self.fluid.bw_m3m3
+        self.b_oil_init_m3m3 = self.fluid.b_oil_m3m3
+        self.b_wat_init_m3m3 = self.fluid.b_wat_m3m3
 
         self.fluid.calc(self.p_reservoir_bar, self.t_reservoir_c)  # TODO разграничить флюиды на 2 экземпляра
-        self.b_oil_m3m3 = self.fluid.bo_m3m3
-        self.b_wat_m3m3 = self.fluid.bw_m3m3
+        self.b_oil_m3m3 = self.fluid.b_oil_m3m3
+        self.b_wat_m3m3 = self.fluid.b_wat_m3m3
 
         self.S_oil_d = 1 - self.S_wat_connate_d
 
@@ -97,9 +97,9 @@ class MatBalance():
 
         self.p_reservoir_bar = float(p_reservoir_bar)
         self.fluid.calc(self.p_reservoir_bar, self.t_reservoir_init_c)
-        self.b_oil_m3m3 = self.fluid.bo_m3m3
-        self.b_wat_m3m3 = self.fluid.bw_m3m3
-        self.b_gas_m3m3 = self.fluid.bg_m3m3
+        self.b_oil_m3m3 = self.fluid.b_oil_m3m3
+        self.b_wat_m3m3 = self.fluid.b_wat_m3m3
+        self.b_gas_m3m3 = self.fluid.b_gas_m3m3
         self.rs_m3m3 = self.fluid.rs_m3m3
 
         self.p_drop_bar = self.p_reservoir_init_bar - self.p_reservoir_bar
@@ -132,9 +132,9 @@ class MatBalance():
         self.N_cum_oil_recovery_m3 = N_cum_oil_recovery_m3
 
         self.fluid.calc(self.p_reservoir_init_bar, self.t_reservoir_init_c)
-        self.b_oil_init_m3m3 = self.fluid.bo_m3m3
-        self.b_wat_init_m3m3 = self.fluid.bw_m3m3
-        self.b_gas_init_m3m3 = self.fluid.bg_m3m3
+        self.b_oil_init_m3m3 = self.fluid.b_oil_m3m3
+        self.b_wat_init_m3m3 = self.fluid.b_wat_m3m3
+        self.b_gas_init_m3m3 = self.fluid.b_gas_m3m3
         self.rs_init_m3m3 = self.fluid.rs_m3m3
 
         p_0_reservoir_bar = 1.1

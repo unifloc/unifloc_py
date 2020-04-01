@@ -24,6 +24,7 @@ class BlackOil_option():
         self.pb_cor_number = 0
         self.rs_cor_number = 0
         self.compr_oil_cor_number = 0
+        self.compr_oil_below_pb_cor_number = 0
         self.b_oil_in_pb_cor_number = 0
         self.b_oil_below_pb_cor_number = 0
         self.b_oil_above_pb_cor_number = 0
@@ -61,8 +62,9 @@ class BlackOil_option():
 
 
 class Fluid:
-    def __init__(self, gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0, gamma_gassep=0, y_h2s=0, y_co2=0,
-                 y_n2=0, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=80, b_oil_b_cal_m3m3=0, mu_oil_b_cal_cp=0.5,
+    def __init__(self, gamma_oil=0.87, gamma_gas=0.81, gamma_wat=1.0, rsb_m3m3=80, gamma_gassep=0, y_h2s=0, y_co2=0,
+                 y_n2=0, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=-1, b_oil_b_cal_m3m3=-1, mu_oil_b_cal_cp=-1,
+                 t_res_c=90,
                  option=BlackOil_option()):
         """
         Cоздает флюид с заданными базовыми свойствами и определенным набором методик/корреляций для расчета
@@ -99,6 +101,7 @@ class Fluid:
         self.s_ppm = s_ppm
         self.par_wat = par_wat
         self.rho_oil_stkgm3 = gamma_oil * uc.rho_w_kgm3_sc  # TODO check?
+        self.t_res_c = t_res_c
         # термобарические условия
         self.p_bar = uc.psc_bar                 # thermobaric conditions for all parameters
         self.t_c = uc.tsc_c                     # can be set up by calc method
@@ -144,6 +147,7 @@ class Fluid:
         self.tpc_k = 0.0
         self.ppc_mpa = 0.0
         self.pb_mpa = 0.0
+        self.t_res_k = 0.0
 
     def _calc_pb_MPaa(self, number_cor): # TODO калибровку свойств делать внутри функций контейнеров, чтобы оставался выбор корреляций
         if number_cor == 0:
@@ -151,7 +155,7 @@ class Fluid:
         if number_cor == 1:
             return PVT.unf_pb_Valko_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
         if number_cor == 2:  # TODO check cor
-            return PVT.unf_pb_Glaso_MPaa(self.rsb_m3m3, self.t_k, self.gamma_oil, self.gamma_gas)
+            return PVT.unf_pb_Glaso_MPaa(self.rsb_m3m3, self.t_res_k, self.gamma_oil, self.gamma_gas)
 
     def _calc_rs_m3m3(self, number_cor):
         if number_cor == 0:
@@ -165,6 +169,10 @@ class Fluid:
         if number_cor == 0:
             return PVT.unf_compressibility_oil_VB_1Mpa(self.rs_m3m3, self.t_k, self.gamma_oil,
                                                        self.p_mpa, self.gamma_gas)
+
+    def _calc_compr_oil_below_pb_1mpa(self, number_cor):
+        if number_cor == 0:
+            return PVT.unf_compressibility_saturated_oil_McCain_1Mpa(self.p_mpa, self.pb_mpa, self.t_k, self.gamma_oil, self.rsb_m3m3)
 
     def _calc_b_oil_in_pb_m3m3(self, number_cor):
         if number_cor == 0:
@@ -260,6 +268,8 @@ class Fluid:
     def _calc_rho_wat_kgm3(self, number_cor):
         if number_cor == 0:
             return PVT.unf_density_brine_Spivey_kgm3(self.t_k, self.p_mpa, self.s_ppm, self.par_wat)
+        if number_cor == 1:
+            return PVT.unf_density_brine_uniflocvba_kgm3(self.gamma_wat, self.b_wat_m3m3)
 
     def _calc_compr_wat_1bar(self, number_cor):
         if number_cor == 0:
@@ -269,10 +279,14 @@ class Fluid:
     def _calc_b_wat_m3m3(self, number_cor):
         if number_cor == 0:
             return PVT.unf_fvf_brine_Spivey_m3m3(self.t_k, self.p_mpa, self.s_ppm)
+        if number_cor == 1:
+            return PVT.unf_fvf_brine_McCain_m3m3(self.t_k, self.p_mpa)
 
     def _calc_mu_wat_cp(self, number_cor):
         if number_cor == 0:
             return PVT.unf_viscosity_brine_MaoDuan_cP(self.t_k, self.p_mpa, self.s_ppm)
+        if number_cor == 1:
+            return PVT.unf_viscosity_brine_McCain_cp(self.t_k, self.p_mpa, self.s_ppm)
 
     def _calc_rs_wat_m3m3(self, number_cor):
         if number_cor == 0:
@@ -290,13 +304,13 @@ class Fluid:
         if number_cor == 0:
             return PVT.unf_thermal_expansion_coefficient_water_IAPWS_1C(self.t_c)
 
-    def _calc_sigma_oil_gas_Nm(self, number_cor):
+    def _calc_sigma_oil_gas_nm(self, number_cor):
         if number_cor == 0:
             return PVT.unf_surface_tension_go_Baker_Swerdloff_Nm(self.t_k, self.gamma_oil, self.p_mpa)
         if number_cor == 1:
             return PVT.unf_surface_tension_go_Abdul_Majeed_Nm(self.t_k, self.gamma_oil, self.rs_m3m3)
 
-    def _calc_sigma_wat_gas_Nm(self, number_cor):
+    def _calc_sigma_wat_gas_nm(self, number_cor):
         if number_cor == 0:
             return PVT.unf_surface_tension_gw_Sutton_Nm(self.rho_wat_kgm3, self.rho_gas_kgm3, self.t_c)
         # TODO разобраться при использовании давления: когда идет калибровка давление изменяется - проверить где истинное где нет
@@ -306,6 +320,7 @@ class Fluid:
         self.t_c = t_c
         self.t_k = uc.c2k(self.t_c)
         self.p_mpa = uc.bar2MPa(self.p_bar)
+        self.t_res_k = uc.c2k(self.t_res_c)
 
         # oil
         # давление насыщения нефти
@@ -320,7 +335,11 @@ class Fluid:
         # газосодержание
         self.rs_m3m3 = self._calc_rs_m3m3(self.option.rs_cor_number)
         # коэффициент изотермической сжимаемости
-        self.compr_oil_1mpa = self._calc_compr_oil_1mpa(self.option.compr_oil_cor_number)
+        if self.p_mpa >= self.pb_mpa:
+            self.compr_oil_1mpa = self._calc_compr_oil_1mpa(self.option.compr_oil_cor_number)
+        else:
+            self.compr_oil_1mpa = self._calc_compr_oil_below_pb_1mpa(self.option.compr_oil_below_pb_cor_number)
+
         self.compr_oil_1bar = uc.compr_1mpa_2_1bar(self.compr_oil_1mpa)
         # объемный коэффициент
         self.b_oil_b_m3m3 = self._calc_b_oil_in_pb_m3m3(self.option.b_oil_in_pb_cor_number)
@@ -357,9 +376,9 @@ class Fluid:
         self.thermal_conduct_gas_wmk = self._calc_thermal_conduct_gas_wmk(self.option.thermal_conduct_gas_cor_number)
 
         # water
+        self.b_wat_m3m3 = self._calc_b_wat_m3m3(self.option.b_wat_cor_number)
         self.rho_wat_kgm3 = self._calc_rho_wat_kgm3(self.option.rho_wat_cor_number)
         self.compr_wat_1bar = self._calc_compr_wat_1bar(self.option.compr_gas_cor_number)
-        self.b_wat_m3m3 = self._calc_b_wat_m3m3(self.option.b_wat_cor_number)
         self.mu_wat_cp = self._calc_mu_wat_cp(self.option.mu_wat_cor_number)
         self.rsw_m3m3 = self._calc_rs_wat_m3m3(self.option.rs_wat_cor_number)
         self.heatcap_wat_jkgc = self._calc_heatcap_wat_jkgc(self.option.heatcap_wat_cor_number)
@@ -367,6 +386,6 @@ class Fluid:
         self.thermal_expansion_wat_1c = self._calc_thermal_expansion_wat_1c(self.option.thermal_expansion_wat_cor_number)
 
         # some system properties
-        self.sigma_oil_gas_Nm = self._calc_sigma_oil_gas_Nm(self.option.sigma_oil_gas_cor_number)
-        self.sigma_wat_gas_Nm = self._calc_sigma_wat_gas_Nm(self.option.sigma_wat_gas_cor_number)
+        self.sigma_oil_gas_Nm = self._calc_sigma_oil_gas_nm(self.option.sigma_oil_gas_cor_number)
+        self.sigma_wat_gas_Nm = self._calc_sigma_wat_gas_nm(self.option.sigma_wat_gas_cor_number)
 

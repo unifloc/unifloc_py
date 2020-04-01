@@ -326,7 +326,34 @@ def unf_fvf_VB_m3m3_above(bob, cofb_1MPa, pb_MPaa, p_MPaa):
     return bo
 
 
-def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0.6):
+def unf_compressibility_saturated_oil_McCain_1Mpa(p_mpa, pb_mpa, t_k, gamma_oil, rsb_m3m3):
+    """
+        Oil compressibility below bubble point (saturated oil)
+
+    :param p_mpa:
+    :param pb_mpa:
+    :param t_k:
+    :param gamma_oil:
+    :param rsb_m3m3:
+    :return:
+
+    ref1 https://www.researchgate.net/publication/
+    254529353_The_Oil_Compressibility_Below_Bubble_Point_Pressure_Revisited_-_Formulations_and_Estimations
+
+    ref2 https://www.onepetro.org/download/journal-paper/SPE-15664-PA?id=journal-paper%2FSPE-15664-PA
+    """
+    rsb_scfstb = uc.m3m3_2_scfstb(rsb_m3m3)
+    t_F = uc.k2r(t_k)
+    api = uc.gamma_oil2api(gamma_oil)
+    p_psia = uc.Pa2psi(p_mpa * 10 ** 6)
+    pb_psia = uc.Pa2psi(pb_mpa * 10 ** 6)
+    co_1psi = np.exp(-7.573 - 1.450 * np.log(p_psia) - 0.383 * np.log(pb_psia) + 1.402 * np.log(t_F) +
+                     0.256 * np.log(api) + 0.449 * np.log(rsb_scfstb))
+    co_1MPa = uc.compr_1psi_2_1pa(co_1psi) * 10 ** 5 # TODO нужно исправить
+    return co_1MPa
+
+
+def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0.6): # TODO above bubble point!!
     """
         Oil compressibility according to Vasquez & Beggs (1980) correlation
 
@@ -447,8 +474,8 @@ def unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_g
     ref1 book Brill 2006, Production Optimization Using Nodal Analysis
     """
     po = (1000 * gamma_oil + 1.224 * gamma_gas * rs_m3m3) / bo_m3m3
-    if p_MPaa > pb_MPaa:
-        po = po * np.exp(co_1MPa * (p_MPaa - pb_MPaa))
+    #if p_MPaa > pb_MPaa:  # TODO возможно это надо оставить, при давлении выше P нас, уже есть в fvf_oil степень с co
+    #    po = po * np.exp(co_1MPa * (p_MPaa - pb_MPaa))
     return po
 
 
@@ -650,7 +677,7 @@ def unf_heat_capacity_oil_Gambill_JkgC(gamma_oil, t_c):
 
     t_f = uc.c2f(t_c)
     api = uc.gamma_oil2api(gamma_oil)
-    heat_capacity_oil_btulbmF = ((0.388 + 0.00045 * t_f) / gamma_oil ** (1/2) )
+    heat_capacity_oil_btulbmF = ((0.388 + 0.00045 * t_f) / gamma_oil ** (1/2))
     return uc.btulbmF2kJkgK(heat_capacity_oil_btulbmF) * 1000
 
 
@@ -993,6 +1020,7 @@ def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
     rho_gas = p_Pa * m / (z * 8.31 * t_K)
     return rho_gas
 
+
 def unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas):
     """
         Gas heat capacity by Mahmood Moshfeghian for 0.1 to 20 MPa
@@ -1045,6 +1073,19 @@ def unf_compressibility_oil_Mccain_1MPa_lower():
 """
 
 # uPVT свойства для воды
+
+
+def unf_density_brine_uniflocvba_kgm3(gamma_w, bw_m3m3):
+    """
+        Equation from UniflocVBA
+
+    :param gamma_w:
+    :param bw_m3m3:
+    :return:
+    """
+    rho_wat_rc_kgm3 = 1000 * gamma_w / bw_m3m3
+    return rho_wat_rc_kgm3
+
 
 def unf_density_brine_Spivey_kgm3(t_K, p_MPaa, s_ppm, par=1):
     """
@@ -1254,7 +1295,26 @@ def unf_compressibility_brine_Spivey_1MPa(t_K, p_MPaa, s_ppm, z=1.0, par=1):
     return c_1MPa
 
 
-def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
+def unf_fvf_brine_McCain_m3m3(t_K, p_MPaa):
+    """
+        FVF of brine by McCain
+
+        https://petrowiki.org/Produced_water_formation_volume_factor
+
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :return: formation volume factor, m3/m3
+    """
+    t_f = uc.k2f(t_K)
+    p_psi = uc.bar2psi(p_MPaa * 10)
+    dvwp = -1.95301 * 10 ** (-9) * p_psi * t_f - 1.72834 * 10 ** (-13) * p_psi ** 2 * t_f - 3.58922 * 10 ** (
+        -7) * p_psi - 2.25341 * 10 ** (-10) * p_psi ** 2
+    dvwt = -1.0001 * 10 ** (-2) + 1.33391 * 10 ** (-4) * t_f + 5.50654 * 10 ** (-7) * t_f ** 2
+    fvf_brine_McCain = (1 + dvwp) * (1 + dvwt)
+    return fvf_brine_McCain
+
+
+def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):  # TODO check
     """
         Modified Spivey et al. correlation for brine(water) formation volume factor (2009)
 
@@ -1357,7 +1417,7 @@ def unf_fvf_brine_Spivey_m3m3(t_K, p_MPaa, s_ppm):
     return bw
 
 
-def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
+def unf_gwr_brine_Spivey_m3m3(s_ppm, z):  # TODO check
     """
         Modified Spivey et al. correlation for solution gas-water ratio of methane in brine(2009)
 
@@ -1438,7 +1498,34 @@ def unf_gwr_brine_Spivey_m3m3(s_ppm, z):
     return gwr
 
 
-def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):
+def unf_viscosity_brine_McCain_cp(t_K, p_MPaa, s_ppm):  #TODO check
+    """
+        McCain correlation for brine(water) viscosity
+
+    :param t_K: temperature, K
+    :param p_MPaa: pressure, MPaa
+    :param s_ppm: salinity, ppm
+    :return: viscosity, cP
+
+    ref 1 McCain, W.D. Jr.: McCain, W.D. Jr. 1990. The Properties of Petroleum Fluids, second edition. Tulsa,
+    Oklahoma: PennWell Books.
+
+    ref 2 https://petrowiki.org/Produced_water_properties#cite_note-r1-1
+    """
+
+    wpTDS = s_ppm / 10000
+
+    a = 109.574 - 8.40564 * wpTDS + 0.313314 * wpTDS ** 2 + 0.00872213 * wpTDS ** 3
+    b = -1.12166 + 0.0263951 * wpTDS - 0.000679461 * wpTDS ** 2 - 5.47119 * 10 ** (-5) * wpTDS ** 3 + 1.55586 * 10 ** (
+        -6) * wpTDS ** 4
+
+    visc = a * (1.8 * t_K - 460) ** b
+    p_psi = uc.bar2psi(p_MPaa * 10)
+    viscosity_cp = visc * (0.9994 + 4.0295 * 10 ** (-5) * p_psi + 3.1062 * 10 ** (-9) * p_psi ** 2)
+    return viscosity_cp
+
+
+def unf_viscosity_brine_MaoDuan_cP(t_K, p_MPaa, s_ppm):  #TODO check
     """
         Mao-Duan correlation for brine(water) viscosity (2009)
 

@@ -106,17 +106,17 @@ class FluidBlackOil:
         return self._pb_bar
 
     @property
-    def mu_oil_cP(self):
+    def mu_oil_cp(self):
         """ return oil viscosity at working condition"""
         return self._mu_oil_cP
 
     @property
-    def mu_gas_cP(self):
+    def mu_gas_cp(self):
         """ return gas viscosity at working condition"""
         return self._mu_gas_cP
 
     @property
-    def mu_wat_cP(self):
+    def mu_wat_cp(self):
         """ return water viscosity at working condition"""
         return self._mu_wat_cP
 
@@ -151,17 +151,17 @@ class FluidBlackOil:
         return self._rsw_m3m3
 
     @property
-    def bo_m3m3(self):
+    def b_oil_m3m3(self):
         """ return oil formation volume factor at working condition"""
         return self._bo_m3m3
 
     @property
-    def bg_m3m3(self):
+    def b_gas_m3m3(self):
         """ return gas formation volume factor at working condition"""
         return self._bg_m3m3
 
     @property
-    def bw_m3m3(self):
+    def b_wat_m3m3(self):
         """ return water formation volume factor at working condition"""
         return self._bw_m3m3
 
@@ -442,6 +442,7 @@ class FluidFlow:
         self.qwat_m3day = None
         self.qgas_m3day = None
         self.qliq_m3day = None
+        self.q_mix_n_m3day = None
 
         self.vsl_msec = None
         self.vsg_msec = None
@@ -460,6 +461,10 @@ class FluidFlow:
         self.heatcapn_jkgc = None
         self.thermal_conductn_wmk = None
 
+        self.mass_flowrate_gas_kgsec = None
+        self.mass_flowrate_wat_kgsec = None
+        self.mass_flowrate_oil_kgsec = None
+        self.mass_flowrate_liq_kgsec = None
         self.mass_flowraten_kgsec = None
 
         self.mun_cP = None
@@ -530,19 +535,32 @@ class FluidFlow:
 
         self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.rsb_m3m3  # TODO учесть газ в воде
 
-        self.qoil_m3day = self.qoil_on_surface_m3day * self.fl.bo_m3m3
+        self.qoil_m3day = self.qoil_on_surface_m3day * self.fl.b_oil_m3m3
 
-        self.qwat_m3day = self.qwat_on_surface_m3day * self.fl.bw_m3m3
+        self.qwat_m3day = self.qwat_on_surface_m3day * self.fl.b_wat_m3m3
 
         self.qliq_m3day = self.qoil_m3day + self.qwat_m3day
         # TODO учесть газ в воде
-        self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.bg_m3m3
+        self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
+
+        self.q_mix_n_m3day = self.qoil_m3day + self.qwat_m3day + self.qgas_m3day
 
         self.vsl_msec = uc.m3day2m3sec(self.qliq_m3day) / self.Ap_m2
 
         self.vsg_msec = uc.m3day2m3sec(self.qgas_m3day) / self.Ap_m2
 
         self.vm_msec = self.vsl_msec + self.vsg_msec
+
+        self.mass_flowrate_gas_kgsec = self.fl.rho_gas_kgm3 * self.qgas_m3day / 86400
+
+        self.mass_flowrate_wat_kgsec = self.fl.rho_wat_kgm3 * self.qwat_m3day / 86400
+
+        self.mass_flowrate_oil_kgsec = self.fl.rho_oil_kgm3 * self.qoil_m3day / 86400
+
+        self.mass_flowrate_liq_kgsec = self.mass_flowrate_wat_kgsec + self.mass_flowrate_oil_kgsec
+
+        self.mass_flowraten_kgsec = self.mass_flowrate_gas_kgsec + self.mass_flowrate_liq_kgsec
+
 
     def __calc_dvdp_msecpam__(self):
         """
@@ -579,15 +597,17 @@ class FluidFlow:
 
         self.liquid_content = self.qliq_m3day / (self.qliq_m3day + self.qgas_m3day)
 
+        self.gas_fraction_d = self.qgas_m3day / (self.qliq_m3day + self.qgas_m3day)
+
         self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
 
         self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * (1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
 
         self.sigma_liq_Nm = self.fl.sigma_oil_gas_Nm * (1 - self.fw_perc / 100) + self.fl.sigma_wat_gas_Nm * self.fw_perc / 100
 
-        self.mu_liq_cP = self.fl.mu_oil_cP * (1 - self.fw_perc / 100) + self.fl.mu_wat_cP * self.fw_perc / 100
+        self.mu_liq_cP = self.fl.mu_oil_cp * (1 - self.fw_perc / 100) + self.fl.mu_wat_cp * self.fw_perc / 100
 
-        self.mun_cP = self.mu_liq_cP * self.liquid_content + self.fl.mu_gas_cP * (1 - self.liquid_content)
+        self.mun_cP = self.mu_liq_cP * self.liquid_content + self.fl.mu_gas_cp * (1 - self.liquid_content)
 
         self.rhon_kgm3 = self.rho_liq_kgm3 * self.liquid_content + self.fl.rho_gas_kgm3 * (1 - self.liquid_content)
 
@@ -603,8 +623,6 @@ class FluidFlow:
 
         self.thermal_conductn_wmk = self.thermal_conduct_liq_wmk * self.liquid_content +\
                                     self.fl.thermal_conduct_gas_wmk * (1 - self.liquid_content)
-
-        self.mass_flowraten_kgsec = self.rhon_kgm3 * self.vm_msec * self.Ap_m2
 
         self.number_re_n = self.rhon_kgm3 * self.vm_msec * self.d_m / uc.cP2pasec(self.mun_cP)
 

@@ -11,16 +11,13 @@ import pandas as pd
 import numpy as np
 import sys
 sys.path.append('../')
-from _plotly_future_ import v4_subplots
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from plotly.offline import download_plotlyjs, plot, iplot
-from plotly import tools
-
-from datetime import date
+from plotly.offline import plot, iplot
+import re
 
 
-def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
+def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = True, swap_xy = False):
     """
     Создание одного trace по данным
 
@@ -30,35 +27,52 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines'):
     :param chosen_mode: настройка отображения 'lines', 'markers'
     :return: один trace
     """
-    one_trace = go.Scattergl(
-        x=data_x,
-        y=data_y,
-        name=namexy,
-        mode=chosen_mode
-    )
+    if swap_xy:
+        data_x, data_y = data_y, data_x
+        hovertemplate = namexy + ": %{x}<extra></extra>"
+    else:
+        hovertemplate = namexy + ": %{y}<extra></extra>"
+    if use_gl == True:
+        one_trace = go.Scattergl(
+			x=data_x,
+			y=data_y,
+			name=namexy,
+			mode=chosen_mode,
+            hovertemplate=hovertemplate
+		)
+    else:
+        one_trace = go.Scatter(
+            x=data_x,
+            y=data_y,
+            name=namexy,
+            mode=chosen_mode,
+            hovertemplate=hovertemplate
+        )
     return one_trace
 
 
-def plot_func(data, plot_title_str, filename_str):
+def plot_func(data, plot_title_str, filename_str, reversed_y=False, iplot_option=False):
     """
     Итоговая функция для построения графиков
 
+    :param reversed_y:
     :param data: созданный список из trace
     :param plot_title_str: название графика
     :param filename_str: названия html файлика
     :return: None
     """
-    layout = dict(title=plot_title_str)
-
+    if reversed_y:
+        layout = dict(title=plot_title_str, yaxis=dict(autorange='reversed'), hovermode='x')
+    else:
+        layout = dict(title=plot_title_str)
     fig = dict(data=data, layout=layout)
+    if iplot_option:
+        iplot(fig, filename=filename_str)
+    else:
+        plot(fig, filename=filename_str)
 
-    # fig = make_subplots(rows=8, cols=1)
 
-    plot(fig, filename=filename_str)
-    # iplot(fig)
-
-
-def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
+def plot_subplots(data_traces, filename_str, two_equal_subplots=False, auto_open = True):
     """
     Построение нескольких графиков
 
@@ -77,20 +91,11 @@ def plot_subplots(data_traces, filename_str, two_equal_subplots=False):
         fig = make_subplots(rows=len(data_traces), cols=1, shared_xaxes=True, vertical_spacing=0.02)
         for i in range(len(data_traces)):
             fig.append_trace(data_traces[i], row=i + 1, col=1)
-
-    plot(fig, filename=filename_str)
-
-
-"""def create_traces_list_by_num(data_x_values, data_y, num_y_list):
-    trace_list = []
-    for i in num_y_list:
-        namexy = data_y.get_saved_parameter_name_by_number(i)
-        this_trace = create_plotly_trace(data_x_values, data_y.get_saved_values_by_number(i), namexy)
-        trace_list.append(this_trace)
-    return trace_list"""
+    fig.layout.hovermode = 'x'
+    plot(fig, filename=filename_str, auto_open=auto_open)
 
 
-def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
+def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', use_gl=True, swap_xy=False):
     """
     Создание списка из trace для данного DataFrame для передачи их в data и последующего строительства графика.
 
@@ -102,7 +107,8 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines'):
     columns_name_list = data_frame.columns
     for i in columns_name_list:
         column_name = i
-        this_trace = create_plotly_trace(data_frame.index, data_frame[column_name], column_name, chosen_mode)
+        this_series = data_frame[column_name].dropna()
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, use_gl, swap_xy)
         trace_list.append(this_trace)
     return trace_list
 
@@ -121,3 +127,73 @@ def connect_traces(traces1, trace2):
     for j in trace2:
         connected_traces.append(j)
     return connected_traces
+
+
+def find_by_patterns(patterns, list_to_search):
+    res = [x for x in list_to_search if re.search(patterns[0], x)]
+    if len(patterns) >1:
+        for i in patterns[1:]:
+            res = [x for x in res if re.search(i, x)]
+    return res
+
+
+def plot_specific_columns(result_df, columns_to_plot=None, swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot'):
+    """
+    Функция для быстрого построения графиков, только для определенных колонок DataFrame
+    :param result_df:
+    :param columns_to_plot:
+    :param swap_xy:
+    :param reversed_y:
+    :param iplot_option:
+    :param plot_name:
+    :return:
+    """
+    if columns_to_plot == None:
+        columns_to_plot = result_df.columns
+    result_df_to_plot = result_df[columns_to_plot]
+    all_traces = create_traces_list_for_all_columms(result_df_to_plot, 'lines+markers', swap_xy=swap_xy)
+    plot_func(all_traces, plot_name, f'{plot_name}.html', reversed_y=reversed_y, iplot_option= iplot_option)
+
+
+def filtr_by_antipatterns(init_list: list, antipatterns: list):
+    """
+    Фильтрация списка параметров по антипаттернам, удаления нежелательных элементов типа string
+    :param init_list:
+    :param antipatterns:
+    :return:
+    """
+    new_list = init_list.copy()
+    droped_values = []
+    for j in antipatterns:
+        new_list = [i for i in new_list if j not in i ]
+    for i in init_list:
+        if i not in new_list:
+            droped_values.append(i)
+    print(f"Удаленные совпадения по антипаттерну: {droped_values}")
+    return new_list
+
+
+def plot_by_patterns(result_df, group_patterns, antipatterns=[],
+                     swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot'):
+    """
+    Функция для построения графиков с учетом групп паттерном (в каждой группе должны выполняться все условия)
+    и антипаттернов для выбора колонок для отображения
+
+    :param result_df:
+    :param group_patterns:
+    :param antipatterns:
+    :return:
+    """
+    if type(group_patterns[0]) == str:
+        columns_to_plot = find_by_patterns(group_patterns, result_df.columns)
+    else:
+        columns_to_plot = []
+        for i in group_patterns:
+            this_column_to_plot = find_by_patterns(i, result_df.columns)
+            columns_to_plot += this_column_to_plot
+    print(f"Найденные совпадения: {columns_to_plot}")
+    if len(antipatterns)>0:
+        print('cj')
+        columns_to_plot = filtr_by_antipatterns(columns_to_plot, antipatterns)
+    plot_specific_columns(result_df, columns_to_plot,swap_xy=swap_xy, reversed_y=reversed_y,
+                          iplot_option=iplot_option, plot_name=plot_name)

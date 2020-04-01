@@ -207,7 +207,7 @@ class ESP():
             self.q_mix_m3day = self.fluid_flow.qliq_m3day + self.fluid_flow.qgas_m3day * (1 - self.k_sep_total_d)
             self.q_mix_degr_m3day = self.q_mix_m3day * (1 + self.k_rate_degradation_d)
             self.mu_mix_cP = self.fluid_flow.mu_liq_cP * (1 - self.gas_fraction_d) + \
-                             self.fluid_flow.fl.mu_gas_cP * self.gas_fraction_d
+                             self.fluid_flow.fl.mu_gas_cp * self.gas_fraction_d
             self.rho_mix_kgm3 = self.fluid_flow.rho_liq_kgm3 * (1 - self.gas_fraction_d) + \
                                 self.fluid_flow.fl.rho_gas_kgm3 * self.gas_fraction_d
             self.stage_head_m = self.get_ESP_head_m(self.q_mix_degr_m3day, self.stage_number_in_calc, self.mu_mix_cP)

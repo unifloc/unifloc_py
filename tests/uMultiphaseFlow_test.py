@@ -34,7 +34,7 @@ class TestFriction_Bratland(unittest.TestCase):
         d_m = 159 / 1000
         epsilon = relative_roughness * d_m
         friction = friction_Bratland.Friction()
-        self.assertAlmostEqual(friction.calc_f(number_re, epsilon, d_m), 0.037014744989689666,
+        self.assertAlmostEqual(friction.calc_f(number_re, epsilon, d_m), 0.033576179992238414,
                                delta=0.00000001)
 
     def test_fourth_part(self):
@@ -43,7 +43,7 @@ class TestFriction_Bratland(unittest.TestCase):
         d_m = 159 / 1000
         epsilon = relative_roughness * d_m
         friction = friction_Bratland.Friction()
-        self.assertAlmostEqual(friction.calc_f(number_re, epsilon, d_m), 0.04865207639535838,
+        self.assertAlmostEqual(friction.calc_f(number_re, epsilon, d_m), 0.04864539878664956,
                                delta=0.00000001)
 
 
@@ -53,7 +53,7 @@ class TestBB(unittest.TestCase):
 
         p_bar = 11.713 * 10
         t_c = 82
-        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 10511.938363972778,
+        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c),  7797.35531726843,
                                delta=0.00000001)
 
 
