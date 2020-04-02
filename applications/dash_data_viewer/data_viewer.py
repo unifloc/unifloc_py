@@ -28,17 +28,19 @@ import pandas as pd
 from glob import glob
 import json
 import ctypes
+from dash.exceptions import PreventUpdate
+
 user32 = ctypes.windll.user32
 
 
 # Служебные переменные, можно менять настройки перед запуском
 
-ver = '0.3.2'
+ver = '0.4.0'
 date = '04/2020'
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 graph_mode = 'lines+markers' # 'markers', 'lines', 'lines+markers'
 dir_path = 'input/'
-using_screen_coef = 0.99
+using_screen_coef = 0.5
 marker_size = 5
 
 
@@ -48,6 +50,11 @@ screen_height = int(user32.GetSystemMetrics(1) * using_screen_coef)
 
 file_paths = glob(dir_path + '*.csv')
 
+init_allocated_df = pd.DataFrame({'x': ['Выделенные интервалы будут отображаться здесь']},
+                                 index=[0])
+
+init_saved_df = pd.DataFrame({'x': ['Сохраненные интервалы будут отображаться здесь']},
+                                 index=[0])
 
 def read_files(file_paths):
     file_names = [file_path[len(dir_path):] for file_path in file_paths]
@@ -69,6 +76,29 @@ file_names, loaded_files_dict, unique_cols = read_files(file_paths)
 
 
 # Функции для построения графиков
+
+def create_trace_for_table(df):
+    all_columns = [df.index.name] + list(df.columns)
+    #header_values = [x.replace(' ', '<br>') for x in all_columns]
+    header_values = [x for x in all_columns]
+    cells_values = [df.index.to_list()] + [df[x].to_list() for x in df.columns]
+    trace = go.Table(
+        header=dict(
+            values=header_values,
+            font=dict(size=10),
+            align="left"
+        ),
+        cells=dict(
+            values=cells_values,
+            align="left")
+    )
+    return trace
+
+
+def create_table_figure(df, table_name):
+    fig = go.Figure(data = create_trace_for_table(df))
+    fig.layout.title = table_name
+    return fig
 
 
 def create_traces(dfs, df_names, params, graph_type):
@@ -171,21 +201,16 @@ app.layout = html.Div(children=[html.Div([html.H4('Просмотрщик гра
                                     labelStyle={'display': 'inline-block'}
                                 ),
 
-                                html.Div(id='my-div'),
+                                html.Label('Выбор режима работы приложения'),
+                                dcc.RadioItems(id='radio_items_mode_chose',
+                                    options=[
+                                        {'label': 'Просмотрщик',  'value': 1},
+                                        {'label': 'Разметчик',  'value': 2},
+                                    ],
+                                    value=1,
+                                    labelStyle={'display': 'inline-block'}
+                                ),
 
-                                #html.Div([
-                                #    dcc.Markdown("""
-                                #                    **Selection Data**
-                                #
-                                #                    Choose the lasso or rectangle tool in the graph's menu
-                                #                    bar and then select points in the graph.
-                                #
-                                #                    Note that if `layout.clickmode = 'event+select'`, selection data also
-                                #                    accumulates (or un-accumulates) selected data if you hold down the shift
-                                #                    button while clicking.
-                                #                """),
-                                #    html.Pre(id='selected-data', style=styles['pre']),
-                                #], className='three columns'),
 
                                 html.Div([
                                     html.P('Управление графиком 1', id='text-1'),
@@ -314,7 +339,27 @@ app.layout = html.Div(children=[html.Div([html.H4('Просмотрщик гра
                                         figure=plot_ex([[loaded_files_dict[file_names[0]]]],
                                                        [[file_names[0]]],
                                                        [[loaded_files_dict[file_names[0]].columns[0]]],
-                                                       screen_height, [1]))])
+                                                       screen_height, [1]))]),
+
+                                html.Div([
+                                    dcc.Graph(
+                                        id='table_for_allocated_data',
+                                        figure=create_table_figure(init_allocated_df, 'Выделенные интервалы'),
+                                        style={'display': 'inline-block'}),
+
+                                    html.Button('Сохранить выделенный интервал', id='button', n_clicks=0,
+                                        style={'display': 'inline-block'}),
+
+                                    dcc.Graph(
+                                        id='table_for_saved_data',
+                                        figure=create_table_figure(init_saved_df, 'Сохраненные интервалы'),
+                                        style={'display': 'inline-block'})
+                                ]),
+
+                                # Hidden div inside the app that stores the intermediate value
+                                html.Div(id='data_storage_allocated', style={'display': 'none'}),
+                                html.Div(id='data_storage_saved', style={'display': 'none'})
+
                                 ],
                       id='main')
 
@@ -403,34 +448,70 @@ def show_graph(value):
         return {'display': 'inline'}, {'display': 'inline'}, {'display': 'inline'}, {'display': 'inline'}, {'display': 'inline'}
 
 
-#app.callback(
-#   Output('selected-data', 'children'),
-#   [Input('plot', 'selectedData')])
-#ef display_selected_data(selectedData):
-#   print(selectedData)
 
-#   print('\n')
-#   print(type(selectedData))
-
-#   print('\n')
-
-
-#   print(selectedData['range'])
-
-#   print(selectedData['range']['x'])
-
-#   return json.dumps(selectedData, indent=2)
+@app.callback([Output('table_for_allocated_data', 'style'),
+            Output('table_for_saved_data', 'style'),
+            Output('button', 'style')],
+            [Input('radio_items_mode_chose', 'value')])
+def show_graph(value):
+    if value == 1:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+    elif value == 2:
+        return {'display': 'inline-block'}, {'display': 'inline-block'}, {'display': 'inline-block'}
 
 
 @app.callback(
-    Output(component_id='my-div', component_property='children'),
+    [Output('table_for_allocated_data', 'figure'),
+    Output('data_storage_allocated', 'children')],
     [Input('plot', 'selectedData')])
 def display_selected_data(selectedData):
     if type(selectedData) != type(None):
-        return f"Период выбранных данных с {selectedData['range']['x'][0]} по {selectedData['range']['x'][1]}"
+        if 'range' in selectedData.keys():
+            df = pd.DataFrame.from_dict(selectedData['range'])
+            df = pd.DataFrame({'Начало интервала': [df[df.columns[0]][0]],
+                               'Конец интервала': [df[df.columns[0]][1]],
+                               'Ось сабплота': [df.columns[0]]},
+                              index=[0])
+            return create_table_figure(df, 'Выделенные значения'), df.to_json(date_format='iso', orient='split')
+        else:
+            raise PreventUpdate
     else:
-        return None
+        raise PreventUpdate
+
+
+class N_click_save(): # не знаю как сделать триггер на button
+    def __init__(self):
+        self.n_clicks = 0
+
+
+n_click_save = N_click_save()  # костыль - так делать нельзя
+
+
+@app.callback(
+    [Output('table_for_saved_data', 'figure'),
+    Output('data_storage_saved', 'children')],
+    [Input('data_storage_allocated', 'children'),
+     Input('button', 'n_clicks')])
+def save_selected_data(allocated_data, n_clicks):
+    print('Вызов сохранения в таблицу')
+    if n_clicks > n_click_save.n_clicks:
+        n_click_save.n_clicks = n_clicks
+        if type(allocated_data) != type(None):
+            df = pd.read_json(allocated_data, orient='split')
+            if n_clicks > 1:
+                loaded_df = pd.read_csv('saved_data.csv', index_col=[0])
+                df = loaded_df.append(df)
+                df.to_csv('saved_data.csv')
+            else:
+                df.to_csv('saved_data.csv')
+
+            return create_table_figure(df, 'Сохраненные значения'), df.to_json(date_format='iso', orient='split')
+    else:
+        raise PreventUpdate
+
 
 if __name__ == '__main__':
-    app.run_server(dev_tools_hot_reload=True)
+    #app.run_server(debug=True, dev_tools_hot_reload=True)
+    app.run_server()
+
 
