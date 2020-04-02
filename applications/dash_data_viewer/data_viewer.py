@@ -35,7 +35,7 @@ user32 = ctypes.windll.user32
 
 # Служебные переменные, можно менять настройки перед запуском
 
-ver = '0.4.0'
+ver = '0.5.0'
 date = '04/2020'
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 graph_mode = 'lines+markers' # 'markers', 'lines', 'lines+markers'
@@ -45,7 +45,7 @@ marker_size = 5
 
 
 screen_height = int(user32.GetSystemMetrics(1) * using_screen_coef)
-
+screen_width = int(user32.GetSystemMetrics(0))
 # Считывание файлов
 
 file_paths = glob(dir_path + '*.csv')
@@ -98,6 +98,8 @@ def create_trace_for_table(df):
 def create_table_figure(df, table_name):
     fig = go.Figure(data = create_trace_for_table(df))
     fig.layout.title = table_name
+    fig.update_layout(width=int(screen_width * 0.45))
+
     return fig
 
 
@@ -342,18 +344,26 @@ app.layout = html.Div(children=[html.Div([html.H4('Просмотрщик гра
                                                        screen_height, [1]))]),
 
                                 html.Div([
+
+                                    # html.P('Метка выделенного события', id='info'),
+                                    dcc.Input(id='label_for_event', value='event1', type='text',
+                                              style={'display': 'none'}),
+
+                                    html.Button('Сохранить выделенный интервал', id='button', n_clicks=0,
+                                                style={'display': 'none'}),
+
+                                    html.Button('Удалить последний интервал', id='button_to_del', n_clicks=0,
+                                                style={'display': 'none'}),
+
                                     dcc.Graph(
                                         id='table_for_allocated_data',
                                         figure=create_table_figure(init_allocated_df, 'Выделенные интервалы'),
-                                        style={'display': 'inline-block'}),
-
-                                    html.Button('Сохранить выделенный интервал', id='button', n_clicks=0,
-                                        style={'display': 'inline-block'}),
+                                        style={'display': 'none'}),
 
                                     dcc.Graph(
                                         id='table_for_saved_data',
                                         figure=create_table_figure(init_saved_df, 'Сохраненные интервалы'),
-                                        style={'display': 'inline-block'})
+                                        style={'display': 'none'})
                                 ]),
 
                                 # Hidden div inside the app that stores the intermediate value
@@ -451,27 +461,89 @@ def show_graph(value):
 
 @app.callback([Output('table_for_allocated_data', 'style'),
             Output('table_for_saved_data', 'style'),
-            Output('button', 'style')],
+
+            Output('button', 'style'),
+            Output('button_to_del', 'style'),
+               Output('label_for_event', 'style')],
             [Input('radio_items_mode_chose', 'value')])
 def show_graph(value):
     if value == 1:
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+        ts = {'display': 'none'}
+        return ts, ts, ts, ts, ts
     elif value == 2:
-        return {'display': 'inline-block'}, {'display': 'inline-block'}, {'display': 'inline-block'}
+        button = {'width': '30%', 'height': '10%', 'display': 'inline-block', "margin-right": "25px"}
+        table = {'width': '40%', 'display': 'inline-block', "margin-bottom": "1px", "margin-right": "1px"}
+        return table, table, button, button, button
 
 
 @app.callback(
     [Output('table_for_allocated_data', 'figure'),
     Output('data_storage_allocated', 'children')],
-    [Input('plot', 'selectedData')])
-def display_selected_data(selectedData):
+    [Input('plot', 'selectedData'),
+     Input('loaded_files_dict-subplot-1', 'value'),
+     Input('cols-subplot-1', 'value'),
+     Input('loaded_files_dict-subplot-2', 'value'),
+     Input('cols-subplot-2', 'value'),
+     Input('loaded_files_dict-subplot-3', 'value'),
+     Input('cols-subplot-3', 'value'),
+     Input('loaded_files_dict-subplot-4', 'value'),
+     Input('cols-subplot-4', 'value'),
+     Input('loaded_files_dict-subplot-5', 'value'),
+     Input('cols-subplot-5', 'value'),
+     Input('loaded_files_dict-subplot-6', 'value'),
+     Input('cols-subplot-6', 'value'),
+     Input('label_for_event', 'value')])
+def display_selected_data(selectedData, file_vals1, col_vals1,
+                file_vals2, col_vals2,
+                  file_vals3, col_vals3,
+                 file_vals4, col_vals4,
+                file_vals5, col_vals5,
+                  file_vals6, col_vals6,
+                          label_for_event):
     if type(selectedData) != type(None):
         if 'range' in selectedData.keys():
             df = pd.DataFrame.from_dict(selectedData['range'])
+            print(df)
+
+            axis_name_of_selected_subplot = df.columns[0]
+            print(axis_name_of_selected_subplot)
+            if axis_name_of_selected_subplot == 'x':
+                file_vals = file_vals1
+                col_vals = col_vals1
+            elif axis_name_of_selected_subplot == 'x2':
+                file_vals = file_vals2
+                col_vals = col_vals2
+            elif axis_name_of_selected_subplot == 'x3':
+                file_vals = file_vals3
+                col_vals = col_vals3
+            elif axis_name_of_selected_subplot == 'x4':
+                file_vals = file_vals4
+                col_vals = col_vals4
+            elif axis_name_of_selected_subplot == 'x5':
+                file_vals = file_vals5
+                col_vals = col_vals5
+            else:
+                file_vals = file_vals6
+                col_vals = col_vals6
+
+            file_vals_for_csv = ''
+            for i in file_vals:
+                file_vals_for_csv += i + ','
+            file_vals_for_csv = file_vals_for_csv[:-1]
+            col_vals_for_csv = ''
+            for i in col_vals:
+                col_vals_for_csv += i + ','
+            col_vals_for_csv = col_vals_for_csv[:-1]
+
+
             df = pd.DataFrame({'Начало интервала': [df[df.columns[0]][0]],
                                'Конец интервала': [df[df.columns[0]][1]],
-                               'Ось сабплота': [df.columns[0]]},
-                              index=[0])
+                               'Ось сабплота': [axis_name_of_selected_subplot],
+                               'Название файлов': [file_vals_for_csv],
+                               'Название параметров': [col_vals_for_csv]},
+                              index=[label_for_event])
+            df.index.name = 'Название события'
+
             return create_table_figure(df, 'Выделенные значения'), df.to_json(date_format='iso', orient='split')
         else:
             raise PreventUpdate
@@ -482,6 +554,7 @@ def display_selected_data(selectedData):
 class N_click_save(): # не знаю как сделать триггер на button
     def __init__(self):
         self.n_clicks = 0
+        self.n_clicks_to_del = 0
 
 
 n_click_save = N_click_save()  # костыль - так делать нельзя
@@ -491,21 +564,36 @@ n_click_save = N_click_save()  # костыль - так делать нельз
     [Output('table_for_saved_data', 'figure'),
     Output('data_storage_saved', 'children')],
     [Input('data_storage_allocated', 'children'),
-     Input('button', 'n_clicks')])
-def save_selected_data(allocated_data, n_clicks):
-    print('Вызов сохранения в таблицу')
-    if n_clicks > n_click_save.n_clicks:
-        n_click_save.n_clicks = n_clicks
-        if type(allocated_data) != type(None):
-            df = pd.read_json(allocated_data, orient='split')
-            if n_clicks > 1:
-                loaded_df = pd.read_csv('saved_data.csv', index_col=[0])
-                df = loaded_df.append(df)
-                df.to_csv('saved_data.csv')
-            else:
-                df.to_csv('saved_data.csv')
+     Input('button', 'n_clicks'),
+     Input('button_to_del', 'n_clicks')])
+def save_selected_data(allocated_data, n_clicks, n_clicks_to_del):
+    if n_clicks > n_click_save.n_clicks or n_clicks_to_del > n_click_save.n_clicks_to_del:
+        print('Вызов сохранения в таблицу')
+        if n_clicks > n_click_save.n_clicks:
+            n_click_save.n_clicks = n_clicks
+            if type(allocated_data) != type(None):
+                df = pd.read_json(allocated_data, orient='split')
+                if n_clicks > 1:
+                    loaded_df = pd.read_csv('saved_data.csv', index_col=[0])
+                    df = loaded_df.append(df)
+                    df.to_csv('saved_data.csv')
+                else:
+                    df.to_csv('saved_data.csv')
 
-            return create_table_figure(df, 'Сохраненные значения'), df.to_json(date_format='iso', orient='split')
+                return create_table_figure(df, 'Сохраненные значения'), df.to_json(date_format='iso', orient='split')
+        else:
+            print('Вызов удаления последней строчки')
+            n_click_save.n_clicks_to_del = n_clicks_to_del
+            if n_clicks > 0:
+                loaded_df = pd.read_csv('saved_data.csv', index_col=[0])
+                if loaded_df.shape[0] >= 1:
+                    df = loaded_df.iloc[0:-1]
+                    df.to_csv('saved_data.csv')
+                else:
+                    df = loaded_df[loaded_df.index == None]
+                return create_table_figure(df, 'Сохраненные значения'), df.to_json(date_format='iso',
+                                                                                   orient='split')
+
     else:
         raise PreventUpdate
 
