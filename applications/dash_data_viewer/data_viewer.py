@@ -35,12 +35,12 @@ user32 = ctypes.windll.user32
 
 # Служебные переменные, можно менять настройки перед запуском
 
-ver = '0.5.0'
+ver = '0.5.1'
 date = '04/2020'
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 graph_mode = 'lines+markers' # 'markers', 'lines', 'lines+markers'
 dir_path = 'input/'
-using_screen_coef = 0.5
+using_screen_coef = 0.9
 marker_size = 5
 
 
@@ -50,10 +50,12 @@ screen_width = int(user32.GetSystemMetrics(0))
 
 file_paths = glob(dir_path + '*.csv')
 
-init_allocated_df = pd.DataFrame({'x': ['Выделенные интервалы будут отображаться здесь']},
+init_allocated_df = pd.DataFrame({'Тут': ['выделенные'],
+                                  'будут': ['интервалы']},
                                  index=[0])
 
-init_saved_df = pd.DataFrame({'x': ['Сохраненные интервалы будут отображаться здесь']},
+init_saved_df = pd.DataFrame({'Тут': ['сохраненные'],
+                              'будут': ['интервалы']},
                                  index=[0])
 
 def read_files(file_paths):
@@ -393,11 +395,12 @@ app.layout = html.Div(children=[html.Div([html.H4('Просмотрщик гра
                Input('loaded_files_dict-subplot-6', 'value'),
                Input('cols-subplot-6', 'value'),
                Input('graph-type-choose-6', 'value'),
-              Input('radio_items_plot_chose', 'value')])
+              Input('radio_items_plot_chose', 'value'),
+               Input('radio_items_mode_chose', 'value')])
 def update_graph(file_vals1, col_vals1, chose_vals1, file_vals2, col_vals2, 
                  chose_vals2, file_vals3, col_vals3, chose_vals3, 
                  file_vals4, col_vals4, chose_vals4, file_vals5, col_vals5,
-                 chose_vals5, file_vals6, col_vals6, chose_vals6, n_clicks):
+                 chose_vals5, file_vals6, col_vals6, chose_vals6, n_clicks, mode_value):
     
     files_plot1 = [loaded_files_dict[val] for val in file_vals1]
     files_plot = [files_plot1]
@@ -434,7 +437,11 @@ def update_graph(file_vals1, col_vals1, chose_vals1, file_vals2, col_vals2,
         files_vals.append(file_vals6)
         col_vals.append(col_vals6)
         chose_vals.append(chose_vals6)
-    return plot_ex(files_plot, files_vals, col_vals, screen_height, chose_vals)
+    if mode_value == 1:
+        return plot_ex(files_plot, files_vals, col_vals, screen_height, chose_vals)
+    else:
+        return plot_ex(files_plot, files_vals, col_vals, int(0.6 * screen_height), chose_vals)
+
 
 
 @app.callback([Output('management-2', 'style'),
@@ -503,10 +510,7 @@ def display_selected_data(selectedData, file_vals1, col_vals1,
     if type(selectedData) != type(None):
         if 'range' in selectedData.keys():
             df = pd.DataFrame.from_dict(selectedData['range'])
-            print(df)
-
             axis_name_of_selected_subplot = df.columns[0]
-            print(axis_name_of_selected_subplot)
             if axis_name_of_selected_subplot == 'x':
                 file_vals = file_vals1
                 col_vals = col_vals1
@@ -544,7 +548,7 @@ def display_selected_data(selectedData, file_vals1, col_vals1,
                               index=[label_for_event])
             df.index.name = 'Название события'
 
-            return create_table_figure(df, 'Выделенные значения'), df.to_json(date_format='iso', orient='split')
+            return create_table_figure(df, 'Выделенные интервалы'), df.to_json(date_format='iso', orient='split')
         else:
             raise PreventUpdate
     else:
@@ -580,7 +584,7 @@ def save_selected_data(allocated_data, n_clicks, n_clicks_to_del):
                 else:
                     df.to_csv('saved_data.csv')
 
-                return create_table_figure(df, 'Сохраненные значения'), df.to_json(date_format='iso', orient='split')
+                return create_table_figure(df, 'Сохраненные интервалы'), df.to_json(date_format='iso', orient='split')
         else:
             print('Вызов удаления последней строчки')
             n_click_save.n_clicks_to_del = n_clicks_to_del
@@ -591,7 +595,7 @@ def save_selected_data(allocated_data, n_clicks, n_clicks_to_del):
                     df.to_csv('saved_data.csv')
                 else:
                     df = loaded_df[loaded_df.index == None]
-                return create_table_figure(df, 'Сохраненные значения'), df.to_json(date_format='iso',
+                return create_table_figure(df, 'Сохраненные интервалы'), df.to_json(date_format='iso',
                                                                                    orient='split')
 
     else:
