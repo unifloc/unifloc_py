@@ -321,3 +321,49 @@ def create_useful_inf(cs_file_name):
     result_df.index = [cs_file_name.split('\\')[-1].replace('_first_edit_cs.csv', '')]
     result_df.index.name = 'Скважина'
     return result_df
+
+
+def undim_index(time_index):
+    time_index = time_index - time_index[0]
+    time_index = time_index.total_seconds()
+    time_index = time_index / time_index[-1]
+    return time_index
+
+
+def find_gas_periods(df, param=gn.i_a_motor_a):
+    work_status, work_timedelta, \
+    stop_timedelta, work_bounds, stop_bounds = calculated_regime_time(df, return_all=True)
+
+    work_periods = []
+    for k in work_bounds:
+        this_df = df[(df.index >= k[0]) & (df.index <= k[1])]
+        work_periods.append(this_df)
+
+    gas_periods = []
+    gas_dfs = []
+    if len(work_periods) > 2:
+        for j, i in enumerate(work_periods):
+            small_df = i.copy()
+            small_df = small_df.dropna(subset=[param])
+            if small_df.shape[0] > 0:
+                small_df = small_df[param]
+                small_df = small_df[small_df > 0]
+                if len(small_df) > 0:
+                    small_df = small_df / small_df.max()
+                    # small_df = small_df[small_df>0.2]
+                    small_df.index = undim_index(small_df.index)
+                    small_df = small_df[small_df.index <= 0.95]
+                    small_df = small_df[small_df.index > 0.5]
+
+                    values = [0] + list(small_df.values[1::] - small_df.values[0:-1:])
+                    np_values = np.array(values)
+                    np_values_gas = np_values[np_values <= -0.15]
+                    np_values_gas_up = np_values[np_values >= 0.10]
+                    np_values_gas_down = np_values[np_values <= -0.07]
+                    if len(np_values_gas) > 0 or (len(np_values_gas_up) > 0 and len(np_values_gas_down) > 0):
+                        gas_dfs.append(i)
+                        gas_periods.append(work_bounds[j])
+    stats = {'Количество рабочих режимов': len(work_periods),
+             'Количество режимов с поступлением газа': len(gas_periods),
+             'Доля нестабильных режимов': len(gas_periods) / len(work_periods)}
+    return gas_periods, gas_dfs, stats
