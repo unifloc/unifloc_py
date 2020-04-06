@@ -109,6 +109,8 @@ class self_flow_well():
 
         self.ipr = reservoir
 
+        self.direction_up = None
+
     def __transfer_data_to_pipe__(self, pipe_object, section_casing,  d_inner_pipe_m):
         """
         Происходит изменение параметров в используемом подмодуле - трубе -
@@ -129,7 +131,18 @@ class self_flow_well():
         pipe_object.h_mes_in_m = self.h_bottomhole_mes_m
         pipe_object.h_mes_out_m = 0
 
-    def __calc_pipe__(self, pipe_object, option_last_calc_boolean = False):
+    def __init_construction__(self):
+        self.well_profile.h_conductor_mes_m = self.h_conductor_mes_m
+        self.well_profile.h_conductor_vert_m = self.h_conductor_vert_m
+        self.well_profile.h_pump_mes_m = self.h_intake_mes_m
+        self.well_profile.h_pump_vert_m = self.h_intake_vert_m
+        self.well_profile.h_bottomhole_mes_m = self.h_bottomhole_mes_m
+        self.well_profile.h_bottomhole_vert_m = self.h_bottomhole_vert_m
+        self.well_profile.lenth_of_one_part = self.step_lenth_in_calc_along_wellbore_m
+        self.well_profile.calc_all()
+        return None
+
+    def __calc_pipe__(self, pipe_object, option_last_calc_boolean=False):
         """
         Расчет трубы (НКТ или ОК) в текущей точке всех параметров, сохранение их в атрибуты класса и в хранилище
         data_workflow - self.data, а после вычисление параметров в следующей точке.
@@ -138,6 +151,10 @@ class self_flow_well():
         :param option_last_calc_boolean: опция последнего расчета - не вычисляются параметры в следующей точке
         :return: None
         """
+        if self.direction_up:
+            sign = 1
+        else:
+            sign = - 1
         pipe_object.t_earth_init_c = self.t_calculated_earth_init
         pipe_object.angle_to_horizontal_grad = self.well_profile.get_angle_to_horizontal_grad(self.h_calculated_mes_m)
 
@@ -150,19 +167,23 @@ class self_flow_well():
             self.step_lenth_calculated_along_vert_m = np.abs(self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
                                                                                             self.step_lenth_in_calc_along_wellbore_m) -
                                                              self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
-            self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m
+            self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m * sign
             #if self.p_calculated_bar < 1:
             #    self.p_calculated_bar = 1
-            self.t_calculated_c -= self.t_grad_calculated_cm * self.step_lenth_in_calc_along_wellbore_m
-            self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m
+            self.t_calculated_c -= self.t_grad_calculated_cm * self.step_lenth_in_calc_along_wellbore_m * sign
+            self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m * sign
             self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
-            self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m
+            self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m * sign
+            #print(f"Давление: {self.p_calculated_bar} и температура {self.t_calculated_c}")
+
+
     def calc_all_from_down_to_up(self):
         """
         Расчет фонтанирующей скважины методом снизу-вверх
 
         :return: None
         """
+        self.direction_up = True
 
         self.well_profile.h_conductor_mes_m = self.h_conductor_mes_m
         self.well_profile.h_conductor_vert_m = self.h_conductor_vert_m
@@ -217,49 +238,118 @@ class self_flow_well():
         self.p_wellhead_bar = self.p_calculated_bar
         self.t_wellhead_c = self.t_calculated_c
 
+    def calc_all_from_up_to_down(self):
+        """
+        Расчет фонтанирующей скважины методом снизу-вверх
+
+        :return: None
+        """
+        self.direction_up = False
+
+        self.__init_construction__()
+
+        self.h_calculated_mes_m = 0
+        self.h_calculated_vert_m = 0
+
+        self.p_calculated_bar = self.p_wellhead_bar
+        self.t_calculated_c = self.t_wellhead_c
+
+        self.t_calculated_earth_init = self.t_wellhead_c  # TODO
+
+        self.step_lenth_calculated_along_vert_m = (self.well_profile.get_h_vert_m(self.h_calculated_mes_m +
+                                                                                 self.step_lenth_in_calc_along_wellbore_m) -
+                                                   self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
+        self.data.clear_data()
+
+        # tubing calc
+        if self.without_annulus_space:
+            self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_tube_inner_m)
+        else:
+            self.__transfer_data_to_pipe__(self.pipe, section_casing=False, d_inner_pipe_m=self.d_tube_inner_m)
+
+        while self.h_calculated_mes_m <= self.h_intake_mes_m - self.step_lenth_in_calc_along_wellbore_m:
+            self.__calc_pipe__(self.pipe)
+
+        # last calc in tubing
+        step_lenth_in_calc_along_wellbore_m = self.step_lenth_in_calc_along_wellbore_m
+        self.step_lenth_in_calc_along_wellbore_m = self.h_intake_mes_m - self.h_calculated_mes_m * 0.9999
+        self.__calc_pipe__(self.pipe)
+        self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
+
+        # casing calc
+        self.__transfer_data_to_pipe__(self.pipe, section_casing=True, d_inner_pipe_m=self.d_casing_inner_m)
+        while self.h_calculated_mes_m <= self.h_bottomhole_mes_m - self.step_lenth_in_calc_along_wellbore_m:
+            self.__calc_pipe__(self.pipe)
+
+        # last step in casing before 0 point
+        step_lenth_in_calc_along_wellbore_m = self.step_lenth_in_calc_along_wellbore_m
+        self.step_lenth_in_calc_along_wellbore_m = self.h_bottomhole_mes_m - self.h_calculated_mes_m
+        self.__calc_pipe__(self.pipe, option_last_calc_boolean=False)
+        self.step_lenth_in_calc_along_wellbore_m = step_lenth_in_calc_along_wellbore_m
+        # calc grad in 0 point and save
+        self.__calc_pipe__(self.pipe, option_last_calc_boolean=True)
+        if not self.save_all:
+            self.data.get_data(self)
+        self.p_bottomhole_bar = self.p_calculated_bar
+        self.t_bottomhole_c = self.t_calculated_c
+
+
 import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import pandas as pd
 import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
-calc_options ={"step_lenth_in_calc_along_wellbore_m": 10,
-                "without_annulus_space": False,
-               "save_all": True}
-
-rsb_m3m3 = 56
-pb_bar = 9 * 10 ** 5
-gamma_oil = 0.86
-gamma_gas = 1.45
-
-well_data = {"h_intake_mes_m": 1205,
-             "h_intake_vert_m": 1205,
-             "h_bottomhole_mes_m": 1607,  # 1756.8
-             "h_bottomhole_vert_m": 1607,
-
-             "geothermal_grad_cm": 0.02,
-             "t_bottomhole_c": 40,
-             "t_earth_init_in_reservoir_c": 40,
-             'p_bottomhole_bar': 114.35,
-             "d_casing_inner_m": 0.133,
-             "d_tube_inner_m": 0.0503,
-             "qliq_on_surface_m3day": 40,
-             "fw_on_surface_perc": 0}
-
-real_measurements = pd.DataFrame(
-    {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
-     'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
 
 
-reservoir = IPR_simple_line.IPRSimpleLine()
-ipr_m3daybar = reservoir.calc_pi_m3daybar(well_data['qliq_on_surface_m3day'], well_data['p_bottomhole_bar'], 250)
-well_data['qliq_on_surface_m3day'] = 20
 
-fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3)
-simple_well = self_flow_well(fluid=fluid,reservoir=reservoir,
-                             pipe=uPipe.Pipe(temp_cor=temp_cor_simple_line.SimpleLineCor()), **well_data, **calc_options)
-simple_well.well_work_time_sec = 1
-import time
-start = time.time()
+if __name__ == "__main__":
+    calc_options ={"step_lenth_in_calc_along_wellbore_m": 10,
+                    "without_annulus_space": False,
+                   "save_all": True}
 
-simple_well.calc_all_from_down_to_up()
-stop = time.time()
-print(stop-start)
+    rsb_m3m3 = 56
+    pb_bar = 9 * 10 ** 5
+    gamma_oil = 0.86
+    gamma_gas = 1.45
+
+    well_data = {"h_intake_mes_m": 1205,
+                 "h_intake_vert_m": 1205,
+                 "h_bottomhole_mes_m": 1607,  # 1756.8
+                 "h_bottomhole_vert_m": 1607,
+
+                 "geothermal_grad_cm": 0.02,
+                 "t_bottomhole_c": 40,
+                 "t_earth_init_in_reservoir_c": 40,
+                 'p_bottomhole_bar': 114.35,
+                 "d_casing_inner_m": 0.133,
+                 "d_tube_inner_m": 0.0503,
+                 "qliq_on_surface_m3day": 40,
+                 "fw_on_surface_perc": 0}
+
+    real_measurements = pd.DataFrame(
+        {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
+         'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
+
+
+    reservoir = IPR_simple_line.IPRSimpleLine()
+    ipr_m3daybar = reservoir.calc_pi_m3daybar(well_data['qliq_on_surface_m3day'], well_data['p_bottomhole_bar'], 250)
+    well_data['qliq_on_surface_m3day'] = 20
+
+    fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3)
+    simple_well = self_flow_well(fluid=fluid,reservoir=reservoir,
+                                 pipe=uPipe.Pipe(temp_cor=temp_cor_simple_line.SimpleLineCor()), **well_data, **calc_options)
+    simple_well.well_work_time_sec = 1
+
+    simple_well.p_wellhead_bar = 20
+    simple_well.t_wellhead_c = 20
+
+    import time
+    start = time.time()
+    simple_well.calc_all_from_down_to_up()
+    stop = time.time()
+    print(stop-start)
+
+    start = time.time()
+
+    simple_well.calc_all_from_up_to_down()
+    stop = time.time()
+    print(stop-start)
