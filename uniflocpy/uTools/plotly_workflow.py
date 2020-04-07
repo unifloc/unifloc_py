@@ -154,9 +154,10 @@ def plot_specific_columns(result_df, columns_to_plot=None, swap_xy=True, reverse
     plot_func(all_traces, plot_name, f'{plot_name}.html', reversed_y=reversed_y, iplot_option= iplot_option)
 
 
-def filtr_by_antipatterns(init_list: list, antipatterns: list):
+def filtr_by_antipatterns(init_list: list, antipatterns: list, print_all: bool = True):
     """
     Фильтрация списка параметров по антипаттернам, удаления нежелательных элементов типа string
+    :param print_all: опция - выводить все удаленные совпадения по антипаттерну
     :param init_list:
     :param antipatterns:
     :return:
@@ -168,16 +169,18 @@ def filtr_by_antipatterns(init_list: list, antipatterns: list):
     for i in init_list:
         if i not in new_list:
             droped_values.append(i)
-    print(f"Удаленные совпадения по антипаттерну: {droped_values}")
+    if print_all:
+        print(f"Удаленные совпадения по антипаттерну: {droped_values}")
     return new_list
 
 
 def plot_by_patterns(result_df, group_patterns, antipatterns=[],
-                     swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot'):
+                     swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot', print_all=True):
     """
-    Функция для построения графиков с учетом групп паттерном (в каждой группе должны выполняться все условия)
+    Функция для построения графиков с учетом групп паттернов (в каждой группе должны выполняться все условия)
     и антипаттернов для выбора колонок для отображения
 
+    :param print_all: опция - выводить все найденные совпадения и удаленные антипаттерны
     :param result_df:
     :param group_patterns:
     :param antipatterns:
@@ -190,12 +193,14 @@ def plot_by_patterns(result_df, group_patterns, antipatterns=[],
         for i in group_patterns:
             this_column_to_plot = find_by_patterns(i, result_df.columns)
             columns_to_plot += this_column_to_plot
-    print(f"Найденные совпадения: {columns_to_plot}")
+    if print_all:
+        print(f"Найденные совпадения: {columns_to_plot}")
     if len(antipatterns)>0:
-        print('cj')
-        columns_to_plot = filtr_by_antipatterns(columns_to_plot, antipatterns)
+        columns_to_plot = filtr_by_antipatterns(columns_to_plot, antipatterns, print_all=print_all)
     plot_specific_columns(result_df, columns_to_plot,swap_xy=swap_xy, reversed_y=reversed_y,
                           iplot_option=iplot_option, plot_name=plot_name)
+
+
 def create_report_html(df, all_banches, filename):
     """
     Создание шаблонизированного и удобного набора графиков

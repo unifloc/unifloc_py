@@ -14,25 +14,38 @@ import uniflocpy.uTools.data_workflow as data_workflow
 import uniflocpy.uWell.uPipe as uPipe
 import uniflocpy.uWell.deviation_survey as deviation_survey
 import uniflocpy.uPVT.PVT_fluids as PVT_fluids
+import uniflocpy.uPVT.BlackOil_model as BlackOil_model
+
 import numpy as np
 import uniflocpy.uReservoir.IPR_simple_line as IPR_simple_line
+import uniflocpy.uTemperature as uTemperature
+import uniflocpy.uMultiphaseFlow as uMultiphaseFlow
 
 
 class self_flow_well():
-    def __init__(self, fluid=PVT_fluids.FluidStanding(),
-                 well_profile=deviation_survey.simple_well_deviation_survey(),
-                 data=data_workflow.Data(),
-                 pipe=uPipe.Pipe(),
-                 reservoir=None,
+    def __init__(self, fluid=0,
+                 well_profile=0,
+                 hydr_corr=0,
+                 temp_corr=0,
+                 pipe=0,
+                 reservoir=-1,
+
+                 gamma_oil=0.86, gamma_gas=0.6, gamma_wat=1.0, rsb_m3m3=200.0,
+
                  h_conductor_mes_m=500, h_conductor_vert_m=500,
                  h_intake_mes_m=1000, h_intake_vert_m=1000,
                  h_bottomhole_mes_m=1500, h_bottomhole_vert_m=1500,
-                 qliq_on_surface_m3day=100, fw_on_surface_perc=10,
                  d_casing_inner_m=0.120, d_tube_inner_m=0.062,
+
+                 qliq_on_surface_m3day=100, fw_on_surface_perc=10,
                  p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
                  t_earth_init_on_surface_c=3, t_earth_init_in_reservoir_c=90, geothermal_grad_cm=0.03,
-                 well_work_time_sec=60 * 24 * 60 * 60, step_lenth_in_calc_along_wellbore_m=10, without_annulus_space=False,
+                 p_reservoir_bar=250,
+                 well_work_time_sec=60 * 24 * 60 * 60,
+
+                 step_lenth_in_calc_along_wellbore_m=10,
+                 without_annulus_space=False,
                  save_all=True):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
@@ -64,19 +77,15 @@ class self_flow_well():
 
         self.h_conductor_mes_m = h_conductor_mes_m
         self.h_conductor_vert_m = h_conductor_vert_m
-
         self.h_intake_mes_m = h_intake_mes_m
         self.h_intake_vert_m = h_intake_vert_m
-
         self.h_bottomhole_mes_m = h_bottomhole_mes_m
         self.h_bottomhole_vert_m = h_bottomhole_vert_m
-
         self.d_casing_inner_m = d_casing_inner_m
         self.d_tube_inner_m = d_tube_inner_m
 
         self.p_bottomhole_bar = p_bottomhole_bar
         self.t_bottomhole_c = t_bottomhole_c
-
         self.p_wellhead_bar = p_wellhead_bar
         self.t_wellhead_c = t_wellhead_c
 
@@ -87,11 +96,32 @@ class self_flow_well():
         self.t_earth_init_on_surface_c = t_earth_init_on_surface_c
         self.t_earth_init_in_reservoir_c = t_earth_init_in_reservoir_c
         self.geothermal_grad_cm = geothermal_grad_cm
+        self.p_reservoir_bar = p_reservoir_bar
 
-        self.well_profile = well_profile
-        self.pipe = pipe
-        self.pipe.fluid_flow.fl = fluid
-        self.data = data
+        if well_profile == 0:
+            self.well_profile = deviation_survey.simple_well_deviation_survey()
+        elif well_profile == 1:
+            self.well_profile = deviation_survey.well_deviation_survey()
+
+        if pipe == 0:
+            self.pipe = uPipe.Pipe()
+
+        if hydr_corr == 0:
+            self.pipe.hydr_cor = uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor()
+
+        if temp_corr == 0:
+            self.pipe.temp_cor = uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor()
+        elif temp_corr == 1:
+            self.pipe.temp_cor = uTemperature.temp_cor_simple_line.SimpleLineCor()
+
+        if fluid == 0:
+            self.pipe.fluid_flow.fl = PVT_fluids.FluidStanding(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
+                                                               gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3)
+        elif fluid == 1:
+            self.pipe.fluid_flow.fl = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
+                                                               gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3)
+
+        self.data = data_workflow.Data()
 
         self.qliq_on_surface_m3day = qliq_on_surface_m3day
         self.fw_on_surface_perc = fw_on_surface_perc
@@ -107,7 +137,12 @@ class self_flow_well():
         self.without_annulus_space = without_annulus_space
         self.save_all = save_all
 
-        self.ipr = reservoir
+        if reservoir == -1:
+            self.ipr = None
+        elif reservoir == 0:
+            self.ipr = IPR_simple_line.IPRSimpleLine()
+            self.ipr.pi_m3daybar = self.ipr.calc_pi_m3daybar(self.qliq_on_surface_m3day, self.p_bottomhole_bar,
+                                                      self.p_reservoir_bar)
 
         self.direction_up = None
 
@@ -294,7 +329,6 @@ class self_flow_well():
         self.t_bottomhole_c = self.t_calculated_c
 
 
-import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 import pandas as pd
 import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
@@ -334,9 +368,10 @@ if __name__ == "__main__":
     ipr_m3daybar = reservoir.calc_pi_m3daybar(well_data['qliq_on_surface_m3day'], well_data['p_bottomhole_bar'], 250)
     well_data['qliq_on_surface_m3day'] = 20
 
-    fluid = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3)
-    simple_well = self_flow_well(fluid=fluid,reservoir=reservoir,
-                                 pipe=uPipe.Pipe(temp_cor=temp_cor_simple_line.SimpleLineCor()), **well_data, **calc_options)
+    fluid = BlackOil_model.Fluid()
+    simple_well = self_flow_well(fluid=1, reservoir=0,
+                                 temp_corr=1, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
+                                 **well_data, **calc_options)
     simple_well.well_work_time_sec = 1
 
     simple_well.p_wellhead_bar = 20
@@ -347,9 +382,42 @@ if __name__ == "__main__":
     simple_well.calc_all_from_down_to_up()
     stop = time.time()
     print(stop-start)
+    print(simple_well.p_wellhead_bar)
+    print(simple_well.p_bottomhole_bar)
+    print(simple_well.p_calculated_bar)
 
     start = time.time()
 
     simple_well.calc_all_from_up_to_down()
     stop = time.time()
     print(stop-start)
+    print(simple_well.p_wellhead_bar)
+    print(simple_well.p_bottomhole_bar)
+    print(simple_well.p_calculated_bar)
+
+
+    simple_well = self_flow_well(fluid=1, reservoir=0,
+                                 temp_corr=0, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
+                                 **well_data, **calc_options)
+    simple_well.well_work_time_sec = 1
+
+    simple_well.p_wellhead_bar = 20
+    simple_well.t_wellhead_c = 20
+
+    import time
+    start = time.time()
+    simple_well.calc_all_from_down_to_up()
+    stop = time.time()
+    print(stop-start)
+    print(simple_well.p_wellhead_bar)
+    print(simple_well.p_bottomhole_bar)
+    print(simple_well.p_calculated_bar)
+
+    start = time.time()
+
+    simple_well.calc_all_from_up_to_down()
+    stop = time.time()
+    print(stop-start)
+    print(simple_well.p_wellhead_bar)
+    print(simple_well.p_bottomhole_bar)
+    print(simple_well.p_calculated_bar)
