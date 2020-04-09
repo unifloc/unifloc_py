@@ -21,6 +21,8 @@ import uniflocpy.uReservoir.IPR_simple_line as IPR_simple_line
 import uniflocpy.uTemperature as uTemperature
 import uniflocpy.uMultiphaseFlow as uMultiphaseFlow
 
+from scipy.integrate import solve_ivp
+import time
 
 class self_flow_well():
     def __init__(self, fluid=0,
@@ -46,7 +48,8 @@ class self_flow_well():
 
                  step_lenth_in_calc_along_wellbore_m=10,
                  without_annulus_space=False,
-                 save_all=True):
+                 save_all=True,
+                 solver_using=0):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
         вместе с граничными условиями. Кроме параметров, которые предлагается задать при
@@ -145,6 +148,10 @@ class self_flow_well():
                                                       self.p_reservoir_bar)
 
         self.direction_up = None
+        self.solver_using = solver_using
+
+        self.time_calculated_sec = None
+        self.calculation_number_in_one_step = None
 
     def __transfer_data_to_pipe__(self, pipe_object, section_casing,  d_inner_pipe_m):
         """
@@ -177,6 +184,13 @@ class self_flow_well():
         self.well_profile.calc_all()
         return None
 
+
+    def calc_p_grad_pam_for_scipy(self, h_m, p_bar, t_c, pipe_object):
+        p_bar = float(p_bar)
+        t_c = float(t_c)
+        p_grad_pam = pipe_object.calc_p_grad_pam(p_bar, t_c)
+        return uc.Pa2bar(p_grad_pam)
+
     def __calc_pipe__(self, pipe_object, option_last_calc_boolean=False):
         """
         Расчет трубы (НКТ или ОК) в текущей точке всех параметров, сохранение их в атрибуты класса и в хранилище
@@ -186,6 +200,11 @@ class self_flow_well():
         :param option_last_calc_boolean: опция последнего расчета - не вычисляются параметры в следующей точке
         :return: None
         """
+        #print(f"В начале расчета\n"
+        #      f"Давление: {self.p_calculated_bar} и температура {self.t_calculated_c} "
+        #      f"на измеренной глубине {self.h_calculated_mes_m}"
+        #      f"\n")
+        start_calculation_time = time.time()
         if self.direction_up:
             sign = 1
         else:
@@ -202,14 +221,34 @@ class self_flow_well():
             self.step_lenth_calculated_along_vert_m = np.abs(self.well_profile.get_h_vert_m(self.h_calculated_mes_m -
                                                                                             self.step_lenth_in_calc_along_wellbore_m) -
                                                              self.well_profile.get_h_vert_m(self.h_calculated_mes_m))
-            self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m * sign
+
+            if self.solver_using == 1:
+                new_p_calculated_bar_solve_output = solve_ivp(self.calc_p_grad_pam_for_scipy,
+                                                              t_span=(self.h_calculated_mes_m,
+                                                                      self.h_calculated_mes_m - self.step_lenth_in_calc_along_wellbore_m * sign),
+                                                              y0=[self.p_calculated_bar],
+                                                              args=(self.t_calculated_c, pipe_object),
+                                                              rtol=0.1, atol=0.1
+                                                              )
+                #print(new_p_calculated_bar_solve_output)
+                #print('\n')
+                new_p_calculated_bar = new_p_calculated_bar_solve_output.y[-1][-1]
+                #print(f"new_p_calculated_bar = {new_p_calculated_bar}")
+                self.p_calculated_bar = new_p_calculated_bar
+                self.calculation_number_in_one_step = new_p_calculated_bar_solve_output.nfev
+            else:
+                self.p_calculated_bar -= self.p_grad_calculated_barm * self.step_lenth_in_calc_along_wellbore_m * sign
+                self.calculation_number_in_one_step = 1
             #if self.p_calculated_bar < 1:
             #    self.p_calculated_bar = 1
             self.t_calculated_c -= self.t_grad_calculated_cm * self.step_lenth_in_calc_along_wellbore_m * sign
             self.h_calculated_mes_m -= self.step_lenth_in_calc_along_wellbore_m * sign
             self.h_calculated_vert_m = self.well_profile.get_h_vert_m(self.h_calculated_mes_m)
             self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m * sign
-            #print(f"Давление: {self.p_calculated_bar} и температура {self.t_calculated_c}")
+            #print(f"Давление: {self.p_calculated_bar} и температура {self.t_calculated_c} "
+            #      f"на измеренной глубине {self.h_calculated_mes_m}")
+
+        self.time_calculated_sec = time.time() - start_calculation_time
 
 
     def calc_all_from_down_to_up(self):
@@ -336,7 +375,7 @@ import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
 
 if __name__ == "__main__":
-    calc_options ={"step_lenth_in_calc_along_wellbore_m": 10,
+    calc_options ={"step_lenth_in_calc_along_wellbore_m": 100,
                     "without_annulus_space": False,
                    "save_all": True}
 
@@ -364,14 +403,13 @@ if __name__ == "__main__":
          'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
 
 
-    reservoir = IPR_simple_line.IPRSimpleLine()
-    ipr_m3daybar = reservoir.calc_pi_m3daybar(well_data['qliq_on_surface_m3day'], well_data['p_bottomhole_bar'], 250)
     well_data['qliq_on_surface_m3day'] = 20
 
     fluid = BlackOil_model.Fluid()
     simple_well = self_flow_well(fluid=1, reservoir=0,
                                  temp_corr=1, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
-                                 **well_data, **calc_options)
+                                 **well_data, **calc_options,
+                                 solver_using=1)
     simple_well.well_work_time_sec = 1
 
     simple_well.p_wellhead_bar = 20
@@ -381,43 +419,22 @@ if __name__ == "__main__":
     start = time.time()
     simple_well.calc_all_from_down_to_up()
     stop = time.time()
-    print(stop-start)
-    print(simple_well.p_wellhead_bar)
-    print(simple_well.p_bottomhole_bar)
-    print(simple_well.p_calculated_bar)
+    print(f"stop-start={stop-start}")
+    print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
+    print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
+    print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
+    print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
 
+
+
+    print('\nРазворот\n')
     start = time.time()
 
     simple_well.calc_all_from_up_to_down()
     stop = time.time()
-    print(stop-start)
-    print(simple_well.p_wellhead_bar)
-    print(simple_well.p_bottomhole_bar)
-    print(simple_well.p_calculated_bar)
+    print(f"stop-start={stop-start}")
+    print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
+    print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
+    print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
+    print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
 
-
-    simple_well = self_flow_well(fluid=1, reservoir=0,
-                                 temp_corr=0, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
-                                 **well_data, **calc_options)
-    simple_well.well_work_time_sec = 1
-
-    simple_well.p_wellhead_bar = 20
-    simple_well.t_wellhead_c = 20
-
-    import time
-    start = time.time()
-    simple_well.calc_all_from_down_to_up()
-    stop = time.time()
-    print(stop-start)
-    print(simple_well.p_wellhead_bar)
-    print(simple_well.p_bottomhole_bar)
-    print(simple_well.p_calculated_bar)
-
-    start = time.time()
-
-    simple_well.calc_all_from_up_to_down()
-    stop = time.time()
-    print(stop-start)
-    print(simple_well.p_wellhead_bar)
-    print(simple_well.p_bottomhole_bar)
-    print(simple_well.p_calculated_bar)
