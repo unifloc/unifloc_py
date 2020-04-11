@@ -58,6 +58,7 @@ class BlackOil_option():
         self.sigma_oil_gas_cor_number = 0
         self.sigma_wat_gas_cor_number = 0
 
+
 #  TODO передавать свойства нефти через структуру
 
 
@@ -230,14 +231,20 @@ class Fluid:
     def _calc_pseudocritical_temperature_k(self, number_cor):
         if number_cor == 0:
             return PVT.unf_pseudocritical_temperature_K(self.gamma_gas, self.y_h2s, self.y_co2, self.y_n2)
+        if number_cor == 1:
+            return PVT.unf_pseudocritical_temperature_Standing_K(self.gamma_gas)
 
     def _calc_pseudocritical_pressure_mpa(self, number_cor):
         if number_cor == 0:
             return PVT.unf_pseudocritical_pressure_MPa(self.gamma_gas, self.y_h2s, self.y_co2, self.y_n2)
+        if number_cor == 1:
+            return PVT.unf_pseudocritical_pressure_Standing_MPa(self.gamma_gas)
 
     def _calc_zfactor(self, number_cor):
         if number_cor == 0:
             return PVT.unf_zfactor_DAK(self.p_mpa, self.t_k, self.ppc_mpa, self.tpc_k)
+        if number_cor == 1:
+            return PVT.unf_z_factor_Kareem(self.t_k/self.tpc_k, self.p_mpa/self.ppc_mpa)
 
     def _calc_mu_gas_cp(self, number_cor):
         if number_cor == 0:

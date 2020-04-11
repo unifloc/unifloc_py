@@ -130,12 +130,11 @@ class Beggs_Brill_cor():
             else:
                 self.correction_factor_c = result
 
-        self.angle_rad = self.angle_grad * math.pi / 180
+        self.angle_rad = self.angle_grad * math.pi / 180 # TODO если скважина вертикальная, будет коррекция
 
         self.angle_correction_factor = (1 + self.correction_factor_c *
                                         ((math.sin(1.8 * self.angle_rad)) - (1 / 3) *
-                                         (math.sin(1.8 * self.angle_rad)) ** 3))  #TODO знак - в экселе
-
+                                         (math.sin(1.8 * self.angle_rad)) ** 3))
         self.liquid_content_with_angle = self.liquid_content_with_zero_angle * self.angle_correction_factor
 
         if self.angle_grad > 0:  # uphill flow
@@ -178,6 +177,20 @@ class Beggs_Brill_cor():
                     self.flow_regime = 2
         return self.flow_regime
 
+    def determine_flow_pattern2(self, n_fr, lambda_l):
+
+        if (n_fr >= 316 * lambda_l ** 0.302 or n_fr >= 0.5 * lambda_l ** -6.738):
+            flow_pattern = 2
+        else:
+            if (n_fr <= 0.000925 * lambda_l ** -2.468):
+                flow_pattern = 0
+            else:
+                if (n_fr <= 0.1 * lambda_l ** -1.452):
+                    flow_pattern = 3
+                else:
+                    flow_pattern = 1
+        return flow_pattern
+
     def calc_grad(self, p_bar, t_c):
         """
         Функция для расчета градиента давления по методу Беггз и Брилл
@@ -195,6 +208,7 @@ class Beggs_Brill_cor():
             self.val_number_Fr = self.vm_msec ** 2 / const_g_m2sec / self.d_m  # (4.109)
 
             self.flow_regime = self.determine_flow_pattern(self.val_number_Fr, self.liquid_content)
+            #self.flow_regime = self.determine_flow_pattern2(self.val_number_Fr, self.liquid_content)
 
             if self.flow_regime != 3:
                 self.__calc_hltetta__()

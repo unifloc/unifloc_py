@@ -828,6 +828,14 @@ def unf_pseudocritical_pressure_MPa(gamma_gas, y_h2s=0.0, y_co2=0.0, y_n2=0.0):
     return ppc_MPa
 
 
+def unf_pseudocritical_temperature_Standing_K(gamma_gas):  # VBA
+    return 93.3 + 180 * gamma_gas - 6.94 * gamma_gas ** 2
+
+
+def unf_pseudocritical_pressure_Standing_MPa(gamma_gas):  # VBA
+    return 4.6 + 0.1 * gamma_gas - 0.258 * gamma_gas ** 2
+
+
 def unf_zfactor_BrillBeggs(ppr, tpr):
     """
         Correlation for z-factor according Beggs & Brill correlation (1977)
@@ -925,6 +933,55 @@ def unf_zfactor_DAK_ppr(ppr, tpr):
     solution = opt.newton(f, z0, maxiter=150, tol=1e-4)
     """
     return solution[0]
+
+
+def unf_z_factor_Kareem(Tpr, Ppr):
+    """
+    based on  https://link.springer.com/article/10.1007/s13202-015-0209-3
+    Kareem, L.A., Iwalewa, T.M. & Al-Marhoun, M.
+    New explicit correlation for the compressibility factor of natural gas: linearized z-factor isotherms.
+    J Petrol Explor Prod Technol 6, 481–492 (2016).
+    https://doi.org/10.1007/s13202-015-0209-3
+    :param Tpr:
+    :param Ppr:
+    :return:
+    """
+    a = [0] * 20
+    a[1] = 0.317842
+    a[11] = -1.966847
+    a[2] = 0.382216
+    a[12] = 21.0581
+    a[3] = -7.768354
+    a[13] = -27.0246
+    a[4] = 14.290531
+    a[14] = 16.23
+    a[5] = 0.000002
+    a[15] = 207.783
+    a[6] = -0.004693
+    a[16] = -488.161
+    a[7] = 0.096254
+    a[17] = 176.29
+    a[8] = 0.16672
+    a[18] = 1.88453
+    a[9] = 0.96691
+    a[19] = 3.05921
+    a[10] = 0.063069
+
+    t = 1 / Tpr
+    AA = a[1]* t * np.exp(a[2] * (1 - t) ** 2) * Ppr
+    BB = a[3]* t + a[4] * t ** 2 + a[5] * t ** 6 * Ppr ** 6
+    CC = a[9]+ a[8] * t * Ppr + a[7] * t ** 2 * Ppr ** 2 + a[6] * t ** 3 * Ppr ** 3
+    DD = a[10] * t * np.exp(a[11] * (1 - t) ** 2)
+    EE = a[12] * t + a[13] * t ** 2 + a[14] * t ** 3
+    FF = a[15] * t + a[16] * t ** 2 + a[17] * t ** 3
+    GG = a[18] + a[19] * t
+
+    DPpr = DD * Ppr
+    y = DPpr / ((1 + AA ** 2) / CC - AA ** 2 * BB / (CC ** 3))
+
+    z = DPpr * (1 + y + y ** 2 - y ** 3) / (DPpr + EE * y ** 2 - FF * y ** GG) / ((1 - y) ** 3)
+
+    return z
 
 
 def unf_compressibility_gas_Mattar_1MPa(p_MPaa, t_K, ppc_MPa, tpc_K):
