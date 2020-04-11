@@ -222,6 +222,7 @@ class Beggs_Brill_cor():
                 A = (self.L3 - self.val_number_Fr) / (self.L3 - self.L2)
                 B = 1 - A
                 self.liquid_content_with_Pains_cor = A * hltetta_segr + B * hltetta_inter
+                self.flow_regime = 3
 
             self.number_Re = self.rhon_kgm3 * self.vm_msec * self.d_m / self.mun_pas
 
