@@ -41,7 +41,7 @@ def unf_pb_Standing_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
     # для низких значений газосодержания зададим асимптотику Pb = 1 атма при Rsb = 0
     # для больших значений газосодержания не корректируем то, что дает корреляция
     if rsb_old < min_rsb:
-        pb_MPaa = (pb_MPaa - 0.101325) * rsb_old / min_rsb + 0.101325
+        pb_MPaa = (pb_MPaa - 0.1013) * rsb_old / min_rsb + 0.1013  # 0.101325
     return pb_MPaa
 
 
@@ -496,6 +496,15 @@ def unf_deadoilviscosity_Beggs_cP(gamma_oil, t_K):
     c = 10 ** (3.0324 - 0.02023 * api) * t_F ** (-1.163)
     viscosity_cP = 10 ** c - 1
     return viscosity_cP
+
+
+def unf_deadoilviscosity_BeggsRobinson_VBA_cP(gamma_oil, t_K):
+    x = (1.8 * t_K - 460) ** (-1.163) * np.exp(13.108 - 6.591 / gamma_oil)
+    return 10 ** x - 1
+
+
+def unf_deadoilviscosity_Standing(gamma_oil, t_k):
+    return (0.32 + 1.8 * 10 ** 7 / (141.5 / gamma_oil - 131.5) ** 4.53) * (360 / (1.8 * t_k - 260)) ** (10 ** (0.43 + 8.33 / (141.5 / gamma_oil - 131.5)))
 
 
 def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
@@ -1062,6 +1071,10 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     return bg
 
 
+def unf_fvf_gas_vba_m3m3(T_K, z, P_MPa):
+    return 0.00034722 * T_K * z / P_MPa
+
+
 def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
     """
         Equation for gas density from state equation
@@ -1076,6 +1089,10 @@ def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
     p_Pa = 10 ** 6 * p_MPaa
     rho_gas = p_Pa * m / (z * 8.31 * t_K)
     return rho_gas
+
+
+def unf_gas_density_VBA_kgm3(gamma_gas, bg_m3m3):
+    return gamma_gas * uc.air_density_sckgm3 / bg_m3m3
 
 
 def unf_heat_capacity_gas_Mahmood_Moshfeghian_JkgC(p_MPaa, t_K, gamma_gas):
@@ -1768,3 +1785,33 @@ def unf_surface_tension_gw_Sutton_Nm(rho_water_kgm3, rho_gas_kgm3, t_c):  # TODO
             ((t_r /302.881) ** (0.821976 - 0.00183785 * t_r +
             0.00000134016 * t_r ** 2))) ** 3.6667
     return uc.dyncm2nm(surface_tension_dyncm)
+
+
+def unf_surface_tension_Baker_Sverdloff_vba_nm(p_atma, t_C, gamma_o_):
+    t_F = t_C * 1.8 + 32
+    P_psia = p_atma / 0.068046
+    P_MPa = p_atma / 10
+    ST68 = 39 - 0.2571 * (141.5 / gamma_o_ - 131.5)
+    ST100 = 37.5 - 0.2571 * (141.5 / gamma_o_ - 131.5)
+    if t_F < 68:
+        STo = ST68
+    else:
+        Tst = t_F
+        if t_F > 100:
+            Tst = 100
+        STo = (68 - (((Tst - 68) * (ST68 - ST100)) / 32)) * np.exp(-0.00086306 * P_psia)
+
+    STw74 = (75 - (1.108 * (P_psia) ** 0.349))
+    STw280 = (53 - (0.1048 * (P_psia) ** 0.637))
+
+    if t_F < 74:
+        STw = STw74
+    else:
+        Tstw = t_F
+        if t_F > 280:
+            Tstw = 280
+        STw = STw74 - (((Tstw - 74) * (STw74 - STw280)) / 206)
+    STw = 10 ** (-(1.19 + 0.01 * P_MPa)) * 1000
+    ST_oilgas_dyncm_ = STo
+    ST_watgas_dyncm_ = STw
+    return [uc.dyncm2nm(ST_oilgas_dyncm_), uc.dyncm2nm(ST_watgas_dyncm_)]

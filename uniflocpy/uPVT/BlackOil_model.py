@@ -204,6 +204,10 @@ class Fluid:
     def _calc_mu_dead_oil_cp(self, number_cor):
         if number_cor == 0:
             return PVT.unf_deadoilviscosity_Beggs_cP(self.gamma_oil, self.t_k)
+        if number_cor == 1:
+            return PVT.unf_deadoilviscosity_Standing(self.gamma_oil, self.t_k)
+        if number_cor == 2:
+            return PVT.unf_deadoilviscosity_BeggsRobinson_VBA_cP(self.gamma_oil, self.t_k)
 
     def _calc_mu_oil_in_pb_cp(self, number_cor):
         if number_cor == 0:
@@ -253,6 +257,8 @@ class Fluid:
     def _calc_b_gas_m3m3(self, number_cor):
         if number_cor == 0:
             return PVT.unf_gas_fvf_m3m3(self.t_k, self.p_mpa, self.z)
+        if number_cor == 1:
+            return PVT.unf_fvf_gas_vba_m3m3(self.t_k, self.z, self.p_mpa)
 
     def _calc_compr_gas_1bar(self, number_cor):
         if number_cor == 0:
@@ -262,6 +268,8 @@ class Fluid:
     def _calc_rho_gas_kgm3(self, number_cor):
         if number_cor == 0:
             return PVT.unf_gas_density_kgm3(self.t_k, self.p_mpa, self.gamma_gas, self.z)
+        if number_cor == 1:
+            return PVT.unf_gas_density_VBA_kgm3(self.gamma_gas, self.b_gas_m3m3)
 
     def _calc_heatcap_gas_jkgc(self, number_cor):
         if number_cor == 0:
@@ -316,10 +324,16 @@ class Fluid:
             return PVT.unf_surface_tension_go_Baker_Swerdloff_Nm(self.t_k, self.gamma_oil, self.p_mpa)
         if number_cor == 1:
             return PVT.unf_surface_tension_go_Abdul_Majeed_Nm(self.t_k, self.gamma_oil, self.rs_m3m3)
+        if number_cor == 2:
+            return PVT.unf_surface_tension_Baker_Sverdloff_vba_nm(uc.bar2atm(self.p_mpa * 10), self.t_c, self.gamma_oil)[0]
 
     def _calc_sigma_wat_gas_nm(self, number_cor):
         if number_cor == 0:
             return PVT.unf_surface_tension_gw_Sutton_Nm(self.rho_wat_kgm3, self.rho_gas_kgm3, self.t_c)
+        if number_cor == 1:
+            return PVT.unf_surface_tension_Baker_Sverdloff_vba_nm(uc.bar2atm(self.p_mpa * 10), self.t_c, self.gamma_oil)[1]
+
+
         # TODO разобраться при использовании давления: когда идет калибровка давление изменяется - проверить где истинное где нет
         #   и давление при калибровке для всех единое, либо измененное только для свойств нефти
     def calc(self, p_bar, t_c):
@@ -345,7 +359,8 @@ class Fluid:
         if self.p_mpa >= self.pb_mpa:
             self.compr_oil_1mpa = self._calc_compr_oil_1mpa(self.option.compr_oil_cor_number)
         else:
-            self.compr_oil_1mpa = self._calc_compr_oil_below_pb_1mpa(self.option.compr_oil_below_pb_cor_number)
+            #self.compr_oil_1mpa = self._calc_compr_oil_below_pb_1mpa(self.option.compr_oil_below_pb_cor_number)
+            self.compr_oil_1mpa = 0
 
         self.compr_oil_1bar = uc.compr_1mpa_2_1bar(self.compr_oil_1mpa)
         # объемный коэффициент

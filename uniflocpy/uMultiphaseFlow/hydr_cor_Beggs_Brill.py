@@ -8,11 +8,11 @@
 import math
 import uniflocpy.uMultiphaseFlow.friction_Bratland as fr  # модуль для расчета коэффициента трения
 import uniflocpy.uTools.uconst as uc
-
+import numpy as np
+import scipy.optimize as sp
 const_g_m2sec = uc.g
 
 # TODO добавить учет расчета сверху вниз
-
 
 
 class Beggs_Brill_cor():
@@ -191,6 +191,25 @@ class Beggs_Brill_cor():
                     flow_pattern = 1
         return flow_pattern
 
+
+    def __friction_factor__(self, number_re, relative_roughness):
+        if number_re == 0:
+            return 0
+        else:
+            if number_re > 2000:
+                f_n = (2 * np.log10(2 / 3.7 * relative_roughness -
+                                   5.02 / number_re * np.log10(2 / 3.7 * relative_roughness + 13 / number_re))) ** -2
+                result = 20
+                i = 0
+                while result > 0.001 or i < 19:
+                    new_fn = (1.74 - 2 * np.log10(2 * relative_roughness + 18.7 / (number_re * f_n ** 0.5))) ** -2
+                    result = np.abs(new_fn-f_n)
+                    i = i + 1
+                    f_n = new_fn
+                return f_n
+            else:
+                return 64 / number_re
+
     def calc_grad(self, p_bar, t_c):
         """
         Функция для расчета градиента давления по методу Беггз и Брилл
@@ -229,6 +248,8 @@ class Beggs_Brill_cor():
             self.friction_coefficient = self.module_friction.calc_f(self.number_Re, self.epsilon_friction_m,
                                                                     self.d_m)
 
+            self.friction_coefficient = self.__friction_factor__(self.number_Re, self.epsilon_friction_m / self.d_m)
+
             self.y = self.liquid_content / self.liquid_content_with_Pains_cor ** 2
             if 1 < self.y < 1.2:
                 self.s = math.log(2.2 * self.y - 1.2)
@@ -241,6 +262,7 @@ class Beggs_Brill_cor():
             self.result_friction = self.friction_coefficient * math.exp(self.s)
 
             self.Ek = self.vm_msec * self.vsg_msec * self.rhon_kgm3 / self.p_pa
+            self.Ek = 0
 
             self.rhos_kgm3 = (self.rho_liq_kgm3 * self.liquid_content_with_Pains_cor +
                               self.rho_gas_kgm3 * (1 - self.liquid_content_with_Pains_cor))

@@ -228,7 +228,7 @@ class self_flow_well():
                                                                       self.h_calculated_mes_m - self.step_lenth_in_calc_along_wellbore_m * sign),
                                                               y0=[self.p_calculated_bar],
                                                               args=(self.t_calculated_c, pipe_object),
-                                                              rtol=0.1, atol=0.1
+                                                              rtol=0.001, atol=0.001
                                                               )
                 #print(new_p_calculated_bar_solve_output)
                 #print('\n')

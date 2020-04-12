@@ -599,13 +599,15 @@ class FluidFlow:
 
         self.gas_fraction_d = self.qgas_m3day / (self.qliq_m3day + self.qgas_m3day)
 
-        self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
+        #self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
+        self.fw_perc = self.fw_on_surface_perc
 
         self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * (1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
 
         self.sigma_liq_Nm = self.fl.sigma_oil_gas_Nm * (1 - self.fw_perc / 100) + self.fl.sigma_wat_gas_Nm * self.fw_perc / 100
 
-        self.mu_liq_cP = self.fl.mu_oil_cp * (1 - self.fw_perc / 100) + self.fl.mu_wat_cp * self.fw_perc / 100
+        self.mu_liq_cP = self.fl.mu_oil_cp * (1 - self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day)) + \
+                         self.fl.mu_wat_cp * self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day)  # VBA
 
         self.mun_cP = self.mu_liq_cP * self.liquid_content + self.fl.mu_gas_cp * (1 - self.liquid_content)
 
