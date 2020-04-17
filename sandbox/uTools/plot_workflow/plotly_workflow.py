@@ -125,8 +125,52 @@ def connect_traces(traces1, trace2):
         connected_traces.append(j)
     return connected_traces
 
+def colors(n):
+  ret = []
+  r = int(142)
+  g = int(215)
+  b = int(180)
+  step = 256 / n
+  for i in range(n):
+    r += step
+    g += step
+    b += step
+    r = int(r) % 256
+    g = int(g) % 256
+    b = int(b) % 256
+    ret.append((r,g,b))
+  return ret
 
 def create_shapes_to_plotly(borders):
+    """
+    Выделение событий для графиков с помощью форм на фоне
+    :param borders:
+    :return:
+    """
+    shapes = []
+    colors_rgb = colors(len(borders))
+    for j, this_color in zip(borders, colors_rgb):
+        for i in j:
+            this_shape = dict(
+                type="rect",
+                # x-reference is assigned to the x-values
+                xref="x",
+                # y-reference is assigned to the plot paper [0,1]
+                yref="paper",
+                x0=i[0],
+                y0=0,
+                x1=i[1],
+                y1=1,
+                fillcolor=f"rgb({this_color[0]},{this_color[1]},{this_color[2]})",
+                opacity=0.3,
+                layer="below",
+                line_width=1,
+                line_color="LightSalmon"
+            )
+            shapes.append(this_shape)
+    return shapes
+
+def create_shapes_to_plotly2(borders):
     """
     Выделение событий для графиков с помощью форм на фоне
     :param borders:
@@ -144,7 +188,7 @@ def create_shapes_to_plotly(borders):
             y0=0,
             x1=i[1],
             y1=1,
-            fillcolor="LightSalmon",
+            fillcolor='rgb(150,150,150)',
             opacity=0.9,
             layer="below",
             line_width=1,

@@ -365,5 +365,9 @@ def find_gas_periods(df, param=gn.i_a_motor_a):
                         gas_periods.append(work_bounds[j])
     stats = {'Количество рабочих режимов': len(work_periods),
              'Количество режимов с поступлением газа': len(gas_periods),
-             'Доля нестабильных режимов': len(gas_periods) / len(work_periods)}
+             'Доля нестабильных режимов, %': len(gas_periods) / len(work_periods) * 100,
+             'Параметр, по которому детектировался газ': param,
+             "Медианное время работы, мин" : np.median(work_timedelta),
+                "Медианное время накопления, мин": np.median(stop_timedelta)
+    }
     return gas_periods, gas_dfs, stats
