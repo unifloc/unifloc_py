@@ -202,7 +202,7 @@ def rename_columns_by_dict(df, columns_name_dict = global_names.return_dict_colu
 
     for i in df.columns:
         for items in columns_name_dict.items():
-            if i in items[1]:
+            if i in items[1] or i in [x.replace(' ', '') for x in items[1]]:
                 df = df.rename(columns={i: items[0]})
     return df
 
