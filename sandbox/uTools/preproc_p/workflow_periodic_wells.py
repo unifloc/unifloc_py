@@ -8,6 +8,8 @@ import sys
 sys.path.append('../')
 sys.path.append('../'*4)
 import unifloc.sandbox.uTools.preproc_p.preproc_tool as preproc_tool
+import unifloc.sandbox.uTools.plot_workflow.plotly_workflow as pltl_wf
+
 
 gn = preproc_tool.GlobalNames()
 
@@ -21,7 +23,7 @@ def prepare_data(this_file):
     if this_file[gn.i_a_motor_a].min() == 0.1:
         this_file[gn.i_a_motor_a] = this_file[gn.i_a_motor_a].replace(0.1, 0)
 
-    work_status, work_timedelta, stop_timedelta, work_bounds, stop_bounds = calculated_regime_time(this_file,
+    work_status, work_timedelta, stop_timedelta, work_bounds, stop_bounds, stats = calculated_regime_time(this_file,
                                                                                                    regime_column=gn.i_a_motor_a,
                                                                                                    return_all=True)
     this_file = this_file.dropna(subset=[gn.i_a_motor_a])
@@ -87,10 +89,16 @@ def calculated_regime_time(this_file, regime_column=gn.i_a_motor_a, return_all=F
 
     work_time_median = np.median(work_timedelta)
     stop_timedelta_median = np.median(stop_timedelta)
+    work_fraction_perc = np.sum(work_timedelta) / (np.sum(work_timedelta) + np.sum(stop_timedelta)) * 100
+
+    stats = {f"Медианное время работы ({regime_column}), мин": work_time_median,
+                f"Медианное время накопления ({regime_column}), мин": stop_timedelta_median,
+             f"Рабочая доля времени за весь период ({regime_column}), %": work_fraction_perc}
+
     if not return_all:
         return work_time_median, stop_timedelta_median
     else:
-        return work_status, work_timedelta, stop_timedelta, work_bounds, stop_bounds
+        return work_status, work_timedelta, stop_timedelta, work_bounds, stop_bounds, stats
 
 
 def calc_integral(series, return_result_series = False):
@@ -212,7 +220,7 @@ def find_stucks(df):
 
     time_series = this_file['Ток фазы А дельта']
     time_series = time_series[(time_series < np.inf) & (time_series > -np.inf)]
-    work_status, work_timedelta, stop_timedelta, work_bounds, stop_bounds = calculated_regime_time(this_file,
+    work_status, work_timedelta, stop_timedelta, work_bounds, stop_bounds, stats = calculated_regime_time(this_file,
                                                                                                    regime_column=gn.i_a_motor_a,
                                                                                                    return_all=True)
     stucks = []
@@ -332,7 +340,7 @@ def undim_index(time_index):
 
 def find_gas_periods(df, param=gn.i_a_motor_a):
     work_status, work_timedelta, \
-    stop_timedelta, work_bounds, stop_bounds = calculated_regime_time(df, return_all=True)
+    stop_timedelta, work_bounds, stop_bounds, stats = calculated_regime_time(df, regime_column=param, return_all=True)
 
     work_periods = []
     for k in work_bounds:
@@ -357,17 +365,56 @@ def find_gas_periods(df, param=gn.i_a_motor_a):
 
                     values = [0] + list(small_df.values[1::] - small_df.values[0:-1:])
                     np_values = np.array(values)
-                    np_values_gas = np_values[np_values <= -0.15]
-                    np_values_gas_up = np_values[np_values >= 0.10]
-                    np_values_gas_down = np_values[np_values <= -0.07]
+                    np_values_gas = np_values[np_values <= -0.14]
+                    np_values_gas_up = np_values[np_values >= 0.09]
+                    np_values_gas_down = np_values[np_values <= -0.06]
                     if len(np_values_gas) > 0 or (len(np_values_gas_up) > 0 and len(np_values_gas_down) > 0):
                         gas_dfs.append(i)
                         gas_periods.append(work_bounds[j])
-    stats = {'Количество рабочих режимов': len(work_periods),
-             'Количество режимов с поступлением газа': len(gas_periods),
-             'Доля нестабильных режимов, %': len(gas_periods) / len(work_periods) * 100,
-             'Параметр, по которому детектировался газ': param,
-             "Медианное время работы, мин" : np.median(work_timedelta),
-                "Медианное время накопления, мин": np.median(stop_timedelta)
+
+    stats_with_gas = {
+             f"Поступление газа по ({param}), раз": len(gas_periods),
+             f"Доля нестабильных режимов по ({param}), %": len(gas_periods) / len(work_periods) * 100
     }
-    return gas_periods, gas_dfs, stats
+    stats_with_gas.update(stats)
+    return gas_periods, gas_dfs, stats_with_gas
+
+
+parameters = [ gn.q_liq_m3day, gn.q_oil_mass_tday, gn.q_gas_m3day,
+              gn.active_power_kwt, gn.i_a_motor_a, gn.motor_load_perc, gn.freq_hz, gn.cos_phi_d,
+             gn.p_intake_atm, gn.p_lin_atm, gn.t_intake_c, gn.t_motor_c,
+              gn.vibration_xy_msec2, gn.vibration_z_msec2,
+             "Рабочая доля времени", gn.work_status_number]
+
+
+def analyse_cs_data(this_file_name, parameters=parameters):
+    try:
+        df = pd.read_csv(this_file_name, index_col = [0], parse_dates = True, dayfirst = True)
+        df = preproc_tool.rename_columns_by_dict(df)
+
+        gas_borders, gas_dfs, stats = find_gas_periods(df, gn.i_a_motor_a)
+
+        gas_borders_load, gas_dfs_load, stats_load = find_gas_periods(df, gn.motor_load_perc)
+        stats.update(stats_load)
+
+        stacks = find_stucks(df)
+        stats['Количество перегрузок'] = len(stacks)
+
+        borders = [gas_borders, gas_borders_load,stacks]
+
+        banches = pltl_wf.create_banches_for_report(df, parameters, fuzzy_names=True)
+        new_file_name = this_file_name.replace('.csv', '.html')
+        new_file_name = new_file_name.replace('dataset_to_use', 'analysis_result')
+        print(' ---> ' + new_file_name +  '\n')
+
+        table = pd.DataFrame(stats, index = [this_file_name.split('\\')[-1]])
+
+        table_for_plot = table.T
+        table_for_plot.index.name = 'Название исходного файла'
+
+        pltl_wf.create_report_html(df, banches,new_file_name , borders = borders, auto_open=False,
+                                   df_for_table = table_for_plot)
+        return table
+    except:
+        print('\n Ошибка \n')
+        return None
