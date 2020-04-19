@@ -43,6 +43,8 @@ class Pipe():
         self.h_mes_out_m = None
         self.h_mes_in_m = None
 
+        self.rho_slip_kgm3 = None
+
     def calc_p_grad_pam(self, p_bar, t_c):
         """расчет градиента давления"""
         self.p_bar = p_bar
@@ -68,6 +70,9 @@ class Pipe():
         self.hydr_cor.sigma_liq_Nm = self.fluid_flow.sigma_liq_Nm
 
         self.p_grad_pam = self.hydr_cor.calc_grad(self.p_bar, self.t_c)
+
+        self.rho_slip_kgm3 = self.fluid_flow.rho_liq_kgm3 * (self.hydr_cor.liquid_content_with_Pains_cor) + \
+                             self.fluid_flow.fl.rho_gas_kgm3 * (1 - self.hydr_cor.liquid_content_with_Pains_cor)
 
         return  self.p_grad_pam
 

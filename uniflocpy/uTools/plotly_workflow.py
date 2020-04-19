@@ -174,6 +174,20 @@ def filtr_by_antipatterns(init_list: list, antipatterns: list, print_all: bool =
     return new_list
 
 
+def create_columns_to_plot(result_df, group_patterns, antipatterns=[], print_all=False):
+    if type(group_patterns[0]) == str:
+        columns_to_plot = find_by_patterns(group_patterns, result_df.columns)
+    else:
+        columns_to_plot = []
+        for i in group_patterns:
+            this_column_to_plot = find_by_patterns(i, result_df.columns)
+            columns_to_plot += this_column_to_plot
+    if print_all:
+        print(f"Найденные совпадения: {columns_to_plot}")
+    if len(antipatterns) > 0:
+        columns_to_plot = filtr_by_antipatterns(columns_to_plot, antipatterns, print_all=print_all)
+    return columns_to_plot
+
 def plot_by_patterns(result_df, group_patterns, antipatterns=[],
                      swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot', print_all=True):
     """
@@ -186,22 +200,25 @@ def plot_by_patterns(result_df, group_patterns, antipatterns=[],
     :param antipatterns:
     :return:
     """
-    if type(group_patterns[0]) == str:
-        columns_to_plot = find_by_patterns(group_patterns, result_df.columns)
-    else:
-        columns_to_plot = []
-        for i in group_patterns:
-            this_column_to_plot = find_by_patterns(i, result_df.columns)
-            columns_to_plot += this_column_to_plot
-    if print_all:
-        print(f"Найденные совпадения: {columns_to_plot}")
-    if len(antipatterns)>0:
-        columns_to_plot = filtr_by_antipatterns(columns_to_plot, antipatterns, print_all=print_all)
+    columns_to_plot = create_columns_to_plot(result_df, group_patterns, antipatterns, print_all)
     plot_specific_columns(result_df, columns_to_plot,swap_xy=swap_xy, reversed_y=reversed_y,
                           iplot_option=iplot_option, plot_name=plot_name)
 
 
-def create_report_html(df, all_banches, filename):
+def create_banches_from_pattern(df, banches_with_patterns: dict):
+    banches = []
+    for i,j in banches_with_patterns.items():
+        columns_to_plot = create_columns_to_plot(df, j[0], j[1], print_all=False)
+        one_banch = {i: columns_to_plot}
+        banches.append(one_banch)
+    return banches
+
+
+def create_report_html(df, all_banches, filename, shared_xaxes=True,
+                       shared_yaxes=False,
+                      cols=1, one_plot_height=450,
+                      verical_spacing=0.01, title_text='Распределение параметров',
+                       swap_xy=False, reversed_y=False):
     """
     Создание шаблонизированного и удобного набора графиков
     :param df:
@@ -213,17 +230,38 @@ def create_report_html(df, all_banches, filename):
     subplot_titles = []
     for z in all_banches:
         subplot_titles.append(list(z.keys())[0])
+
+    if cols == 1:
+        rows = subplot_amount
+    else:
+        rows = subplot_amount // cols
+        if subplot_amount % cols != 0:
+            rows += 1
+
+
     fig = make_subplots(
-        rows=subplot_amount, cols=1, shared_xaxes=True,
-        vertical_spacing=0.01,
+        rows=rows, cols=cols, shared_xaxes=shared_xaxes,
+        shared_yaxes=shared_yaxes,
+        vertical_spacing=verical_spacing,
         subplot_titles=subplot_titles
     )
     for i in range(subplot_amount):
         this_df = df[all_banches[i][subplot_titles[i]]]
-        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', use_gl=True)
+        this_banch_trace = create_traces_list_for_all_columms(this_df, chosen_mode='lines+markers', use_gl=True,
+                                                              swap_xy=swap_xy)
         for j in this_banch_trace:
-            fig.add_trace(j, row=i + 1, col=1)
+            if cols == 1:
+                this_row = i+1
+                this_col = 1
+            else:
+                this_row = i // cols + 1
+                this_col = i % cols + 1
+            fig.add_trace(j, row=this_row, col=this_col)
 
     fig.layout.hovermode = 'x'
-    fig.layout.height = 450 * subplot_amount
+    fig.layout.height = one_plot_height * rows
+    fig.update_layout(
+                      title_text=title_text)
+    if reversed_y:
+        fig.update_yaxes(autorange="reversed")
     plot(fig, filename=filename)
