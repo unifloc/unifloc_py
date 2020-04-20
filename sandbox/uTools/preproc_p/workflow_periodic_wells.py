@@ -51,6 +51,7 @@ def calculated_regime_time(this_file, regime_column=gn.i_a_motor_a, return_all=F
     work_timedelta = []
     stop_timedelta = []
     regime_bounds = []
+    regime_timedelta = []
     work_bounds = []
     stop_bounds = []
 
@@ -71,10 +72,16 @@ def calculated_regime_time(this_file, regime_column=gn.i_a_motor_a, return_all=F
                 # print('Включение')
                 stop_timedelta.append(time_delta.total_seconds() / 60)
                 stop_bounds.append([last_time, this_time])
+
+                regime_timedelta.append(time_delta.total_seconds() / 60)
+                regime_bounds.append([last_time, this_time])
             else:
                 # print('Выключение')
                 work_timedelta.append(time_delta.total_seconds() / 60)
                 work_bounds.append([last_time, this_time])
+
+                regime_timedelta.append(time_delta.total_seconds() / 60)
+                regime_bounds.append([last_time, this_time])
 
             last_time = this_time
 
@@ -90,10 +97,16 @@ def calculated_regime_time(this_file, regime_column=gn.i_a_motor_a, return_all=F
     work_time_median = np.median(work_timedelta)
     stop_timedelta_median = np.median(stop_timedelta)
     work_fraction_perc = np.sum(work_timedelta) / (np.sum(work_timedelta) + np.sum(stop_timedelta)) * 100
+    stop_timedelta_np_array = np.array(stop_timedelta)
+    amount_of_big_stops = len(stop_timedelta_np_array[stop_timedelta_np_array > stop_timedelta_median * 2])
 
     stats = {f"Медианное время работы ({regime_column}), мин": work_time_median,
                 f"Медианное время накопления ({regime_column}), мин": stop_timedelta_median,
-             f"Рабочая доля времени за весь период ({regime_column}), %": work_fraction_perc}
+             f"Рабочая доля времени за весь период ({regime_column}), %": work_fraction_perc,
+             f"Количество неплановых остановок ({regime_column}), %": amount_of_big_stops,
+             f"Период записи данных ({regime_column}), timedelta": this_file.index[-1] - this_file.index[0],
+             f"Количество записей  ({regime_column}), штук": this_file.shape[0]}
+
 
     if not return_all:
         return work_time_median, stop_timedelta_median
@@ -338,9 +351,11 @@ def undim_index(time_index):
     return time_index
 
 
-def find_gas_periods(df, param=gn.i_a_motor_a):
+def find_gas_periods(this_df, param=gn.i_a_motor_a):
+    df = this_df.copy()
     work_status, work_timedelta, \
     stop_timedelta, work_bounds, stop_bounds, stats = calculated_regime_time(df, regime_column=param, return_all=True)
+    df[gn.work_status_number + f" ({param.replace(' ','_')})"] = work_status
 
     work_periods = []
     for k in work_bounds:
@@ -360,14 +375,14 @@ def find_gas_periods(df, param=gn.i_a_motor_a):
                     small_df = small_df / small_df.max()
                     # small_df = small_df[small_df>0.2]
                     small_df.index = undim_index(small_df.index)
-                    small_df = small_df[small_df.index <= 0.95]
+                    small_df = small_df[small_df.index <= 0.98]
                     small_df = small_df[small_df.index > 0.5]
 
                     values = [0] + list(small_df.values[1::] - small_df.values[0:-1:])
                     np_values = np.array(values)
-                    np_values_gas = np_values[np_values <= -0.14]
-                    np_values_gas_up = np_values[np_values >= 0.09]
-                    np_values_gas_down = np_values[np_values <= -0.06]
+                    np_values_gas = np_values[np_values <= -0.12]
+                    np_values_gas_up = np_values[np_values >= 0.06]
+                    np_values_gas_down = np_values[np_values <= -0.04]
                     if len(np_values_gas) > 0 or (len(np_values_gas_up) > 0 and len(np_values_gas_down) > 0):
                         gas_dfs.append(i)
                         gas_periods.append(work_bounds[j])
@@ -377,7 +392,21 @@ def find_gas_periods(df, param=gn.i_a_motor_a):
              f"Доля нестабильных режимов по ({param}), %": len(gas_periods) / len(work_periods) * 100
     }
     stats_with_gas.update(stats)
-    return gas_periods, gas_dfs, stats_with_gas
+    if len(gas_dfs) != 0:
+        for j,i in enumerate(gas_dfs):
+            #small_df = i[[param, gn.work_status_number + f" ({param})"]]
+            #print(i.columns)
+            small_df = i[[param, gn.work_status_number + f" ({param.replace(' ','_')})"]]
+            small_df.columns = [f"Поступление газа в ЭЦН по {param}", gn.work_status_number + f" ({param.replace(' ','_')})"]
+            #small_df[gn.work_status_number + f" ({param})"] = df[gn.work_status_number + f" ({param})"] * 0 + 2
+            #small_df = small_df.drop(columns = [param])
+            if j == 0:
+                result_gas_df = small_df.copy()
+            else:
+                result_gas_df = result_gas_df.append(small_df)
+        result_gas_df = result_gas_df.drop(columns = [gn.work_status_number + f" ({param.replace(' ','_')})"])
+        df = df.join(result_gas_df, how = 'outer')
+    return gas_periods, gas_dfs, stats_with_gas, df
 
 
 parameters = [ gn.q_liq_m3day, gn.q_oil_mass_tday, gn.q_gas_m3day,
@@ -392,9 +421,9 @@ def analyse_cs_data(this_file_name, parameters=parameters):
         df = pd.read_csv(this_file_name, index_col = [0], parse_dates = True, dayfirst = True)
         df = preproc_tool.rename_columns_by_dict(df)
 
-        gas_borders, gas_dfs, stats = find_gas_periods(df, gn.i_a_motor_a)
+        gas_borders, gas_dfs, stats, df = find_gas_periods(df, gn.i_a_motor_a)
 
-        gas_borders_load, gas_dfs_load, stats_load = find_gas_periods(df, gn.motor_load_perc)
+        gas_borders_load, gas_dfs_load, stats_load, df = find_gas_periods(df, gn.motor_load_perc)
         stats.update(stats_load)
 
         stacks = find_stucks(df)
