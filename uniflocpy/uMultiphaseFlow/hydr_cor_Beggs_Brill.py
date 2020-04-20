@@ -138,7 +138,8 @@ class Beggs_Brill_cor():
         self.liquid_content_with_angle = self.liquid_content_with_zero_angle * self.angle_correction_factor
 
         if self.angle_grad > 0:  # uphill flow
-            self.liquid_content_with_Pains_cor = 0.924 * self.liquid_content_with_angle
+            #self.liquid_content_with_Pains_cor = 0.924 * self.liquid_content_with_angle
+            self.liquid_content_with_Pains_cor = 1 * self.liquid_content_with_angle
         else:  # downhill flow
             self.liquid_content_with_Pains_cor = 0.685 * self.liquid_content_with_angle
 

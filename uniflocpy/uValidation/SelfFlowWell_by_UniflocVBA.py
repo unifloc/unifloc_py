@@ -53,7 +53,7 @@ real_measurements = pd.DataFrame(
      'h_mes_survey_m': [0, 957, 1057, 1157, 1211, 1257, 1357, 1457, 1557, 1657, 1757]})
 
 
-well_data["t_wellhead_c"] = well_data["t_bottomhole_c"]
+#well_data["t_wellhead_c"] = well_data["t_bottomhole_c"]
 
 blackoil_option = BlackOil_model.BlackOil_option()
 
