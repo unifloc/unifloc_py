@@ -57,7 +57,7 @@ def calculated_regime_time(this_file, regime_column=gn.i_a_motor_a, return_all=F
 
     for i in range(1, this_file.shape[0]):
         this_time = this_file.index[i]
-        this_value = this_file[gn.i_a_motor_a][i]
+        this_value = this_file[regime_column][i]
         if this_value > 0:
             work_status.append(1)
         else:
@@ -198,7 +198,7 @@ def get_true_median_value_in_series(df, column, except_zero=True):
         median_value = df[column].median()
 
     top_values_len = df[df[column] > df[column].max() * 0.9].shape[0]
-    _, work_timedelta, _, _, _ = calculated_regime_time(df, regime_column=column, return_all=True)
+    _, work_timedelta, _, _, _,_ = calculated_regime_time(df, regime_column=column, return_all=True)
     if len(work_timedelta) * 2 < top_values_len:
         median_value = df[df[column] > df[column].max() * 0.9][column].median()
     print(median_value)
@@ -259,6 +259,8 @@ def find_stucks(df):
                         median_check_df = this_file[
                             (this_file.index >= stuck_work_bounds[0] - 10 * normal_work_timedelta) &
                             (this_file.index <= stuck_work_bounds[1] + 10 * normal_work_timedelta)]
+                        median_check_df = median_check_df[(median_check_df.index < stuck_work_bounds[0]) |
+                                                          (median_check_df.index > stuck_work_bounds[1])]
                         median_median_value = get_true_median_value_in_series(median_check_df, gn.i_a_motor_a,
                                                                               except_zero=True)
                         max_check_df = this_file[(this_file.index >= stuck_work_bounds[0]) &
@@ -375,7 +377,7 @@ def find_gas_periods(this_df, param=gn.i_a_motor_a):
                     small_df = small_df / small_df.max()
                     # small_df = small_df[small_df>0.2]
                     small_df.index = undim_index(small_df.index)
-                    small_df = small_df[small_df.index <= 0.98]
+                    small_df = small_df[small_df.index <= 0.95]
                     small_df = small_df[small_df.index > 0.5]
 
                     values = [0] + list(small_df.values[1::] - small_df.values[0:-1:])
@@ -421,6 +423,13 @@ def analyse_cs_data(this_file_name, parameters=parameters):
         df = pd.read_csv(this_file_name, index_col = [0], parse_dates = True, dayfirst = True)
         df = preproc_tool.rename_columns_by_dict(df)
 
+        if df[gn.i_a_motor_a].min() != 0.1 and df[gn.i_a_motor_a].min() < 1:
+            minimum_value = df[gn.i_a_motor_a].min()
+            df[gn.i_a_motor_a] = df[gn.i_a_motor_a].replace(minimum_value, 0)
+            df[gn.i_a_motor_a] = df[gn.i_a_motor_a].replace(0.2, 0)
+            df[gn.i_a_motor_a] = df[gn.i_a_motor_a].replace(0.3, 0)
+            df[gn.i_a_motor_a] = df[gn.i_a_motor_a].replace(0.4, 0)
+
         gas_borders, gas_dfs, stats, df = find_gas_periods(df, gn.i_a_motor_a)
 
         gas_borders_load, gas_dfs_load, stats_load, df = find_gas_periods(df, gn.motor_load_perc)
@@ -445,5 +454,8 @@ def analyse_cs_data(this_file_name, parameters=parameters):
                                    df_for_table = table_for_plot)
         return table
     except:
-        print('\n Ошибка \n')
+        print(f"\n Ошибка в файле: {this_file_name}\n")
         return None
+
+
+analyse_cs_data(r'E:\Данные\2020_04_ноябрьск_су\dataset_to_use\04_14_2020\_Суторма2_13_13_K_186_1680_0.csv')
