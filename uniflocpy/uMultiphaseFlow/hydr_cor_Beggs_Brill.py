@@ -78,6 +78,8 @@ class Beggs_Brill_cor():
         self.density_grad_part_percent = None
         self.acceleration_grad_part_percent = None
 
+        self.gas_fraction_real_d = None
+
         self.L1 = None
         self.L2 = None
         self.L3 = None
@@ -249,7 +251,7 @@ class Beggs_Brill_cor():
             self.friction_coefficient = self.module_friction.calc_f(self.number_Re, self.epsilon_friction_m,
                                                                     self.d_m)
 
-            self.friction_coefficient = self.__friction_factor__(self.number_Re, self.epsilon_friction_m / self.d_m)
+            #self.friction_coefficient = self.__friction_factor__(self.number_Re, self.epsilon_friction_m / self.d_m)
 
             self.y = self.liquid_content / self.liquid_content_with_Pains_cor ** 2
             if 1 < self.y < 1.2:
@@ -282,6 +284,8 @@ class Beggs_Brill_cor():
             self.density_grad_part_percent = self.density_grad_pam / self.result_grad_pam * 100
 
             self.acceleration_grad_part_percent = self.acceleration_grad_pam / self.result_grad_pam * 100
+
+            self.gas_fraction_real_d = 1 - self.liquid_content_with_Pains_cor
 
             return self.result_grad_pam
 
