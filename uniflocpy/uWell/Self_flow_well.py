@@ -43,7 +43,7 @@ class self_flow_well():
                  p_bottomhole_bar=200, t_bottomhole_c=92,
                  p_wellhead_bar=20, t_wellhead_c=20,
                  t_earth_init_on_surface_c=3, t_earth_init_in_reservoir_c=90, geothermal_grad_cm=0.03,
-                 p_reservoir_bar=250,
+                 p_reservoir_bar=None,
                  well_work_time_sec=60 * 24 * 60 * 60,
 
                  step_lenth_in_calc_along_wellbore_m=10,
@@ -144,6 +144,8 @@ class self_flow_well():
             self.ipr = None
         elif reservoir == 0:
             self.ipr = IPR_simple_line.IPRSimpleLine()
+            if self.p_reservoir_bar == None:
+                self.p_reservoir_bar = 1000 * uc.g * self.h_bottomhole_vert_m / 100000
             self.ipr.pi_m3daybar = self.ipr.calc_pi_m3daybar(self.qliq_on_surface_m3day, self.p_bottomhole_bar,
                                                       self.p_reservoir_bar)
 

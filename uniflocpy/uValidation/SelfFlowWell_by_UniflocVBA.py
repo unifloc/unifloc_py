@@ -74,6 +74,7 @@ simple_well = self_flow_well.self_flow_well(fluid=1, reservoir = 0, pipe=0, temp
                                             **well_data, **calc_options)
 
 simple_well.pipe.fluid_flow.fl.option = blackoil_option
+simple_well.pipe.fluid_flow.calc_with_temp_cor = 0
 
 simple_well.pipe.hydr_cor.epsilon_friction_m = 0.0001
 
