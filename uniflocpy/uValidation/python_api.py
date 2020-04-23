@@ -2546,3 +2546,104 @@ class API():
         self.f_transient_def_pwf_atma = self.book.macro("transient_def_pwf_atma")
         return self.f_transient_def_pwf_atma(pd,qliq_sm3day,pi_atma,k_mD,h_m,mu_cP,b_m3m3)
 
+
+    def MF_p_pipeline_atma(self, qliq_sm3day, fw_perc, h_list_m, p_calc_from_atma, t_calc_from_C,
+                           calc_along_coord, flow_along_coord, str_PVT, diam_list_mm,
+                           hydr_corr, t_amb_list_C, temp_method,
+                           c_calibr_grav=1, c_calibr_fric=1, roughness_m=0.0001, q_gas_sm3day=0,
+                           out_curves_num_points=20):
+        """" расчет распределения давления и температуры в трубопроводе  с использованием многофазных корреляций
+
+                       qliq_sm3day - дебит жидкости в поверхностных условиях
+
+        fw_perc - обводненность
+
+        h_list_m - траектория трубы.  число, range или таблица [0..n,0..1]
+
+        p_calc_from_atma - давление с которого начинается расчет, атм  граничное значение для проведения расчета
+
+        t_calc_from_c - температура в точке где задано давление расчета
+
+        calc_along_coord - направление расчета относительно координаты  если = 1 то расчет вдоль оси координат  если = 0 то расчет против оси координат
+
+        flow_along_coord - флаг направления потока относительно  направления роста координаты  если = 1 то поток вдоль оси координат  если = 0 то поток против оси координат
+
+        str_pvt - закодированная строка с параметрами pvt.  если задана - перекрывает другие значения  если задан флаг gas_only = 1 то жидкость не учитывается
+
+        diam_list_mm - внутрнний диаметр трубы  число, range или таблица [0..n,0..1]
+
+        hydr_corr - гидравлическая корреляция, h_correlation  beggsbrill = 0  ansari = 1  unified = 2  gray = 3  hagedornbrown = 4  sakharovmokhov = 5
+
+        t_amb_list_c - температура окружающей среды, с  range или таблица [0..n,0..1]  temp_method - метод расчета температуры  0 - линейное распределение по длине  1 - температур..см.мануал
+
+   temp_methodtemp_calc_method
+
+        c_calibr_grav - поправка на гравитационную составляющую  перепада давления
+
+        c_calibr_fric - поправка на трение в перепаде давления
+
+        roughness_m - шероховатость трубы
+
+        если qliq_sm3day =0 и q_gas_sm3day > 0  тогда считается барботаж газа через жидкость  fw_perc - обводненность  h_list_m - траектория трубы.  число, range или таблица [0..n..см.мануал
+
+        out_curves_num_points - количество точек для вывода значений  между концами трубы.    )
+
+        """
+
+        self.f_MF_p_pipeline_atma = self.book.macro("MF_p_pipeline_atma")
+        return self.f_MF_p_pipeline_atma(qliq_sm3day, fw_perc, h_list_m, p_calc_from_atma, t_calc_from_C,
+                                         calc_along_coord, flow_along_coord, str_PVT, diam_list_mm, hydr_corr,
+                                         t_amb_list_C, temp_method, c_calibr_grav, c_calibr_fric,
+                                         roughness_m, q_gas_sm3day, out_curves_num_points)
+
+import xlwings as xw
+if __name__=='__main__':
+    uniflocvba = API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
+
+    PVT_str = uniflocvba.PVT_encode_string()
+
+    qliq_sm3day = 100
+    fw_perc = 0
+    h_list_m = [[0, 0], [3500, 3500]]
+    p_calc_from_atma = 200
+    t_calc_from_C = 100
+    calc_along_coord = 0
+    flow_along_coord = 0
+    str_PVT = PVT_str
+    diam_list_mm = [[0, 100], [500, 120], [3500, 120]]
+    hydr_corr = 0
+
+    t_amb_list_C = [[0, 20], [3500, 100]]
+    temp_method = 1
+    c_calibr_grav = 1
+    c_calibr_fric = 1
+    roughness_m = 0.0001
+    q_gas_sm3day = 0
+    out_curves_num_points = 20
+
+    uniflocvba.f_MF_test = uniflocvba.book.macro('MF_test')
+
+    result0 = uniflocvba.f_MF_test(h_list_m)
+    print(result0)
+
+
+
+    result = uniflocvba.MF_p_pipeline_atma(
+        qliq_sm3day,
+        fw_perc,
+        h_list_m,
+        p_calc_from_atma,
+        t_calc_from_C,
+        calc_along_coord,
+        flow_along_coord,
+        str_PVT,
+        diam_list_mm,
+        hydr_corr,
+        t_amb_list_C,
+        temp_method,
+        c_calibr_grav,
+        c_calibr_fric,
+        roughness_m,
+        q_gas_sm3day,
+        out_curves_num_points)
+    print(result)

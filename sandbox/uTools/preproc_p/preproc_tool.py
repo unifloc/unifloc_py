@@ -141,9 +141,9 @@ class GlobalNames():
             self.u_ab_v: ["Входное напряжение АВ", "Напряжение AB (ТМ)", "UAB,В", 'Uвх.AB,В', 'Uab,В',
                                   'UвхAB(B)',  'Uab, В', 'Напряжение BA'],
             self.i_a_motor_a: ["Ток фазы А", "Ток фазы A (ТМ)", "Ia,А", 'Ia, A', 'Iа(A)', 'Ia, А',
-                               'Ток фазы A'],
+                               'Ток фазы A',"Ia, A"],
             self.freq_hz: ["Выходная частота ПЧ", "Частота вращения (ТМ)", "F,Гц", 'F, Гц', 'F(Гц)',
-                                   'Fвр, Гц', 'Частота вращения двигателя'],
+                                   'Fвр, Гц', 'Частота вращения двигателя',"F, Гц"],
 
             self.cos_phi_d: ["Коэффициент мощности", "Коэффициент мощности (ТМ)", "Cos", 'cos',
                                         'Коэффициент мощности', 'Коэффициент мощности, д.ед.'],
@@ -202,7 +202,7 @@ def rename_columns_by_dict(df, columns_name_dict = global_names.return_dict_colu
 
     for i in df.columns:
         for items in columns_name_dict.items():
-            if i in items[1]:
+            if i in items[1] or i in [x.replace(' ', '') for x in items[1]]:
                 df = df.rename(columns={i: items[0]})
     return df
 

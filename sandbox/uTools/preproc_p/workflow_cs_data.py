@@ -162,14 +162,34 @@ def delete_string_axis(df: pd.DataFrame, column_name):
 
 
 def clear_df_from_string(df: pd.DataFrame):
+    start_shape = df.shape[0]
     column_names = df.columns
     delete_all = False
     for i in column_names:
         if i in df.columns and not delete_all:
             df = delete_string_axis(df, i)
             delete_all = True
+    print(f"Удалено строк функцией clear_df_from_string"
+          f" {start_shape - df.shape[0]} ({start_shape} --> {df.shape[0]})")
     return df
 
+
+def clear_df_from_string_by_each_element(df):
+    start_shape = df.shape[0]
+    new_df = df.copy()
+    rows_to_del = []
+    for i in df.columns:
+        for z,k in zip(df.index, df[i]):
+            if type(k) != type(None):
+                try:
+                    k = float(k)
+                except:
+                    rows_to_del.append(z)
+    rows_to_del = set(rows_to_del)
+    new_df = new_df.drop(index = rows_to_del)
+    print(f"Удалено строк функцией clear_df_from_string_by_each_element"
+          f" {start_shape - new_df.shape[0]} ({start_shape} --> {new_df.shape[0]})")
+    return new_df
 
 def read_and_format_bad_tm_data(filename_full_path):
     """
@@ -186,30 +206,52 @@ def read_and_format_bad_tm_data(filename_full_path):
         loaded_file = loaded_file[loaded_file['   Состояние   '] == 'Работа']
 
     elif flash_data[0][0] == 'Дата, Время':
-        print('Тип данных: Почти нормальный тип')
+        print('Тип данных: Почти нормальный тип, исходный формат .ELR, .ZQL, приложение Electon')
         loaded_file = pd.read_excel(filename_full_path, index_col='Дата, Время', parse_dates=True)
         loaded_file = loaded_file.replace(to_replace='-----', value=None)
+        loaded_file = loaded_file.drop(columns=['Статусн.сообщ.'])
         loaded_file = loaded_file.dropna(subset=['P, кВА'])
 
     elif flash_data[0][2] == 'Nп/п':
-        print('Тип данных: Борец энергетика')
-        loaded_file = pd.read_excel(filename_full_path, skiprows=2, index_col='Дата        Время', parse_dates=True)
-
+        print('Тип данных: Борец энергетика, исходный формат .DMS, .PR, приложение Spectrum, Борец')
+        loaded_file = pd.read_excel(filename_full_path, skiprows=2, index_col='Дата        Время')
+        loaded_file.index = pd.to_datetime(loaded_file.index, format="%d.%m.%Y %H:%M:%S")
+        loaded_file = loaded_file.drop(columns='Вращение')
     elif flash_data[1][1] == 'Информация:':
-        print('Тип данных: Зеленый Борец с несколькими листами')
-        loaded_file = pd.read_excel(filename_full_path, sheet_name='Журнал', skiprows=4, index_col='Дата/Время', parse_dates=True)
+        print('Тип данных: Зеленый Борец с несколькими листами, исходный формат .ARH, приложение Etalon_AV, Борец')
+        loaded_file = pd.read_excel(filename_full_path, sheet_name='Журнал', skiprows=4, index_col='Дата/Время')
+        loaded_file.index = pd.to_datetime(loaded_file.index, format="%d.%m.%Y %H:%M:%S")
         loaded_file = loaded_file.replace(to_replace='###', value=None)
-        loaded_file[(loaded_file['   Состояние   '] == 'ПИД реж.') | (loaded_file['   Состояние   '] == 'работа')]
+        loaded_file = loaded_file[loaded_file['   Состояние   '] != 'Очистка архива']
+        #loaded_file = [(loaded_file['   Состояние   '] == 'ПИД реж.') | (loaded_file['   Состояние   '] == 'работа')]
     elif flash_data[0][0] == 'ID':
-        print('Тип данных: почти нормальный с большой точностью')
+        print('Тип данных: почти нормальный с большой точностью, исходныный формат .SUDE, приложение Унив.просмотрщик, Новомет')
         loaded_file = pd.read_excel(filename_full_path, index_col='Дата время', parse_dates=True)
         loaded_file = loaded_file.dropna(subset=['№Скв'])
+    elif 'UMKA' in flash_data[flash_data.columns[0]][1]:
+        print(
+            'Тип данных: UMKA файл (2 листа!!), исходный формат .JRM, приложение umka3N.exe')
+        file = pd.read_excel(filename_full_path, header=3)
+        file.index = pd.to_datetime(file['Date'].astype(str) + ' ' + file['Time'].astype(str),
+                                    format="%d.%m.%Y %H:%M:%S")
+        file = file.drop(columns=['CS state ', 'Rotation direction ', 'Event', 'Date', 'Time'])
+        try:
+            file2 = pd.read_excel(filename_full_path, header=3, sheet_name=1)
+            file2.index = pd.to_datetime(file2['Date'].astype(str) + ' ' + file2['Time'].astype(str),
+                                         format="%d.%m.%Y %H:%M:%S")
+            file2 = file2.drop(columns=['CS state ', 'Rotation direction ', 'Event', 'Date', 'Time'])
+            file = file.append(file2)
+        except:
+            pass
+        loaded_file = file
     else:
         print('Тип данных: тип не распознан')
 
     loaded_file = drop_string_columns(loaded_file)
     loaded_file = clear_df_from_string(loaded_file)
+    loaded_file = clear_df_from_string_by_each_element(loaded_file)
     loaded_file.index.name = 'Время'
+    print('\n')
     return loaded_file
 
 

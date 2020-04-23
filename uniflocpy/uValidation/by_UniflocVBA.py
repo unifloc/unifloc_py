@@ -1,86 +1,107 @@
-import uniflocpy.uPVT.BlackOil_model as BlackOil_model
-import sys
-sys.path.append('E:\\Git\\unifloc_vba\\unifloc_vba_python_api')
-import python_api
-import math
+
 import uniflocpy.uTools.uconst as uc
-p_bar = 250
-p_atma = uc.bar2atm(p_bar)
-t_c = 80
-gamma_oil = 0.87
-gamma_water = 1
-gamma_gas = 1.2
-rsb_m3m3 = 50
-rp_m3m3 = 80
-pb_cal_bar = 120
-t_res_c = 100
-bob_cal_m3m3 = 1.2
-mu_oil_bubble_cp = 1
+import numpy as np
+import pandas as pd
 
-keywords = {"gamma_oil": gamma_oil, "gamma_gas": gamma_gas, "gamma_wat":gamma_water,
-                                    "rsb_m3m3": rsb_m3m3, "t_res_c": t_res_c}
+columns_name_dict = {
+    'num': ["num"],
+    'h_calculated_mes_m': ["h,m"],
+    'h_calculated_vert_m': ["hvert,m"],
+    "p,atma": ["p,atma"],
+    "t,C": ["t,C"],
+    "Hl": ["Hl"],
+    "flow_regime": ["fpat"],
+    "t_amb, C": ["t_amb, C"],
+    "diam, mm": ["diam, mm"],
 
-keywords_vba = {"t_C": t_c, "gamma_gas": gamma_gas,
-                "gamma_oil": gamma_oil, "gamma_wat": gamma_water, "rsb_m3m3": rsb_m3m3, "tres_C": t_res_c} #проверено, улетают свойства газа (из-за z), st oil-gas, mu_wate
+    'c_Roughness': ["c_Roughness"],
+    'c_Theta': ["c_Theta"],
+    't_earth_init_c': ["c_Tinit"],
+    'p_calculated_bar': ["c_P"],
+    't_calculated_c': ["c_T"],
+    't_earth_init_in_reservoir_c': ["c_Tamb"],
+    'c_udl_m': ["c_udl_m"],
+    'density_grad_pam': ["c_dpdl_g"],
+    'friction_grad_pam': ["c_dpdl_f"],
+    'acceleration_grad_pam': ["c_dpdl_a"],
+    'vsl_msec': ["c_vsl"],
+    'vsg_msec': ["c_vsg"],
+    'liquid_content_with_Pains_cor_d': ["c_Hl"],
+    'gas_fraction': ["c_gasfrac"],
+    'mu_oil_cp': ["c_muo"],
+    'mu_wat_cp': ["c_muw"],
+    'mu_gas_cp': ["c_mug"],
+    'mun_cP': ["c_mumix"],
+    'rho_oil_kgm3': ["c_rhoo"],
+    'rho_wat_kgm3': ["c_rhow"],
+    'rho_liq_kgm3': ["c_rhol"],
+    'rho_gas_kgm3': ["c_rhog"],
+    'rhon_kgm3': ["c_rhomix"],
+    'qoil_m3day': ["c_qo"],
+    'qwat_m3day': ["c_qw"],
+    'qgas_m3day': ["c_qg"],
+    'mass_flowrate_oil_kgsec': ["c_mo"],
+    'mass_flowrate_wat_kgsec': ["c_mw"],
+    'mass_flowrate_gas_kgsec': ["c_mg"],
+    "c_vl": ["c_vl"],
+    "c_vg": ["c_vg"],
 
-python_fluid = BlackOil_model.Fluid(**keywords)
-
-uniflocvba = python_api.API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
-
-
-def re_perc(y_fact,_y_calc):
-    return abs((y_fact-_y_calc)/y_fact * 100)
+    "rs_m3m3": ["c_Rs"],
+}
 
 
-python_fluid.calc(p_bar, t_c)
-vba_value = uniflocvba.PVT_bo_m3m3(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.b_oil_m3m3
-print(f"b_oil_m3m3. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
+def rename_columns_by_dict(df, columns_name_dict):
+    """
+    Специальное изменение названий столбцов по словарю
+    :param df:
+    :param dict:
+    :return:
+    """
 
-vba_value = uniflocvba.PVT_bw_m3m3(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.b_wat_m3m3
-print(f"b_wat_m3m3. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
+    for i in df.columns:
+        for items in columns_name_dict.items():
+            if i in items[1]:
+                df = df.rename(columns={i: items[0]})
+    return df
 
-vba_value = uniflocvba.PVT_bg_m3m3(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.b_gas_m3m3
-print(f"b_gas_m3m3. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
+def mark_df_columns(df, mark):
+    """
+    Пометка названий столбцов DataFrame c помошью (this_mark)
+    :param df: исходный DataFrame
+    :param mark: str, который будет приписан к названию столбца (например, СУ, или Ш)
+    :return: DataFrame с новыми названиями столбцов
+    """
+    for i in df.columns:
+        df = df.rename(columns={i: i + '_' + mark})
+    return df
 
-vba_value = uniflocvba.PVT_pb_atma(**keywords_vba)
-python_value = uc.bar2atm(python_fluid.pb_bar)
-print(f"pb_bar. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
+def covert_result_from_vba_to_df(result):
+    df2 = create_result_df_from_vba_output(result)
+    df2 = rename_columns_by_dict(df2, columns_name_dict)
+    df2['p_calculated_bar'] = df2['p_calculated_bar'].apply(uc.atm2bar)
+    df2['density_grad_pam'] = df2['density_grad_pam'].apply(uc.atm2Pa)
+    df2['friction_grad_pam'] = df2['friction_grad_pam'].apply(uc.atm2Pa)
+    df2['acceleration_grad_pam'] = df2['acceleration_grad_pam'].apply(uc.atm2Pa)
 
-vba_value = uniflocvba.PVT_rs_m3m3(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.rs_m3m3
-print(f"rs_m3m3. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
+    df2['qliq_m3day'] = df2['qoil_m3day'] + df2['qwat_m3day']
+    df2['q_mix_n_m3day'] = df2['qliq_m3day'] + df2['qgas_m3day']
+    df2['rhos_kgm3'] = df2['rho_liq_kgm3'] * df2['liquid_content_with_Pains_cor_d'] + df2['rho_gas_kgm3'] * (1 - df2['liquid_content_with_Pains_cor_d'])
+    df2['grad_pam'] = df2['density_grad_pam'] + df2['friction_grad_pam'] + df2['acceleration_grad_pam']
+    df2['d_m'] = df2['diam, mm']
+    df2['vm_msec'] = df2['vsl_msec'] + df2['vsg_msec']
+    df2['mass_flowrate_liq_kgsec'] = df2['mass_flowrate_oil_kgsec'] + df2['mass_flowrate_wat_kgsec']
+    df2['mass_flowraten_kgsec'] = df2['mass_flowrate_liq_kgsec'] + df2['mass_flowrate_gas_kgsec']
+    df2['liquid_content'] = 1 - df2['gas_fraction']
+    df2 = mark_df_columns(df2, 'vba')
+    return df2
 
-vba_value = uniflocvba.PVT_mu_gas_cP(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.mu_gas_cp
-print(f"mu_gas_cp. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
 
-vba_value = uniflocvba.PVT_mu_oil_cP(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.mu_oil_cp
-print(f"mu_oil_cp. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
-
-vba_value = uniflocvba.PVT_mu_wat_cP(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.mu_wat_cp
-print(f"mu_wat_cp. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
-
-vba_value = uniflocvba.PVT_z(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.z
-print(f"z. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
-
-vba_value = uniflocvba.PVT_salinity_ppm(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.s_ppm
-print(f"s_ppm. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
-
-vba_value = uniflocvba.PVT_ST_oilgas_Nm(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.sigma_oil_gas_Nm
-print(f"sigma_oil_gas_Nm. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
-
-vba_value = uniflocvba.PVT_ST_watgas_Nm(p_atma=p_atma, **keywords_vba)
-python_value = python_fluid.sigma_wat_gas_Nm
-print(f"sigma_wat_gas_Nm. vba_value: {vba_value}, python_value: {python_value}, relative_error: {re_perc(vba_value,python_value)}")
-
+def create_result_df_from_vba_output(vba_result):
+    result_np = np.array(vba_result[3:])
+    df = pd.DataFrame(result_np,
+                   columns=vba_result[2])
+    df = df.set_index(df['h,m'])
+    return df
 
 
 

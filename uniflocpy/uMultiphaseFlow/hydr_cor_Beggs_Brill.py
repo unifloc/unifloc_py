@@ -8,18 +8,67 @@
 import math
 import uniflocpy.uMultiphaseFlow.friction_Bratland as fr  # модуль для расчета коэффициента трения
 import uniflocpy.uTools.uconst as uc
-
+import numpy as np
+import scipy.optimize as sp
 const_g_m2sec = uc.g
 
 # TODO добавить учет расчета сверху вниз
 
+
+class FrictionVBA():
+    def __init__(self):
+        self.d_m = None
+        self.relative_roughness = None
+        self.epsilon_m = None
+        self.number_re = None
+
+    def calc_f(self, number_re, epsilon_m, d_m):
+        self.relative_roughness = epsilon_m / d_m
+        self.d_m = d_m
+        self.epsilon_m = epsilon_m
+        self.number_re = number_re
+        relative_roughness = self.relative_roughness
+
+        if number_re == 0:
+            return 0
+        else:
+            if number_re > 2000:
+                f_n = (2 * np.log10(2 / 3.7 * relative_roughness -
+                                   5.02 / number_re * np.log10(2 / 3.7 * relative_roughness + 13 / number_re))) ** -2
+                result = 20
+                i = 0
+                while result > 0.001 or i < 19:
+                    new_fn = (1.74 - 2 * np.log10(2 * relative_roughness + 18.7 / (number_re * f_n ** 0.5))) ** -2
+                    result = np.abs(new_fn-f_n)
+                    i = i + 1
+                    f_n = new_fn
+                return f_n
+            else:
+                return 64 / number_re
+
+
+def __determine_flow_pattern_vba(n_fr, lambda_l):
+
+    if (n_fr >= 316 * lambda_l ** 0.302 or n_fr >= 0.5 * lambda_l ** -6.738):
+        flow_pattern = 2
+    else:
+        if (n_fr <= 0.000925 * lambda_l ** -2.468):
+            flow_pattern = 0
+        else:
+            if (n_fr <= 0.1 * lambda_l ** -1.452):
+                flow_pattern = 3
+            else:
+                flow_pattern = 1
+    return flow_pattern
 
 
 class Beggs_Brill_cor():
     """
     Класс для хранения данных и расчета градиента давления по методу Беггз и Брилл
     """
-    def __init__(self, epsilon_friction_m=18.288 * 10 ** (-6), angle_grad=90):
+    def __init__(self, epsilon_friction_m=18.288 * 10 ** (-6), angle_grad=90, friction_type=0,
+                 pains_corr_using=0, gravity_grad_coef=1, friction_grad_coef=1, acceleration_grad_coef=1,
+                 acceleration_grad_using=0):
         """
         Инизиализация гидравлической корреляции
 
@@ -28,6 +77,11 @@ class Beggs_Brill_cor():
         """
 
         self.epsilon_friction_m = epsilon_friction_m
+        self.pains_corr_using = pains_corr_using
+        self.gravity_grad_coef = gravity_grad_coef
+        self.friction_grad_coef = friction_grad_coef
+        self.acceleration_grad_coef = acceleration_grad_coef
+        self.acceleration_grad_using = acceleration_grad_using
 
         self.angle_grad = angle_grad  # угол наклона ствола скважины от горизонтали
         self.angle_rad = None
@@ -69,7 +123,12 @@ class Beggs_Brill_cor():
         self.result_grad_pam = None
 
         # импорт модуля для расчета коэффициента трения
-        self.module_friction = fr.Friction()
+        if friction_type == 0:
+            self.module_friction = FrictionVBA()
+        elif friction_type == 1:
+            self.module_friction = fr.Friction()
+        else:
+            self.module_friction = FrictionVBA()
 
         self.friction_grad_pam = None
         self.density_grad_pam = None
@@ -77,6 +136,9 @@ class Beggs_Brill_cor():
         self.friction_grad_part_percent = None
         self.density_grad_part_percent = None
         self.acceleration_grad_part_percent = None
+
+        self.gas_fraction_real_d = None
+        self.liquid_holdup_d = None
 
         self.L1 = None
         self.L2 = None
@@ -130,23 +192,30 @@ class Beggs_Brill_cor():
             else:
                 self.correction_factor_c = result
 
-        self.angle_rad = self.angle_grad * math.pi / 180
+        self.angle_rad = self.angle_grad * math.pi / 180 # TODO если скважина вертикальная, будет коррекция
 
         self.angle_correction_factor = (1 + self.correction_factor_c *
                                         ((math.sin(1.8 * self.angle_rad)) - (1 / 3) *
-                                         (math.sin(1.8 * self.angle_rad)) ** 3))  #TODO знак - в экселе
-
+                                         (math.sin(1.8 * self.angle_rad)) ** 3))
         self.liquid_content_with_angle = self.liquid_content_with_zero_angle * self.angle_correction_factor
 
         if self.angle_grad > 0:  # uphill flow
-            self.liquid_content_with_Pains_cor = 0.924 * self.liquid_content_with_angle
+            if self.pains_corr_using == 1:
+                self.liquid_content_with_Pains_cor = 0.924 * self.liquid_content_with_angle
+            else:
+                self.liquid_content_with_Pains_cor = 1 * self.liquid_content_with_angle
         else:  # downhill flow
-            self.liquid_content_with_Pains_cor = 0.685 * self.liquid_content_with_angle
+            if self.pains_corr_using == 1:
+                self.liquid_content_with_Pains_cor = 0.685 * self.liquid_content_with_angle
+            else:
+                self.liquid_content_with_Pains_cor = 1 * self.liquid_content_with_angle
 
         if self.liquid_content_with_Pains_cor > 1:  # reality check
             self.liquid_content_with_Pains_cor = 1
         if self.liquid_content_with_Pains_cor < self.liquid_content:  #TODO check reality
             self.liquid_content_with_Pains_cor = self.liquid_content
+
+        self.liquid_holdup_d = self.liquid_content_with_Pains_cor
 
     def determine_flow_pattern(self, number_Fr, liquid_content):
         """
@@ -178,7 +247,7 @@ class Beggs_Brill_cor():
                     self.flow_regime = 2
         return self.flow_regime
 
-    def calc_grad(self, p_bar, t_c):
+    def calc_grad(self, p_bar, t_c, gravity_grad_coef=1, friction_grad_coef=1, acceleration_grad_coef=1):
         """
         Функция для расчета градиента давления по методу Беггз и Брилл
 
@@ -186,6 +255,9 @@ class Beggs_Brill_cor():
         :param t_c: температура, С
         :return: градиент давления, Па /м
         """
+        self.gravity_grad_coef = gravity_grad_coef
+        self.friction_grad_coef = friction_grad_coef
+        self.acceleration_grad_coef = acceleration_grad_coef
         self.p_pa = uc.bar2Pa(p_bar)
         self.t_c = t_c
         if self.p_pa <= 0:
@@ -208,6 +280,7 @@ class Beggs_Brill_cor():
                 A = (self.L3 - self.val_number_Fr) / (self.L3 - self.L2)
                 B = 1 - A
                 self.liquid_content_with_Pains_cor = A * hltetta_segr + B * hltetta_inter
+                self.flow_regime = 3
 
             self.number_Re = self.rhon_kgm3 * self.vm_msec * self.d_m / self.mun_pas
 
@@ -225,17 +298,21 @@ class Beggs_Brill_cor():
 
             self.result_friction = self.friction_coefficient * math.exp(self.s)
 
-            self.Ek = self.vm_msec * self.vsg_msec * self.rhon_kgm3 / self.p_pa
+            if self.acceleration_grad_using == 0:
+                self.Ek = 0  # TODO дополнительно можно сделать градиент на ускорение
+            else:
+                self.Ek = self.vm_msec * self.vsg_msec * self.rhon_kgm3 / self.p_pa
 
             self.rhos_kgm3 = (self.rho_liq_kgm3 * self.liquid_content_with_Pains_cor +
                               self.rho_gas_kgm3 * (1 - self.liquid_content_with_Pains_cor))
 
-            self.result_grad_pam = ((self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.d_m +
-                                     self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)) / (1 - self.Ek))
-
             self.friction_grad_pam = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.d_m)
 
             self.density_grad_pam = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
+
+            self.result_grad_pam = ((self.friction_grad_pam * self.friction_grad_coef +
+                                    self.density_grad_pam * self.gravity_grad_coef) /
+                                    (1 - self.Ek) * self.acceleration_grad_coef)
 
             self.acceleration_grad_pam = self.result_grad_pam * self.Ek
 
@@ -244,6 +321,8 @@ class Beggs_Brill_cor():
             self.density_grad_part_percent = self.density_grad_pam / self.result_grad_pam * 100
 
             self.acceleration_grad_part_percent = self.acceleration_grad_pam / self.result_grad_pam * 100
+
+            self.gas_fraction_real_d = 1 - self.liquid_holdup_d
 
             return self.result_grad_pam
 

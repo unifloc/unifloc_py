@@ -418,7 +418,7 @@ class FluidMcCain(FluidBlackOil):
 
 class FluidFlow:
     """класс для описания потока флюида"""
-    def __init__(self, fluid = FluidStanding()):
+    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=1):
         """
         Создает многофазный поток с нефтью определенной модели
 
@@ -429,7 +429,7 @@ class FluidFlow:
         self.qliq_on_surface_m3day = 100      # дебит жидкости
         self.fw_on_surface_perc = 20              # обводненность
         self.d_m = 0.152 # внутренний диаметр трубы  #TODO добавить возможность расчета потока в кольцевом пространстве
-
+        self.calc_with_temp_cor = calc_with_temp_cor # не будет рассчитываться коэффициент Джоуля-Томпсона и dv/dp
         self.p_bar = None
         self.t_c = None
 
@@ -599,13 +599,15 @@ class FluidFlow:
 
         self.gas_fraction_d = self.qgas_m3day / (self.qliq_m3day + self.qgas_m3day)
 
-        self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
+        #self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
+        self.fw_perc = self.fw_on_surface_perc
 
         self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * (1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
 
         self.sigma_liq_Nm = self.fl.sigma_oil_gas_Nm * (1 - self.fw_perc / 100) + self.fl.sigma_wat_gas_Nm * self.fw_perc / 100
 
-        self.mu_liq_cP = self.fl.mu_oil_cp * (1 - self.fw_perc / 100) + self.fl.mu_wat_cp * self.fw_perc / 100
+        self.mu_liq_cP = self.fl.mu_oil_cp * (1 - self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day)) + \
+                         self.fl.mu_wat_cp * self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day)  # VBA
 
         self.mun_cP = self.mu_liq_cP * self.liquid_content + self.fl.mu_gas_cp * (1 - self.liquid_content)
 
@@ -633,9 +635,13 @@ class FluidFlow:
         self.wat_mass_fraction_from_liquid = self.qwat_m3day * self.fl.rho_wat_kgm3 / \
                                              (self.qwat_m3day * self.fl.rho_wat_kgm3 +
                                               self.qoil_m3day * self.fl.rho_oil_kgm3)
+        if self.calc_with_temp_cor == 1:
+            self.Joule_Thompson_coef_cpa = self.__calc_Joule_Thompson_coef_cpa__()
 
-        self.Joule_Thompson_coef_cpa = self.__calc_Joule_Thompson_coef_cpa__()
+            self.dvdp_msecpam = self.__calc_dvdp_msecpam__()
+        else:
+            self.Joule_Thompson_coef_cpa = -1
+            self.dvdp_msecpam = -1
 
-        self.dvdp_msecpam = self.__calc_dvdp_msecpam__()
     # здесь будут методы для расчета свойств потока, также можно сделать трансляцию базовых свойств (pb, rs)
     # идея отдельного класса - тут вообще говоря может быть и смесь флюидов - какой то потомок может расшириться туда

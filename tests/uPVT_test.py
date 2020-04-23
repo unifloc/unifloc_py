@@ -40,19 +40,33 @@ class TestFluid(unittest.TestCase):
         for i in fluid_flow.__dict__.items():
             if type(i[-1]) != type(PVT_fluids.FluidStanding()):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 53221.725353030706,
+        self.assertAlmostEqual(sum, 53191.8257247249,
                                delta=0.0001)
 
     def test_BlackOil_model(self):
         pressure_bar = 100
         temp_c = 80
-        fluid_flow = BlackOil_model.Fluid()
-        fluid_flow.calc(pressure_bar, temp_c)
+        fluid_model = BlackOil_model.Fluid()
+        fluid_model.calc(pressure_bar, temp_c)
         sum = 0
-        for i in fluid_flow.__dict__.items():
+        for i in fluid_model.__dict__.items():
             if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 13320.994251413265,
+        self.assertAlmostEqual(sum, 13320.990563147594,
+                               delta=0.0001)
+
+    def test_BlackOil_model_vba_preset(self):
+        pressure_bar = 20
+        temp_c = 80
+        blackoil_option_vba = BlackOil_model.BlackOil_option()
+        blackoil_option_vba.set_vba_preset()
+        fluid_model = BlackOil_model.Fluid(option=blackoil_option_vba)
+        fluid_model.calc(pressure_bar, temp_c)
+        sum = 0
+        for i in fluid_model.__dict__.items():
+            if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
+                sum += i[-1]
+        self.assertAlmostEqual(sum, 12781.763876576446,
                                delta=0.0001)
 
     def test_BlackOil_option(self):
@@ -451,6 +465,58 @@ class TestPVT(unittest.TestCase):
         self.assertAlmostEqual(PVT_correlations.unf_surface_tension_gw_Sutton_Nm(rho_water_kgm3, rho_gas_kgm3, t_c),
                                0.06256845320633196,
                                delta=0.0001)
+
+    def test_unf_z_factor_Kareem(self):
+        Tpr = 1.2
+        Ppr = 1.2
+        self.assertAlmostEqual(PVT_correlations.unf_z_factor_Kareem(Tpr, Ppr),
+                               0.71245963496651,
+                               delta=0.0001)
+
+    def test_unf_pseudocritical_temperature_Standing_K(self):
+        gamma_gas = 0.6
+        self.assertAlmostEqual(PVT_correlations.unf_pseudocritical_temperature_Standing_K(gamma_gas),
+                               198.8016, #TODO сheck - маловато
+                               delta=0.0001)
+
+    def test_unf_pseudocritical_pressure_Standing_MPa(self):
+        gamma_gas = 0.6
+        self.assertAlmostEqual(PVT_correlations.unf_pseudocritical_pressure_Standing_MPa(gamma_gas),
+                               4.567119999999999,
+                               delta=0.0001)
+
+    def test_unf_gas_density_VBA_kgm3(self):
+        gamma_gas = 0.6
+        b_gas_m3m3 = 0.005
+        self.assertAlmostEqual(PVT_correlations.unf_gas_density_VBA_kgm3(gamma_gas, b_gas_m3m3),
+                               147.0,
+                               delta=0.0001)
+
+    def test_unf_fvf_gas_vba_m3m3(self):
+        T_K = 300
+        z = 1.1
+        P_MPa = 0.3
+        self.assertAlmostEqual(PVT_correlations.unf_fvf_gas_vba_m3m3(T_K, z, P_MPa),
+                               0.38194200000000006,
+                               delta=0.0001)
+
+    def test_unf_deadoilviscosity_BeggsRobinson_VBA_cP(self):
+        gamma_oil = 0.8
+        t_K = 300
+        self.assertAlmostEqual(PVT_correlations.unf_deadoilviscosity_BeggsRobinson_VBA_cP(gamma_oil, t_K),
+                               5.264455765058494,
+                               delta=0.0001)
+
+    def test_unf_surface_tension_Baker_Sverdloff_vba_nm(self):
+        p_atma = 10
+        t_C = 20
+        gamma_o_ = 40
+        self.assertAlmostEqual(sum(PVT_correlations.unf_surface_tension_Baker_Sverdloff_vba_nm(p_atma, t_C, gamma_o_)),
+                               0.12299551951661537,
+                               delta=0.0001)
+
+
+
 
 # лучше запустите все тесты в run_all_tests.py
 # но, для тестирования только данного модуля воспользуйтесь следующими функциями
