@@ -58,6 +58,19 @@ class BlackOil_option():
         self.sigma_oil_gas_cor_number = 0
         self.sigma_wat_gas_cor_number = 0
 
+    def set_vba_preset(self):
+        self.b_wat_cor_number = 1
+        self.mu_wat_cor_number = 1
+        self.rho_wat_cor_number = 1
+        self.z_cor_number = 1
+        self.pseudocritical_temperature_cor_number = 1
+        self.pseudocritical_pressure_cor_number = 1
+        self.rho_gas_cor_number = 1
+        self.b_gas_cor_number = 1
+        self.mu_dead_oil_cor_number = 2
+        self.sigma_oil_gas_cor_number = 2
+        self.sigma_wat_gas_cor_number = 1
+
 
 #  TODO передавать свойства нефти через структуру
 

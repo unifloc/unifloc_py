@@ -418,7 +418,7 @@ class FluidMcCain(FluidBlackOil):
 
 class FluidFlow:
     """класс для описания потока флюида"""
-    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=0):
+    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=1):
         """
         Создает многофазный поток с нефтью определенной модели
 
