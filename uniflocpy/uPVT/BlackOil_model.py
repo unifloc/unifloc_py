@@ -79,7 +79,7 @@ class Fluid:
     def __init__(self, gamma_oil=0.87, gamma_gas=0.81, gamma_wat=1.0, rsb_m3m3=80, gamma_gassep=0, y_h2s=0, y_co2=0,
                  y_n2=0, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=-1, b_oil_b_cal_m3m3=-1, mu_oil_b_cal_cp=-1,
                  t_res_c=90,
-                 option=BlackOil_option()):
+                 option=BlackOil_option(), pb_bar=-1):
         """
         Cоздает флюид с заданными базовыми свойствами и определенным набором методик/корреляций для расчета
 
@@ -163,6 +163,8 @@ class Fluid:
         self.pb_mpa = 0.0
         self.t_res_k = 0.0
 
+        self.pb_bar_for_rus_cor = pb_bar
+
     def _calc_pb_MPaa(self, number_cor): # TODO калибровку свойств делать внутри функций контейнеров, чтобы оставался выбор корреляций
         if number_cor == 0:
             return PVT.unf_pb_Standing_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
@@ -170,6 +172,8 @@ class Fluid:
             return PVT.unf_pb_Valko_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
         if number_cor == 2:  # TODO check cor
             return PVT.unf_pb_Glaso_MPaa(self.rsb_m3m3, self.t_res_k, self.gamma_oil, self.gamma_gas)
+        if number_cor == 3:
+            return PVT.calc_pb(self.pb_bar_for_rus_cor / 10, self.gamma_oil*1000, self.rsb_m3m3, self.t_res_k, self.t_k)
 
     def _calc_rs_m3m3(self, number_cor):
         if number_cor == 0:
@@ -178,6 +182,12 @@ class Fluid:
         if number_cor == 1:
             return PVT.unf_rs_Velarde_m3m3(self.p_mpa, self.pb_mpa, self.gamma_oil,
                                            self.gamma_gas, self.t_k)
+        if number_cor == 2:
+            return PVT.calc_gas_with_fsolve(self.t_k, self.gamma_oil * 1000, self.gamma_gas,
+                                   self.p_mpa, self.pb_mpa, self.rsb_m3m3, True)[1]
+        if number_cor == 3:
+            return PVT.calc_gas(self.t_k, self.gamma_oil * 1000, self.gamma_gas,
+                                   self.p_mpa, self.pb_mpa, self.rsb_m3m3, True)[1]
 
     def _calc_compr_oil_1mpa(self, number_cor):
         if number_cor == 0:
@@ -346,7 +356,6 @@ class Fluid:
         if number_cor == 1:
             return PVT.unf_surface_tension_Baker_Sverdloff_vba_nm(uc.bar2atm(self.p_mpa * 10), self.t_c, self.gamma_oil)[1]
 
-
         # TODO разобраться при использовании давления: когда идет калибровка давление изменяется - проверить где истинное где нет
         #   и давление при калибровке для всех единое, либо измененное только для свойств нефти
     def calc(self, p_bar, t_c):
@@ -423,4 +432,3 @@ class Fluid:
         # some system properties
         self.sigma_oil_gas_Nm = self._calc_sigma_oil_gas_nm(self.option.sigma_oil_gas_cor_number)
         self.sigma_wat_gas_Nm = self._calc_sigma_wat_gas_nm(self.option.sigma_wat_gas_cor_number)
-

@@ -247,7 +247,7 @@ class Beggs_Brill_cor():
                     self.flow_regime = 2
         return self.flow_regime
 
-    def calc_grad(self, p_bar, t_c, gravity_grad_coef=1, friction_grad_coef=1, acceleration_grad_coef=1):
+    def calc_grad(self, p_bar, t_c):
         """
         Функция для расчета градиента давления по методу Беггз и Брилл
 
@@ -255,9 +255,6 @@ class Beggs_Brill_cor():
         :param t_c: температура, С
         :return: градиент давления, Па /м
         """
-        self.gravity_grad_coef = gravity_grad_coef
-        self.friction_grad_coef = friction_grad_coef
-        self.acceleration_grad_coef = acceleration_grad_coef
         self.p_pa = uc.bar2Pa(p_bar)
         self.t_c = t_c
         if self.p_pa <= 0:

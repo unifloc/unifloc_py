@@ -1815,3 +1815,55 @@ def unf_surface_tension_Baker_Sverdloff_vba_nm(p_atma, t_C, gamma_o_):
     ST_oilgas_dyncm_ = STo
     ST_watgas_dyncm_ = STw
     return [uc.dyncm2nm(ST_oilgas_dyncm_), uc.dyncm2nm(ST_watgas_dyncm_)]
+
+import scipy.optimize as sp  # модуль для решения уравения
+
+def coef_mt(t_k, rho_deadoil_kgm3, gamma_gas):
+    return 1 + 0.029 * (t_k - 293) * (rho_deadoil_kgm3 * gamma_gas * 10 ** (-3) - 0.7966)
+
+
+def coef_dt(t_k, rho_deadoil_kgm3, gamma_gas):
+    return 10 ** (-3) * rho_deadoil_kgm3 * gamma_gas * (4.5 - 0.00305 * (t_k - 293)) - 4.785
+
+
+def coef_rp(p_mpa, pb_mpa):
+    return (1 + np.log10(p_mpa)) / (1 + np.log10(pb_mpa)) - 1
+
+
+def calc_gas(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    # rsb_m3m3 = 50
+    rp = coef_rp(p_mpa, pb_mpa)
+    # print(f"rp={rp}")
+    dt = coef_dt(t_k, rho_deadoil_kgm3, gamma_gas)
+    # print(f"dt={dt}")
+    mt = coef_mt(t_k, rho_deadoil_kgm3, gamma_gas)
+    # print(f"mt={mt}")
+    gas_liberated_m3t = rsb_m3m3 * rp * mt * (dt * (1 + rp) - 1)
+    gas_dissolved_m3t = rsb_m3m3 * mt - gas_liberated_m3t
+
+    if p_mpa >= pb_mpa:
+        if return_m3m3:
+            return 0, rsb_m3m3 * mt * rho_deadoil_kgm3 / 1000
+    if return_m3m3:
+        return gas_liberated_m3t * rho_deadoil_kgm3 / 1000, gas_dissolved_m3t * rho_deadoil_kgm3 / 1000
+        # return gas_liberated_m3t, gas_dissolved_m3t
+
+    return gas_liberated_m3t, gas_dissolved_m3t
+
+
+def calc_gas_for_fsolve(rsb_m3m3_real, t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    gas_dissolved_m3m3 = calc_gas(t_k, rho_deadoil_kgm3, gamma_gas, pb_mpa, pb_mpa, rsb_m3m3_real, return_m3m3)[1]
+    return (gas_dissolved_m3m3 - rsb_m3m3) ** 2
+
+
+def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    method = 'excitingmixing'
+    answer = sp.root(calc_gas_for_fsolve, rsb_m3m3, args=(t_k, rho_deadoil_kgm3, gamma_gas,
+                                                          pb_mpa, pb_mpa, rsb_m3m3, return_m3m3), tol=0.01)
+    answer = answer.x[0]
+    return calc_gas(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, answer, return_m3m3)
+
+def calc_pb(pb_mpa, rho_deadoil_kgm3, rsb_m3m3, tres_k, t_k):
+    gi = rsb_m3m3 * 10**3 * 273 / 293 / rho_deadoil_kgm3
+    pbt_mpa = pb_mpa - (tres_k - t_k) / (9.157 + 701.8 / (gi * (0.4 - 0.8* 0.08)))
+    return pbt_mpa
