@@ -148,26 +148,27 @@ def create_shapes_to_plotly(borders):
     :return:
     """
     shapes = []
-    colors_rgb = colors(len(borders))
-    for j, this_color in zip(borders, colors_rgb):
-        for i in j:
-            this_shape = dict(
-                type="rect",
-                # x-reference is assigned to the x-values
-                xref="x",
-                # y-reference is assigned to the plot paper [0,1]
-                yref="paper",
-                x0=i[0],
-                y0=0,
-                x1=i[1],
-                y1=1,
-                fillcolor=f"rgb({this_color[0]},{this_color[1]},{this_color[2]})",
-                opacity=0.3,
-                layer="below",
-                line_width=1,
-                line_color="LightSalmon"
-            )
-            shapes.append(this_shape)
+    if len(borders) != 0:
+        colors_rgb = colors(len(borders))
+        for j, this_color in zip(borders, colors_rgb):
+            for i in j:
+                this_shape = dict(
+                    type="rect",
+                    # x-reference is assigned to the x-values
+                    xref="x",
+                    # y-reference is assigned to the plot paper [0,1]
+                    yref="paper",
+                    x0=i[0],
+                    y0=0,
+                    x1=i[1],
+                    y1=1,
+                    fillcolor=f"rgb({this_color[0]},{this_color[1]},{this_color[2]})",
+                    opacity=0.3,
+                    layer="below",
+                    line_width=1,
+                    line_color="LightSalmon"
+                )
+                shapes.append(this_shape)
     return shapes
 
 def create_shapes_to_plotly2(borders):

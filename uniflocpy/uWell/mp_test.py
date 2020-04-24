@@ -5,10 +5,7 @@ import uniflocpy.uPVT.BlackOil_model as bom
 
 
 blackoil_option = bom.BlackOil_option()
-
-blackoil_option.b_wat_cor_number = 1
-blackoil_option.mu_wat_cor_number = 1
-blackoil_option.rho_wat_cor_number = 1
+blackoil_option.set_vba_preset()
 
 def calc_well_with_one_parameter(data):
 
