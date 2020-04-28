@@ -533,6 +533,10 @@ class FluidFlow:
 
         self.qwat_on_surface_m3day = self.qliq_on_surface_m3day * self.fw_on_surface_perc / 100
 
+        #if self.fl.max_rs_m3m3 != None:
+        #    self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.max_rs_m3m3
+        #else:
+        #
         self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.rsb_m3m3  # TODO учесть газ в воде
 
         self.qoil_m3day = self.qoil_on_surface_m3day * self.fl.b_oil_m3m3
@@ -541,7 +545,10 @@ class FluidFlow:
 
         self.qliq_m3day = self.qoil_m3day + self.qwat_m3day
         # TODO учесть газ в воде
-        self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
+        if self.fl.activate_rus_cor == 1:
+            self.qgas_m3day = self.fl.gas_liberated_m3m3  * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
+        else:
+            self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
 
         #self.qgas_dissolved_m3day = self.qoil_on_surface_m3day * self.fl.rs_m3m3 * self.fl.b_gas_m3m3
 
@@ -615,8 +622,8 @@ class FluidFlow:
 
         self.gas_fraction_d = self.qgas_m3day / (self.qliq_m3day + self.qgas_m3day)
 
-        #self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
-        self.fw_perc = self.fw_on_surface_perc
+        self.fw_perc = self.qwat_m3day / (self.qwat_m3day + self.qoil_m3day) * 100
+        #self.fw_perc = self.fw_on_surface_perc
 
         self.rho_liq_kgm3 = self.fl.rho_oil_kgm3 * (1 - self.fw_perc / 100) + self.fl.rho_wat_kgm3 * self.fw_perc / 100
 

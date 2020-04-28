@@ -51,6 +51,7 @@ class self_flow_well():
                  save_all=True,
                  solver_using=0,
 
+                activate_rus_mode=0,
 
                  pb_bar=90):
         """
@@ -127,6 +128,10 @@ class self_flow_well():
             self.pipe.fluid_flow.fl = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
                                                                gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3,
                                                            t_res_c=t_bottomhole_c, pb_bar=pb_bar)
+        if activate_rus_mode:
+            self.pipe.fluid_flow.fl = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
+                                                               gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3,
+                                                       t_res_c=t_bottomhole_c, pb_bar=pb_bar, activate_rus_cor=1, p_reservoir_bar=p_bottomhole_bar)
 
         self.data = data_workflow.Data()
 
