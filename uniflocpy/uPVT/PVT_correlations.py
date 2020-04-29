@@ -1830,38 +1830,41 @@ def coef_rp(p_mpa, pb_mpa):
     return (1 + np.log10(p_mpa)) / (1 + np.log10(pb_mpa)) - 1
 
 
-def calc_gas(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
-    # rsb_m3m3 = 50
+def unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    rsb_m3t = rsb_m3m3 / gamma_oil
     rp = coef_rp(p_mpa, pb_mpa)
-    # print(f"rp={rp}")
+    #print(f"rp={rp}")
     dt = coef_dt(t_k, rho_deadoil_kgm3, gamma_gas)
-    # print(f"dt={dt}")
+    #print(f"dt={dt}")
     mt = coef_mt(t_k, rho_deadoil_kgm3, gamma_gas)
-    # print(f"mt={mt}")
-    gas_liberated_m3t = rsb_m3m3 * rp * mt * (dt * (1 + rp) - 1)
-    gas_dissolved_m3t = rsb_m3m3 * mt - gas_liberated_m3t
+    #print(f"mt={mt}")
+    gas_liberated_m3t = rsb_m3t * rp * mt * (dt * (1 + rp) - 1)
+    gas_dissolved_m3t = rsb_m3t * mt - gas_liberated_m3t
 
     if p_mpa >= pb_mpa:
         if return_m3m3:
-            return 0, rsb_m3m3 * mt * rho_deadoil_kgm3 / 1000
+            return 0, rsb_m3t * mt * rho_deadoil_kgm3 / 1000
+        else:
+            return 0, rsb_m3t * mt
+
     if return_m3m3:
         return gas_liberated_m3t * rho_deadoil_kgm3 / 1000, gas_dissolved_m3t * rho_deadoil_kgm3 / 1000
         # return gas_liberated_m3t, gas_dissolved_m3t
+    else:
+        return gas_liberated_m3t, gas_dissolved_m3t
 
-    return gas_liberated_m3t, gas_dissolved_m3t
 
-
-def calc_gas_for_fsolve(rsb_m3m3_real, t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
-    gas_dissolved_m3m3 = calc_gas(t_k, rho_deadoil_kgm3, gamma_gas, pb_mpa, pb_mpa, rsb_m3m3_real, return_m3m3)[1]
+def calc_gas_for_fsolve(rsb_m3m3_real, t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    gas_dissolved_m3m3 = unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3,  gamma_oil, gamma_gas, pb_mpa, pb_mpa, rsb_m3m3_real, return_m3m3)[1]
     return (gas_dissolved_m3m3 - rsb_m3m3) ** 2
 
 
-def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_oil,  gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
     method = 'excitingmixing'
-    answer = sp.root(calc_gas_for_fsolve, rsb_m3m3, args=(t_k, rho_deadoil_kgm3, gamma_gas,
+    answer = sp.root(calc_gas_for_fsolve, rsb_m3m3, args=(t_k, rho_deadoil_kgm3,gamma_oil, gamma_gas,
                                                           pb_mpa, pb_mpa, rsb_m3m3, return_m3m3), tol=0.01)
     answer = answer.x[0]
-    return calc_gas(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, answer, return_m3m3)
+    return unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3,gamma_oil, gamma_gas, p_mpa, pb_mpa, answer, return_m3m3)
 
 def calc_pb(pb_mpa, rho_deadoil_kgm3, rsb_m3m3, tres_k, t_k):
     gi = rsb_m3m3 * 10**3 * 273 / 293 / rho_deadoil_kgm3

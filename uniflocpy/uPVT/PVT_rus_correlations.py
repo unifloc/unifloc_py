@@ -46,7 +46,7 @@ def calc_gas_for_fsolve(rsb_m3m3_real, t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, 
 def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
     method = 'excitingmixing'
     answer = sp.root(calc_gas_for_fsolve, rsb_m3m3, args=(t_k, rho_deadoil_kgm3, gamma_gas,
-                                                          pb_mpa, pb_mpa, rsb_m3m3, return_m3m3), tol=0.01,
+                                                          pb_mpa, pb_mpa, rsb_m3m3, True), tol=0.01,
                      options={'xtol': 0.01, 'maxfev': 25, 'eps': 0.01})
     # print(answer)
     answer = answer.x[0]
@@ -56,7 +56,7 @@ def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3
 
 t_k = 300.5
 p_mpa = 5.5
-p_res_mpa =17.5
+p_res_mpa = 17.5
 t_res_k = 313
 gamma_oil = 0.868
 rsb_m3t = 55.6
@@ -258,16 +258,16 @@ def unf_mu_oil_above_pb_cp(gamma_oil, rsb_m3t, t_k, p_mpa, p_b_mpa):
     if mu_oil_pb_cp < 5:
         delta = 0.0114 * mu_oil_pb_cp
     elif 5 <= mu_oil_pb_cp < 10:
-        delta = 0.0114 * (mu_oil_pb_cp - 5)
+        delta = 0.057 + 0.023 * (mu_oil_pb_cp - 5)
     elif 10 <= mu_oil_pb_cp < 25:
         delta = 0.0171 + 0.031 * (mu_oil_pb_cp - 10)
     elif 25 <= mu_oil_pb_cp < 45:
-        delta = 0.0171 + 0.031 * (mu_oil_pb_cp - 10)
+        delta = 0.643 + 0.045 * (mu_oil_pb_cp - 25)
     elif 45 <= mu_oil_pb_cp < 75:
-        delta = 0.0171 + 0.031 * (mu_oil_pb_cp - 10)
+        delta = 1.539 + 0.058 * (mu_oil_pb_cp - 45)
     # elif 75<=mu_oil_pb_cp < 85:
     else:
-        delta = 0.0171 + 0.031 * (mu_oil_pb_cp - 10)
+        delta = 3.286 + 0.100 * (mu_oil_pb_cp - 75)
     # print(delta)
     result = mu_oil_pb_cp + delta * (p_mpa - p_b_mpa)
     # print(mu_oil_pb_cp, delta,p_mpa, p_b_mpa)

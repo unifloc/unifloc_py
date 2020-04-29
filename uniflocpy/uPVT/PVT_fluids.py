@@ -418,7 +418,7 @@ class FluidMcCain(FluidBlackOil):
 
 class FluidFlow:
     """класс для описания потока флюида"""
-    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=1):
+    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=0):
         """
         Создает многофазный поток с нефтью определенной модели
 
@@ -547,26 +547,20 @@ class FluidFlow:
         # TODO учесть газ в воде
         if self.fl.activate_rus_cor == 1:
             self.qgas_m3day = self.fl.gas_liberated_m3m3  * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
+
+            self.liberated_gas_sc_m3m3 = self.fl.gas_liberated_m3m3
+
+            self.dissolved_gas_sc_m3m3 = self.fl.rs_m3m3
+
         else:
             self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
 
-        #self.qgas_dissolved_m3day = self.qoil_on_surface_m3day * self.fl.rs_m3m3 * self.fl.b_gas_m3m3
+            self.dissolved_gas_sc_m3m3 = self.fl.rs_m3m3
 
-        #self.qgas_dissolved_m3day2 = self.qgas_on_surface_m3day * self.fl.b_gas_m3m3
+            self.liberated_gas_sc_m3m3 = self.fl.rsb_m3m3 - self.fl.rs_m3m3
 
-        #self.qgas_dissolved_m3day3 = self.qgas_on_surface_m3day
-
-        #self.qgas_dissolved_m3day4 = self.qoil_on_surface_m3day * (self.fl.rsb_m3m3 - self.fl.rs_m3m3) * self.fl.b_gas_m3m3
-
-        #self.qgas_dissolved_sc_m3day = self.qoil_on_surface_m3day * self.fl.rs_m3m3
-
-        #self.qgas_liberated_sc_m3day = self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3
 
         self.q_mix_n_m3day = self.qoil_m3day + self.qwat_m3day + self.qgas_m3day
-
-        self.dissolved_gas_sc_m3m3 = self.fl.rs_m3m3
-
-        self.liberated_gas_sc_m3m3 = self.fl.rsb_m3m3 - self.fl.rs_m3m3
 
         self.vsl_msec = uc.m3day2m3sec(self.qliq_m3day) / self.Ap_m2
 
