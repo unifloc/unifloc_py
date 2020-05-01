@@ -14,8 +14,7 @@ def coef_rp(p_mpa, pb_mpa):
     return (1 + np.log10(p_mpa)) / (1 + np.log10(pb_mpa)) - 1
 
 
-def unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
-    rsb_m3t = rsb_m3m3 / gamma_oil
+def unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3t, return_m3m3=True):
     rp = coef_rp(p_mpa, pb_mpa)
     #print(f"rp={rp}")
     dt = coef_dt(t_k, rho_deadoil_kgm3, gamma_gas)
@@ -74,9 +73,7 @@ def calc_pb(pb_mpa, rho_deadoil_kgm3, rsb_m3t, tres_k, t_k, ch4_d = 0.4, n2_d=0.
 
 
 
-def rho_gas_liberated_relative(p_mpa, pb_mpa, gamma_gas, gamma_oil, t_k, rsb_m3m3):
-    rsb_m3t = rsb_m3m3 / gamma_oil
-
+def rho_gas_liberated_relative(p_mpa, pb_mpa, gamma_gas, gamma_oil, t_k, rsb_m3t):
     a = 1 + 0.0054 * (t_k - 293)
 
     u = gamma_oil * rsb_m3t - 186

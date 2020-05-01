@@ -386,66 +386,126 @@ import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
 
 
 if __name__ == "__main__":
-    calc_options ={"step_lenth_in_calc_along_wellbore_m": 100,
-                    "without_annulus_space": False,
-                   "save_all": True}
+    #calc_options ={"step_lenth_in_calc_along_wellbore_m": 100,
+    #                "without_annulus_space": False,
+    #               "save_all": True}
+#
+    #rsb_m3m3 = 56
+    #pb_bar = 9 * 10 ** 5
+    #gamma_oil = 0.86
+    #gamma_gas = 1.45
+#
+    #well_data = {"h_intake_mes_m": 1205,
+    #             "h_intake_vert_m": 1205,
+    #             "h_bottomhole_mes_m": 1607,  # 1756.8
+    #             "h_bottomhole_vert_m": 1607,
+#
+    #             "geothermal_grad_cm": 0.02,
+    #             "t_bottomhole_c": 40,
+    #             "t_earth_init_in_reservoir_c": 40,
+    #             'p_bottomhole_bar': 114.35,
+    #             "d_casing_inner_m": 0.133,
+    #             "d_tube_inner_m": 0.0503,
+    #             "qliq_on_surface_m3day": 40,
+    #             "fw_on_surface_perc": 0}
+#
+    #real_measurements = pd.DataFrame(
+    #    {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
+    #     'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
+#
+#
+    #well_data['qliq_on_surface_m3day'] = 20
+#
+    #fluid = BlackOil_model.Fluid()
+    #simple_well = self_flow_well(fluid=1, reservoir=0,
+    #                             temp_corr=1, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
+    #                             **well_data, **calc_options,
+    #                             solver_using=1)
+    #simple_well.well_work_time_sec = 1
+#
+    #simple_well.p_wellhead_bar = 20
+    #simple_well.t_wellhead_c = 20
+#
+    #import time
+    #start = time.time()
+    #simple_well.calc_all_from_down_to_up()
+    #stop = time.time()
+    #print(f"stop-start={stop-start}")
+    #print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
+    #print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
+    #print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
+    #print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
+#
+#
+#
+    #print('\nРазворот\n')
+    #start = time.time()
+#
+    #simple_well.calc_all_from_up_to_down()
+    #stop = time.time()
+    #print(f"stop-start={stop-start}")
+    #print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
+    #print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
+    #print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
+    #print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
 
-    rsb_m3m3 = 56
-    pb_bar = 9 * 10 ** 5
-    gamma_oil = 0.86
-    gamma_gas = 1.45
+#
 
-    well_data = {"h_intake_mes_m": 1205,
-                 "h_intake_vert_m": 1205,
-                 "h_bottomhole_mes_m": 1607,  # 1756.8
-                 "h_bottomhole_vert_m": 1607,
+    pb_bar = 90
+    fluid_data = {"rsb_m3m3": 56,
+                  "gamma_oil": 0.86,
+                  "gamma_gas": 1.45 * 24.05 / 28.98,
+                  'pb_bar': pb_bar}
+
+    well_data = {"h_intake_mes_m": 1205.5,
+                 "h_intake_vert_m": 1205.5,
+                 "h_bottomhole_mes_m": 1605,
+                 "h_bottomhole_vert_m": 1605,
 
                  "geothermal_grad_cm": 0.02,
+                 "t_wellhead_c": 30,
                  "t_bottomhole_c": 40,
                  "t_earth_init_in_reservoir_c": 40,
                  'p_bottomhole_bar': 114.35,
                  "d_casing_inner_m": 0.133,
                  "d_tube_inner_m": 0.0503,
                  "qliq_on_surface_m3day": 40,
+                 "p_reservoir_bar": 177,
                  "fw_on_surface_perc": 0}
-
     real_measurements = pd.DataFrame(
-        {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
+        {'p_survey_mpa': [0.9, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
          'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
 
+    calc_options = {"step_lenth_in_calc_along_wellbore_m": 25,
+                    "without_annulus_space": False,
+                    "solver_using": True}
 
-    well_data['qliq_on_surface_m3day'] = 20
+    blackoil_option = BlackOil_model.BlackOil_option()
 
-    fluid = BlackOil_model.Fluid()
-    simple_well = self_flow_well(fluid=1, reservoir=0,
-                                 temp_corr=1, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
-                                 **well_data, **calc_options,
-                                 solver_using=1)
-    simple_well.well_work_time_sec = 1
 
-    simple_well.p_wellhead_bar = 20
-    simple_well.t_wellhead_c = 20
 
-    import time
-    start = time.time()
+    blackoil_option.b_wat_cor_number = 1
+    blackoil_option.mu_wat_cor_number = 1
+    blackoil_option.rho_wat_cor_number = 1
+    blackoil_option.z_cor_number = 1
+    blackoil_option.pseudocritical_temperature_cor_number = 1
+    blackoil_option.pseudocritical_pressure_cor_number = 1
+    blackoil_option.rho_gas_cor_number = 1
+    blackoil_option.b_gas_cor_number = 1
+    blackoil_option.mu_dead_oil_cor_number = 2
+    blackoil_option.sigma_oil_gas_cor_number = 2
+    blackoil_option.sigma_wat_gas_cor_number = 1
+    # blackoil_option.rs_cor_number = 2
+    # blackoil_option.pb_cor_number = 3
+
+    simple_well = self_flow_well(fluid=1, reservoir=0, pipe=0, temp_corr=1, **fluid_data,
+                                                **well_data, **calc_options, activate_rus_mode=1)
+
+    simple_well.pipe.hydr_cor.gravity_grad_coef = 0.941
+    simple_well.pipe.hydr_cor.friction_grad_coef = 0.94
+
+    simple_well.pipe.fluid_flow.fl.option = blackoil_option
+
+    simple_well.pipe.hydr_cor.epsilon_friction_m = 0.00029
+
     simple_well.calc_all_from_down_to_up()
-    stop = time.time()
-    print(f"stop-start={stop-start}")
-    print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
-    print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
-    print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
-    print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
-
-
-
-    print('\nРазворот\n')
-    start = time.time()
-
-    simple_well.calc_all_from_up_to_down()
-    stop = time.time()
-    print(f"stop-start={stop-start}")
-    print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
-    print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
-    print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
-    print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
-
