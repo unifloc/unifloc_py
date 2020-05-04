@@ -72,6 +72,21 @@ class BlackOil_option():
         self.sigma_oil_gas_cor_number = 2
         self.sigma_wat_gas_cor_number = 1
 
+    def set_mccain_preset(self):
+        self.set_vba_preset()
+        # unf_pvt_compressibility_oil_VB_1atm
+        self.pb_cor_number = 1
+        self.mu_dead_oil_cor_number = 1
+        self.rs_cor_number = 1
+        self.rho_oil_cor_number = 1
+
+        self.b_oil_below_pb_cor_number = 2
+        self.b_oil_above_pb_cor_number = 1
+        self.mu_oil_pb_cor_number = 1
+        self.mu_oil_any_p_cor_number = 1
+        # blackoil_option.compr_oil_cor_number = 1
+        # blackoil_option.compr_oil_below_pb_cor_number = 1
+
 
 #  TODO передавать свойства нефти через структуру
 
@@ -205,8 +220,7 @@ class Fluid:
             return PVT.unf_rs_Standing_m3m3(self.p_mpa, self.pb_mpa, self.rsb_m3m3, self.gamma_oil,
                                             self.gamma_gas, self.t_k)
         if number_cor == 1:
-            return PVT.unf_rs_Velarde_m3m3(self.p_mpa, self.pb_mpa, self.gamma_oil,
-                                           self.gamma_gas, self.t_k)
+            return PVT.unf_rs_Velarde_m3m3(self.p_mpa, self.pb_mpa, self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
         if number_cor == 2:
             return PVT.calc_gas_with_fsolve(self.t_k, self.gamma_oil * 1000, self.gamma_gas,
                                    self.p_mpa, self.pb_mpa, self.rsb_m3m3, True)[1]
@@ -218,10 +232,14 @@ class Fluid:
         if number_cor == 0:
             return PVT.unf_compressibility_oil_VB_1Mpa(self.rs_m3m3, self.t_k, self.gamma_oil,
                                                        self.p_mpa, self.gamma_gas)
+        if number_cor == 1:
+            return PVT.unf_compessibility_oil_VB_1MPa_vba(self.rsb_m3m3, self.t_k, self.gamma_oil, self.gamma_gas)
 
     def _calc_compr_oil_below_pb_1mpa(self, number_cor):
         if number_cor == 0:
             return PVT.unf_compressibility_saturated_oil_McCain_1Mpa(self.p_mpa, self.pb_mpa, self.t_k, self.gamma_oil, self.rsb_m3m3)
+        if number_cor == 1:
+            return PVT.unf_compessibility_oil_VB_1MPa_vba(self.rsb_m3m3, self.t_k, self.gamma_oil, self.gamma_gas)
 
     def _calc_b_oil_in_pb_m3m3(self, number_cor):
         if number_cor == 0:
@@ -231,6 +249,13 @@ class Fluid:
         if number_cor == 0:
             return PVT.unf_fvf_VB_m3m3_above(self.b_oil_b_m3m3, self.compr_oil_1mpa,
                                              self.pb_mpa, self.p_mpa)
+        if number_cor == 1:
+            #if self.rho_oil_kgm3 == 0 or self.rho_oil_kgm3 is None:
+            #    raise TypeError
+            self.rho_oil_kgm3 = PVT.unf_density_oil_Mccain(self.p_mpa, self.pb_mpa, self.compr_oil_1mpa, self.rs_m3m3,
+                                              self.gamma_gas, self.t_k, self.gamma_oil, self.gamma_gassep)
+            return PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self.rs_m3m3, self.rho_oil_kgm3,
+                                                 self.gamma_gas)
 
     def _calc_b_oil_below_pb_m3m3(self, number_cor):
         if number_cor == 0:
@@ -260,11 +285,16 @@ class Fluid:
     def _calc_mu_oil_in_pb_cp(self, number_cor):
         if number_cor == 0:
             return PVT.unf_saturatedoilviscosity_Beggs_cP(self.mu_dead_oil_cp, self.rsb_m3m3)
+        if number_cor == 1:
+            return PVT.unf_saturatedoilviscosity_Beggs_cP_vba(self.mu_dead_oil_cp, self.rsb_m3m3)
 
     def _calc_mu_oil_any_p_cp(self, number_cor):
         if number_cor == 0:
             return PVT.unf_oil_viscosity_Beggs_VB_cP(self.mu_dead_oil_cp, self.rs_m3m3,
                                                      self.p_mpa, self.pb_mpa)
+        if number_cor == 1:
+            return PVT.unf_viscosity_oil_Standing_cP(self.rs_m3m3, self.mu_dead_oil_cp, self.p_mpa, self.pb_mpa)
+
 
     def _calc_heatcap_oil_jkgc(self, number_cor):
         if number_cor == 0:
