@@ -37,20 +37,27 @@ def unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma
         return gas_liberated_m3t, gas_dissolved_m3t
 
 
-def calc_gas_for_fsolve(rsb_m3m3_real, t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
-    gas_dissolved_m3m3 = unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_gas, pb_mpa, pb_mpa, rsb_m3m3_real, return_m3m3=True)[1]
-    return (gas_dissolved_m3m3 - rsb_m3m3) ** 2
+def calc_gas_for_fsolve(rsb_m3t_real, t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3t, return_m3m3):
+    gas_dissolved = unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3t_real, return_m3m3)[1]
+    if return_m3m3:
+        return (gas_dissolved - rsb_m3t/(rho_deadoil_kgm3/1000)) ** 2
+    else:
+        return (gas_dissolved - rsb_m3t) ** 2
 
 
-def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+
+def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3t, return_m3m3):
     method = 'excitingmixing'
-    answer = sp.root(calc_gas_for_fsolve, rsb_m3m3, args=(t_k, rho_deadoil_kgm3, gamma_gas,
-                                                          pb_mpa, pb_mpa, rsb_m3m3, True), tol=0.01,
-                     options={'xtol': 0.01, 'maxfev': 25, 'eps': 0.01})
+    answer = sp.root(calc_gas_for_fsolve, rsb_m3t, args=(t_k, rho_deadoil_kgm3, gamma_oil,
+                                                         gamma_gas, p_mpa, pb_mpa, rsb_m3t, return_m3m3), tol=0.01,
+                     options={'xtol': 0.1, 'maxfev': 50, 'eps': 0.1})
+
     # print(answer)
     answer = answer.x[0]
+    if return_m3m3:
+        answer = answer / (rho_deadoil_kgm3/1000)
 
-    return unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_gas, p_mpa, pb_mpa, answer, return_m3m3)
+    return unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, answer, return_m3m3)
 
 
 t_k = 300.5

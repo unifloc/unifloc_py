@@ -474,8 +474,8 @@ def unf_density_oil_Standing(p_MPaa, pb_MPaa, co_1MPa, rs_m3m3, bo_m3m3, gamma_g
     ref1 book Brill 2006, Production Optimization Using Nodal Analysis
     """
     po = (1000 * gamma_oil + 1.224 * gamma_gas * rs_m3m3) / bo_m3m3
-    #if p_MPaa > pb_MPaa:  # TODO возможно это надо оставить, при давлении выше P нас, уже есть в fvf_oil степень с co
-    #    po = po * np.exp(co_1MPa * (p_MPaa - pb_MPaa))
+    if p_MPaa > pb_MPaa:  # TODO возможно это надо оставить, при давлении выше P нас, уже есть в fvf_oil степень с co
+        po = po * np.exp(co_1MPa * (p_MPaa - pb_MPaa))
     return po
 
 

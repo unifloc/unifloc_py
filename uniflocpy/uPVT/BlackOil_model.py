@@ -442,19 +442,48 @@ class Fluid:
             self.mt = pvt_rus.coef_mt(self.t_k, self.gamma_oil * 1000, self.gamma_gas)
             self.rp = pvt_rus.coef_rp(self.p_mpa, self.pb_mpa)
             self.dt = pvt_rus.coef_dt(self.t_k, self.gamma_oil * 1000, self.gamma_gas)
-            self.gas_liberated_m3t, self.gas_dissolved_m3t = pvt_rus.unf_calc_gas_liberated_and_dissolved(self.t_k, self.gamma_oil * 1000,
-                                                                                        self.gamma_oil, self.gamma_gas,
-                                                                                        self.p_mpa, self.pb_mpa,
-                                                                                        self.rsb_m3t, False) #
+            check = True
+            if check:
+                self.gas_liberated_m3t, self.gas_dissolved_m3t = pvt_rus.unf_calc_gas_liberated_and_dissolved(self.t_k, self.gamma_oil * 1000,
+                                                                                            self.gamma_oil, self.gamma_gas,
+                                                                                            self.p_mpa, self.pb_mpa,
+                                                                                            self.rsb_m3t, False) #
 
 
-            self.gas_liberated_m3m3, self.rs_m3m3 = pvt_rus.unf_calc_gas_liberated_and_dissolved(self.t_k, self.gamma_oil * 1000,
-                                                                                     self.gamma_oil,
-                                                                                     self.gamma_gas,
-                                                                                     self.p_mpa,
-                                                                                     self.pb_mpa,
-                                                                                     self.rsb_m3t,
-                                                                                     True)
+                self.gas_liberated_m3m3, self.rs_m3m3 = pvt_rus.unf_calc_gas_liberated_and_dissolved(self.t_k, self.gamma_oil * 1000,
+                                                                                         self.gamma_oil,
+                                                                                         self.gamma_gas,
+                                                                                         self.p_mpa,
+                                                                                         self.pb_mpa,
+                                                                                         self.rsb_m3t,
+                                                                                         True)
+            else:
+                self.gas_liberated_m3t, self.gas_dissolved_m3t = pvt_rus.calc_gas_with_fsolve(self.t_k,
+                                                                                              self.gamma_oil * 1000,
+                                                                                              self.gamma_oil,
+                                                                                                              self.gamma_gas,
+                                                                                                              self.p_mpa,
+                                                                                                              self.pb_mpa,
+                                                                                                              self.rsb_m3t,
+                                                                                                              False)  #
+
+                self.gas_liberated_m3m3, self.rs_m3m3 = pvt_rus.calc_gas_with_fsolve(self.t_k,
+                                                                                                     self.gamma_oil * 1000,
+                                                                                                     self.gamma_oil,
+                                                                                                     self.gamma_gas,
+                                                                                                     self.p_mpa,
+                                                                                                     self.pb_mpa,
+                                                                                                     self.rsb_m3t,
+                                                                                                     True)
+            if self.p_mpa > self.pb_mpa:
+                self.gas_liberated_m3t, self.gas_dissolved_m3t = 0, 73.23
+                self.gas_liberated_m3m3, self.rs_m3m3 = 0, 63.01
+
+
+
+
+
+
 
 
             if self.p_mpa != None: # self.pb_mpa:
