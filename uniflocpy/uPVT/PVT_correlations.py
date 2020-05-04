@@ -1067,12 +1067,12 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     :return: formation volume factor for gas bg, m3/m3
     """
 
-    bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa)
+    bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa) # тут от нормальный условий по температуре
     return bg
 
 
 def unf_fvf_gas_vba_m3m3(T_K, z, P_MPa):
-    return 0.00034722 * T_K * z / P_MPa
+    return 0.00034722 * T_K * z / P_MPa  # от какой температуры?
 
 
 def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):

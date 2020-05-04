@@ -432,8 +432,9 @@ class Fluid:
 
         else:
             # Давления избыточные для графиков, тут видимо абсолютные
-            self.rsb_m3t = self.rsb_m3m3 * 10**3 * 273 / 293 / (self.gamma_oil * 1000)
+            #self.rsb_m3t = self.rsb_m3m3 * 10**3 * 273 / 293 / (self.gamma_oil * 1000)
 
+            self.rsb_m3t = self.rsb_m3m3 / self.gamma_oil
             self.pb_mpa = pvt_rus.calc_pb(self.pb_bar_for_rus_cor / 10, self.gamma_oil * 1000,
                                           self.rsb_m3t, self.t_res_k, self.t_k, self.y_ch4, self.y_n2)
             self.pb_bar = uc.MPa2bar(self.pb_mpa)
@@ -457,10 +458,11 @@ class Fluid:
 
 
             if self.p_mpa != None: # self.pb_mpa:
+            #if self.p_mpa <= self.pb_mpa:
                 self.rho_gas_liberated_d = pvt_rus.rho_gas_liberated_relative(self.p_mpa, self.pb_mpa, self.gamma_gas,
                                                                  self.gamma_oil, self.t_k, self.rsb_m3t)
-                if self.p_mpa > self.pb_mpa:
-                    self.rho_gas_liberated_d = 0
+                #if self.p_mpa > self.pb_mpa:
+                #    self.rho_gas_liberated_d = 0
 
                 self.rho_gas_dissolved_relative_d = pvt_rus.unf_rho_gas_dissolved_relative(self.rsb_m3t, self.gamma_oil, self.gamma_gas,
                                                                               self.gas_liberated_m3t, self.gas_dissolved_m3t,

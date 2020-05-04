@@ -26,7 +26,7 @@ def unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma
 
     if p_mpa >= pb_mpa:
         if return_m3m3:
-            return 0, rsb_m3t * mt * rho_deadoil_kgm3 / 1000
+            return 0, rsb_m3t * rho_deadoil_kgm3 / 1000 * mt
         else:
             return 0, rsb_m3t * mt
 
@@ -266,7 +266,7 @@ def unf_mu_oil_above_pb_cp(gamma_oil, rsb_m3t, t_k, p_mpa, p_b_mpa):
     else:
         delta = 3.286 + 0.100 * (mu_oil_pb_cp - 75)
     # print(delta)
-    result = mu_oil_pb_cp + delta * (p_mpa - p_b_mpa)
+    result = mu_oil_pb_cp * delta * (p_mpa - p_b_mpa)
     # print(mu_oil_pb_cp, delta,p_mpa, p_b_mpa)
 
     return result
@@ -278,12 +278,12 @@ if __name__ == "__main__":
 
 
     gas_liberated_m3t, gas_dissolved_m3t = unf_calc_gas_liberated_and_dissolved(t_k, gamma_oil * 1000, gamma_oil, gamma_gas,
-                                                                                p_mpa, p_b_t_mpa, rsb_m3t * gamma_oil, False)
+                                                                                p_mpa, p_b_t_mpa, rsb_m3t, False)
     print(f"gas_liberated_m3t = {gas_liberated_m3t}")
     print(f"gas_dissolved_m3t = {gas_dissolved_m3t}")
 
     rho_gas_liberated_d = rho_gas_liberated_relative(p_mpa, p_b_t_mpa, gamma_gas,
-                                                     gamma_oil, t_k , rsb_m3t * gamma_oil)
+                                                     gamma_oil, t_k , rsb_m3t)
 
     print(f"rho_gas_liberated_d = {rho_gas_liberated_d}")
 
