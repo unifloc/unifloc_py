@@ -201,6 +201,10 @@ class Fluid:
             self.mt = None
             self.rp = None
             self.dt = None
+            self.gas_dissolved_m3t_fixed = None
+            self.rs_m3m3_fixed = None
+            self.true_rsb_m3t = True
+
         self.max_rs_m3m3 = None
 
 
@@ -462,9 +466,10 @@ class Fluid:
 
         else:
             # Давления избыточные для графиков, тут видимо абсолютные
-            #self.rsb_m3t = self.rsb_m3m3 * 10**3 * 273 / 293 / (self.gamma_oil * 1000)
-
-            self.rsb_m3t = self.rsb_m3m3 / self.gamma_oil
+            if self.true_rsb_m3t:
+                self.rsb_m3t = self.rsb_m3m3 * 10**3 * 273 / 293 / (self.gamma_oil * 1000)
+            else:
+                self.rsb_m3t = self.rsb_m3m3 / self.gamma_oil  #c этой штукой прямые линии
             self.pb_mpa = pvt_rus.calc_pb(self.pb_bar_for_rus_cor / 10, self.gamma_oil * 1000,
                                           self.rsb_m3t, self.t_res_k, self.t_k, self.y_ch4, self.y_n2)
             self.pb_bar = uc.MPa2bar(self.pb_mpa)
@@ -506,8 +511,9 @@ class Fluid:
                                                                                                      self.rsb_m3t,
                                                                                                      True)
             if self.p_mpa > self.pb_mpa:
-                self.gas_liberated_m3t, self.gas_dissolved_m3t = 0, 73.23
-                self.gas_liberated_m3m3, self.rs_m3m3 = 0, 63.01
+                if self.gas_dissolved_m3t_fixed != None and self.rs_m3m3_fixed != None:
+                    self.gas_liberated_m3t, self.gas_dissolved_m3t = 0, self.gas_dissolved_m3t_fixed #73.23
+                    self.gas_liberated_m3m3, self.rs_m3m3 = 0, self.rs_m3m3_fixed # 63.01
 
 
 
