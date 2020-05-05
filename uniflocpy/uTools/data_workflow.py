@@ -225,3 +225,55 @@ class Data():
         return self.result_df
 
 
+translation_dict = {'Давление, бар': 'p_calculated_bar',
+                    'Температура, С': 't_calculated_c',
+                    'Температура окр. среды, С': 't_calculated_earth_init',
+                    'Расходная доля газа в потоке, д.ед.': 'gas_fraction_d',
+                    'Истинная доля газа в потоке, д.ед.': 'gas_fraction_real_d',
+                    'Расходная плотность ГЖС, кг/м3': 'rhon_kgm3',
+                    'Расходная вязкость ГЖС, Па*сек': 'mun_pas',
+                    'Расходная вязкость ГЖС, сПуаз': 'mun_cP',
+                    'Составляющая градиента по гравитации, Па/м': 'density_grad_pam',
+                    'Доля градиента по гравитации, %': 'density_grad_part_percent',
+                    'Калибровочный коэффициент на трение, ед.': 'friction_grad_coef',
+                    'Составляющая градиента по трению, Па/м': 'friction_grad_pam',
+                    'Доля градиента по трению, %': 'friction_grad_part_percent',
+                    'Число Рейнольдса, безр.': 'number_re_n',
+                    'Давление насыщения, бар': 'pb_bar',
+                    'Давление насыщения для rupvt, бар': 'pb_bar_for_rus_cor',
+                    'Приведенная скорость жидкости, м/сек': 'vsl_msec',
+                    'Приведенная скорость газа, м/сек': 'vsg_msec',
+                    'Приведенная скорость ГЖС, м/сек': 'vm_msec',
+                    'Градиент давления, Па/м': 'result_grad_pam',
+                    'Калибровочный коэффициент на ускорение, ед.': 'acceleration_grad_coef',
+                    'Флаг использования ускорения в градиенте': 'acceleration_grad_using',
+                    'Составляющая градиента по ускорению, Па/м': 'acceleration_grad_pam',
+                    'Доля градиента по ускорению, %': 'acceleration_grad_part_percent',
+                    'Газосодержание при Pнас, м3/т': 'rsb_m3t',
+                    'Удельный объем выделившегося газа, м3/т': 'gas_liberated_m3t',
+                    'Удельный объем растворенного газа, м3/т': 'gas_dissolved_m3t',
+                    'Объемный коэффициент нефти, м3/м3': 'b_oil_m3m3',
+                    'Плотность нефти, кг/м3': 'rho_oil_kgm3',
+                    'Вязкость нефти, сПуаз': 'mu_oil_cp',
+                    'Модель флюида.Коэффициент сверхсжимаемости газа': 'fl.z',
+                    'Относительная плотность газа, растворенного в нефти': 'rho_gas_dissolved_relative_d',
+                    'Измеренная глубина, м':'h_calculated_mes_m'
+
+                    }
+
+
+def rename_columns_by_dict(this_df, columns_name_dict=translation_dict):
+    """
+    Специальное изменение названий столбцов по словарю
+    :param df:
+    :param dict: словарь со значениями типа rus:eng
+    :return:
+    """
+    df = this_df.copy()
+    for i in df.columns:
+        for items in columns_name_dict.items():
+            pattern_to_change = items[1]
+            if pattern_to_change in i:
+                new_name = i.replace(pattern_to_change, items[0])
+                df = df.rename(columns={i: new_name})
+    return df
