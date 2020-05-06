@@ -53,6 +53,8 @@ class self_flow_well():
 
                 activate_rus_mode=0,
 
+                 multiplier_for_pi=1,
+
                  pb_bar=90):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
@@ -161,6 +163,7 @@ class self_flow_well():
         self.direction_up = None
         self.solver_using = solver_using
 
+        self.multiplier_for_pi = multiplier_for_pi
         self.time_calculated_sec = None
         self.calculation_number_in_one_step = None
 
@@ -258,6 +261,8 @@ class self_flow_well():
             self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m * sign
             #print(f"Давление: {self.p_calculated_bar} и температура {self.t_calculated_c} "
             #      f"на измеренной глубине {self.h_calculated_mes_m}")
+            if self.p_calculated_bar < 1.1:
+                self.p_calculated_bar = 1.1
 
         self.time_calculated_sec = time.time() - start_calculation_time
 
@@ -282,7 +287,7 @@ class self_flow_well():
         self.h_calculated_mes_m = self.h_bottomhole_mes_m
         self.h_calculated_vert_m = self.h_bottomhole_vert_m
         if self.ipr != None:
-            self.p_calculated_bar = self.ipr.calc_p_bottomhole_bar(self.qliq_on_surface_m3day)
+            self.p_calculated_bar = self.ipr.calc_p_bottomhole_bar(self.qliq_on_surface_m3day, self.multiplier_for_pi)
             self.p_bottomhole_bar = self.p_calculated_bar
         else:
             self.p_calculated_bar = self.p_bottomhole_bar

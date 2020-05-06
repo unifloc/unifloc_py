@@ -479,6 +479,8 @@ class FluidFlow:
         self.Joule_Thompson_coef_cpa = None
         self.dvdp_msecpam = None
 
+        self.r_gas_injected_m3m3 = None   #Отношение закачиваемого газа к добываемой нефти
+
     def __calc_Joule_Thompson_coef_cpa__(self):  #TODO проверить данный простой расчет
         """
         Рассчет коэффициента Джоуля Томпсона для смеси
@@ -546,7 +548,10 @@ class FluidFlow:
         self.qliq_m3day = self.qoil_m3day + self.qwat_m3day
         # TODO учесть газ в воде
         if self.fl.activate_rus_cor == 1:
-            self.qgas_m3day = self.fl.gas_liberated_m3m3  * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
+            if self.r_gas_injected_m3m3 != None:
+                self.qgas_m3day = (self.fl.gas_liberated_m3m3 + self.r_gas_injected_m3m3) * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
+            else:
+                self.qgas_m3day = self.fl.gas_liberated_m3m3  * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
 
             self.liberated_gas_sc_m3m3 = self.fl.gas_liberated_m3m3
 
