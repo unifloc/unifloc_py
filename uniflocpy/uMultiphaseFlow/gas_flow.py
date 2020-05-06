@@ -5,11 +5,15 @@ import uniflocpy.uTools.uconst as uconst
 
 
 def calc_z_in_annulus(gamma_gas, t_c, p_bar):
+    gamma_gas = float(gamma_gas)
+    t_c = float(t_c)
+    p_bar = float(p_bar)
     t_k = uconst.c2k(t_c)
     p_mpa = uconst.bar2MPa(p_bar)
     tpc_k = PVT.unf_pseudocritical_temperature_Standing_K(gamma_gas)
     ppc_mpa = PVT.unf_pseudocritical_pressure_Standing_MPa(gamma_gas)
-    z = PVT.unf_z_factor_Kareem(t_k/tpc_k, p_mpa/ppc_mpa)
+    #z = PVT.unf_z_factor_Kareem(t_k/tpc_k, p_mpa/ppc_mpa)
+    z = PVT.unf_zfactor_DAK_ppr(p_mpa / ppc_mpa, t_k / tpc_k)
     return z
 
 
@@ -35,7 +39,7 @@ def calc_p_in_annulus_for_scipy(p_bar, h_m, p_wellhead_bar, t_wellhead_c, gamma_
     return (p_new_bar - p_bar) ** 2
 
 
-def calc_p_in_annulus_bar(h_m, p_wellhead_bar, t_wellhead_c, gamma_gas,t_bottomhole_c, h_bottomhole_m):
+def calc_p_in_annulus_bar(h_m, p_wellhead_bar, t_wellhead_c, gamma_gas,t_bottomhole_c, h_bottomhole_m, dranchuk_using=False):
     method = 'excitingmixing'
     answer = sp.root(calc_p_in_annulus_for_scipy, p_wellhead_bar,
                      args=(h_m, p_wellhead_bar, t_wellhead_c, gamma_gas,t_bottomhole_c, h_bottomhole_m), tol=0.01,
