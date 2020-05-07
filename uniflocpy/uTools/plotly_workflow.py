@@ -49,7 +49,8 @@ def create_plotly_trace(data_x, data_y, namexy, chosen_mode='lines', use_gl = Tr
     return one_trace
 
 
-def plot_func(data, plot_title_str, filename_str, reversed_y=False, iplot_option=False, x_name=None, y_name=None):
+def plot_func(data, plot_title_str, filename_str, reversed_y=False, iplot_option=False, x_name=None, y_name=None,
+              annotation = None):
     """
     Итоговая функция для построения графиков
 
@@ -63,11 +64,37 @@ def plot_func(data, plot_title_str, filename_str, reversed_y=False, iplot_option
         layout = dict(title=plot_title_str, yaxis=dict(autorange='reversed'), hovermode='x')
     else:
         layout = dict(title=plot_title_str)
+    if annotation != None:
+        layout['annotations'] = [
+            dict(
+                x=annotation['x'],
+                y=annotation['y'],
+                xref="x",
+                yref="y",
+                text=annotation['text'],
+                showarrow=True,
+                font=dict(
+                    family="Courier New, monospace",
+                    size=17,
+                    color="#ffffff"
+                ),
+                bordercolor="#c7c7c7",
+                borderwidth=2,
+                borderpad=4,
+                arrowsize=10
+                ,
+                bgcolor="#0e0700",
+                opacity=0.8
+            )]
+
     if x_name != None:
         layout['xaxis_title'] = x_name
     if y_name != None:
         layout['yaxis_title'] = y_name
+
     fig = dict(data=data, layout=layout)
+
+
     if iplot_option:
         iplot(fig, filename=filename_str)
     else:
@@ -148,7 +175,7 @@ def find_by_patterns(patterns, list_to_search):
 
 
 def plot_specific_columns(result_df, columns_to_plot=None, swap_xy=True, reversed_y=True, iplot_option=True,
-                          plot_name='this_plot', x_name=None, y_name=None, traces_names=None):
+                          plot_name='this_plot', x_name=None, y_name=None, traces_names=None, annotation=None):
     """
     Функция для быстрого построения графиков, только для определенных колонок DataFrame
     :param result_df:
@@ -163,7 +190,8 @@ def plot_specific_columns(result_df, columns_to_plot=None, swap_xy=True, reverse
         columns_to_plot = result_df.columns
     result_df_to_plot = result_df[columns_to_plot]
     all_traces = create_traces_list_for_all_columms(result_df_to_plot, 'lines+markers', swap_xy=swap_xy, traces_names=traces_names)
-    plot_func(all_traces, plot_name, f'{plot_name}.html', reversed_y=reversed_y, iplot_option= iplot_option, x_name=x_name, y_name=y_name)
+    plot_func(all_traces, plot_name, f'{plot_name}.html', reversed_y=reversed_y, iplot_option= iplot_option, x_name=x_name, y_name=y_name,
+              annotation=annotation)
 
 
 def filtr_by_antipatterns(init_list: list, antipatterns: list, print_all: bool = True):
@@ -201,7 +229,7 @@ def create_columns_to_plot(result_df, group_patterns, antipatterns=[], print_all
     return columns_to_plot
 
 def plot_by_patterns(result_df, group_patterns, antipatterns=[],
-                     swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot', print_all=True, x_name=None, y_name=None, traces_names = None):
+                     swap_xy=True, reversed_y=True, iplot_option=True, plot_name='this_plot', print_all=True, x_name=None, y_name=None, traces_names = None, annotation = None):
     """
     Функция для построения графиков с учетом групп паттернов (в каждой группе должны выполняться все условия)
     и антипаттернов для выбора колонок для отображения
@@ -214,7 +242,8 @@ def plot_by_patterns(result_df, group_patterns, antipatterns=[],
     """
     columns_to_plot = create_columns_to_plot(result_df, group_patterns, antipatterns, print_all)
     plot_specific_columns(result_df, columns_to_plot, swap_xy=swap_xy, reversed_y=reversed_y,
-                          iplot_option=iplot_option, plot_name=plot_name, x_name=x_name, y_name=y_name, traces_names=traces_names)
+                          iplot_option=iplot_option, plot_name=plot_name, x_name=x_name, y_name=y_name, traces_names=traces_names,
+                          annotation=annotation)
 
 
 def create_banches_from_pattern(df, banches_with_patterns: dict):
