@@ -134,3 +134,82 @@ class Pipe():
 
         self.t_grad_cm = self.temp_cor.calc_grad_t_cm(self.p_bar, self.t_c)
         return self.t_grad_cm
+
+if __name__ == "__main__":
+    import uniflocpy.uTools.data_workflow as data_workflow
+    import pandas as pd
+    from uniflocpy.uTools import plotly_workflow
+    import uniflocpy.uPVT.BlackOil_model as BlackOil_model
+    import uniflocpy.uValidation.python_api as python_api
+    import uniflocpy.uTools.uconst as uc
+    import uniflocpy.uPVT.PVT_fluids as PVT_fluids
+    import xlwings as xw
+    import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as BB
+    pipe = Pipe(fluid=BlackOil_model.Fluid())
+    uniflocvba = python_api.API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
+    uniflocvba.f_bb = uniflocvba.book.macro('unf_BegsBrillGradient')
+
+
+    def convert_result_to_df(result):
+        this_dict = {
+            "p_grad_pam": uc.atm2Pa(result[0]),
+            "density_part_pam": uc.atm2Pa(result[1]),
+            "friction_part_pam": uc.atm2Pa(result[2]),
+            "acceleration_part_pam": uc.atm2Pa(result[3]),
+            "vsl_msec": result[4],
+            "vsg_msec": result[5],
+            "liquid_content_with_pains_corr": result[6],
+            "flow_regime_number": result[7]
+        }
+        this_df = pd.DataFrame(this_dict, index=[0])
+        return this_df
+
+
+    p_bar = 8
+
+
+
+
+    vba_result_df = None
+    t_c = 40
+    pipe.fluid_flow.qliq_on_surface_m3day = 40
+    pipe.fluid_flow.fl.rsb_m3m3 = 56
+
+    pipe.calc_p_grad_pam(p_bar, t_c)
+
+    arr_d_m = pipe.fluid_flow.d_m
+    arr_theta_deg = pipe.angle_to_horizontal_grad
+    eps_m = pipe.hydr_cor.epsilon_friction_m
+    Ql_rc_m3day = pipe.fluid_flow.qliq_m3day
+    Qg_rc_m3day = pipe.fluid_flow.qgas_m3day
+    Mul_rc_cP = pipe.fluid_flow.mu_liq_cP
+    Mug_rc_cP = pipe.fluid_flow.fl.mu_gas_cp
+    sigma_l_Nm = pipe.fluid_flow.sigma_liq_Nm
+    rho_lrc_kgm3 = pipe.fluid_flow.rho_liq_kgm3
+    rho_grc_kgm3 = pipe.fluid_flow.fl.rho_gas_kgm3
+    Payne_et_all_holdup = 1,
+    Payne_et_all_friction = 1
+    c_calibr_grav = 1
+    c_calibr_fric = 1
+
+    vba_result = uniflocvba.f_bb(arr_d_m,
+                                 arr_theta_deg, eps_m,
+                                 Ql_rc_m3day, Qg_rc_m3day,
+                                 Mul_rc_cP, Mug_rc_cP,
+                                 sigma_l_Nm,
+                                 rho_lrc_kgm3,
+                                 rho_grc_kgm3,
+                                 # Payne_et_all_holdup
+                                 # Payne_et_all_friction ,
+                                 # c_calibr_grav   ,
+                                 # c_calibr_fric
+                                 )
+    this_vba_result_df = convert_result_to_df(vba_result)
+    for i in this_vba_result_df.columns:
+        print(i, this_vba_result_df[i][0])
+    print(this_vba_result_df["liquid_content_with_pains_corr"][0])
+    print(pipe.hydr_cor.liquid_holdup_d)
+    print(pipe.hydr_cor.liquid_content)
+    print(this_vba_result_df)
+    for i in pipe.hydr_cor.__dict__.items():
+        print(i)
