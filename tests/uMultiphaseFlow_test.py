@@ -53,7 +53,7 @@ class TestBB(unittest.TestCase):
 
         p_bar = 11.713 * 10
         t_c = 82
-        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 7850.006127137097,
+        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 7810.134558034709,
                                delta=0.00000001)
 
 

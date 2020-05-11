@@ -3,6 +3,7 @@ import numpy as np
 import scipy.optimize as sp  # модуль для решения уравения
 import uniflocpy.uTools.uconst as uconst
 
+# расчет по барометрической формуле
 
 def calc_z_in_annulus(gamma_gas, t_c, p_bar):
     gamma_gas = float(gamma_gas)

@@ -15,7 +15,7 @@ class TestWell(unittest.TestCase):
         p_bar = 100
         t_c = 80
         pipe = Pipe.Pipe()
-        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 7913.910837767923,
+        self.assertAlmostEqual(pipe.calc_p_grad_pam(p_bar, t_c), 7880.809498348545,
                                delta=0.0001)
 
     def test_Pipe_calc_t_grad_cm_in_tube(self):
@@ -23,7 +23,7 @@ class TestWell(unittest.TestCase):
         t_c = 80
         pipe = Pipe.Pipe()
         pipe.section_casing = False
-        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.020721113953251068,
+        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.02099504389575558,
                                delta=0.0001)
 
     def test_Pipe_calc_t_grad_cm_in_casing(self):
@@ -31,7 +31,7 @@ class TestWell(unittest.TestCase):
         t_c = 80
         pipe = Pipe.Pipe()
         pipe.section_casing = True
-        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.0184349739137646,
+        self.assertAlmostEqual(pipe.calc_t_grad_cm(p_bar, t_c), 0.018679578601707502,
                                delta=0.0001)
 # TODO температура последний рассчитанный параметр, но может быть поменять на сумму для более точной проверки?
 
@@ -43,7 +43,7 @@ class TestSelfFlowWell(unittest.TestCase):
         t_wellhead_c = self_flow_well_object.t_wellhead_c
         p_wellhead_bar =  self_flow_well_object.p_wellhead_bar
         sum_p_t = t_wellhead_c + p_wellhead_bar
-        self.assertAlmostEquals(sum_p_t, 187.76503060230502, delta=0.00000001)
+        self.assertAlmostEquals(sum_p_t, 187.9908034681909, delta=0.00000001)
 
     def test_calc_all_from_down_to_up_vba_fluid_simple_line_for_t(self):
         bo_option = BlackOil_model.BlackOil_option()
@@ -54,7 +54,7 @@ class TestSelfFlowWell(unittest.TestCase):
         t_wellhead_c = self_flow_well_object.t_wellhead_c
         p_wellhead_bar =  self_flow_well_object.p_wellhead_bar
         sum_p_t = t_wellhead_c + p_wellhead_bar
-        self.assertAlmostEquals(sum_p_t, 127.22040318153236, delta=0.00000001)
+        self.assertAlmostEquals(sum_p_t, 127.54691770355993, delta=0.00000001)
 
     def test_calc_all_from_up_to_down(self):
         self_flow_well_object = self_flow_well_module.self_flow_well(temp_corr=1)
@@ -62,7 +62,7 @@ class TestSelfFlowWell(unittest.TestCase):
         p_bottomhole_bar = self_flow_well_object.p_bottomhole_bar
         t_bottomhole_c = self_flow_well_object.t_bottomhole_c
         sum_p_t = p_bottomhole_bar + t_bottomhole_c
-        self.assertAlmostEquals(sum_p_t, 179.91262201328874, delta=0.00000001)
+        self.assertAlmostEquals(sum_p_t, 179.82223070688732, delta=0.00000001)
 
     def test_calc_all_from_up_to_down_vba_fluid_simple_line_for_t(self):
         bo_option = BlackOil_model.BlackOil_option()
@@ -73,7 +73,7 @@ class TestSelfFlowWell(unittest.TestCase):
         p_bottomhole_bar = self_flow_well_object.p_bottomhole_bar
         t_bottomhole_c = self_flow_well_object.t_bottomhole_c
         sum_p_t = p_bottomhole_bar + t_bottomhole_c
-        self.assertAlmostEquals(sum_p_t, 180.69492387992076, delta=0.00000001)
+        self.assertAlmostEquals(sum_p_t, 180.81140510126218 , delta=0.00000001)
 
 
 class TestDeviationSurvey(unittest.TestCase):

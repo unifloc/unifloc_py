@@ -18,6 +18,7 @@ def calc_well_with_one_parameter(data):
         this_dict[parameter_name_to_iterate] = i
         this_object = object_class(**this_dict)
         this_object.pipe.fluid_flow.fl.option = blackoil_option
+        this_object.pipe.fluid_flow.calc_with_temp_cor = 0
         this_object.calc_all_from_up_to_down()
         result_i.append(i)
         result_parameter.append(this_object.__dict__[parameter_name_to_extract])
@@ -25,9 +26,3 @@ def calc_well_with_one_parameter(data):
                                result_parameter}, index=result_i)
     one_df.index.name = parameter_name_to_iterate
     return one_df
-
-if __name__ == '__main__':
-    data = (self_flow_well.self_flow_well, {'fluid':1,'temp_corr':1}, [10,20,30],
-                                          'qliq_on_surface_m3day', 'p_bottomhole_bar')
-    result = calc_well_with_one_parameter(data)
-    print(result)

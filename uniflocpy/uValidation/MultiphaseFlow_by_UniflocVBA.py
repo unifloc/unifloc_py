@@ -17,7 +17,9 @@ def create_result_df_from_vba_output(vba_result, p_bar, t_c):
     result_dict['t_c'] = t_c
     this_df = pd.DataFrame(result_dict, index = [0])
     return this_df
-
+#
+#для надстройки из ветки dev22_2
+#
 uniflocvba = python_api.API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
 
 gamma_oil = 0.86

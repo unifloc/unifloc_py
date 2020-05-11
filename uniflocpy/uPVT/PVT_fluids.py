@@ -98,6 +98,7 @@ class FluidBlackOil:
         self._thermal_conduct_gas_wmk = 0.0
         self._thermal_conduct_wat_wmk = 0.0
         self._thermal_expansion_wat_1c = 0.0
+        self.activate_rus_cor = 0
 
     # ========= default properties definition =======
     @property
@@ -418,7 +419,7 @@ class FluidMcCain(FluidBlackOil):
 
 class FluidFlow:
     """класс для описания потока флюида"""
-    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=0):
+    def __init__(self, fluid = FluidStanding(), calc_with_temp_cor=1):
         """
         Создает многофазный поток с нефтью определенной модели
 
@@ -429,7 +430,7 @@ class FluidFlow:
         self.qliq_on_surface_m3day = 100      # дебит жидкости
         self.fw_on_surface_perc = 20              # обводненность
         self.d_m = 0.152 # внутренний диаметр трубы  #TODO добавить возможность расчета потока в кольцевом пространстве
-        self.calc_with_temp_cor = calc_with_temp_cor # не будет рассчитываться коэффициент Джоуля-Томпсона и dv/dp
+        self.calc_with_temp_cor = calc_with_temp_cor # не будет рассчитываться коэффициент Джоуля-Томпсона и dv/dp (минус 3 расчета PVT)
         self.p_bar = None
         self.t_c = None
 
@@ -535,10 +536,6 @@ class FluidFlow:
 
         self.qwat_on_surface_m3day = self.qliq_on_surface_m3day * self.fw_on_surface_perc / 100
 
-        #if self.fl.max_rs_m3m3 != None:
-        #    self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.max_rs_m3m3
-        #else:
-        #
         self.qgas_on_surface_m3day = self.qoil_on_surface_m3day * self.fl.rsb_m3m3  # TODO учесть газ в воде
 
         self.qoil_m3day = self.qoil_on_surface_m3day * self.fl.b_oil_m3m3
@@ -546,26 +543,29 @@ class FluidFlow:
         self.qwat_m3day = self.qwat_on_surface_m3day * self.fl.b_wat_m3m3
 
         self.qliq_m3day = self.qoil_m3day + self.qwat_m3day
-        # TODO учесть газ в воде
+
         if self.fl.activate_rus_cor == 1:
             if self.r_gas_injected_m3m3 != 0:
                 self.qgas_m3day = self.fl.gas_liberated_m3m3 * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
                 self.qgas_m3day_injected = self.r_gas_injected_m3m3 * self.qliq_on_surface_m3day * self.fl.b_gas_m3m3
                 self.qgas_m3day = self.qgas_m3day + self.qgas_m3day_injected
             else:
-                self.qgas_m3day = self.fl.gas_liberated_m3m3  * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
+                self.qgas_m3day = self.fl.gas_liberated_m3m3 * self.qoil_on_surface_m3day * self.fl.b_gas_m3m3
 
             self.liberated_gas_sc_m3m3 = self.fl.gas_liberated_m3m3
 
             self.dissolved_gas_sc_m3m3 = self.fl.rs_m3m3
-
         else:
-            self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
+            if self.r_gas_injected_m3m3 != 0:
+                self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
+                self.qgas_m3day_injected = self.r_gas_injected_m3m3 * self.qliq_on_surface_m3day * self.fl.b_gas_m3m3
+                self.qgas_m3day = self.qgas_m3day + self.qgas_m3day_injected
+            else:
+                self.qgas_m3day = (self.qgas_on_surface_m3day - self.qoil_on_surface_m3day * self.fl.rs_m3m3) * self.fl.b_gas_m3m3
 
             self.dissolved_gas_sc_m3m3 = self.fl.rs_m3m3
 
             self.liberated_gas_sc_m3m3 = self.fl.rsb_m3m3 - self.fl.rs_m3m3
-
 
         self.q_mix_n_m3day = self.qoil_m3day + self.qwat_m3day + self.qgas_m3day
 

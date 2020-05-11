@@ -70,6 +70,11 @@ simple_well.pipe.hydr_cor.epsilon_friction_m = 0.0001
 
 simple_well.calc_all_from_down_to_up()
 
+
+#
+#для надстройки из ветки dev17_2
+#
+
 uniflocvba = python_api.API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
 
 
