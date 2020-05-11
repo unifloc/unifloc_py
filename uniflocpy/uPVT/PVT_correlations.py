@@ -69,13 +69,30 @@ def unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil=0.86, gamma_gas=0.6, t_K=350):
 
     z1 = -4.81413889469569 + 0.748104504934282 * np.log(rsb_m3m3) \
         + 0.174372295950536 * np.log(rsb_m3m3) ** 2 - 0.0206 * np.log(rsb_m3m3) ** 3
-    z2 = 25.537681965 - 57.519938195 / gamma_oil + 46.327882495 / gamma_oil ** 2 - 13.485786265 / gamma_oil ** 3
+
+    #init
+    #z2 = 25.537681965 - 57.519938195 / gamma_oil + 46.327882495 / gamma_oil ** 2 - 13.485786265 / gamma_oil ** 3 init
+    #vba
+    api = uc.gamma_oil2api(gamma_oil)
+    z2 = 1.27 - 0.0449 * api + 4.36 * 10 ** (-4) * api ** 2 - 4.76 * 10 ** (-6) * api ** 3
+
+
     z3 = 4.51 - 10.84 * gamma_gas + 8.39 * gamma_gas ** 2 - 2.34 * gamma_gas ** 3
-    z4 = 6.00696e-8 * t_K ** 3 - 8.554832172e-5 * t_K ** 2 + 0.043155018225018 * t_K - 7.22546617091445
+
+    #init
+    #z4 = 6.00696e-8 * t_K ** 3 - 8.554832172e-5 * t_K ** 2 + 0.043155018225018 * t_K - 7.22546617091445
+    # vba
+    z4 = -7.2254661 + 0.043155 * t_K - 8.5548 * 10 ** (-5) * t_K ** 2 + 6.00696 * 10 ** (
+        -8) * t_K ** 3
+
     z = z1 + z2 + z3 + z4
 
-    pb_atma = 119.992765886175 * np.exp(0.0075 * z ** 2 + 0.713 * z)
-    pb_MPaa = pb_atma / 10.1325
+    #init
+    #pb_atma = 119.992765886175 * np.exp(0.0075 * z ** 2 + 0.713 * z)
+    #pb_MPaa = pb_atma / 10.1325
+    #vba
+    lnpb = 2.498006 + 0.713 * z + 0.0075 * z ** 2
+    pb_MPaa = 2.718282 ** lnpb
     """
     для низких значений газосодержания зададим асимптотику Pb = 1 атма при Rsb = 0
     корреляция Valko получена с использованием непараметрической регресии GRACE метод (SPE 35412)
@@ -380,6 +397,10 @@ def unf_compressibility_oil_VB_1Mpa(rs_m3m3, t_K, gamma_oil, p_MPaa, gamma_gas=0
         co_1MPa = 0
     return co_1MPa
 
+def unf_compessibility_oil_VB_1MPa_vba(rsb_m3m3, t_k, gamma_oil, gamma_gas):
+    co_1atm = (28.1 * rsb_m3m3 + 30.6 * t_k - 1180 * gamma_gas + 1784 / gamma_oil - 10910)
+    return 1/uc.atm2bar(1/co_1atm)/10  #*))) **когда не дружишь с математикой ***когда слишком много времени потратил на uniflocpy
+
 
 def unf_fvf_Standing_m3m3_saturated(rs_m3m3, gamma_gas, gamma_oil, t_K):
     """
@@ -509,7 +530,7 @@ def unf_deadoilviscosity_Standing(gamma_oil, t_k):
 
 def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
     """
-        Correlation for oil viscosity for pressure below bubble point
+        Correlation for oil viscosity for pressure below bubble point (for pb!!!)
 
     :param deadoilviscosity_cP: dead oil viscosity,cP
     :param rs_m3m3: solution gas-oil ratio, m3m3
@@ -525,6 +546,21 @@ def unf_saturatedoilviscosity_Beggs_cP(deadoilviscosity_cP, rs_m3m3):
     viscosity_cP = a * deadoilviscosity_cP ** b
     return viscosity_cP
 
+
+def unf_saturatedoilviscosity_Beggs_cP_vba(deadoilviscosity_cP, rs_m3m3):
+        a = 10.715 * (5.615 * rs_m3m3 + 100) ** (-0.515)
+        b = 5.44 * (5.615 * rs_m3m3 + 150) ** (-0.338)
+        return  a * (deadoilviscosity_cP) ** b
+
+def unf_viscosity_oil_Standing_cP(rs_m3m3, Dead_oil_viscosity, p_MPa,  pb_MPa):
+
+    a = 5.6148 * rs_m3m3 * (0.1235 * 10 ** (-5) * rs_m3m3 - 0.00074)
+    b = 0.68 / 10 ** (0.000484 * rs_m3m3) + 0.25 / 10 ** (0.006176 * rs_m3m3) + 0.062 / 10 ** (0.021 * rs_m3m3)
+
+    unf_pvt_viscosity_oil_Standing_cP = 10 ** a * Dead_oil_viscosity ** b
+    if pb_MPa < p_MPa:
+        unf_pvt_viscosity_oil_Standing_cP = unf_pvt_viscosity_oil_Standing_cP + 0.14504 * (p_MPa - pb_MPa) * (0.024 * unf_pvt_viscosity_oil_Standing_cP ** 1.6 + 0.038 * unf_pvt_viscosity_oil_Standing_cP ** 0.56)
+    return unf_pvt_viscosity_oil_Standing_cP
 
 def unf_undersaturatedoilviscosity_VB_cP(p_MPaa, pb_MPaa, bubblepointviscosity_cP):
     """
@@ -1067,12 +1103,12 @@ def unf_gas_fvf_m3m3(t_K, p_MPaa, z):
     :return: formation volume factor for gas bg, m3/m3
     """
 
-    bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa)
+    bg = 101.33 * 10**(-3) * t_K * z / (1 * 293.15 * p_MPaa) # тут от нормальный условий по температуре
     return bg
 
 
 def unf_fvf_gas_vba_m3m3(T_K, z, P_MPa):
-    return 0.00034722 * T_K * z / P_MPa
+    return 0.00034722 * T_K * z / P_MPa  # от какой температуры?
 
 
 def unf_gas_density_kgm3(t_K, p_MPaa, gamma_gas, z):
@@ -1815,3 +1851,58 @@ def unf_surface_tension_Baker_Sverdloff_vba_nm(p_atma, t_C, gamma_o_):
     ST_oilgas_dyncm_ = STo
     ST_watgas_dyncm_ = STw
     return [uc.dyncm2nm(ST_oilgas_dyncm_), uc.dyncm2nm(ST_watgas_dyncm_)]
+
+import scipy.optimize as sp  # модуль для решения уравения
+
+def coef_mt(t_k, rho_deadoil_kgm3, gamma_gas):
+    return 1 + 0.029 * (t_k - 293) * (rho_deadoil_kgm3 * gamma_gas * 10 ** (-3) - 0.7966)
+
+
+def coef_dt(t_k, rho_deadoil_kgm3, gamma_gas):
+    return 10 ** (-3) * rho_deadoil_kgm3 * gamma_gas * (4.5 - 0.00305 * (t_k - 293)) - 4.785
+
+
+def coef_rp(p_mpa, pb_mpa):
+    return (1 + np.log10(p_mpa)) / (1 + np.log10(pb_mpa)) - 1
+
+
+def unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    rsb_m3t = rsb_m3m3 / gamma_oil
+    rp = coef_rp(p_mpa, pb_mpa)
+    #print(f"rp={rp}")
+    dt = coef_dt(t_k, rho_deadoil_kgm3, gamma_gas)
+    #print(f"dt={dt}")
+    mt = coef_mt(t_k, rho_deadoil_kgm3, gamma_gas)
+    #print(f"mt={mt}")
+    gas_liberated_m3t = rsb_m3t * rp * mt * (dt * (1 + rp) - 1)
+    gas_dissolved_m3t = rsb_m3t * mt - gas_liberated_m3t
+
+    if p_mpa >= pb_mpa:
+        if return_m3m3:
+            return 0, rsb_m3t * mt * rho_deadoil_kgm3 / 1000
+        else:
+            return 0, rsb_m3t * mt
+
+    if return_m3m3:
+        return gas_liberated_m3t * rho_deadoil_kgm3 / 1000, gas_dissolved_m3t * rho_deadoil_kgm3 / 1000
+        # return gas_liberated_m3t, gas_dissolved_m3t
+    else:
+        return gas_liberated_m3t, gas_dissolved_m3t
+
+
+def calc_gas_for_fsolve(rsb_m3m3_real, t_k, rho_deadoil_kgm3, gamma_oil, gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    gas_dissolved_m3m3 = unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3,  gamma_oil, gamma_gas, pb_mpa, pb_mpa, rsb_m3m3_real, return_m3m3)[1]
+    return (gas_dissolved_m3m3 - rsb_m3m3) ** 2
+
+
+def calc_gas_with_fsolve(t_k, rho_deadoil_kgm3, gamma_oil,  gamma_gas, p_mpa, pb_mpa, rsb_m3m3, return_m3m3=True):
+    method = 'excitingmixing'
+    answer = sp.root(calc_gas_for_fsolve, rsb_m3m3, args=(t_k, rho_deadoil_kgm3,gamma_oil, gamma_gas,
+                                                          pb_mpa, pb_mpa, rsb_m3m3, return_m3m3), tol=0.01)
+    answer = answer.x[0]
+    return unf_calc_gas_liberated_and_dissolved(t_k, rho_deadoil_kgm3,gamma_oil, gamma_gas, p_mpa, pb_mpa, answer, return_m3m3)
+
+def calc_pb(pb_mpa, rho_deadoil_kgm3, rsb_m3m3, tres_k, t_k):
+    gi = rsb_m3m3 * 10**3 * 273 / 293 / rho_deadoil_kgm3
+    pbt_mpa = pb_mpa - (tres_k - t_k) / (9.157 + 701.8 / (gi * (0.4 - 0.8* 0.08)))
+    return pbt_mpa

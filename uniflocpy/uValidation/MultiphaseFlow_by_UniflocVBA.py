@@ -17,18 +17,20 @@ def create_result_df_from_vba_output(vba_result, p_bar, t_c):
     result_dict['t_c'] = t_c
     this_df = pd.DataFrame(result_dict, index = [0])
     return this_df
-
+#
+#для надстройки из ветки dev22_2
+#
 uniflocvba = python_api.API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
 
-gamma_oil = 0.7
+gamma_oil = 0.86
 gamma_water = 1
-gamma_gas = 0.8
-rsb_m3m3 = 300
-t_res_c = 100
-t_c = 20
+gamma_gas = 1.45 / 1.293
+rsb_m3m3 = 56
+t_res_c = 40
+t_c = 30
 p_bar = 100
 q_liq_sm3day = 100
-watercut_perc = 50
+watercut_perc = 0
 
 
 keywords_python = {"gamma_oil": gamma_oil, "gamma_gas": gamma_gas, "gamma_wat":gamma_water,
@@ -60,7 +62,7 @@ multiphase_flow.fw_on_surface_perc  =watercut_perc
 python_flow_model_db = data_workflow.Data()
 python_flow_model_db.clear_data()
 vba_result_df = None
-for p_bar in range(2, 400, 2):
+for p_bar in range(1, 400, 10):
     multiphase_flow.calc(p_bar, t_c)
     p_atm = uc.bar2atm(p_bar)
     python_flow_model_db.get_data(multiphase_flow, object_name='python_flow_model')

@@ -53,21 +53,11 @@ real_measurements = pd.DataFrame(
      'h_mes_survey_m': [0, 957, 1057, 1157, 1211, 1257, 1357, 1457, 1557, 1657, 1757]})
 
 
-#well_data["t_wellhead_c"] = well_data["t_bottomhole_c"]
+well_data["t_wellhead_c"] = well_data["t_bottomhole_c"]
 
 blackoil_option = BlackOil_model.BlackOil_option()
 
-blackoil_option.b_wat_cor_number = 1
-blackoil_option.mu_wat_cor_number = 1
-blackoil_option.rho_wat_cor_number = 1
-blackoil_option.z_cor_number = 1
-blackoil_option.pseudocritical_temperature_cor_number = 1
-blackoil_option.pseudocritical_pressure_cor_number = 1
-blackoil_option.rho_gas_cor_number = 1
-blackoil_option.b_gas_cor_number = 1
-blackoil_option.mu_dead_oil_cor_number = 2
-blackoil_option.sigma_oil_gas_cor_number = 2
-blackoil_option.sigma_wat_gas_cor_number = 1
+blackoil_option.set_vba_preset()
 
 
 simple_well = self_flow_well.self_flow_well(fluid=1, reservoir = 0, pipe=0, temp_corr=1, **fluid_data,
@@ -79,6 +69,11 @@ simple_well.pipe.fluid_flow.calc_with_temp_cor = 0
 simple_well.pipe.hydr_cor.epsilon_friction_m = 0.0001
 
 simple_well.calc_all_from_down_to_up()
+
+
+#
+#для надстройки из ветки dev17_2
+#
 
 uniflocvba = python_api.API('E:\\Git\\unifloc_vba\\UniflocVBA_7.xlam')
 

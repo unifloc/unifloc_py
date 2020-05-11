@@ -66,9 +66,9 @@ class Beggs_Brill_cor():
     """
     Класс для хранения данных и расчета градиента давления по методу Беггз и Брилл
     """
-    def __init__(self, epsilon_friction_m=18.288 * 10 ** (-6), angle_grad=90, friction_type=0,
+    def __init__(self, epsilon_friction_m=18.288 * 10 ** (-6), angle_grad=90, friction_type=1,
                  pains_corr_using=0, gravity_grad_coef=1, friction_grad_coef=1, acceleration_grad_coef=1,
-                 acceleration_grad_using=0):
+                 acceleration_grad_using=1):
         """
         Инизиализация гидравлической корреляции
 
@@ -153,17 +153,17 @@ class Beggs_Brill_cor():
         :return: ничего, последний расчет - объемное соодержание жидкости с поправкой на угол и поправкой Пэйна
         """
         if self.flow_regime == 0:
-            # Segregated Flow - Расслоенный
+            # Segregated Flow - Расслоенный - кольцевая структура
             a = 0.98
             b = 0.4846
             c = 0.0868
         if self.flow_regime == 1:
-            # Intermittent Flow - Прерывистый
+            # Intermittent Flow - Прерывистый - пробвокая структура
             a = 0.845
             b = 0.5351
             c = 0.0173
         if self.flow_regime == 2:
-            # Distributed Flow - Распределенный
+            # Distributed Flow - Распределенный - пузырьковая структура
             a = 1.065
             b = 0.5824
             c = 0.0609
@@ -247,7 +247,7 @@ class Beggs_Brill_cor():
                     self.flow_regime = 2
         return self.flow_regime
 
-    def calc_grad(self, p_bar, t_c, gravity_grad_coef=1, friction_grad_coef=1, acceleration_grad_coef=1):
+    def calc_grad(self, p_bar, t_c):
         """
         Функция для расчета градиента давления по методу Беггз и Брилл
 
@@ -255,9 +255,6 @@ class Beggs_Brill_cor():
         :param t_c: температура, С
         :return: градиент давления, Па /м
         """
-        self.gravity_grad_coef = gravity_grad_coef
-        self.friction_grad_coef = friction_grad_coef
-        self.acceleration_grad_coef = acceleration_grad_coef
         self.p_pa = uc.bar2Pa(p_bar)
         self.t_c = t_c
         if self.p_pa <= 0:
@@ -306,12 +303,12 @@ class Beggs_Brill_cor():
             self.rhos_kgm3 = (self.rho_liq_kgm3 * self.liquid_content_with_Pains_cor +
                               self.rho_gas_kgm3 * (1 - self.liquid_content_with_Pains_cor))
 
-            self.friction_grad_pam = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.d_m)
+            self.friction_grad_pam = (self.result_friction * self.rhon_kgm3 * self.vm_msec ** 2 / 2 / self.d_m) * self.friction_grad_coef
 
-            self.density_grad_pam = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad)
+            self.density_grad_pam = self.rhos_kgm3 * const_g_m2sec * math.sin(self.angle_rad) * self.gravity_grad_coef
 
-            self.result_grad_pam = ((self.friction_grad_pam * self.friction_grad_coef +
-                                    self.density_grad_pam * self.gravity_grad_coef) /
+            self.result_grad_pam = ((self.friction_grad_pam  +
+                                    self.density_grad_pam ) /
                                     (1 - self.Ek) * self.acceleration_grad_coef)
 
             self.acceleration_grad_pam = self.result_grad_pam * self.Ek

@@ -18,8 +18,10 @@ import uniflocpy.uPVT.BlackOil_model as BlackOil_model
 
 import numpy as np
 import uniflocpy.uReservoir.IPR_simple_line as IPR_simple_line
-import uniflocpy.uTemperature as uTemperature
-import uniflocpy.uMultiphaseFlow as uMultiphaseFlow
+import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
+import uniflocpy.uTemperature.temp_cor_Hasan_Kabir as temp_cor_Hasan_Kabir
+import uniflocpy.uMultiphaseFlow.hydr_cor_Beggs_Brill as hydr_cor_Beggs_Brill
+
 
 from scipy.integrate import solve_ivp
 import time
@@ -49,7 +51,13 @@ class self_flow_well():
                  step_lenth_in_calc_along_wellbore_m=10,
                  without_annulus_space=False,
                  save_all=True,
-                 solver_using=0):
+                 solver_using=0,
+
+                activate_rus_mode=0,
+
+                 multiplier_for_pi=1,
+
+                 pb_bar=90):
         """
         При создании модели скважины необходимо задать ее конструкцию, PVT свойства флюидов и режим работы
         вместе с граничными условиями. Кроме параметров, которые предлагается задать при
@@ -110,19 +118,24 @@ class self_flow_well():
             self.pipe = uPipe.Pipe()
 
         if hydr_corr == 0:
-            self.pipe.hydr_cor = uMultiphaseFlow.hydr_cor_Beggs_Brill.Beggs_Brill_cor()
+            self.pipe.hydr_cor = hydr_cor_Beggs_Brill.Beggs_Brill_cor()
 
         if temp_corr == 0:
-            self.pipe.temp_cor = uTemperature.temp_cor_Hasan_Kabir.Hasan_Kabir_cor()
+            self.pipe.temp_cor = temp_cor_Hasan_Kabir.Hasan_Kabir_cor()
         elif temp_corr == 1:
-            self.pipe.temp_cor = uTemperature.temp_cor_simple_line.SimpleLineCor()
+            self.pipe.temp_cor = temp_cor_simple_line.SimpleLineCor()
 
         if fluid == 0:
             self.pipe.fluid_flow.fl = PVT_fluids.FluidStanding(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
                                                                gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3)
         elif fluid == 1:
             self.pipe.fluid_flow.fl = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
-                                                               gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3)
+                                                               gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3,
+                                                           t_res_c=t_bottomhole_c, pb_bar=pb_bar)
+        if activate_rus_mode:
+            self.pipe.fluid_flow.fl = BlackOil_model.Fluid(gamma_oil=gamma_oil, gamma_gas=gamma_gas,
+                                                               gamma_wat=gamma_wat, rsb_m3m3=rsb_m3m3,
+                                                       t_res_c=t_bottomhole_c, pb_bar=pb_bar, activate_rus_cor=1)
 
         self.data = data_workflow.Data()
 
@@ -152,6 +165,7 @@ class self_flow_well():
         self.direction_up = None
         self.solver_using = solver_using
 
+        self.multiplier_for_pi = multiplier_for_pi
         self.time_calculated_sec = None
         self.calculation_number_in_one_step = None
 
@@ -231,7 +245,7 @@ class self_flow_well():
                                                               y0=[self.p_calculated_bar],
                                                               args=(self.t_calculated_c, pipe_object),
                                                               rtol=0.001, atol=0.001
-                                                              )
+                                                              ) #на всем участке постоянная температура, что неверно
                 #print(new_p_calculated_bar_solve_output)
                 #print('\n')
                 new_p_calculated_bar = new_p_calculated_bar_solve_output.y[-1][-1]
@@ -249,6 +263,8 @@ class self_flow_well():
             self.t_calculated_earth_init -= self.geothermal_grad_cm * self.step_lenth_calculated_along_vert_m * sign
             #print(f"Давление: {self.p_calculated_bar} и температура {self.t_calculated_c} "
             #      f"на измеренной глубине {self.h_calculated_mes_m}")
+            if self.p_calculated_bar < 1.1:
+                self.p_calculated_bar = 1.1
 
         self.time_calculated_sec = time.time() - start_calculation_time
 
@@ -273,7 +289,7 @@ class self_flow_well():
         self.h_calculated_mes_m = self.h_bottomhole_mes_m
         self.h_calculated_vert_m = self.h_bottomhole_vert_m
         if self.ipr != None:
-            self.p_calculated_bar = self.ipr.calc_p_bottomhole_bar(self.qliq_on_surface_m3day)
+            self.p_calculated_bar = self.ipr.calc_p_bottomhole_bar(self.qliq_on_surface_m3day, self.multiplier_for_pi)
             self.p_bottomhole_bar = self.p_calculated_bar
         else:
             self.p_calculated_bar = self.p_bottomhole_bar
@@ -368,75 +384,3 @@ class self_flow_well():
             self.data.get_data(self)
         self.p_bottomhole_bar = self.p_calculated_bar
         self.t_bottomhole_c = self.t_calculated_c
-
-
-import pandas as pd
-import uniflocpy.uTemperature.temp_cor_simple_line as temp_cor_simple_line
-
-
-
-
-if __name__ == "__main__":
-    calc_options ={"step_lenth_in_calc_along_wellbore_m": 100,
-                    "without_annulus_space": False,
-                   "save_all": True}
-
-    rsb_m3m3 = 56
-    pb_bar = 9 * 10 ** 5
-    gamma_oil = 0.86
-    gamma_gas = 1.45
-
-    well_data = {"h_intake_mes_m": 1205,
-                 "h_intake_vert_m": 1205,
-                 "h_bottomhole_mes_m": 1607,  # 1756.8
-                 "h_bottomhole_vert_m": 1607,
-
-                 "geothermal_grad_cm": 0.02,
-                 "t_bottomhole_c": 40,
-                 "t_earth_init_in_reservoir_c": 40,
-                 'p_bottomhole_bar': 114.35,
-                 "d_casing_inner_m": 0.133,
-                 "d_tube_inner_m": 0.0503,
-                 "qliq_on_surface_m3day": 40,
-                 "fw_on_surface_perc": 0}
-
-    real_measurements = pd.DataFrame(
-        {'p_survey_mpa': [0.975, 1.12, 1.83, 2.957, 4.355, 5.785, 7.3, 8.953, 9.863, 10.176, 11.435],
-         'h_mes_survey_m': [0, 105, 305, 505, 705, 905, 1105, 1305, 1405, 1505, 1605]})
-
-
-    well_data['qliq_on_surface_m3day'] = 20
-
-    fluid = BlackOil_model.Fluid()
-    simple_well = self_flow_well(fluid=1, reservoir=0,
-                                 temp_corr=1, gamma_oil=gamma_oil, gamma_gas=gamma_gas, rsb_m3m3=rsb_m3m3,
-                                 **well_data, **calc_options,
-                                 solver_using=1)
-    simple_well.well_work_time_sec = 1
-
-    simple_well.p_wellhead_bar = 20
-    simple_well.t_wellhead_c = 20
-
-    import time
-    start = time.time()
-    simple_well.calc_all_from_down_to_up()
-    stop = time.time()
-    print(f"stop-start={stop-start}")
-    print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
-    print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
-    print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
-    print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
-
-
-
-    print('\nРазворот\n')
-    start = time.time()
-
-    simple_well.calc_all_from_up_to_down()
-    stop = time.time()
-    print(f"stop-start={stop-start}")
-    print(f"simple_well.p_wellhead_bar={simple_well.p_wellhead_bar}")
-    print(f"simple_well.p_bottomhole_bar={simple_well.p_bottomhole_bar}")
-    print(f"simple_well.p_calculated_bar={simple_well.p_calculated_bar}")
-    print(f"simple_well.calculation_number_in_one_step={simple_well.calculation_number_in_one_step}")
-

@@ -28,7 +28,7 @@ class TestFluid(unittest.TestCase):
         sum = 0
         for i in fluid.__dict__.items():
             sum += i[-1]
-        self.assertAlmostEqual(sum, 2622.8782700132388,
+        self.assertAlmostEqual(sum, 2632.7063404381806,
                                delta=0.0001)  # TODO cлишком большая разница со Стендингом, проверить (плотность и др.)
 
     def test_FluidFlow(self):
@@ -40,7 +40,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_flow.__dict__.items():
             if type(i[-1]) != type(PVT_fluids.FluidStanding()):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 53191.8257247249,
+        self.assertAlmostEqual(sum,  53422.725353030706,
                                delta=0.0001)
 
     def test_BlackOil_model(self):
@@ -52,7 +52,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_model.__dict__.items():
             if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 13320.990563147594,
+        self.assertAlmostEqual(sum, 13330.58601414152,
                                delta=0.0001)
 
     def test_BlackOil_model_vba_preset(self):
@@ -66,7 +66,7 @@ class TestFluid(unittest.TestCase):
         for i in fluid_model.__dict__.items():
             if type(i[-1]) != type((BlackOil_model.BlackOil_option())):
                 sum += i[-1]
-        self.assertAlmostEqual(sum, 12781.763876576446,
+        self.assertAlmostEqual(sum, 12781.243876576445,
                                delta=0.0001)
 
     def test_BlackOil_option(self):
@@ -92,7 +92,7 @@ class TestPVT(unittest.TestCase):
         gamma_oil = 0.86
         gamma_gas = 0.6
         t_K = 350
-        self.assertAlmostEqual(PVT_correlations.unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil, gamma_gas, t_K), 22.694051278736964,
+        self.assertAlmostEqual(PVT_correlations.unf_pb_Valko_MPaa(rsb_m3m3, gamma_oil, gamma_gas, t_K), 23.29991481380937,
                                delta=0.0001)
 
     def test_unf_rs_Standing_m3m3(self):

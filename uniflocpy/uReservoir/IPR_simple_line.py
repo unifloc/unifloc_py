@@ -21,9 +21,9 @@ class IPRSimpleLine():
         self.pi_m3daybar = self.q_liq_test_m3day / self.dp_test_bar
         return self.pi_m3daybar
 
-    def calc_p_bottomhole_bar(self, q_liq_m3day):
+    def calc_p_bottomhole_bar(self, q_liq_m3day, multiplier_for_pi=1):
         self.q_liq_m3day = q_liq_m3day
-        self.dp_bar = self.q_liq_m3day / self.pi_m3daybar
+        self.dp_bar = self.q_liq_m3day / (self.pi_m3daybar*multiplier_for_pi)
         self.p_bottomhole_bar = self.p_reservoir_bar - self.dp_bar
         return self.p_bottomhole_bar
 

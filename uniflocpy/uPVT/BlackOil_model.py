@@ -8,6 +8,7 @@
 
 import uniflocpy.uTools.uconst as uc
 import uniflocpy.uPVT.PVT_correlations as PVT
+import uniflocpy.uPVT.PVT_rus_correlations as pvt_rus
 
 
 class BlackOil_option():
@@ -71,15 +72,30 @@ class BlackOil_option():
         self.sigma_oil_gas_cor_number = 2
         self.sigma_wat_gas_cor_number = 1
 
+    def set_mccain_preset(self):
+        self.set_vba_preset()
+        # unf_pvt_compressibility_oil_VB_1atm
+        self.pb_cor_number = 1
+        self.mu_dead_oil_cor_number = 1
+        self.rs_cor_number = 1
+        self.rho_oil_cor_number = 1
+
+        self.b_oil_below_pb_cor_number = 2
+        self.b_oil_above_pb_cor_number = 1
+        self.mu_oil_pb_cor_number = 1
+        self.mu_oil_any_p_cor_number = 1
+        # blackoil_option.compr_oil_cor_number = 1
+        # blackoil_option.compr_oil_below_pb_cor_number = 1
+
 
 #  TODO передавать свойства нефти через структуру
 
 
 class Fluid:
     def __init__(self, gamma_oil=0.87, gamma_gas=0.81, gamma_wat=1.0, rsb_m3m3=80, gamma_gassep=0, y_h2s=0, y_co2=0,
-                 y_n2=0, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=-1, b_oil_b_cal_m3m3=-1, mu_oil_b_cal_cp=-1,
+                 y_n2=0.08, y_ch4=0.4, s_ppm=0, par_wat=0, pb_cal_bar=-1., tpb_c=-1, b_oil_b_cal_m3m3=-1, mu_oil_b_cal_cp=-1,
                  t_res_c=90,
-                 option=BlackOil_option()):
+                 option=BlackOil_option(), pb_bar=-1, activate_rus_cor=0):
         """
         Cоздает флюид с заданными базовыми свойствами и определенным набором методик/корреляций для расчета
 
@@ -109,6 +125,7 @@ class Fluid:
         self.gamma_wat = gamma_wat
         self.rsb_m3m3 = rsb_m3m3
         self.gamma_gassep = gamma_gassep
+        self.y_ch4 = y_ch4
         self.y_h2s = y_h2s
         self.y_co2 = y_co2
         self.y_n2 = y_n2
@@ -163,6 +180,33 @@ class Fluid:
         self.pb_mpa = 0.0
         self.t_res_k = 0.0
 
+        self.pb_bar_for_rus_cor = pb_bar
+
+        self.activate_rus_cor = activate_rus_cor
+        if self.activate_rus_cor == 1:
+            self.gas_liberated_m3t, self.gas_dissolved_m3t = None, None
+            self.gas_liberated_m3m3 = None
+            self.rho_gas_dissolved_relative_d = None
+            self.mu_dead_oil_293_cp = None
+            self.mu_dead_oil_t_cp = None
+            self.mu_oil_below_pb_cp = None
+            self.sigma_oil_gas_nm = None
+            self.rs_res_m3t = None
+            self.rho_gas_relative_in_oil_res_d = None
+            self.b_oil_res_m3m3 = None
+            self.b_oil_m3m3 = None
+            self.rho_oil_above_pb_m3m3 = None
+            self.mu_oil_above_pb_cp = None
+            self.mt = None
+            self.rp = None
+            self.dt = None
+            self.gas_dissolved_m3t_fixed = None
+            self.rs_m3m3_fixed = None
+            self.true_rsb_m3t = True
+
+
+
+
     def _calc_pb_MPaa(self, number_cor): # TODO калибровку свойств делать внутри функций контейнеров, чтобы оставался выбор корреляций
         if number_cor == 0:
             return PVT.unf_pb_Standing_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
@@ -170,23 +214,34 @@ class Fluid:
             return PVT.unf_pb_Valko_MPaa(self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
         if number_cor == 2:  # TODO check cor
             return PVT.unf_pb_Glaso_MPaa(self.rsb_m3m3, self.t_res_k, self.gamma_oil, self.gamma_gas)
+        if number_cor == 3:
+            return PVT.calc_pb(self.pb_bar_for_rus_cor / 10, self.gamma_oil*1000, self.rsb_m3m3, self.t_res_k, self.t_k)
 
     def _calc_rs_m3m3(self, number_cor):
         if number_cor == 0:
             return PVT.unf_rs_Standing_m3m3(self.p_mpa, self.pb_mpa, self.rsb_m3m3, self.gamma_oil,
                                             self.gamma_gas, self.t_k)
         if number_cor == 1:
-            return PVT.unf_rs_Velarde_m3m3(self.p_mpa, self.pb_mpa, self.gamma_oil,
-                                           self.gamma_gas, self.t_k)
+            return PVT.unf_rs_Velarde_m3m3(self.p_mpa, self.pb_mpa, self.rsb_m3m3, self.gamma_oil, self.gamma_gas, self.t_k)
+        if number_cor == 2:
+            return PVT.calc_gas_with_fsolve(self.t_k, self.gamma_oil * 1000, self.gamma_gas,
+                                   self.p_mpa, self.pb_mpa, self.rsb_m3m3, True)[1]
+        if number_cor == 3:
+            return PVT.calc_gas(self.t_k, self.gamma_oil * 1000, self.gamma_gas,
+                                   self.p_mpa, self.pb_mpa, self.rsb_m3m3, True)[1]
 
     def _calc_compr_oil_1mpa(self, number_cor):
         if number_cor == 0:
             return PVT.unf_compressibility_oil_VB_1Mpa(self.rs_m3m3, self.t_k, self.gamma_oil,
                                                        self.p_mpa, self.gamma_gas)
+        if number_cor == 1:
+            return PVT.unf_compessibility_oil_VB_1MPa_vba(self.rsb_m3m3, self.t_k, self.gamma_oil, self.gamma_gas)
 
     def _calc_compr_oil_below_pb_1mpa(self, number_cor):
         if number_cor == 0:
             return PVT.unf_compressibility_saturated_oil_McCain_1Mpa(self.p_mpa, self.pb_mpa, self.t_k, self.gamma_oil, self.rsb_m3m3)
+        if number_cor == 1:
+            return PVT.unf_compessibility_oil_VB_1MPa_vba(self.rsb_m3m3, self.t_k, self.gamma_oil, self.gamma_gas)
 
     def _calc_b_oil_in_pb_m3m3(self, number_cor):
         if number_cor == 0:
@@ -196,6 +251,13 @@ class Fluid:
         if number_cor == 0:
             return PVT.unf_fvf_VB_m3m3_above(self.b_oil_b_m3m3, self.compr_oil_1mpa,
                                              self.pb_mpa, self.p_mpa)
+        if number_cor == 1:
+            #if self.rho_oil_kgm3 == 0 or self.rho_oil_kgm3 is None:
+            #    raise TypeError
+            self.rho_oil_kgm3 = PVT.unf_density_oil_Mccain(self.p_mpa, self.pb_mpa, self.compr_oil_1mpa, self.rs_m3m3,
+                                              self.gamma_gas, self.t_k, self.gamma_oil, self.gamma_gassep)
+            return PVT.unf_fvf_Mccain_m3m3_below(self.rho_oil_stkgm3, self.rs_m3m3, self.rho_oil_kgm3,
+                                                 self.gamma_gas)
 
     def _calc_b_oil_below_pb_m3m3(self, number_cor):
         if number_cor == 0:
@@ -225,11 +287,16 @@ class Fluid:
     def _calc_mu_oil_in_pb_cp(self, number_cor):
         if number_cor == 0:
             return PVT.unf_saturatedoilviscosity_Beggs_cP(self.mu_dead_oil_cp, self.rsb_m3m3)
+        if number_cor == 1:
+            return PVT.unf_saturatedoilviscosity_Beggs_cP_vba(self.mu_dead_oil_cp, self.rsb_m3m3)
 
     def _calc_mu_oil_any_p_cp(self, number_cor):
         if number_cor == 0:
             return PVT.unf_oil_viscosity_Beggs_VB_cP(self.mu_dead_oil_cp, self.rs_m3m3,
                                                      self.p_mpa, self.pb_mpa)
+        if number_cor == 1:
+            return PVT.unf_viscosity_oil_Standing_cP(self.rs_m3m3, self.mu_dead_oil_cp, self.p_mpa, self.pb_mpa)
+
 
     def _calc_heatcap_oil_jkgc(self, number_cor):
         if number_cor == 0:
@@ -346,7 +413,6 @@ class Fluid:
         if number_cor == 1:
             return PVT.unf_surface_tension_Baker_Sverdloff_vba_nm(uc.bar2atm(self.p_mpa * 10), self.t_c, self.gamma_oil)[1]
 
-
         # TODO разобраться при использовании давления: когда идет калибровка давление изменяется - проверить где истинное где нет
         #   и давление при калибровке для всех единое, либо измененное только для свойств нефти
     def calc(self, p_bar, t_c):
@@ -355,49 +421,115 @@ class Fluid:
         self.t_k = uc.c2k(self.t_c)
         self.p_mpa = uc.bar2MPa(self.p_bar)
         self.t_res_k = uc.c2k(self.t_res_c)
+        if self.activate_rus_cor == 0:  # нормальный расчет по UniflocVBA
+            # oil
+            # давление насыщения нефти
 
-        # oil
-        # давление насыщения нефти
-        self.pb_mpa = self._calc_pb_MPaa(self.option.pb_cor_number)
-        self.pb_bar = uc.MPa2bar(self.pb_mpa)
-        pbcal_MPaa = uc.bar2MPa(self.pb_cal_bar)
-        if pbcal_MPaa > 0:
-            p_fact = self.pb_mpa / pbcal_MPaa
-            # сдвигаем шкалу по давлению для расчета, если задана калибровка
-            self.p_mpa = p_fact * self.p_mpa
-            self.pb_bar = self.pb_bar / p_fact
-        # газосодержание
-        self.rs_m3m3 = self._calc_rs_m3m3(self.option.rs_cor_number)
-        # коэффициент изотермической сжимаемости
-        if self.p_mpa >= self.pb_mpa:
-            self.compr_oil_1mpa = self._calc_compr_oil_1mpa(self.option.compr_oil_cor_number)
-        else:
-            #self.compr_oil_1mpa = self._calc_compr_oil_below_pb_1mpa(self.option.compr_oil_below_pb_cor_number)
-            self.compr_oil_1mpa = 0
+            self.pb_mpa = self._calc_pb_MPaa(self.option.pb_cor_number)
+            self.pb_bar = uc.MPa2bar(self.pb_mpa)
+            pbcal_MPaa = uc.bar2MPa(self.pb_cal_bar)
+            if pbcal_MPaa > 0:
+                p_fact = self.pb_mpa / pbcal_MPaa
+                # сдвигаем шкалу по давлению для расчета, если задана калибровка
+                self.p_mpa = p_fact * self.p_mpa
+                self.pb_bar = self.pb_bar / p_fact
+            # газосодержание
+            self.rs_m3m3 = self._calc_rs_m3m3(self.option.rs_cor_number)
+            # коэффициент изотермической сжимаемости
+            if self.p_mpa >= self.pb_mpa:
+                self.compr_oil_1mpa = self._calc_compr_oil_1mpa(self.option.compr_oil_cor_number)
+            else:
+                #self.compr_oil_1mpa = self._calc_compr_oil_below_pb_1mpa(self.option.compr_oil_below_pb_cor_number)
+                self.compr_oil_1mpa = 0
 
-        self.compr_oil_1bar = uc.compr_1mpa_2_1bar(self.compr_oil_1mpa)
-        # объемный коэффициент
-        self.b_oil_b_m3m3 = self._calc_b_oil_in_pb_m3m3(self.option.b_oil_in_pb_cor_number)
-        if self.p_mpa > self.pb_mpa:
-            self.b_oil_m3m3 = self._calc_b_oil_above_pb_m3m3(self.option.b_oil_above_pb_cor_number)
-        else:
-            self.b_oil_m3m3 = self._calc_b_oil_below_pb_m3m3(self.option.b_oil_below_pb_cor_number)
-        if self.b_oil_b_cal_m3m3 > 0:
-            b_fact = (self.b_oil_b_cal_m3m3 - 1) / (self.b_oil_b_m3m3 - 1)
-            self.b_oil_m3m3 = b_fact * self.b_oil_m3m3
-        # плотность нефти
-        self.rho_oil_kgm3 = self._calc_rho_oil_kgm3(self.option.rho_oil_cor_number)
-        # вязкость
-        self.mu_dead_oil_cp = self._calc_mu_dead_oil_cp(self.option.mu_dead_oil_cor_number)
-        self.mu_oil_b_cP = self._calc_mu_oil_in_pb_cp(self.option.mu_oil_pb_cor_number)
-        self.mu_oil_cp = self._calc_mu_oil_any_p_cp(self.option.mu_oil_any_p_cor_number)
-        if self.mu_oil_b_cal_cp > 0:
-            mu_fact = self.mu_oil_b_cal_cp / self.mu_oil_b_cP
-            self.mu_oil_cp = mu_fact * self.mu_oil_cp
+            self.compr_oil_1bar = uc.compr_1mpa_2_1bar(self.compr_oil_1mpa)
+            # объемный коэффициент
+            self.b_oil_b_m3m3 = self._calc_b_oil_in_pb_m3m3(self.option.b_oil_in_pb_cor_number)
+            if self.p_mpa > self.pb_mpa:
+                self.b_oil_m3m3 = self._calc_b_oil_above_pb_m3m3(self.option.b_oil_above_pb_cor_number)
+            else:
+                self.b_oil_m3m3 = self._calc_b_oil_below_pb_m3m3(self.option.b_oil_below_pb_cor_number)
+            if self.b_oil_b_cal_m3m3 > 0:
+                b_fact = (self.b_oil_b_cal_m3m3 - 1) / (self.b_oil_b_m3m3 - 1)
+                self.b_oil_m3m3 = b_fact * self.b_oil_m3m3
+            # плотность нефти
+            self.rho_oil_kgm3 = self._calc_rho_oil_kgm3(self.option.rho_oil_cor_number)
+            # вязкость
+            self.mu_dead_oil_cp = self._calc_mu_dead_oil_cp(self.option.mu_dead_oil_cor_number)
+            self.mu_oil_b_cP = self._calc_mu_oil_in_pb_cp(self.option.mu_oil_pb_cor_number)
+            self.mu_oil_cp = self._calc_mu_oil_any_p_cp(self.option.mu_oil_any_p_cor_number)
+            if self.mu_oil_b_cal_cp > 0:
+                mu_fact = self.mu_oil_b_cal_cp / self.mu_oil_b_cP
+                self.mu_oil_cp = mu_fact * self.mu_oil_cp
+
+        else:  # расчет по Мищенко
+            if self.true_rsb_m3t:
+                self.rsb_m3t = self.rsb_m3m3 * 10**3 * 273 / 293 / (self.gamma_oil * 1000)
+            else:
+                self.rsb_m3t = self.rsb_m3m3 / self.gamma_oil  #c этой штукой расчет получше
+            self.pb_mpa = pvt_rus.calc_pb(self.pb_bar_for_rus_cor / 10, self.gamma_oil * 1000,
+                                          self.rsb_m3t, self.t_res_k, self.t_k, self.y_ch4, self.y_n2)
+            self.pb_bar = uc.MPa2bar(self.pb_mpa)
+
+            self.mt = pvt_rus.coef_mt(self.t_k, self.gamma_oil * 1000, self.gamma_gas)
+            self.rp = pvt_rus.coef_rp(self.p_mpa, self.pb_mpa)
+            self.dt = pvt_rus.coef_dt(self.t_k, self.gamma_oil * 1000, self.gamma_gas)
+
+            self.gas_liberated_m3t, self.gas_dissolved_m3t = pvt_rus.unf_calc_gas_liberated_and_dissolved(self.t_k, self.gamma_oil * 1000,
+                                                                                        self.gamma_oil, self.gamma_gas,
+                                                                                        self.p_mpa, self.pb_mpa,
+                                                                                        self.rsb_m3t, False) #
+
+            self.gas_liberated_m3m3, self.rs_m3m3 = pvt_rus.unf_calc_gas_liberated_and_dissolved(self.t_k, self.gamma_oil * 1000,
+                                                                                     self.gamma_oil,
+                                                                                     self.gamma_gas,
+                                                                                     self.p_mpa,
+                                                                                     self.pb_mpa,
+                                                                                     self.rsb_m3t,
+                                                                                     True)
+            if self.p_mpa > self.pb_mpa:
+                if self.gas_dissolved_m3t_fixed != None and self.rs_m3m3_fixed != None:
+                    self.gas_liberated_m3t, self.gas_dissolved_m3t = 0, self.gas_dissolved_m3t_fixed #73.23
+                    self.gas_liberated_m3m3, self.rs_m3m3 = 0, self.rs_m3m3_fixed # 63.01
+
+            self.rho_gas_liberated_d = pvt_rus.rho_gas_liberated_relative(self.p_mpa, self.pb_mpa, self.gamma_gas,
+                                                             self.gamma_oil, self.t_k, self.rsb_m3t)
+
+            self.rho_gas_dissolved_relative_d = pvt_rus.unf_rho_gas_dissolved_relative(self.rsb_m3t, self.gamma_oil, self.gamma_gas,
+                                                                          self.gas_liberated_m3t, self.gas_dissolved_m3t,
+                                                                          self.rho_gas_liberated_d,
+                                                                          self.p_mpa, self.pb_mpa, self.t_k)
+
+
+
+
+            self.b_oil_m3m3 = pvt_rus.unf_b_oil_below_pb_m3m3(self.t_k, self.p_mpa, self.gamma_oil, self.gamma_gas,
+                                                              self.rho_gas_dissolved_relative_d,
+                                                 self.rho_gas_liberated_d,
+                                                 self.gas_dissolved_m3t)
+
+            self.rho_oil_kgm3 = pvt_rus.unf_rho_oil_kgm3(self.gamma_oil, self.rho_gas_dissolved_relative_d, self.gas_dissolved_m3t,
+                                            self.t_k, self.gamma_gas, self.b_oil_m3m3)
+
+
+            self.mu_dead_oil_293_cp = pvt_rus.unf_mu_dead_oil_293_cp(self.gamma_oil)
+
+            self.mu_dead_oil_t_cp = pvt_rus.unf_mu_dead_oil_t_cp(self.mu_dead_oil_293_cp, self.t_k, self.gamma_oil)
+
+            self.mu_oil_below_pb_cp = pvt_rus.unf_mu_oil_below_pb_cp(self.mu_dead_oil_t_cp, self.gas_dissolved_m3t, self.gamma_oil)
+
+            self.mu_oil_cp = self.mu_oil_below_pb_cp
+
+            self.sigma_oil_gas_nm = pvt_rus.unf_sigma_oil_gas_nm(self.p_mpa, self.t_k, self.gamma_gas)
+
+
         # теплоемкость
         self.heatcap_oil_jkgc = self._calc_heatcap_oil_jkgc(self.option.heatcap_oil_cor_number)
         # теплопроводность
-        self.thermal_conduct_oil_wmk = self._calc_thermal_conduct_oil_wmk(self.option.thermal_conduct_oil_cor_number)
+        self.thermal_conduct_oil_wmk = self._calc_thermal_conduct_oil_wmk(
+            self.option.thermal_conduct_oil_cor_number)
+
+
 
         # gas
         self.tpc_k = self._calc_pseudocritical_temperature_k(self.option.pseudocritical_temperature_cor_number)
@@ -423,4 +555,3 @@ class Fluid:
         # some system properties
         self.sigma_oil_gas_Nm = self._calc_sigma_oil_gas_nm(self.option.sigma_oil_gas_cor_number)
         self.sigma_wat_gas_Nm = self._calc_sigma_wat_gas_nm(self.option.sigma_wat_gas_cor_number)
-
