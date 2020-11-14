@@ -1,0 +1,12 @@
+/.idea
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.cache
+*.csv
+*.html
+*.xls
+*.rar
+*.txt
+*.xlsx
+*.trd
